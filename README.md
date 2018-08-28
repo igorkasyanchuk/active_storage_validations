@@ -20,6 +20,20 @@ class User < ApplicationRecord
 end
 ```
 
+or
+
+```ruby
+class Project < ApplicationRecord
+  has_one_attached :preview
+  has_one_attached :attachment
+
+  validates :title, presence: true
+
+  validates :preview, attached: true
+  validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' }
+end
+```
+
 ## Installation
 
 Add this line to your application's Gemfile:

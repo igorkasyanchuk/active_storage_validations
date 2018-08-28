@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_storage_validations (0.1)
+    active_storage_validations (0.3)
       rails (~> 5.2.0)
 
 GEM
@@ -129,4 +129,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   1.13.6
+   1.16.1

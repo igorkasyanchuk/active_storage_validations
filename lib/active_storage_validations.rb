@@ -11,6 +11,11 @@ module ActiveStorageValidations
   end
 
   class ContentTypeValidator < ActiveModel::EachValidator
+
+    # def initialize(options)
+    #   super(options)
+    # end
+
     def validate_each(record, attribute, value)
       files = record.send(attribute)
 
@@ -24,7 +29,7 @@ module ActiveStorageValidations
 
       files.each do |file|
         unless content_type_valid?(file) 
-          record.errors.add(attribute, :invalid)
+          record.errors.add(attribute, options[:message].presence || :invalid)
           return
         end
       end
