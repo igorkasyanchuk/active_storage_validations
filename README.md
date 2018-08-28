@@ -8,7 +8,7 @@ This gems doing it for you. Just use `attached: true` or `content_type: 'image/p
 
 For example you have a model like this and you want to add validation.
 
-```
+```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
   has_many_attached :photos
