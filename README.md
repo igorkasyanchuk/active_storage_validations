@@ -33,6 +33,12 @@ And then execute:
 $ bundle
 ```
 
+## Todo
+* verify with remote storages
+* better error message when content_type is invalid
+* travis CI
+* validation for file size
+
 ## Tests & Contributing
 
 To run tests in root folder of gem `rake test`.
