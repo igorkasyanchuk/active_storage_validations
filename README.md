@@ -47,6 +47,10 @@ And then execute:
 $ bundle
 ```
 
+## Sample
+
+[![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
+
 ## Todo
 * verify with remote storages
 * better error message when content_type is invalid
