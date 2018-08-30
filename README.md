@@ -16,7 +16,7 @@ class User < ApplicationRecord
   validates :name, presence: true
 
   validates :avatar, attached: true, content_type: 'image/png'
-  validates :photos, attached: true, content_type: ['image/png', 'image/jpg']
+  validates :photos, attached: true, content_type: ['image/png', 'image/jpg', 'image/jpeg']
 end
 ```
 
