@@ -11,17 +11,9 @@ module ActiveStorageValidations
   end
 
   class ContentTypeValidator < ActiveModel::EachValidator
-
-    # def initialize(options)
-    #   super(options)
-    # end
-
     def validate_each(record, attribute, value)
       files = record.send(attribute)
 
-      # puts "#{attribute} --- #{value} --- #{options[:with]} --- #{options}"
-
-      # only attached
       return true unless files.attached?
       return true if types.empty?
 
@@ -40,7 +32,7 @@ module ActiveStorageValidations
     end
 
     def content_type_valid?(file)
-      file.blob.content_type.in?(types)
+      file.blob.present? && file.blob.content_type.in?(types)
     end
 
   end
