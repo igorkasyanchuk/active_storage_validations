@@ -66,7 +66,11 @@ To run tests in root folder of gem `rake test`.
 To play with app `cd test/dummy` and `rails s -b 0.0.0.0` (before `rake db:migrate`).
 
 ## Contributing
-Contribution directions go here.
+You are welcome to contribute.
+
+## Contributors (BIG THANK YOU)
+- @schweigert
+
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
