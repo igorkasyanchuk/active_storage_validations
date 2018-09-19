@@ -29,7 +29,7 @@ class Project < ApplicationRecord
 
   validates :title, presence: true
 
-  validates :preview, attached: true
+  validates :preview, attached: true, content_size: { greater_than: 100.megabytes , message: 'is not given between size' }
   validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' }
 end
 ```
@@ -55,15 +55,14 @@ Very simple example of validation with file attached, content type check and cus
 
 ## Todo
 * verify with remote storages
-* better error message when content_type is invalid
+* better error message when content_type, content_size is invalid
 * travis CI
-* validation for file size
 
 ## Tests & Contributing
 
 To run tests in root folder of gem `rake test`.
 
-To play with app `cd test/dummy` and `rails s -b 0.0.0.0` (before `rake db:migrate`).
+To play with app `cd test/dummy` and `rails s -b 0.0.0.0` (before `rails db:migrate`).
 
 ## Contributing
 Contribution directions go here.

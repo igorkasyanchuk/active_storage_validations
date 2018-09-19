@@ -14,6 +14,6 @@ class Project < ApplicationRecord
 
   validates :title, presence: true
 
-  validates :preview, attached: true
-  validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' }
+  validates :preview, attached: true ,content_size: { greater_than: 100.kilobytes }
+  validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' } , content_size: { between: 0..10.megabytes , message: 'is not given between size' }
 end
