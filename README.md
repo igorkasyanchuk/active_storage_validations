@@ -29,7 +29,7 @@ class Project < ApplicationRecord
 
   validates :title, presence: true
 
-  validates :preview, attached: true, content_size: { greater_than: 100.megabytes , message: 'is not given between size' }
+  validates :preview, attached: true, content_size: { less_than: 100.megabytes , message: 'is not given between size' }
   validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' }
 end
 ```
