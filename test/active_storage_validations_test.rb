@@ -24,19 +24,19 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.avatar.attach(good_file)
     u.photos.attach(bad_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Photos is invalid"]
+    assert_equal u.errors.full_messages, ["Photos does not have an authorized content type, authorized content types : [\"image/png\", \"image/jpg\"]"]
 
     u = build_user
     u.avatar.attach(bad_file)
     u.photos.attach(good_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Avatar is invalid"]
+    assert_equal u.errors.full_messages, ["Avatar does not have an authorized content type, authorized content types : [\"image/png\"]"]
 
     u = build_user
     u.avatar.attach(bad_file)
     u.photos.attach(bad_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Avatar is invalid", "Photos is invalid"]
+    assert_equal u.errors.full_messages, ["Avatar does not have an authorized content type, authorized content types : [\"image/png\"]", "Photos does not have an authorized content type, authorized content types : [\"image/png\", \"image/jpg\"]"]
   end
 end
 
