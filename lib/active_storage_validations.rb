@@ -21,7 +21,7 @@ module ActiveStorageValidations
 
       files = Array.wrap(files)
 
-      errors_options = { types: types }
+      errors_options = { types: types_to_human_format }
       errors_options[:message] = options[:message] if options[:message].presence
 
       files.each do |file|
@@ -34,6 +34,10 @@ module ActiveStorageValidations
 
     def types
       Array.wrap(options[:with]) + Array.wrap(options[:in])
+    end
+
+    def types_to_human_format
+      types.join(", ")
     end
 
     def content_type_valid?(file)
