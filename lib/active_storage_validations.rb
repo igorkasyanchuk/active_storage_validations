@@ -20,8 +20,8 @@ module ActiveStorageValidations
       files = Array.wrap(files)
 
       files.each do |file|
-        unless content_type_valid?(file) 
-          record.errors.add(attribute, options[:message].presence || :invalid)
+        unless content_type_valid?(file)
+          record.errors.add(attribute, options[:message].presence || "does not have an authorized content type, authorized content types : #{types}")
           return
         end
       end
