@@ -1,0 +1,4 @@
+en:
+  errors:
+    messages:
+      content_type_invalid: "does not have an authorized content type, authorized content types : %{types}"

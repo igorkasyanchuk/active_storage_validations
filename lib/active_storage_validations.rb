@@ -1,6 +1,8 @@
 require "active_storage_validations/railtie"
 
 module ActiveStorageValidations
+  class Engine < ::Rails::Engine
+  end
 
   class AttachedValidator < ActiveModel::EachValidator
     def validate_each(record, attribute, value)
@@ -19,9 +21,12 @@ module ActiveStorageValidations
 
       files = Array.wrap(files)
 
+      errors_options = { types: types }
+      errors_options[:message] = options[:message] if options[:message].presence
+
       files.each do |file|
         unless content_type_valid?(file)
-          record.errors.add(attribute, options[:message].presence || "does not have an authorized content type, authorized content types : #{types}")
+          record.errors.add(attribute, :content_type_invalid, errors_options)
           return
         end
       end
