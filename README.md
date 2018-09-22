@@ -55,7 +55,6 @@ Very simple example of validation with file attached, content type check and cus
 
 ## Todo
 * verify with remote storages
-* better error message when content_type is invalid
 * travis CI
 * validation for file size
 
