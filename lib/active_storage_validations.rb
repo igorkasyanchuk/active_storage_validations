@@ -23,6 +23,7 @@ module ActiveStorageValidations
 
       errors_options = { types: types_to_human_format }
       errors_options[:message] = options[:message] if options[:message].presence
+      errors_options[:count] = types.size
 
       files.each do |file|
         unless content_type_valid?(file)
