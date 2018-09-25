@@ -44,9 +44,11 @@ module ActiveStorageValidations
     end
 
   end
-  class ContentSizeValidator < ActiveModel::EachValidator
+  class SizeValidator < ActiveModel::EachValidator
+    delegate :number_to_human_size, to: ActiveSupport::NumberHelper
+
     AVAILABLE_CHECKS = [:less_than, :less_than_or_equal_to, :greater_than, :greater_than_or_equal_to, :between]
-    
+
     def check_validity!
       unless (AVAILABLE_CHECKS).any? { |argument| options.has_key?(argument) }
         raise ArgumentError, "You must pass either :less_than, :greater_than, or :between to the validator"
@@ -62,7 +64,7 @@ module ActiveStorageValidations
       
       files.each do |file|
         if content_size_valid?(file)
-          record.errors.add(attribute, options[:message].presence || "size #{human_size(file.blob.byte_size)} is not between rquired range" )
+          record.errors.add(attribute, options[:message].presence || "size #{number_to_human_size(file.blob.byte_size)} is not between rquired range" )
           return
         end
       end
@@ -72,7 +74,7 @@ module ActiveStorageValidations
       file_size = file.blob.byte_size
       case
         when options[:between].present?
-          options[:between].include?(file_size)
+          options[:between].exclude?(file_size)
         when options[:less_than].present?
           file_size > options[:less_than]
         when options[:less_than_or_equal_to].present?
@@ -84,9 +86,6 @@ module ActiveStorageValidations
       end 
     end
 
-    def human_size(size)
-      ActiveSupport::NumberHelper.number_to_human_size(size)
-    end
   end
 
 end
