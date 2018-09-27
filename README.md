@@ -34,6 +34,29 @@ class Project < ApplicationRecord
 end
 ```
 
+## Internationalization (I18n)
+
+Active Storage Validations use I18n for errors messages. For this add there keys in your translation file :
+
+```yml
+en:
+  errors:
+    messages:
+      content_type_invalid: "has an invalid content type"
+```
+
+In some cases Active Storage Validations provides variables to help you customize messages :
+
+The "content_type_invalid" key has two variables that you can use, a variable named "content_type" containing the content type of the send file and a variable named "authorized_type" containing the list of authorized content types.
+
+It's variables are not used by default to leave the choice to the user.
+
+For example :
+
+```yml
+content_type_invalid: "has an invalid content type : %{content_type}"
+```
+
 ## Installation
 
 Add this line to your application's Gemfile:
