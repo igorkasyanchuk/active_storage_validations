@@ -1,0 +1,4 @@
+en:
+  errors:
+    messages:
+      content_type_invalid: "has an invalid content type"
