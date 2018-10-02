@@ -91,7 +91,8 @@ To play with app `cd test/dummy` and `rails s -b 0.0.0.0` (before `rake db:migra
 You are welcome to contribute.
 
 ## Contributors (BIG THANK YOU)
-- @schweigert
+- https://github.com/schweigert
+- https://github.com/tleneveu
 
 
 ## License
