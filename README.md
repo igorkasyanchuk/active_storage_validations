@@ -34,6 +34,29 @@ class Project < ApplicationRecord
 end
 ```
 
+## Internationalization (I18n)
+
+Active Storage Validations use I18n for errors messages. For this add there keys in your translation file :
+
+```yml
+en:
+  errors:
+    messages:
+      content_type_invalid: "has an invalid content type"
+```
+
+In some cases Active Storage Validations provides variables to help you customize messages :
+
+The "content_type_invalid" key has two variables that you can use, a variable named "content_type" containing the content type of the send file and a variable named "authorized_type" containing the list of authorized content types.
+
+It's variables are not used by default to leave the choice to the user.
+
+For example :
+
+```yml
+content_type_invalid: "has an invalid content type : %{content_type}"
+```
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -55,7 +78,7 @@ Very simple example of validation with file attached, content type check and cus
 
 ## Todo
 * verify with remote storages
-* better error message when content_type, content_size is invalid
+* better error message when  content_size is invalid
 * travis CI
 
 ## Tests & Contributing
@@ -65,7 +88,12 @@ To run tests in root folder of gem `rake test`.
 To play with app `cd test/dummy` and `rails s -b 0.0.0.0` (before `rails db:migrate`).
 
 ## Contributing
-Contribution directions go here.
+You are welcome to contribute.
+
+## Contributors (BIG THANK YOU)
+- https://github.com/schweigert
+- https://github.com/tleneveu
+
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

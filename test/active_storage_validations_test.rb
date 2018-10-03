@@ -24,19 +24,19 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.avatar.attach(good_file)
     u.photos.attach(bad_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Photos is invalid"]
+    assert_equal u.errors.full_messages, ["Photos has an invalid content type"]
 
     u = build_user
     u.avatar.attach(bad_file)
     u.photos.attach(good_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Avatar is invalid"]
+    assert_equal u.errors.full_messages, ["Avatar has an invalid content type"]
 
     u = build_user
     u.avatar.attach(bad_file)
     u.photos.attach(bad_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Avatar is invalid", "Photos is invalid"]
+    assert_equal u.errors.full_messages, ["Avatar has an invalid content type", "Photos has an invalid content type"]
   end
 end
 
