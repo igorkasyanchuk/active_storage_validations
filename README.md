@@ -94,6 +94,7 @@ You are welcome to contribute.
 ## Contributors (BIG THANK YOU)
 - https://github.com/schweigert
 - https://github.com/tleneveu
+- https://github.com/reckerswartz
 
 
 ## License
