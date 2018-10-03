@@ -49,8 +49,8 @@ module ActiveStorageValidations
     def content_type_valid?(file)
       file.blob.present? && file.blob.content_type.in?(types)
     end
-
   end
+
   class SizeValidator < ActiveModel::EachValidator
     delegate :number_to_human_size, to: ActiveSupport::NumberHelper
 
@@ -71,7 +71,7 @@ module ActiveStorageValidations
       
       files.each do |file|
         if content_size_valid?(file)
-          record.errors.add(attribute, options[:message].presence || "size #{number_to_human_size(file.blob.byte_size)} is not between rquired range" )
+          record.errors.add(attribute, options[:message].presence || "size #{number_to_human_size(file.blob.byte_size)} is not between required range" )
           return
         end
       end
@@ -92,7 +92,6 @@ module ActiveStorageValidations
           file_size <= options[:greater_than_or_equal_to]
       end 
     end
-
   end
 
 end

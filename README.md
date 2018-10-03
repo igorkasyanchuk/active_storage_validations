@@ -80,6 +80,7 @@ Very simple example of validation with file attached, content type check and cus
 * verify with remote storages
 * better error message when  content_size is invalid
 * travis CI
+* split validation classes into own classes
 
 ## Tests & Contributing
 
