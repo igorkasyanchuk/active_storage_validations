@@ -77,7 +77,8 @@ Very simple example of validation with file attached, content type check and cus
 [![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
 
 ## Todo
-* verify with remote storages
+* verify with remote storages (s3, etc)
+* verify how it works with direct upload 
 * better error message when  content_size is invalid
 
 ## Tests & Contributing
