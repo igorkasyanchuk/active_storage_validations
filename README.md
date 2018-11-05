@@ -95,7 +95,7 @@ You are welcome to contribute.
 - https://github.com/tleneveu
 - https://github.com/reckerswartz
 - https://github.com/Uysim
-
+- https://github.com/D-system
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
