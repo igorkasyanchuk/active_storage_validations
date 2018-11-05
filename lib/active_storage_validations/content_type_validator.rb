@@ -30,7 +30,7 @@ module ActiveStorageValidations
     end
 
     def content_type(file)
-      file.blob.content_type
+      file.blob.present? && file.blob.content_type
     end
 
     def content_type_valid?(file)
