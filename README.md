@@ -87,6 +87,17 @@ To run tests in root folder of gem `rake test`.
 
 To play with app `cd test/dummy` and `rails s -b 0.0.0.0` (before `rails db:migrate`).
 
+## Known issues
+
+- there is an issue in Rails which it possible to get if you have aadded a validation and generating for example an image preview of atachments. It can be fixed with this:
+
+```
+  <% if @user.avatar.attached? && @user.avatar.attachment.blob.present? && @user.avatar.attachment.blob.persisted? %>
+    <%= image_tag @user.avatar %>
+  <% end %>
+```
+This is Rails issue. And according to commits it will be fixed in Rails 6.
+
 ## Contributing
 You are welcome to contribute.
 
