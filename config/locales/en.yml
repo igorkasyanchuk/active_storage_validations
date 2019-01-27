@@ -2,3 +2,4 @@ en:
   errors:
     messages:
       content_type_invalid: "has an invalid content type"
+      limit_out_of_range: "total number is out of range"
