@@ -4,6 +4,14 @@ If you are using `active_storage` gem and you want to add simple validations for
 
 This gems doing it for you. Just use `attached: true` or `content_type: 'image/png'` validation.
 
+## What it can do
+
+* validates if file(s) attached
+* validates content type
+* validates size of files
+* validates number of uploaded files (min/max required)
+* custom error messages
+
 ## Usage
 
 For example you have a model like this and you want to add validation.
