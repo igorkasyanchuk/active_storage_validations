@@ -42,8 +42,36 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.preview.attach(good_big_file)
     e.small_file.attach(good_big_file)
     e.attachment.attach(good_pdf_file)
+    e.documents.attach(good_dummy_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ["Small file size 1.6 KB is not between required range"]
+
+    # validates :documents, limit: { min: 1, max: 3 }
+    e = build_project
+    e.preview.attach(good_big_file)
+    e.small_file.attach(good_dummy_file)
+    e.attachment.attach(good_pdf_file)
+    assert !e.valid?
+    assert_equal e.errors.full_messages, ["Documents total number is out of range"]
+
+    e = build_project
+    e.preview.attach(good_big_file)
+    e.small_file.attach(good_dummy_file)
+    e.attachment.attach(good_pdf_file)
+    e.documents.attach(good_pdf_file)
+    e.documents.attach(good_pdf_file)
+    e.documents.attach(good_pdf_file)
+    e.documents.attach(good_pdf_file)
+    assert !e.valid?
+    assert_equal e.errors.full_messages, ["Documents total number is out of range"]
+
+    e = build_project
+    e.preview.attach(good_big_file)
+    e.small_file.attach(good_dummy_file)
+    e.attachment.attach(good_pdf_file)
+    e.documents.attach(good_pdf_file)
+    e.documents.attach(good_pdf_file)
+    assert e.valid?
   end
 end
 

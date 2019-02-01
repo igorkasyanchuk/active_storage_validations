@@ -4,6 +4,16 @@ If you are using `active_storage` gem and you want to add simple validations for
 
 This gems doing it for you. Just use `attached: true` or `content_type: 'image/png'` validation.
 
+[![Build Status](https://travis-ci.org/igorkasyanchuk/active_storage_validations.svg?branch=master)](https://travis-ci.org/igorkasyanchuk/active_storage_validations)
+
+## What it can do
+
+* validates if file(s) attached
+* validates content type
+* validates size of files
+* validates number of uploaded files (min/max required)
+* custom error messages
+
 ## Usage
 
 For example you have a model like this and you want to add validation.
@@ -26,11 +36,13 @@ or
 class Project < ApplicationRecord
   has_one_attached :preview
   has_one_attached :attachment
+  has_many_attached :documents
 
   validates :title, presence: true
 
   validates :preview, attached: true, size: { less_than: 100.megabytes , message: 'is not given between size' }
   validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' }
+  validates :documents, limit: { min: 1, max: 3 }
 end
 ```
 
@@ -43,6 +55,7 @@ en:
   errors:
     messages:
       content_type_invalid: "has an invalid content type"
+      limit_out_of_range: "total number is out of range"
 ```
 
 In some cases Active Storage Validations provides variables to help you customize messages :
@@ -55,6 +68,14 @@ For example :
 
 ```yml
 content_type_invalid: "has an invalid content type : %{content_type}"
+```
+
+Also the "limit_out_of_range" key supports two variables the "min" and "max".
+
+For example :
+
+```yml
+limit_out_of_range: "total number is out of range. range: [%{min}, %{max}]"
 ```
 
 ## Installation
@@ -107,6 +128,7 @@ You are welcome to contribute.
 - https://github.com/reckerswartz
 - https://github.com/Uysim
 - https://github.com/D-system
+- https://github.com/ivanelrey
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
