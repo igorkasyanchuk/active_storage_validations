@@ -1,15 +1,19 @@
+# frozen_string_literal: true
+
 module ActiveStorageValidations
-  class LimitValidator < ActiveModel::EachValidator
-    AVAILABLE_CHECKS = [:max, :min]
+  class LimitValidator < ActiveModel::EachValidator # :nodoc:
+    AVAILABLE_CHECKS = %i[max min].freeze
 
     def check_validity!
-      unless (AVAILABLE_CHECKS).any? { |argument| options.has_key?(argument) }
-        raise ArgumentError, "You must pass either :max or :min to the validator"
-      end
+      return true if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
+
+      raise ArgumentError, 'You must pass either :max or :min to the validator'
     end
 
-    def validate_each(record, attribute, value)
+    def validate_each(record, attribute, _value)
       files = record.send(attribute)
+
+      return true unless files.attached?
 
       files = Array.wrap(files)
 
@@ -17,20 +21,18 @@ module ActiveStorageValidations
       errors_options[:min] = options[:min]
       errors_options[:max] = options[:max]
 
-      unless files_count_valid?(files.count)
-        record.errors.add(attribute, options[:message].presence || :limit_out_of_range, errors_options)
-        return
-      end
+      return true if files_count_valid?(files.count)
+
+      record.errors.add(attribute, options[:message].presence || :limit_out_of_range, errors_options)
     end
 
     def files_count_valid?(count)
-      case
-        when options[:max].present? && options[:min].present?
-          count >= options[:min] && count <= options[:max]
-        when options[:max].present?
-          count <= options[:max]
-        when options[:min].present?
-          count >= options[:min]
+      if options[:max].present? && options[:min].present?
+        count >= options[:min] && count <= options[:max]
+      elsif options[:max].present?
+        count <= options[:max]
+      elsif options[:min].present?
+        count >= options[:min]
       end
     end
   end

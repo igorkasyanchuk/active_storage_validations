@@ -1,10 +1,11 @@
+# frozen_string_literal: true
+
 module ActiveStorageValidations
-  class ContentTypeValidator < ActiveModel::EachValidator
-    def validate_each(record, attribute, value)
+  class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
+    def validate_each(record, attribute, _value)
       files = record.send(attribute)
 
-      return true unless files.attached?
-      return true if types.empty?
+      return true if !files.attached? || types.empty?
 
       files = Array.wrap(files)
 
@@ -12,12 +13,11 @@ module ActiveStorageValidations
       errors_options[:message] = options[:message] if options[:message].present?
 
       files.each do |file|
-        unless content_type_valid?(file)
-          errors_options[:content_type] = content_type(file)
+        next if content_type_valid?(file)
 
-          record.errors.add(attribute, :content_type_invalid, errors_options)
-          return
-        end
+        errors_options[:content_type] = content_type(file)
+        record.errors.add(attribute, :content_type_invalid, errors_options)
+        break
       end
     end
 
@@ -26,7 +26,7 @@ module ActiveStorageValidations
     end
 
     def types_to_human_format
-      types.join(", ")
+      types.join(', ')
     end
 
     def content_type(file)
