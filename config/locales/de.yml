@@ -1,0 +1,5 @@
+de:
+  errors:
+    messages:
+      content_type_invalid: "hat einen ungültigen Dateityp"
+      limit_out_of_range: "Anzahl ist außerhalb des gültigen Bereichs"
