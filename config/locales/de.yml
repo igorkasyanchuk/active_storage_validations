@@ -2,4 +2,5 @@ de:
   errors:
     messages:
       content_type_invalid: "hat einen ungültigen Dateityp"
+      file_size_out_of_range: "Dateigröße von %{file_size} ist außerhalb des erlaubten Bereichs"
       limit_out_of_range: "Anzahl ist außerhalb des gültigen Bereichs"
