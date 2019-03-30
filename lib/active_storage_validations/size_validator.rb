@@ -18,10 +18,14 @@ module ActiveStorageValidations
 
       files = Array.wrap(record.send(attribute))
 
+      errors_options = {}
+      errors_options[:message] = options[:message] if options[:message].present?
+
       files.each do |file|
         next if content_size_valid?(file.blob.byte_size)
 
-        record.errors.add(attribute, options[:message].presence || "size #{number_to_human_size(file.blob.byte_size)} is not between required range")
+        errors_options[:file_size] = number_to_human_size(file.blob.byte_size)
+        record.errors.add(attribute, :file_size_out_of_range, errors_options)
         break
       end
     end
