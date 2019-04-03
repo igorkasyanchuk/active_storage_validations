@@ -16,7 +16,7 @@ module ActiveStorageValidations
       # only attached
       return true unless record.send(attribute).attached?
 
-      files = Array.wrap(record.send(attribute))
+      files = record.send(attribute).attachments
 
       errors_options = {}
       errors_options[:message] = options[:message] if options[:message].present?
