@@ -13,7 +13,7 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return true unless record.send(attribute).attached?
 
-      files = record.send(attribute).attachments
+      files = Array.wrap(record.send(attribute))
 
       errors_options = {}
       errors_options[:min] = options[:min]

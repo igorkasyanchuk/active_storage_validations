@@ -33,7 +33,7 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return true unless record.send(attribute).attached?
 
-      files = record.send(attribute).attachments
+      files = Array.wrap(record.send(attribute))
 
       files.each do |file|
         # Analyze file first if not analyzed to get all required metadata.

@@ -5,7 +5,7 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return true if !record.send(attribute).attached? || types.empty?
 
-      files = record.send(attribute).attachments
+      files = Array.wrap(record.send(attribute))
 
       errors_options = { authorized_types: types_to_human_format }
       errors_options[:message] = options[:message] if options[:message].present?
