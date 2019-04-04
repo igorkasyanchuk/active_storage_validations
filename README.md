@@ -143,7 +143,7 @@ To play with app `cd test/dummy` and `rails s -b 0.0.0.0` (before `rails db:migr
 
 ## Known issues
 
-- there is an issue in Rails which it possible to get if you have aadded a validation and generating for example an image preview of atachments. It can be fixed with this:
+- there is an issue in Rails which it possible to get if you have aadded a validation and generating for example an image preview of attachments. It can be fixed with this:
 
 ```
   <% if @user.avatar.attached? && @user.avatar.attachment.blob.present? && @user.avatar.attachment.blob.persisted? %>
@@ -162,6 +162,7 @@ You are welcome to contribute.
 - https://github.com/Uysim
 - https://github.com/D-system
 - https://github.com/ivanelrey
+- https://github.com/phlegx
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
