@@ -38,6 +38,10 @@ module ActiveStorageValidations
       files.each do |file|
         # Analyze file first if not analyzed to get all required metadata.
         file.analyze; file.reload unless file.analyzed?
+
+        # File has no dimension and no width and height in metadata.
+        raise StandardError, 'File has no dimension and no width and height in metadata' unless (['width', 'height'] - file.metadata.keys).empty?
+
         next if dimension_valid?(record, attribute, file.metadata)
         break
       end

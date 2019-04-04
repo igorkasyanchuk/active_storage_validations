@@ -11,7 +11,7 @@ This gems doing it for you. Just use `attached: true` or `content_type: 'image/p
 * validates if file(s) attached
 * validates content type
 * validates size of files
-* validates dimension of images
+* validates dimension of images/videos
 * validates number of uploaded files (min/max required)
 * custom error messages
 
