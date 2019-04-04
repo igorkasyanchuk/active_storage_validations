@@ -25,8 +25,11 @@ class User < ApplicationRecord
 
   validates :name, presence: true
 
-  validates :avatar, attached: true, content_type: 'image/png'
-  validates :photos, attached: true, content_type: ['image/png', 'image/jpg', 'image/jpeg']
+  validates :avatar, attached: true, content_type: 'image/png',
+                                     dimension: { width: 200, height: 200 }
+  validates :photos, attached: true, content_type: ['image/png', 'image/jpg', 'image/jpeg'],
+                                     dimension: { width: { min: 800, max: 2400 },
+                                                  height: { min: 600, max: 1800 }, message: 'is not given between dimension' }
 end
 ```
 
@@ -43,6 +46,36 @@ class Project < ApplicationRecord
   validates :preview, attached: true, size: { less_than: 100.megabytes , message: 'is not given between size' }
   validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' }
   validates :documents, limit: { min: 1, max: 3 }
+end
+```
+
+### More examples
+
+- Dimension validation with `width`, `height` and `in`.
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+  has_many_attached :photos
+
+  validates :avatar, dimension: { width: { in: 80..100 }, message: 'is not given between dimension' }
+  validates :photos, dimension: { height: { in: 600..1800 } }
+end
+```
+
+- Dimension validation with `min` and `max` range for width and height.
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+  has_many_attached :photos
+
+  validates :avatar, dimension: { min: 200..100 }
+  # Equivalent to:
+  # validates :avatar, dimension: { width: { min: 200 }, height: { min: 100  } }
+  validates :photos, dimension: { min: 200..100, max: 400..200 }
+  # Equivalent to:
+  # validates :avatar, dimension: { width: { min: 200, max: 400 }, height: { min: 100, max: 200  } }
 end
 ```
 
@@ -99,7 +132,7 @@ Very simple example of validation with file attached, content type check and cus
 
 ## Todo
 * verify with remote storages (s3, etc)
-* verify how it works with direct upload 
+* verify how it works with direct upload
 * better error message when  content_size is invalid
 
 ## Tests & Contributing
