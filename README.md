@@ -148,6 +148,8 @@ Very simple example of validation with file attached, content type check and cus
 * verify with remote storages (s3, etc)
 * verify how it works with direct upload
 * better error message when content_size is invalid
+* add more translations
+* add aspect ratio validation
 
 ## Tests & Contributing
 
