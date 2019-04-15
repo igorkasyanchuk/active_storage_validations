@@ -3,11 +3,9 @@
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
     def validate_each(record, attribute, _value)
-      files = record.send(attribute)
+      return true if !record.send(attribute).attached? || types.empty?
 
-      return true if !files.attached? || types.empty?
-
-      files = Array.wrap(files)
+      files = Array.wrap(record.send(attribute))
 
       errors_options = { authorized_types: types_to_human_format }
       errors_options[:message] = options[:message] if options[:message].present?
