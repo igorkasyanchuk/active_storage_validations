@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'test_helper'
-require "image_processing"
 
 class ActiveStorageValidations::Test < ActiveSupport::TestCase
   test 'truth' do

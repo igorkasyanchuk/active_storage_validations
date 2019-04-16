@@ -53,6 +53,7 @@ end
 ### More examples
 
 - Dimension validation with `width`, `height` and `in`.
+- Dimension detection requires `image_processing` gem.
 
 ```ruby
 class User < ApplicationRecord

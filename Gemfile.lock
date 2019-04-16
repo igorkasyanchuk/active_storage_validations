@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     active_storage_validations (0.7.0)
-      image_processing (>= 1.8)
       rails (>= 5.2.0)
 
 GEM
@@ -150,6 +149,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_storage_validations!
+  image_processing (>= 1.8)
   pry
   rubocop
   sqlite3
