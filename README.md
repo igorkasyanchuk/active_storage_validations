@@ -53,7 +53,6 @@ end
 ### More examples
 
 - Dimension validation with `width`, `height` and `in`.
-- Dimension detection requires `image_processing` gem.
 
 ```ruby
 class User < ApplicationRecord
@@ -130,6 +129,9 @@ Add this line to your application's Gemfile:
 
 ```ruby
 gem 'active_storage_validations'
+
+# Optional, to use :dimension validator
+gem 'image_processing'
 ```
 
 And then execute:
