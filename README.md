@@ -131,7 +131,7 @@ Add this line to your application's Gemfile:
 gem 'active_storage_validations'
 
 # Optional, to use :dimension validator
-gem 'image_processing'
+gem 'mini_magick'
 ```
 
 And then execute:
