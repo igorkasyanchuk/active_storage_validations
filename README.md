@@ -129,6 +129,9 @@ Add this line to your application's Gemfile:
 
 ```ruby
 gem 'active_storage_validations'
+
+# Optional, to use :dimension validator
+gem 'mini_magick'
 ```
 
 And then execute:
