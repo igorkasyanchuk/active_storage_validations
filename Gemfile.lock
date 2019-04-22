@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_storage_validations (0.7.0)
+    active_storage_validations (0.7.1)
       rails (>= 5.2.0)
 
 GEM
@@ -74,7 +74,7 @@ GEM
     mini_portile2 (2.4.0)
     minitest (5.11.3)
     nio4r (2.3.1)
-    nokogiri (1.10.2)
+    nokogiri (1.10.3)
       mini_portile2 (~> 2.4.0)
     parallel (1.13.0)
     parser (2.6.0.0)
