@@ -35,16 +35,22 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return true unless record.send(attribute).attached?
 
-      files = Array.wrap(record.send(attribute))
+      files = Array.wrap(record.attachment_changes[attribute.to_s])
+
+      #binding.pry
 
       files.each do |file|
         # Analyze file first if not analyzed to get all required metadata.
-        file.analyze; file.reload unless file.analyzed?
+        #binding.pry
+        #file.analyze; file.reload unless file.analyzed?
+
+        metadata = read_metadata(file.attachable)
+        #binding.pry
 
         # File has no dimension and no width and height in metadata.
-        raise StandardError, 'File has no dimension and no width and height in metadata' unless (['width', 'height'] - file.metadata.keys).empty?
+        raise StandardError, 'File has no dimension and no width and height in metadata' unless (['width', 'height'] - metadata.keys.collect(&:to_s)).empty?
 
-        next if dimension_valid?(record, attribute, file.metadata)
+        next if dimension_valid?(record, attribute, metadata)
         break
       end
     end
@@ -92,6 +98,39 @@ module ActiveStorageValidations
       end
 
       valid
+    end
+
+    def read_metadata(file)
+      read_image(file) do |image|
+        if rotated_image?(image)
+          { width: image.height, height: image.width }
+        else
+          { width: image.width, height: image.height }
+        end
+      end
+    end
+
+    private
+
+    def read_image(file)
+      image = MiniMagick::Image.new(file.path)
+
+      if image.valid?
+        yield image
+      else
+        logger.info "Skipping image analysis because ImageMagick doesn't support the file"
+        {}
+      end
+    rescue LoadError
+      logger.info "Skipping image analysis because the mini_magick gem isn't installed"
+      {}
+    rescue MiniMagick::Error => error
+      logger.error "Skipping image analysis due to an ImageMagick error: #{error.message}"
+      {}
+    end
+
+    def rotated_image?(image)
+      %w[ RightTop LeftBottom ].include?(image["%[orientation]"])
     end
 
   end
