@@ -39,10 +39,10 @@ module ActiveStorageValidations
       files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
 
       #binding.pry
-      puts "----"
-      puts "attribute: #{attribute}"
-      puts files.inspect
-      puts "----"
+      # puts "----"
+      # puts "attribute: #{attribute}"
+      # puts files.inspect
+      # puts "----"
 
       files.each do |file|
         # Analyze file first if not analyzed to get all required metadata.
