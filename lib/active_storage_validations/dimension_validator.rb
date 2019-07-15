@@ -44,6 +44,8 @@ module ActiveStorageValidations
         #binding.pry
         #file.analyze; file.reload unless file.analyzed?
 
+        #binding.pry
+
         metadata = read_metadata(file.attachable)
         #binding.pry
 
@@ -113,7 +115,7 @@ module ActiveStorageValidations
     private
 
     def read_image(file)
-      image = MiniMagick::Image.new(file.path)
+      image = MiniMagick::Image.new(read_file_path(file))
 
       if image.valid?
         yield image
@@ -131,6 +133,21 @@ module ActiveStorageValidations
 
     def rotated_image?(image)
       %w[ RightTop LeftBottom ].include?(image["%[orientation]"])
+    end
+
+    def read_file_path(attachable)
+      case attachable
+      when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
+        attachable.path
+      when Hash
+        File.open(attachable.fetch(:io)).path
+      else
+        raise "Something wrong with params."
+      end
+    end
+
+    def logger
+      Rails.logger
     end
 
   end
