@@ -110,7 +110,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.valid?, 'Dimension many: width and height must be between or equal to 800 x 600 and 1200 x 900 pixel.'
   rescue Exception => ex
     puts ex.message
-    puts ex.backtrace.join("\n")
+    puts ex.backtrace.take(20).join("\n")
     raise ex
   end
 end

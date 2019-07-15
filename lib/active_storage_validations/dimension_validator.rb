@@ -35,9 +35,14 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return true unless record.send(attribute).attached?
 
-      files = Array.wrap(record.attachment_changes[attribute.to_s])
+      changes = record.attachment_changes[attribute.to_s]
+      files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
 
       #binding.pry
+      puts "----"
+      puts "attribute: #{attribute}"
+      puts files.inspect
+      puts "----"
 
       files.each do |file|
         # Analyze file first if not analyzed to get all required metadata.
@@ -46,7 +51,7 @@ module ActiveStorageValidations
 
         #binding.pry
 
-        metadata = read_metadata(file.attachable)
+        metadata = read_metadata(file)
         #binding.pry
 
         # File has no dimension and no width and height in metadata.
