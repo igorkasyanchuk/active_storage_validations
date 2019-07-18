@@ -38,8 +38,9 @@ module ActiveStorageValidations
       return true unless record.send(attribute).attached?
 
       changes = record.attachment_changes[attribute.to_s]
-      files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
+      return true if changes.blank?
 
+      files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
       files.each do |file|
         metadata = Metadata.new(file).metadata
 

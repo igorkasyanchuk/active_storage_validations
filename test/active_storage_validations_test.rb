@@ -107,6 +107,18 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.attachment.attach(good_pdf_file)
     e.dimension_images.attach([good_image_800x600_file, good_image_1200x900_file])
     assert e.valid?, 'Dimension many: width and height must be between or equal to 800 x 600 and 1200 x 900 pixel.'
+
+    e = build_project
+    e.preview.attach(good_big_file)
+    e.small_file.attach(good_dummy_file)
+    e.attachment.attach(good_pdf_file)
+    e.dimension_images.attach([good_image_800x600_file])
+    e.save!
+
+    e.title = "Changed"
+    e.save!
+    e.reload
+    assert e.title, "Changed"
   rescue Exception => ex
     puts ex.message
     puts ex.backtrace.take(20).join("\n")
