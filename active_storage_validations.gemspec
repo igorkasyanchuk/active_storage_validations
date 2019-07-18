@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.version     = ActiveStorageValidations::VERSION
   s.authors     = ['Igor Kasyanchuk']
   s.email       = ['igorkasyanchuk@gmail.com']
-  s.homepage    = 'https://github.com/igorkasyanchuk'
+  s.homepage    = 'https://github.com/igorkasyanchuk/active_storage_validations'
   s.summary     = 'Validations for Active Storage'
   s.description = 'Validations for Active Storage (presence)'
   s.license     = 'MIT'
