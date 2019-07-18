@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'metadata.rb'
+
 module ActiveStorageValidations
   class DimensionValidator < ActiveModel::EachValidator # :nodoc
     AVAILABLE_CHECKS = %i[width height min max].freeze
@@ -38,21 +40,8 @@ module ActiveStorageValidations
       changes = record.attachment_changes[attribute.to_s]
       files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
 
-      #binding.pry
-      # puts "----"
-      # puts "attribute: #{attribute}"
-      # puts files.inspect
-      # puts "----"
-
       files.each do |file|
-        # Analyze file first if not analyzed to get all required metadata.
-        #binding.pry
-        #file.analyze; file.reload unless file.analyzed?
-
-        #binding.pry
-
-        metadata = read_metadata(file)
-        #binding.pry
+        metadata = Metadata.new(file).metadata
 
         # File has no dimension and no width and height in metadata.
         raise StandardError, 'File has no dimension and no width and height in metadata' unless (['width', 'height'] - metadata.keys.collect(&:to_s)).empty?
@@ -105,54 +94,6 @@ module ActiveStorageValidations
       end
 
       valid
-    end
-
-    def read_metadata(file)
-      read_image(file) do |image|
-        if rotated_image?(image)
-          { width: image.height, height: image.width }
-        else
-          { width: image.width, height: image.height }
-        end
-      end
-    end
-
-    private
-
-    def read_image(file)
-      image = MiniMagick::Image.new(read_file_path(file))
-
-      if image.valid?
-        yield image
-      else
-        logger.info "Skipping image analysis because ImageMagick doesn't support the file"
-        {}
-      end
-    rescue LoadError
-      logger.info "Skipping image analysis because the mini_magick gem isn't installed"
-      {}
-    rescue MiniMagick::Error => error
-      logger.error "Skipping image analysis due to an ImageMagick error: #{error.message}"
-      {}
-    end
-
-    def rotated_image?(image)
-      %w[ RightTop LeftBottom ].include?(image["%[orientation]"])
-    end
-
-    def read_file_path(attachable)
-      case attachable
-      when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
-        attachable.path
-      when Hash
-        File.open(attachable.fetch(:io)).path
-      else
-        raise "Something wrong with params."
-      end
-    end
-
-    def logger
-      Rails.logger
     end
 
   end
