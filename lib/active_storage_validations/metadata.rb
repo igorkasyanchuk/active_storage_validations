@@ -33,6 +33,8 @@ module ActiveStorageValidations
     rescue MiniMagick::Error => error
       logger.error "Skipping image analysis due to an ImageMagick error: #{error.message}"
       {}
+    ensure
+      image = nil
     end
 
     def rotated_image?(image)
