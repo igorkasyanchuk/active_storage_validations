@@ -119,6 +119,10 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.save!
     e.reload
     assert e.title, "Changed"
+
+    blob = ActiveStorage::Blob.create_after_upload!(good_image_800x600_file)
+    e.dimension_min = blob.signed_id
+    e.save!
   rescue Exception => ex
     puts ex.message
     puts ex.backtrace.take(20).join("\n")
