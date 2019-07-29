@@ -128,6 +128,27 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     puts ex.backtrace.take(20).join("\n")
     raise ex
   end
+
+  test 'aspect ratio validation' do
+    e = build_ratio_model
+    e.ratio_one.attach(good_image_150x150_file)
+    e.ratio_many.attach([good_image_600x800_file])
+    e.save!
+
+    e = build_ratio_model
+    e.ratio_one.attach(good_image_150x150_file)
+    e.ratio_many.attach([good_image_150x150_file])
+    e.save
+    assert !e.valid?
+    assert_equal e.errors.full_messages, ["Ratio many doesn't contain a portrait image"]
+
+    e = build_ratio_model
+    e.ratio_one.attach(good_image_150x150_file)
+    e.ratio_many.attach([good_image_600x800_file])
+    e.image1.attach(good_image_150x150_file)
+    assert !e.valid?
+    assert_equal e.errors.full_messages, ["Image1 doesn't contain aspect ration of 16x9"]
+  end
 end
 
 def build_user
@@ -136,6 +157,10 @@ end
 
 def build_project
   Project.new(title: 'Death Star')
+end
+
+def build_ratio_model
+  RatioModel.new(name: 'Princess Leia')
 end
 
 def dummy_file
@@ -156,6 +181,10 @@ end
 
 def image_800x600_file
   File.open(Rails.root.join('public', 'image_800x600.png'))
+end
+
+def image_600x800_file
+  File.open(Rails.root.join('public', 'image_600x800.png'))
 end
 
 def image_1200x900_file
@@ -184,6 +213,10 @@ end
 
 def good_image_800x600_file
   { io: image_800x600_file, filename: 'attachment.png', content_type: 'image/png' }
+end
+
+def good_image_600x800_file
+  { io: image_600x800_file, filename: 'attachment.png', content_type: 'image/png' }
 end
 
 def good_image_1200x900_file

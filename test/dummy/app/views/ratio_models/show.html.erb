@@ -1,0 +1,21 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @ratio_model.name %>
+</p>
+
+<p>
+  <strong>Ratio_one:</strong>
+  <%= image_tag @ratio_model.ratio_one %>
+</p>
+
+<h3>Ratio_many:</h3>
+
+<% @ratio_model.ratio_many.each do |image| %>
+  <%= image_tag image %> <br />
+<% end %>
+
+
+<%= link_to 'Edit', edit_ratio_model_path(@ratio_model) %> |
+<%= link_to 'Back', ratio_models_path %>
