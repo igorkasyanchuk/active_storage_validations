@@ -18,5 +18,3 @@ gemspec
 gem 'pry'
 
 #gem 'rails', path: '../rails'
-
-# gem 'active_storage_validations', github: 'igorkasyanchuk/active_storage_validations', branch: 'rails.6.rc1.fix'

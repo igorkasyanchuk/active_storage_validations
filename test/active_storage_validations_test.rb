@@ -120,9 +120,13 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.reload
     assert e.title, "Changed"
 
+    assert_nil e.dimension_min.attachment
     blob = ActiveStorage::Blob.create_after_upload!(good_image_800x600_file)
     e.dimension_min = blob.signed_id
     e.save!
+    e.reload
+    assert_not_nil e.dimension_min.attachment
+    assert_not_nil e.dimension_min.blob.signed_id
   rescue Exception => ex
     puts ex.message
     puts ex.backtrace.take(20).join("\n")
@@ -147,7 +151,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.ratio_many.attach([good_image_600x800_file])
     e.image1.attach(good_image_150x150_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Image1 doesn't contain aspect ration of 16x9"]
+    assert_equal e.errors.full_messages, ["Image1 doesn't contain aspect ratio of 16x9"]
   end
 end
 

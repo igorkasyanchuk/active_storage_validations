@@ -19,7 +19,7 @@ module ActiveStorageValidations
     private
 
     def read_image
-      if file.is_a? String
+      if file.is_a?(String)
         blob = ActiveStorage::Blob.find_signed(file)
 
         tempfile = Tempfile.new(["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter])
