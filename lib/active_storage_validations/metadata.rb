@@ -19,7 +19,23 @@ module ActiveStorageValidations
     private
 
     def read_image
-      image = MiniMagick::Image.new(read_file_path)
+      if file.is_a? String
+        blob = ActiveStorage::Blob.find_signed(file)
+
+        tempfile = Tempfile.new(["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter])
+        tempfile.binmode 
+
+        blob.download do |chunk|
+          tempfile.write(chunk)
+        end
+
+        tempfile.flush
+        tempfile.rewind
+
+        image = MiniMagick::Image.new(tempfile.path)
+      else
+        image = MiniMagick::Image.new(read_file_path)
+      end
 
       if image.valid?
         yield image
