@@ -134,10 +134,10 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
   end
 
   test 'aspect ratio validation' do
-    e = build_ratio_model
-    e.ratio_one.attach(good_image_150x150_file)
-    e.ratio_many.attach([good_image_600x800_file])
-    e.save!
+    # e = build_ratio_model
+    # e.ratio_one.attach(good_image_150x150_file)
+    # e.ratio_many.attach([good_image_600x800_file])
+    # e.save!
 
     e = build_ratio_model
     e.ratio_one.attach(good_image_150x150_file)
