@@ -43,10 +43,6 @@ module ActiveStorageValidations
       files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
       files.each do |file|
         metadata = Metadata.new(file).metadata
-
-        # File has no dimension and no width and height in metadata.
-        raise StandardError, 'File has no dimension and no width and height in metadata' unless (['width', 'height'] - metadata.keys.collect(&:to_s)).empty?
-
         next if dimension_valid?(record, attribute, metadata)
         break
       end
@@ -54,6 +50,12 @@ module ActiveStorageValidations
 
 
     def dimension_valid?(record, attribute, file_metadata)
+      # Validation fails unless file metadata contains valid width and height.
+      if file_metadata[:width].to_i <= 0 || file_metadata[:height].to_i <= 0
+        record.errors.add(attribute, options[:message].presence || :image_metadata_missing)
+        return false
+      end
+
       valid = true
 
       # Validation based on checks :min and :max (:min, :max has higher priority to :width, :height).
