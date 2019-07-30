@@ -4,6 +4,7 @@ de:
       content_type_invalid: "hat einen ungültigen Dateityp"
       file_size_out_of_range: "Dateigröße von %{file_size} ist außerhalb des erlaubten Bereichs"
       limit_out_of_range: "Anzahl ist außerhalb des gültigen Bereichs"
+      image_metadata_missing: "ist nicht ein gültigen Bild"
       dimension_min_inclusion: "muss größer oder gleich %{width} x %{height} Pixel sein"
       dimension_max_inclusion: "muss kleiner oder gleich %{width} x %{height} Pixel sein"
       dimension_width_inclusion: "Breite ist nicht zwischen %{min} und %{max} Pixel enthalten"

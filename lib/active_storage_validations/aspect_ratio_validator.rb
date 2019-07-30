@@ -29,12 +29,7 @@ module ActiveStorageValidations
 
       files.each do |file|
         metadata = Metadata.new(file).metadata
-
-        # File has no dimension and no width and height in metadata.
-        raise StandardError, 'File has no dimension and no width and height in metadata' unless (['width', 'height'] - metadata.keys.collect(&:to_s)).empty?
-
         next if is_valid?(record, attribute, metadata)
-
         break
       end
     end
@@ -44,22 +39,24 @@ module ActiveStorageValidations
 
 
     def is_valid?(record, attribute, metadata)
-      # Validation based on checks :min and :max (:min, :max has higher priority to :width, :height).
-
-      metadata_ok = metadata[:width].to_i > 0 && metadata[:height].to_i > 0
+      # Validation fails unless file metadata contains valid width and height.
+      if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
+        record.errors.add(attribute, options[:message].presence || :image_metadata_missing)
+        return false
+      end
 
       case options[:with]
 
       when :square
-        return true if metadata_ok && metadata[:width] == metadata[:height]
+        return true if metadata[:width] == metadata[:height]
         add_error(record, attribute, :aspect_ratio_not_square)
 
       when :portrait
-        return true if metadata_ok && metadata[:height] > metadata[:width]
+        return true if metadata[:height] > metadata[:width]
         add_error(record, attribute, :aspect_ratio_not_portrait)
 
       when :landscape
-        return true if metadata_ok && metadata[:width] > metadata[:height]
+        return true if metadata[:width] > metadata[:height]
         add_error(record, attribute, :aspect_ratio_not_landscape)
 
       else
@@ -67,7 +64,7 @@ module ActiveStorageValidations
           x = $1.to_i
           y = $2.to_i
 
-          return true if metadata_ok && (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
+          return true if (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
 
           add_error(record, attribute, :aspect_ratio_is_not, "#{x}x#{y}")
         else
