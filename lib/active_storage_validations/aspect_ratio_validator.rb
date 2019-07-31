@@ -39,14 +39,12 @@ module ActiveStorageValidations
 
 
     def is_valid?(record, attribute, metadata)
-      # Validation fails unless file metadata contains valid width and height.
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
-        record.errors.add(attribute, options[:message].presence || :image_metadata_missing)
+        add_error(record, attribute, options[:message].presence || :image_metadata_missing)
         return false
       end
 
       case options[:with]
-
       when :square
         return true if metadata[:width] == metadata[:height]
         add_error(record, attribute, :aspect_ratio_not_square)
@@ -76,7 +74,9 @@ module ActiveStorageValidations
 
 
     def add_error(record, attribute, type, interpolate = options[:with])
-      record.errors.add(attribute, options[:message].presence || type, aspect_ratio: interpolate)
+      key = options[:message].presence || type
+      return if record.errors.added?(attribute, key)
+      record.errors.add(attribute, key, aspect_ratio: interpolate)
     end
 
   end

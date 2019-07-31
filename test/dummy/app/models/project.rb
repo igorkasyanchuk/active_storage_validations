@@ -33,5 +33,4 @@ class Project < ApplicationRecord
   validates :dimension_min,    dimension: { min: 800..600 }
   validates :dimension_max,    dimension: { max: 1200..900 }
   validates :dimension_images, dimension: { width: { min: 800, max: 1200 }, height: { min: 600, max: 900 } }
-
 end
