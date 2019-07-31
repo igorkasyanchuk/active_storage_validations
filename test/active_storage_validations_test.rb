@@ -62,6 +62,14 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.preview.attach(good_big_file)
     e.small_file.attach(good_dummy_file)
     e.attachment.attach(good_pdf_file)
+    e.dimension_exact.attach(good_pdf_file)
+    assert !e.valid?
+    assert_equal e.errors.full_messages, ['Dimension exact is not a valid image']
+
+    e = build_project
+    e.preview.attach(good_big_file)
+    e.small_file.attach(good_dummy_file)
+    e.attachment.attach(good_pdf_file)
     e.documents.attach(good_pdf_file)
     e.documents.attach(good_pdf_file)
     assert e.valid?
@@ -134,10 +142,10 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
   end
 
   test 'aspect ratio validation' do
-    e = build_ratio_model
-    e.ratio_one.attach(good_image_150x150_file)
-    e.ratio_many.attach([good_image_600x800_file])
-    e.save!
+    # e = build_ratio_model
+    # e.ratio_one.attach(good_image_150x150_file)
+    # e.ratio_many.attach([good_image_600x800_file])
+    # e.save!
 
     e = build_ratio_model
     e.ratio_one.attach(good_image_150x150_file)
@@ -152,6 +160,13 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.image1.attach(good_image_150x150_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ["Image1 doesn't contain aspect ratio of 16x9"]
+
+    e = build_ratio_model
+    e.ratio_one.attach(good_pdf_file)
+    e.ratio_many.attach([good_image_600x800_file])
+    e.image1.attach(good_image_1920x1080_file)
+    assert !e.valid?
+    assert_equal e.errors.full_messages, ["Ratio one is not a valid image"]
   end
 end
 
@@ -195,6 +210,10 @@ def image_1200x900_file
   File.open(Rails.root.join('public', 'image_1200x900.png'))
 end
 
+def image_1920x1080_file
+  File.open(Rails.root.join('public', 'image_1920x1080.png'))
+end
+
 def good_dummy_file
   { io: dummy_file, filename: 'attachment.png', content_type: 'image/png' }
 end
@@ -225,4 +244,8 @@ end
 
 def good_image_1200x900_file
   { io: image_1200x900_file, filename: 'attachment.png', content_type: 'image/png' }
+end
+
+def good_image_1920x1080_file
+  { io: image_1920x1080_file, filename: 'attachment.png', content_type: 'image/png' }
 end
