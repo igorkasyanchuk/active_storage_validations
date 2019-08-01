@@ -68,7 +68,7 @@ class User < ApplicationRecord
 end
 ```
 
-- Dimension validation with `min` and `max` range for width and height.
+- Dimension validation with `min` and `max` range for width and height:
 
 ```ruby
 class User < ApplicationRecord
@@ -83,6 +83,21 @@ class User < ApplicationRecord
   # validates :avatar, dimension: { width: { min: 200, max: 400 }, height: { min: 100, max: 200  } }
 end
 ```
+
+- Aspect ration validation:
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+  has_one_attached :photo
+  has_many_attached :photos
+
+  validates :avatar, aspect_ratio: :square
+  validates :photo, aspect_ratio: :landscape
+
+  # you can also pass dynamic aspect ratio, like :is_4_3, :is_16_9, etc
+  validates :photos, aspect_ratio: :is_4_3
+end
 
 ## Internationalization (I18n)
 
