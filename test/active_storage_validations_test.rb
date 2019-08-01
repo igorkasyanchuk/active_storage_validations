@@ -169,7 +169,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_not_nil e.dimension_min.blob.signed_id
   rescue Exception => ex
     puts ex.message
-    puts ex.backtrace.take(20).join("\n")
+    puts ex.backtrace.join("\n")
     raise ex
   end
 
@@ -203,41 +203,41 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
 end
 
 def dummy_file
-  { io: File.open(Rails.root.join('public', 'apple-touch-icon.png')), filename: 'attachment.png', content_type: 'image/png' }
+  { io: File.open(Rails.root.join('public', 'apple-touch-icon.png')), filename: 'dummy_file.png', content_type: 'image/png' }
 end
 
 def big_file
-  { io: File.open(Rails.root.join('public', '500.html')), filename: 'attachment.png', content_type: 'image/png' }
+  { io: File.open(Rails.root.join('public', '500.html')), filename: 'big_file.png', content_type: 'image/png' }
 end
 
 def pdf_file
-  { io: File.open(Rails.root.join('public', 'pdf.pdf')), filename: 'attachment.pdf', content_type: 'application/pdf' }
+  { io: File.open(Rails.root.join('public', 'pdf.pdf')), filename: 'pdf_file.pdf', content_type: 'application/pdf' }
 end
 
 def bad_dummy_file
-  { io: File.open(Rails.root.join('public', 'apple-touch-icon.png')), filename: 'attachment.png', content_type: 'text/plain' }
+  { io: File.open(Rails.root.join('public', 'apple-touch-icon.png')), filename: 'bad_dummy_file.png', content_type: 'text/plain' }
 end
 
 def image_150x150_file
-  { io: File.open(Rails.root.join('public', 'image_150x150.png')), filename: 'attachment.png', content_type: 'image/png' }
+  { io: File.open(Rails.root.join('public', 'image_150x150.png')), filename: 'image_150x150_file.png', content_type: 'image/png' }
 end
 
 def image_800x600_file
-  { io: File.open(Rails.root.join('public', 'image_800x600.png')), filename: 'attachment.png', content_type: 'image/png' }
+  { io: File.open(Rails.root.join('public', 'image_800x600.png')), filename: 'image_800x600_file.png', content_type: 'image/png' }
 end
 
 def image_600x800_file
-  { io: File.open(Rails.root.join('public', 'image_600x800.png')), filename: 'attachment.png', content_type: 'image/png' }
+  { io: File.open(Rails.root.join('public', 'image_600x800.png')), filename: 'image_600x800_file.png', content_type: 'image/png' }
 end
 
 def image_1200x900_file
-  { io: File.open(Rails.root.join('public', 'image_1200x900.png')), filename: 'attachment.png', content_type: 'image/png' }
+  { io: File.open(Rails.root.join('public', 'image_1200x900.png')), filename: 'image_1200x900_file.png', content_type: 'image/png' }
 end
 
 def image_1920x1080_file
-  { io: File.open(Rails.root.join('public', 'image_1920x1080.png')), filename: 'attachment.png', content_type: 'image/png' }
+  { io: File.open(Rails.root.join('public', 'image_1920x1080.png')), filename: 'image_1920x1080_file.png', content_type: 'image/png' }
 end
 
 def html_file
-  { io: File.open(Rails.root.join('public', '500.html')), filename: '500.html', content_type: 'text/html' }
+  { io: File.open(Rails.root.join('public', '500.html')), filename: 'html_file.html', content_type: 'text/html' }
 end

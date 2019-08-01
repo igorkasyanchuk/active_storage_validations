@@ -156,7 +156,7 @@ else
         files.each do |file|
           # Analyze file first if not analyzed to get all required metadata.
           file.analyze; file.reload unless file.analyzed?
-          metadata = file.metadata
+          metadata = file.metadata rescue {}
           next if is_valid?(record, attribute, metadata)
           break
         end

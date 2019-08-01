@@ -152,7 +152,7 @@ PLATFORMS
 DEPENDENCIES
   active_storage_validations!
   coffee-rails
-  mini_magick (>= 4.9.5)
+  mini_magick
   pry
   rails (= 5.2.3)
   rubocop
