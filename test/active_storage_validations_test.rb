@@ -78,7 +78,11 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e = OnlyImage.new
     e.image.attach(pdf_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Image doesn't contain aspect ratio of 16x9", "Image has an invalid content type"]
+    if Rails::VERSION::MAJOR >= 6
+      assert_equal e.errors.full_messages, ["Image doesn't contain aspect ratio of 16x9", "Image has an invalid content type"]
+    else
+      assert_equal e.errors.full_messages, ["Image is not a valid image", "Image has an invalid content type"]
+    end
   rescue Exception => ex
     puts ex.message
     puts ex.backtrace.take(20).join("\n")
