@@ -13,6 +13,7 @@ This gems doing it for you. Just use `attached: true` or `content_type: 'image/p
 * validates size of files
 * validates dimension of images/videos
 * validates number of uploaded files (min/max required)
+* validates aspect ratio (if square, portrait, landscape, is_16_9, ...)
 * custom error messages
 
 ## Usage
@@ -31,6 +32,9 @@ class User < ApplicationRecord
   validates :photos, attached: true, content_type: ['image/png', 'image/jpg', 'image/jpeg'],
                                      dimension: { width: { min: 800, max: 2400 },
                                                   height: { min: 600, max: 1800 }, message: 'is not given between dimension' }
+  validates :image, attached: true, 
+                    content_type: ['image/png', 'image/jpg'],
+                    aspect_ratio: :landscape
 end
 ```
 
@@ -91,6 +95,7 @@ en:
       content_type_invalid: "has an invalid content type"
       file_size_out_of_range: "size %{file_size} is not between required range"
       limit_out_of_range: "total number is out of range"
+      image_metadata_missing: "is not a valid image"
       dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel."
       dimension_max_inclusion: "must be less than or equal to %{width} x %{height} pixel."
       dimension_width_inclusion: "width is not included between %{min} and %{max} pixel."
@@ -101,6 +106,12 @@ en:
       dimension_height_less_than_or_equal_to: "height must be less than or equal to %{length} pixel."
       dimension_width_equal_to: "width must be equal to %{length} pixel."
       dimension_height_equal_to: "height must be equal to %{length} pixel."
+      aspect_ratio_not_square: "doesn't a square image"
+      aspect_ratio_not_portrait: "doesn't contain a portrait image"
+      aspect_ratio_not_landscape: "doesn't contain a landscape image"
+      aspect_ratio_is_not: "doesn't contain aspect ratio of %{aspect_ratio}"
+      aspect_ratio_unknown: "has an unknown aspect ratio"
+
 ```
 
 In some cases Active Storage Validations provides variables to help you customize messages:
@@ -129,13 +140,10 @@ Add this line to your application's Gemfile:
 
 ```ruby
 
-# Rails 5.2
+# Rails 5.2 and Rails 6
 gem 'active_storage_validations'
 
-# >= Rails 6.0.0.RC.1
-gem 'active_storage_validations', github: 'igorkasyanchuk/active_storage_validations', branch: 'rails.6.rc1.fix'
-
-# Optional, to use :dimension validator
+# Optional, to use :dimension and aspect ratio validators
 gem 'mini_magick', '>= 4.9.4'
 ```
 
