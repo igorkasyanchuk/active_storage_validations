@@ -1,0 +1,27 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Ratio Models</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @ratio_models.each do |ratio_model| %>
+      <tr>
+        <td><%= ratio_model.name %></td>
+        <td><%= link_to 'Show', ratio_model %></td>
+        <td><%= link_to 'Edit', edit_ratio_model_path(ratio_model) %></td>
+        <td><%= link_to 'Destroy', ratio_model, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Ratio Model', new_ratio_model_path %>

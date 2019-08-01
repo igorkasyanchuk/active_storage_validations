@@ -1,0 +1,32 @@
+<%= form_with(model: ratio_model, local: true) do |form| %>
+  <% if ratio_model.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(ratio_model.errors.count, "error") %> prohibited this ratio_model from being saved:</h2>
+
+      <ul>
+        <% ratio_model.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :ratio_one %>
+    <%= form.file_field :ratio_one %>
+  </div>
+
+  <div class="field">
+    <%= form.label :ratio_many %>
+    <%= form.file_field :ratio_many, multiple: true %>
+  </div>    
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>
