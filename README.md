@@ -139,12 +139,11 @@ limit_out_of_range: "total number is out of range. range: [%{min}, %{max}]"
 Add this line to your application's Gemfile:
 
 ```ruby
-
 # Rails 5.2 and Rails 6
 gem 'active_storage_validations'
 
-# Optional, to use :dimension and aspect ratio validators
-gem 'mini_magick', '>= 4.9.4'
+# Optional, to use :dimension validator or :aspect_ratio validator
+gem 'mini_magick', '>= 4.9.5'
 ```
 
 And then execute:
