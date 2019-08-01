@@ -152,7 +152,7 @@ PLATFORMS
 DEPENDENCIES
   active_storage_validations!
   coffee-rails
-  mini_magick (>= 4.9.4)
+  mini_magick (>= 4.9.5)
   pry
   rubocop
   sqlite3
