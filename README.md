@@ -32,7 +32,7 @@ class User < ApplicationRecord
   validates :photos, attached: true, content_type: ['image/png', 'image/jpg', 'image/jpeg'],
                                      dimension: { width: { min: 800, max: 2400 },
                                                   height: { min: 600, max: 1800 }, message: 'is not given between dimension' }
-  validates :image, attached: true, 
+  validates :image, attached: true,
                     content_type: ['image/png', 'image/jpg'],
                     aspect_ratio: :landscape
 end
@@ -55,6 +55,18 @@ end
 ```
 
 ### More examples
+
+- Content type validation using symbols. In order to infer the correct mime type from the symbol, the types must be registered with `Mime::Type`.
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+  has_many_attached :photos
+
+  validates :avatar, attached: true, content_type: :png # Mime[:png].to_s => 'image/png'
+  validates :photos, attached: true, content_type: [:png, :jpg, :jpeg]
+end
+```
 
 - Dimension validation with `width`, `height` and `in`.
 
