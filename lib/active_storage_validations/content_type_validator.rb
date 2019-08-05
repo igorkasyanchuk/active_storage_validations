@@ -20,7 +20,9 @@ module ActiveStorageValidations
     end
 
     def types
-      Array.wrap(options[:with]) + Array.wrap(options[:in])
+      (Array.wrap(options[:with]) + Array.wrap(options[:in])).map do |type|
+        Mime[type] || type
+      end
     end
 
     def types_to_human_format
