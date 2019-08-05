@@ -224,6 +224,14 @@ You are welcome to contribute.
 - https://github.com/D-system
 - https://github.com/ivanelrey
 - https://github.com/phlegx
+- https://github.com/rr-dev
+- https://github.com/dsmalko
+- https://github.com/danderozier
+- https://github.com/cseelus
+- https://github.com/vkinelev
+- https://github.com/reed
+- https://github.com/connorshea
+- https://github.com/Atul9
 
 ## License
 

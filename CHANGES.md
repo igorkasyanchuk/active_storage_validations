@@ -1,3 +1,6 @@
+- 0.8.1
+  - allows to pass symbol for a content type validation: `validates :avatar, attached: true, content_type: :png`
+
 - 0.8.0
   - added aspect ratio validator
   - support for Rails 5.2 and Rails 6
