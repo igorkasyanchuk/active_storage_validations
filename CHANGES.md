@@ -1,3 +1,6 @@
+- 0.8.2
+  - allows to pass Regexp for a content type validation: `validates :avatar, content_type: /\Aimage\/.*\z/`
+
 - 0.8.1
   - allows to pass symbol for a content type validation: `validates :avatar, attached: true, content_type: :png`
 
