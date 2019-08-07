@@ -20,27 +20,37 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u = User.new(name: 'John Smith')
     u.photos.attach(dummy_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Avatar can't be blank"]    
+    assert_equal u.errors.full_messages, ["Avatar can't be blank"]
   end
 
   test 'validates content type' do
     u = User.new(name: 'John Smith')
     u.avatar.attach(dummy_file)
+    u.image_regex.attach(dummy_file)
     u.photos.attach(bad_dummy_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ['Photos has an invalid content type']
 
     u = User.new(name: 'John Smith')
     u.avatar.attach(bad_dummy_file)
+    u.image_regex.attach(dummy_file)
     u.photos.attach(dummy_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type']
 
     u = User.new(name: 'John Smith')
+    u.avatar.attach(dummy_file)
+    u.image_regex.attach(bad_dummy_file)
+    u.photos.attach(dummy_file)
+    assert !u.valid?
+    assert_equal u.errors.full_messages, ['Image regex has an invalid content type']
+
+    u = User.new(name: 'John Smith')
     u.avatar.attach(bad_dummy_file)
+    u.image_regex.attach(bad_dummy_file)
     u.photos.attach(bad_dummy_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type']
+    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Image regex has an invalid content type']
   end
 
   test 'validates size' do
