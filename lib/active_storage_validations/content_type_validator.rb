@@ -34,7 +34,11 @@ module ActiveStorageValidations
     end
 
     def content_type_valid?(file)
-      file.blob.present? && file.blob.content_type.in?(types)
+      if options[:with].is_a?(Regexp)
+        options[:with].match?(content_type(file).to_s)
+      else
+        content_type(file).in?(types)
+      end
     end
   end
 end
