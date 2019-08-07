@@ -11,7 +11,7 @@ module ActiveStorageValidations
       errors_options[:message] = options[:message] if options[:message].present?
 
       files.each do |file|
-        next if content_type_valid?(file)
+        next if is_valid?(file)
 
         errors_options[:content_type] = content_type(file)
         record.errors.add(attribute, :content_type_invalid, errors_options)
@@ -20,7 +20,7 @@ module ActiveStorageValidations
     end
 
     def types
-      (Array.wrap(options[:with]) + Array.wrap(options[:in])).map do |type|
+      (Array.wrap(options[:with]) + Array.wrap(options[:in])).compact.map do |type|
         Mime[type] || type
       end
     end
@@ -33,7 +33,7 @@ module ActiveStorageValidations
       file.blob.present? && file.blob.content_type
     end
 
-    def content_type_valid?(file)
+    def is_valid?(file)
       if options[:with].is_a?(Regexp)
         options[:with].match?(content_type(file).to_s)
       else

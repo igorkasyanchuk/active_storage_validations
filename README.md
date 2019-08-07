@@ -64,7 +64,10 @@ class User < ApplicationRecord
   has_many_attached :photos
 
   validates :avatar, attached: true, content_type: :png # Mime[:png].to_s => 'image/png'
+  # or
   validates :photos, attached: true, content_type: [:png, :jpg, :jpeg]
+  # or
+  validates :avatar, content_type: /\Aimage\/.*\z/
 end
 ```
 
