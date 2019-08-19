@@ -1,4 +1,4 @@
-class CreateOnlyImages < ActiveRecord::Migration[6.0]
+class CreateOnlyImages < ActiveRecord::Migration[5.2]
   def change
     create_table :only_images do |t|
 
