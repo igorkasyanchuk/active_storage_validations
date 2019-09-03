@@ -1,0 +1,22 @@
+pt-BR:
+  errors:
+    messages:
+      content_type_invalid: "tem um tipo de arquivo inválido"
+      file_size_out_of_range: "tamanho %{file_size} está fora da faixa de tamanho válida"
+      limit_out_of_range: "número total está fora do limite"
+      image_metadata_missing: "não é uma imagem válida"
+      dimension_min_inclusion: "deve ser maior ou igual a %{width} x %{height} pixel"
+      dimension_max_inclusion: "deve ser menor ou igual a %{width} x %{height} pixel"
+      dimension_width_inclusion: "largura não está entre %{min} e %{max} pixel"
+      dimension_height_inclusion: "altura não está entre %{min} e %{max} pixel"
+      dimension_width_greater_than_or_equal_to: "largura deve ser maior ou igual a %{length} pixel"
+      dimension_height_greater_than_or_equal_to: "altura deve ser maior ou igual a %{length} pixel"
+      dimension_width_less_than_or_equal_to: "largura deve ser menor ou igual a %{length} pixel"
+      dimension_height_less_than_or_equal_to: "altura deve ser menor ou igual a %{length} pixel"
+      dimension_width_equal_to: "largura deve ser igual a %{length} pixel"
+      dimension_height_equal_to: "altura deve ser igual a %{length} pixel"
+      aspect_ratio_not_square: "não é uma imagem quadrada"
+      aspect_ratio_not_portrait: "não contém uma imagem no formato retrato"
+      aspect_ratio_not_landscape: "não contém uma imagem no formato paisagem"
+      aspect_ratio_is_not: "não contém uma proporção de %{aspect_ratio}"
+      aspect_ratio_unknown: "não tem uma proporção definida"
