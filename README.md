@@ -235,6 +235,7 @@ You are welcome to contribute.
 - https://github.com/reed
 - https://github.com/connorshea
 - https://github.com/Atul9
+- https://github.com/victorbueno
 
 ## License
 

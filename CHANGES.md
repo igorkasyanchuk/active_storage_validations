@@ -1,3 +1,6 @@
+- 0.8.3 (unreleased)
+  - added pt-BR translation
+
 - 0.8.2
   - allows to pass Regexp for a content type validation: `validates :avatar, content_type: /\Aimage\/.*\z/`
 
