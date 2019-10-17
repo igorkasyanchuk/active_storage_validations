@@ -99,7 +99,7 @@ class User < ApplicationRecord
 end
 ```
 
-- Aspect ration validation:
+- Aspect ratio validation:
 
 ```ruby
 class User < ApplicationRecord
