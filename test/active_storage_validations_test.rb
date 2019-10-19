@@ -73,6 +73,22 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.documents.attach(pdf_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ['Documents total number is out of range']
+
+    la = LimitAttachment.create(name: 'klingon')
+    (0..5).each do
+      la.files.attach(pdf_file)
+    end
+    assert !la.valid?
+    assert_equal 4, la.files_blobs.count
+    assert_equal ['Files total number is out of range'], la.errors.full_messages
+
+    la.files_blobs.first.purge
+    la.files_blobs.first.purge
+    la.files_blobs.first.purge
+    la.files_blobs.first.purge
+
+    assert !la.valid?
+    assert_equal ['Files total number is out of range'], la.errors.full_messages
   end
 
   test 'dimensions and is image' do
@@ -110,6 +126,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
     e.documents.attach(pdf_file)
+    e.valid?
     assert e.valid?
 
     e = Project.new(title: 'Death Star')
