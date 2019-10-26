@@ -18,5 +18,5 @@ en:
       aspect_ratio_not_square: "must be a square image"
       aspect_ratio_not_portrait: "must be a portrait image"
       aspect_ratio_not_landscape: "must be a landscape image"
-      aspect_ratio_is_not: "must haave an aspect ratio of %{aspect_ratio}"
+      aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
       aspect_ratio_unknown: "has an unknown aspect ratio"
