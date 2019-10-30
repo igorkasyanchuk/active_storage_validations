@@ -10,17 +10,14 @@ module ActiveStorageValidations
       raise ArgumentError, 'You must pass either :max or :min to the validator'
     end
 
-    def validate_each(record, attribute, _value)
+    def validate_each(record, attribute, value)
       return true unless record.send(attribute).attached?
 
-      files = Array.wrap(record.send(attribute))
-
+      files = Array.wrap(record.send(attribute)).uniq
       errors_options = {}
       errors_options[:min] = options[:min]
       errors_options[:max] = options[:max]
-
       return true if files_count_valid?(files.count)
-
       record.errors.add(attribute, options[:message].presence || :limit_out_of_range, errors_options)
     end
 
