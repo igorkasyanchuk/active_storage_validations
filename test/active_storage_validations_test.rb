@@ -207,14 +207,14 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.ratio_many.attach([image_150x150_file])
     e.save
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Ratio many doesn't contain a portrait image"]
+    assert_equal e.errors.full_messages, ["Ratio many must be a portrait image"]
 
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(image_150x150_file)
     e.ratio_many.attach([image_600x800_file])
     e.image1.attach(image_150x150_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Image1 doesn't contain aspect ratio of 16x9"]
+    assert_equal e.errors.full_messages, ["Image1 must have an aspect ratio of 16x9"]
 
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(html_file)
