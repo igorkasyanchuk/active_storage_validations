@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# Run tests using:
+# BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle exec rake test
+# BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test
+
 require 'test_helper'
 
 class ActiveStorageValidations::Test < ActiveSupport::TestCase
@@ -73,23 +77,60 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.documents.attach(pdf_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ['Documents total number is out of range']
+  end
 
+  test 'validates number of files for Rails 6' do
     la = LimitAttachment.create(name: 'klingon')
-    (0..5).each do
-      la.files.attach(pdf_file)
-    end
+    la.files.attach([pdf_file, pdf_file, pdf_file, pdf_file, pdf_file, pdf_file])
+
     assert !la.valid?
-    assert_equal 4, la.files_blobs.count
+
+    assert_equal 6, la.files.count
+    
+    if Rails.version < "6.0.0"
+      assert_equal 6, la.files_blobs.count
+    else
+      assert_equal 0, la.files_blobs.count
+    end
+
     assert_equal ['Files total number is out of range'], la.errors.full_messages
 
-    la.files_blobs.first.purge
-    la.files_blobs.first.purge
-    la.files_blobs.first.purge
-    la.files_blobs.first.purge
+    if Rails.version < "6.0.0"
+      la.files.first.purge
+      la.files.first.purge
+      la.files.first.purge
+      la.files.first.purge
+    end
 
     assert !la.valid?
     assert_equal ['Files total number is out of range'], la.errors.full_messages
   end
+
+  test 'validates number of files v2' do
+    la = LimitAttachment.create(name: 'klingon')
+    la.files.attach([pdf_file, pdf_file, pdf_file])
+
+    assert la.valid?
+    assert_equal 3, la.files.count
+    assert la.save
+    la.reload
+    
+    assert_equal 3, la.files_blobs.count
+    la.files.first.purge
+
+    assert la.valid?
+    la.reload
+    assert_equal 2, la.files_blobs.count
+  end
+
+  test 'validates number of files v3' do
+    la = LimitAttachment.create(name: 'klingon')
+    la.files.attach([pdf_file, pdf_file, pdf_file, pdf_file, pdf_file])
+
+    assert !la.valid?
+    assert_equal 5, la.files.count
+    assert !la.save
+  end  
 
   test 'dimensions and is image' do
     e = OnlyImage.new
