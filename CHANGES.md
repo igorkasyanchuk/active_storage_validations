@@ -1,5 +1,9 @@
+- master
+
 - 0.8.3 (unreleased)
-  - added pt-BR translation
+  - added pt-BR translation PR #40
+  - fixed error messages for aspect ratio valiation PR #44
+  - better limit validation for rails 6 PR #45
 
 - 0.8.2
   - allows to pass Regexp for a content type validation: `validates :avatar, content_type: /\Aimage\/.*\z/`
