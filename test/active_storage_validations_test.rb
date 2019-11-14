@@ -41,6 +41,13 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.photos.attach(dummy_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type']
+    assert_equal u.errors.details, avatar: [
+      {
+        error: :content_type_invalid,
+        authorized_types: 'PNG',
+        content_type: 'text/plain'
+      }
+    ]
 
     u = User.new(name: 'John Smith')
     u.avatar.attach(dummy_file)
