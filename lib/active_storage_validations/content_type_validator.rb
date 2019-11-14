@@ -26,7 +26,9 @@ module ActiveStorageValidations
     end
 
     def types_to_human_format
-      types.join(', ')
+      types
+        .map { |type| type.to_s.split('/').last.upcase }
+        .join(', ')
     end
 
     def content_type(file)
