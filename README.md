@@ -237,6 +237,7 @@ You are welcome to contribute.
 - https://github.com/Atul9
 - https://github.com/victorbueno
 - https://github.com/UICJohn
+- https://github.com/giovannibonetti
 
 ## License
 
