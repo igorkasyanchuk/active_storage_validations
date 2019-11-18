@@ -64,6 +64,26 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Image regex has an invalid content type']
   end
 
+  # reads content type from file, not from webp_file_wrong method
+  test 'webp content type 1' do
+    u = User.new(name: 'John Smith')
+    u.avatar.attach(webp_file_wrong)
+    u.image_regex.attach(webp_file_wrong)
+    u.photos.attach(webp_file_wrong)
+    assert !u.valid?
+    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type']
+  end
+
+  # trying to attache webp file with PNG extension, but real content type is detected
+  test 'webp content type 2' do
+    u = User.new(name: 'John Smith')
+    u.avatar.attach(webp_file)
+    u.image_regex.attach(webp_file)
+    u.photos.attach(webp_file)
+    assert !u.valid?
+    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type']
+  end
+
   test 'validates size' do
     e = Project.new(title: 'Death Star')
     e.preview.attach(big_file)
@@ -311,4 +331,12 @@ end
 
 def html_file
   { io: File.open(Rails.root.join('public', '500.html')), filename: 'html_file.html', content_type: 'text/html' }
+end
+
+def webp_file
+  { io: File.open(Rails.root.join('public', '1_sm_webp.png')), filename: '1_sm_webp.png', content_type: 'image/webp' }
+end
+
+def webp_file_wrong
+  { io: File.open(Rails.root.join('public', '1_sm_webp.png')), filename: '1_sm_webp.png', content_type: 'image/png' }
 end
