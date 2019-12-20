@@ -113,6 +113,7 @@ class User < ApplicationRecord
   # you can also pass dynamic aspect ratio, like :is_4_3, :is_16_9, etc
   validates :photos, aspect_ratio: :is_4_3
 end
+```
 
 ## Internationalization (I18n)
 
