@@ -1,0 +1,22 @@
+fr:
+  errors:
+    messages:
+      content_type_invalid: "a un type de contenu non valide"
+      file_size_out_of_range: "la taille %{file_size} n'est pas comprise dans la plage permise"
+      limit_out_of_range: "le nombre total est hors limites"
+      image_metadata_missing: "n'est pas une image valide"
+      dimension_min_inclusion: "doit être supérieur ou égal à %{width} x %{height} pixels"
+      dimension_max_inclusion: "doit être inférieur ou égal à %{width} x %{height} pixels"
+      dimension_width_inclusion: "la largeur n'est pas comprise entre %{min} et %{max} pixels"
+      dimension_height_inclusion: "la hauteur n'est pas comprise entre %{min} et %{max} pixels"
+      dimension_width_greater_than_or_equal_to: "la largeur doit être supérieure ou égale à %{length} pixels"
+      dimension_height_greater_than_or_equal_to: "la hauteur doit être supérieure ou égale à %{length} pixels"
+      dimension_width_less_than_or_equal_to: "la largeur doit être inférieure ou égale à %{length} pixels"
+      dimension_height_less_than_or_equal_to: "la hauteur doit être inférieure ou égale à %{length} pixels"
+      dimension_width_equal_to: "la largeur doit être égale à %{length} pixels"
+      dimension_height_equal_to: "la hauteur doit être égale à %{length} pixels"
+      aspect_ratio_not_square: "doit être une image en format carrée"
+      aspect_ratio_not_portrait: "doit être une image en format portrait"
+      aspect_ratio_not_landscape: "doit être une image en format paysage"
+      aspect_ratio_is_not: "doit avoir un rapport hauteur / largeur de %{aspect_ratio}"
+      aspect_ratio_unknown: "a un rapport d'aspect inconnu"
