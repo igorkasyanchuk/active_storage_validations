@@ -1,0 +1,22 @@
+ru:
+  errors:
+    messages:
+      content_type_invalid: "имеет недопустимый тип содержимого"
+      file_size_out_of_range: "размер %{file_size} больше требуемого"
+      limit_out_of_range: "количество файлов больше требуемого"
+      image_metadata_missing: "не является допустимым изображением"
+      dimension_min_inclusion: "должен быть больше или равно %{width} x %{height} пикселям"
+      dimension_max_inclusion: "должно быть меньше или равно %{width} x %{height} пикселям"
+      dimension_width_inclusion: "ширина не включена между %{min} и %{max} пикселям"
+      dimension_height_inclusion: "высота не включена между %{min} и %{max}  пикселям"
+      dimension_width_greater_than_or_equal_to: "ширина должна быть больше или равна %{length} пикселям"
+      dimension_height_greater_than_or_equal_to: "высота должна быть больше или равна %{length} пикселям"
+      dimension_width_less_than_or_equal_to: "ширина должна быть меньше или равна %{length} пикселям"
+      dimension_height_less_than_or_equal_to: "высота должна быть меньше или равна %{length} пикселям"
+      dimension_width_equal_to: "ширина должна быть равна %{length} пикселям"
+      dimension_height_equal_to: "высота должна быть равна %{length} пикселям"
+      aspect_ratio_not_square: "должно быть квадратное изображение"
+      aspect_ratio_not_portrait: "должно быть портретное изображение"
+      aspect_ratio_not_landscape: "должно быть пейзажное изображение"
+      aspect_ratio_is_not: "должен иметь соотношение сторон %{aspect_ratio}"
+      aspect_ratio_unknown: "имеет неизвестное соотношение сторон"

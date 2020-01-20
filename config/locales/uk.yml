@@ -1,0 +1,22 @@
+uk:
+  errors:
+    messages:
+    content_type_invalid: "має неприпустимий тип вмісту"
+    file_size_out_of_range: "розмір %{file_size} більше необхідного"
+    limit_out_of_range: "кількість файлів більше необхідного"
+    image_metadata_missing: "не є допустимим зображенням"
+    dimension_min_inclusion: "мусить бути більше або дорівнювати %{width} x %{height} пікселям"
+    dimension_max_inclusion: "мусить бути менше або дорівнювати %{width} x %{height} пікселям"
+    dimension_width_inclusion: "ширина не включена між %{min} і %{max} пікселям"
+    dimension_height_inclusion: "висота не включена між %{min} і %{max} пікселям"
+    dimension_width_greater_than_or_equal_to: "ширина мусить бути більше або дорівнювати %{length} пікселям"
+    dimension_height_greater_than_or_equal_to: "висота мусить бути більше або дорівнювати %{length} пікселям"
+    dimension_width_less_than_or_equal_to: "ширина мусить бути менше або дорівнювати %{length} пікселям"
+    dimension_height_less_than_or_equal_to: "висота мусить бути менше або дорівнювати %{length} пікселям"
+    dimension_width_equal_to: "ширина мусить дорівнювати %{length} пікселям"
+    dimension_height_equal_to: "висота мусить дорівнювати %{length} пікселям"
+    aspect_ratio_not_square: "мусить бути квадратне зображення"
+    aspect_ratio_not_portrait: "мусить бути портретне зображення"
+    aspect_ratio_not_landscape: "мусить бути пейзажне зображення"
+    aspect_ratio_is_not: "мусить мати співвідношення сторін %{aspect_ratio}"
+    aspect_ratio_unknown: "має невідоме співвідношення сторін"

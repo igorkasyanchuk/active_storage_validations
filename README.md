@@ -239,6 +239,7 @@ You are welcome to contribute.
 - https://github.com/victorbueno
 - https://github.com/UICJohn
 - https://github.com/giovannibonetti
+- https://github.com/dlepage
 
 ## License
 

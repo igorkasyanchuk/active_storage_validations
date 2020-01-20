@@ -1,6 +1,12 @@
 - master
   - ...
 
+- 0.8.6
+  - added FR, RU, UK translations
+
+- 0.8.5
+  - small tweaks
+
 - 0.8.4
   - fixed error messages for aspect ratio valiation PR #44
   - better limit validation for rails 6 PR #45
