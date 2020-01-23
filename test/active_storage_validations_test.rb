@@ -113,7 +113,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert !la.valid?
 
     assert_equal 6, la.files.count
-    
+
     if Rails.version < "6.0.0"
       assert_equal 6, la.files_blobs.count
     else
@@ -141,7 +141,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal 3, la.files.count
     assert la.save
     la.reload
-    
+
     assert_equal 3, la.files_blobs.count
     la.files.first.purge
 
@@ -157,7 +157,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert !la.valid?
     assert_equal 5, la.files.count
     assert !la.save
-  end  
+  end
 
   test 'dimensions and is image' do
     e = OnlyImage.new
