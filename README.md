@@ -190,7 +190,9 @@ Very simple example of validation with file attached, content type check and cus
 [![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
 
 ## Test matchers
-Provides RSpec-compatible matchers for testing the validators.
+Provides RSpec-compatible and Minitest-compatible matchers for testing the validators.
+
+### RSpec
 
 In spec_helper.rb, you'll need to require the matchers:
 
@@ -227,6 +229,45 @@ describe User do
   it { is_expected.to validate_dimensions_of(:avatar).greater_than(1.kilobyte) }
   it { is_expected.to validate_dimensions_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
   it { is_expected.to validate_dimensions_of(:avatar).between(100..500.kilobytes) }
+end
+```
+
+### Minitest
+To use the following syntax, make sure you have the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem up and running. To make use of the matchers you need to require the matchers:
+
+```ruby
+require 'active_storage_validations/matchers'
+```
+
+And _extend_ the module:
+
+```bash
+class ActiveSupport::TestCase
+  extend ActiveStorageValidations::Matchers
+end
+```
+
+Example (Note that the options are chainable):
+
+```ruby
+class UserTest < ActiveSupport::TestCase
+  should validate_attached_of(:avatar)
+
+  should validate_content_type_of(:avatar).allowing('image/png', 'image/gif')
+  should validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml')
+
+  should validate_dimensions_of(:avatar).width_min(200)
+  should validate_dimensions_of(:avatar).width_max(500)
+  should validate_dimensions_of(:avatar).height_min(100)
+  should validate_dimensions_of(:avatar).height_max(300)
+  should validate_dimensions_of(:avatar).width_between(200..500)
+  should validate_dimensions_of(:avatar).height_between(100..300)
+
+  should validate_dimensions_of(:avatar).less_than(50.kilobytes)
+  should validate_dimensions_of(:avatar).less_than_or_equal_to(50.kilobytes)
+  should validate_dimensions_of(:avatar).greater_than(1.kilobyte)
+  should validate_dimensions_of(:avatar).greater_than_or_equal_to(1.kilobyte)
+  should validate_dimensions_of(:avatar).between(100..500.kilobytes)
 end
 ```
 
