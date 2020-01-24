@@ -47,10 +47,12 @@ module ActiveStorageValidations
 
       def width_between(range)
         @width_min, @width_max = range.first, range.last
+        self
       end
 
       def height_between(range)
         @height_min, @height_max = range.first, range.last
+        self
       end
 
       def matches?(subject)
