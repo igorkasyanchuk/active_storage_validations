@@ -226,11 +226,11 @@ describe User do
   it { is_expected.to validate_dimensions_of(:avatar).width_between(200..500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_between(100..300) }
 
-  it { is_expected.to validate_dimensions_of(:avatar).less_than(50.kilobytes) }
-  it { is_expected.to validate_dimensions_of(:avatar).less_than_or_equal_to(50.kilobytes) }
-  it { is_expected.to validate_dimensions_of(:avatar).greater_than(1.kilobyte) }
-  it { is_expected.to validate_dimensions_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
-  it { is_expected.to validate_dimensions_of(:avatar).between(100..500.kilobytes) }
+  it { is_expected.to validate_size_of(:avatar).less_than(50.kilobytes) }
+  it { is_expected.to validate_size_of(:avatar).less_than_or_equal_to(50.kilobytes) }
+  it { is_expected.to validate_size_of(:avatar).greater_than(1.kilobyte) }
+  it { is_expected.to validate_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
+  it { is_expected.to validate_size_of(:avatar).between(100..500.kilobytes) }
 end
 ```
 
@@ -267,11 +267,11 @@ class UserTest < ActiveSupport::TestCase
   should validate_dimensions_of(:avatar).width_between(200..500)
   should validate_dimensions_of(:avatar).height_between(100..300)
 
-  should validate_dimensions_of(:avatar).less_than(50.kilobytes)
-  should validate_dimensions_of(:avatar).less_than_or_equal_to(50.kilobytes)
-  should validate_dimensions_of(:avatar).greater_than(1.kilobyte)
-  should validate_dimensions_of(:avatar).greater_than_or_equal_to(1.kilobyte)
-  should validate_dimensions_of(:avatar).between(100..500.kilobytes)
+  should validate_size_of(:avatar).less_than(50.kilobytes)
+  should validate_size_of(:avatar).less_than_or_equal_to(50.kilobytes)
+  should validate_size_of(:avatar).greater_than(1.kilobyte)
+  should validate_size_of(:avatar).greater_than_or_equal_to(1.kilobyte)
+  should validate_size_of(:avatar).between(100..500.kilobytes)
 end
 ```
 
