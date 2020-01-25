@@ -217,6 +217,8 @@ describe User do
   it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') }
   it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') }
 
+  it { is_expected.to validate_dimensions_of(:avatar).width(250) }
+  it { is_expected.to validate_dimensions_of(:avatar).height(200) }
   it { is_expected.to validate_dimensions_of(:avatar).width_min(200) }
   it { is_expected.to validate_dimensions_of(:avatar).width_max(500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_min(100) }
@@ -256,6 +258,8 @@ class UserTest < ActiveSupport::TestCase
   should validate_content_type_of(:avatar).allowing('image/png', 'image/gif')
   should validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml')
 
+  should validate_dimensions_of(:avatar).width(250)
+  should validate_dimensions_of(:avatar).height(200)
   should validate_dimensions_of(:avatar).width_min(200)
   should validate_dimensions_of(:avatar).width_max(500)
   should validate_dimensions_of(:avatar).height_min(100)

@@ -26,6 +26,11 @@ module ActiveStorageValidations
         self
       end
 
+      def width(width)
+        @width_min = @width_max = width
+        self
+      end
+
       def height_min(height)
         @height_min = height
         self
@@ -46,10 +51,15 @@ module ActiveStorageValidations
         self
       end
 
+      def height(height)
+        @height_min = @height_max = height
+        self
+      end
+
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        width_smaller_than_min? && width_larger_than_min? && width_smaller_than_max? && width_larger_than_max? &&
-          height_smaller_than_min? && height_larger_than_min? && height_smaller_than_max? && height_larger_than_max?
+        width_smaller_than_min? && width_larger_than_min? && width_smaller_than_max? && width_larger_than_max? && width_equals? &&
+          height_smaller_than_min? && height_larger_than_min? && height_smaller_than_max? && height_larger_than_max? && height_equals?
       end
 
       def failure_message
@@ -75,15 +85,19 @@ module ActiveStorageValidations
       end
 
       def width_larger_than_min?
-        @width_min.nil? || passes_validation_with_dimensions(@width_min + 1, valid_height, 'width')
+        @width_min.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_min + 1, valid_height, 'width')
       end
 
       def width_smaller_than_max?
-        @width_max.nil? || passes_validation_with_dimensions(@width_max - 1, valid_height, 'width')
+        @width_max.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_max - 1, valid_height, 'width')
       end
 
       def width_larger_than_max?
         @width_max.nil? || !passes_validation_with_dimensions(@width_max + 1, valid_height, 'width')
+      end
+
+      def width_equals?
+        @width_min.nil? || @width_min != @width_max || passes_validation_with_dimensions(@width_min, valid_height, 'width')
       end
 
       def height_smaller_than_min?
@@ -91,15 +105,19 @@ module ActiveStorageValidations
       end
 
       def height_larger_than_min?
-        @height_min.nil? || passes_validation_with_dimensions(valid_width, @height_min + 1, 'height')
+        @height_min.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_min + 1, 'height')
       end
 
       def height_smaller_than_max?
-        @height_max.nil? || passes_validation_with_dimensions(valid_width, @height_max - 1, 'height')
+        @height_max.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_max - 1, 'height')
       end
 
       def height_larger_than_max?
         @height_max.nil? || !passes_validation_with_dimensions(valid_width, @height_max + 1, 'height')
+      end
+
+      def height_equals?
+        @height_min.nil? || @height_min != @height_max || passes_validation_with_dimensions(valid_width, @height_min, 'height')
       end
 
       def passes_validation_with_dimensions(width, height, check)

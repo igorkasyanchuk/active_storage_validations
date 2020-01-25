@@ -40,6 +40,27 @@ class ActiveStorageValidations::Matchers::DimensionValidatorMatcher::Test < Acti
     refute matcher.matches?(Project)
   end
 
+  test 'width positive exact match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact)
+    matcher.width 150
+    matcher.height 150 # Make sure the validation on height is ok
+    assert matcher.matches?(Project)
+  end
+
+  test 'width bigger than exact match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact)
+    matcher.width 999
+    matcher.height 150 # Make sure the validation on height is ok
+    refute matcher.matches?(Project)
+  end
+
+  test 'width smaller than exact match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact)
+    matcher.width 50
+    matcher.height 150 # Make sure the validation on height is ok
+    refute matcher.matches?(Project)
+  end
+
   test 'height positive match on lower' do
     matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_range)
     matcher.height_min 600
@@ -73,6 +94,27 @@ class ActiveStorageValidations::Matchers::DimensionValidatorMatcher::Test < Acti
   test 'height higher than higher' do
     matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_range)
     matcher.height_max 1000
+    refute matcher.matches?(Project)
+  end
+
+  test 'height positive exact match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact)
+    matcher.width 150 # Make sure the validation on width is ok
+    matcher.height 150
+    assert matcher.matches?(Project)
+  end
+
+  test 'height bigger than exact match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact)
+    matcher.width 150 # Make sure the validation on width is ok
+    matcher.height 999
+    refute matcher.matches?(Project)
+  end
+
+  test 'smaller smaller than exact match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact)
+    matcher.width 150 # Make sure the validation on width is ok
+    matcher.height 50
     refute matcher.matches?(Project)
   end
 end
