@@ -1,14 +1,5 @@
 # frozen_string_literal: true
 
-begin
-  require 'minitest/mock'
-rescue LoadError
-end
-begin
-  require 'rspec/mocks/standalone'
-rescue LoadError
-end
-
 module ActiveStorageValidations
   module Matchers
     def validate_dimensions_of(name)
@@ -114,39 +105,10 @@ module ActiveStorageValidations
       def passes_validation_with_dimensions(width, height, check)
         @subject.public_send(@attribute_name).attach attachment_for(width, height)
 
-        mock_metadata(width, height) do
+        attachment = @subject.public_send(@attribute_name)
+        Matchers.mock_metadata(attachment, width, height) do
           @subject.validate
           @subject.errors.details[@attribute_name].all? { |error| error[:error].to_s.exclude?("dimension_#{check}") }
-        end
-      end
-
-      def mock_metadata(width, height)
-        # Stub the metadata analysis for rails 5
-        if Rails::VERSION::MAJOR == 5
-          attachment = @subject.public_send(@attribute_name)
-          override_method(attachment, :analyze) { true }
-          override_method(attachment, :analyzed?) { true }
-          override_method(attachment, :metadata) { { width: width, height: height } }
-        end
-
-        # Mock the Metadata class for rails 6
-        mock = OpenStruct.new(metadata: { width: width, height: height })
-        if defined?(Minitest::Mock)
-          ActiveStorageValidations::Metadata.stub(:new, mock) do
-            yield
-          end
-        elsif defined?(RSpec::Mocks)
-          ActiveStorageValidations::Metadata.stub(:new) { mock }
-          yield
-        else
-          raise 'Need either Minitest::Mock or RSpec::Mocks to run this validator matcher'
-        end
-      end
-
-      def override_method(object, method, &replacement)
-        (class << object; self; end).class_eval do
-          undef_method(method) if method_defined?(method)
-          define_method(method, &replacement)
         end
       end
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
-require 'active_storage_validations/matchers/size_validator_matcher'
+require 'active_storage_validations/matchers'
 
 class ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test < ActiveSupport::TestCase
   test 'positive match greater than' do

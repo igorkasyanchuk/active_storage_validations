@@ -75,22 +75,12 @@ module ActiveStorageValidations
       end
 
       def passes_validation_with_size(new_size)
-        @subject.public_send(@attribute_name).attach attachment_for(new_size)
-        @subject.validate
-        @subject.errors.details[@attribute_name].all? { |error| error[:error] != :file_size_out_of_range }
-      end
-
-      def override_method(object, method, &replacement)
-        (class << object; self; end).class_eval do
-          undef_method(method) if method_defined?(method)
-          define_method(method, &replacement)
-        end
-      end
-
-      def attachment_for(size)
         io = Tempfile.new('Hello world!')
-        override_method(io, :size) { size }
-        { io: io, filename: 'test.png', content_type: 'image/pg' }
+        Matchers.stub_method(io, :size, new_size) do
+          @subject.public_send(@attribute_name).attach(io: io, filename: 'test.png', content_type: 'image/pg')
+          @subject.validate
+          @subject.errors.details[@attribute_name].all? { |error| error[:error] != :file_size_out_of_range }
+        end
       end
     end
   end

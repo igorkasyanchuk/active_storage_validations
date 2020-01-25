@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
-require 'active_storage_validations/matchers/dimension_validator_matcher'
+require 'active_storage_validations/matchers'
 
 class ActiveStorageValidations::Matchers::DimensionValidatorMatcher::Test < ActiveSupport::TestCase
   test 'width positive match on lower' do
