@@ -10,13 +10,13 @@ class ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test < ActiveSup
     assert matcher.matches?(Project)
   end
 
-  test 'higher than greater then' do
+  test 'higher than greater than' do
     matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:preview)
     matcher.greater_than 2.kilobyte
     refute matcher.matches?(Project)
   end
 
-  test 'lower than greater then' do
+  test 'lower than greater than' do
     matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:preview)
     matcher.greater_than 0.5.kilobyte
     refute matcher.matches?(Project)
@@ -52,13 +52,13 @@ class ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test < ActiveSup
     assert matcher.matches?(Project)
   end
 
-  test 'higher then less than' do
+  test 'higher than less than' do
     matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:small_file)
     matcher.less_than 2.kilobyte
     refute matcher.matches?(Project)
   end
 
-  test 'lower then less than' do
+  test 'lower than less than' do
     matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:small_file)
     matcher.less_than 0.5.kilobyte
     refute matcher.matches?(Project)

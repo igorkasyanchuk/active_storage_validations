@@ -117,7 +117,7 @@ end
 
 ## Internationalization (I18n)
 
-Active Storage Validations use I18n for errors messages. For this add there keys in your translation file:
+Active Storage Validations uses I18n for error messages. For this, add these keys in your translation file:
 
 ```yml
 en:
@@ -137,19 +137,18 @@ en:
       dimension_height_less_than_or_equal_to: "height must be less than or equal to %{length} pixel."
       dimension_width_equal_to: "width must be equal to %{length} pixel."
       dimension_height_equal_to: "height must be equal to %{length} pixel."
-      aspect_ratio_not_square: "doesn't a square image"
-      aspect_ratio_not_portrait: "doesn't contain a portrait image"
-      aspect_ratio_not_landscape: "doesn't contain a landscape image"
-      aspect_ratio_is_not: "doesn't contain aspect ratio of %{aspect_ratio}"
+      aspect_ratio_not_square: "must be a square image"
+      aspect_ratio_not_portrait: "must be a portrait image"
+      aspect_ratio_not_landscape: "must be a landscape image"
+      aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
       aspect_ratio_unknown: "has an unknown aspect ratio"
-
 ```
 
-In some cases Active Storage Validations provides variables to help you customize messages:
+In some cases, Active Storage Validations provides variables to help you customize messages:
 
 The "content_type_invalid" key has two variables that you can use, a variable named "content_type" containing the content type of the send file and a variable named "authorized_type" containing the list of authorized content types.
 
-It's variables are not used by default to leave the choice to the user.
+The variables are not used by default to leave the choice to the user.
 
 For example :
 
@@ -194,7 +193,7 @@ Provides RSpec-compatible and Minitest-compatible matchers for testing the valid
 
 ### RSpec
 
-In spec_helper.rb, you'll need to require the matchers:
+In `spec_helper.rb`, you'll need to require the matchers:
 
 ```ruby
 require 'active_storage_validations/matchers'
@@ -209,7 +208,7 @@ end
 ```
 
 Example (Note that the options are chainable):
-    
+
 ```ruby
 describe User do
   it { is_expected.to validate_attached_of(:avatar) }
@@ -243,7 +242,7 @@ require 'active_storage_validations/matchers'
 
 And _extend_ the module:
 
-```bash
+```ruby
 class ActiveSupport::TestCase
   extend ActiveStorageValidations::Matchers
 end
@@ -281,7 +280,6 @@ end
 * verify how it works with direct upload
 * better error message when content_size is invalid
 * add more translations
-* add aspect ratio validation
 
 ## Tests & Contributing
 
@@ -296,12 +294,13 @@ To play with app `cd test/dummy` and `rails s -b 0.0.0.0` (before `rails db:migr
 
 - There is an issue in Rails which it possible to get if you have added a validation and generating for example an image preview of attachments. It can be fixed with this:
 
-```
+```erb
   <% if @user.avatar.attached? && @user.avatar.attachment.blob.present? && @user.avatar.attachment.blob.persisted? %>
     <%= image_tag @user.avatar %>
   <% end %>
 ```
-This is Rails issue. And according to commits it will be fixed in Rails 6.
+
+This is a Rails issue, and is fixed in Rails 6.
 
 ## Contributing
 You are welcome to contribute.
