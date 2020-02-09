@@ -1,5 +1,6 @@
 - master
   - ...
+  added Janapese language (@willnet)
 
 - 0.8.7
   - added test matchers https://github.com/igorkasyanchuk/active_storage_validations/pull/56
