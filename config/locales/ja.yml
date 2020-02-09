@@ -1,0 +1,22 @@
+ja:
+  errors:
+    messages:
+      content_type_invalid: "のContent Typeが不正です"
+      file_size_out_of_range: "の容量 %{file_size} が許容範囲外です"
+      limit_out_of_range: "の数が許容範囲外です"
+      image_metadata_missing: "は不正な画像です"
+      dimension_min_inclusion: "は %{width} x %{height} ピクセル以上の大きさにしてください"
+      dimension_max_inclusion: "は %{width} x %{height} ピクセル以下の大きさにしてください"
+      dimension_width_inclusion: "の横幅は %{min} ピクセル以上 %{max} ピクセル以下にしてください"
+      dimension_height_inclusion: "の縦幅は %{min} ピクセル以上 %{max} ピクセル以下にしてください"
+      dimension_width_greater_than_or_equal_to: "の横幅は %{length} ピクセル以上にしてください"
+      dimension_height_greater_than_or_equal_to: "の縦幅は %{length} ピクセル以上にしてください"
+      dimension_width_less_than_or_equal_to: "の横幅は %{length} ピクセル以下にしてください"
+      dimension_height_less_than_or_equal_to: "の縦幅は %{length} ピクセル以下にしてください"
+      dimension_width_equal_to: "の横幅は %{length} ピクセルにしてください"
+      dimension_height_equal_to: "の縦幅は %{length} ピクセルにしてください"
+      aspect_ratio_not_square: "は正方形にしてください"
+      aspect_ratio_not_portrait: "は縦長にしてください"
+      aspect_ratio_not_landscape: "は横長にしてください"
+      aspect_ratio_is_not: "のアスペクト比は %{aspect_ratio} にしてください"
+      aspect_ratio_unknown: "のアスペクト比を取得できませんでした"
