@@ -326,6 +326,7 @@ You are welcome to contribute.
 - https://github.com/giovannibonetti
 - https://github.com/dlepage
 - https://github.com/StefSchenkelaars
+- https://github.com/willnet
 
 ## License
 
