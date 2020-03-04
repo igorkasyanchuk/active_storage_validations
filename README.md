@@ -146,7 +146,7 @@ en:
 
 In some cases, Active Storage Validations provides variables to help you customize messages:
 
-The "content_type_invalid" key has two variables that you can use, a variable named "content_type" containing the content type of the send file and a variable named "authorized_type" containing the list of authorized content types.
+The "content_type_invalid" key has two variables that you can use, a variable named "content_type" containing the content type of the send file and a variable named "authorized_types" containing the list of authorized content types.
 
 The variables are not used by default to leave the choice to the user.
 
