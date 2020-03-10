@@ -245,6 +245,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.attachment.attach(pdf_file)
     e.dimension_images.attach([image_800x600_file])
     e.save!
+    e.dimension_images.attach([image_800x600_file])
 
     e.title = "Changed"
     e.save!

@@ -19,11 +19,12 @@ module ActiveStorageValidations
     private
 
     def read_image
-      if file.is_a?(String)
-        blob = ActiveStorage::Blob.find_signed(file)
+      is_string = file.is_a?(String)
+      if is_string || file.is_a?(ActiveStorage::Blob)
+        blob = is_string ? ActiveStorage::Blob.find_signed(file) : file
 
         tempfile = Tempfile.new(["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter])
-        tempfile.binmode 
+        tempfile.binmode
 
         blob.download do |chunk|
           tempfile.write(chunk)
