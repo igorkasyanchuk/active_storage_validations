@@ -1,6 +1,9 @@
 - master
   - ...
-  added Janapese language (@willnet)
+
+- 0.8.8
+  - Fix something wrong with params: https://github.com/igorkasyanchuk/active_storage_validations/pull/66 @High5Apps
+  - added Janapese language (@willnet)
 
 - 0.8.7
   - added test matchers https://github.com/igorkasyanchuk/active_storage_validations/pull/56
