@@ -1,6 +1,9 @@
 - master
   - ...
 
+- 0.8.9
+  - better DE translations
+
 - 0.8.8
   - Fix something wrong with params: https://github.com/igorkasyanchuk/active_storage_validations/pull/66 @High5Apps
   - added Janapese language (@willnet)
