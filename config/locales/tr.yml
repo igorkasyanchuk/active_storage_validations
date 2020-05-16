@@ -1,0 +1,22 @@
+tr:
+  errors:
+    messages:
+      content_type_invalid: "geçersiz dosya tipine sahip"
+      file_size_out_of_range: "dosya boyutu %{file_size} gerekli aralık dışında"
+      limit_out_of_range: "toplam miktar aralık dışında"
+      image_metadata_missing: "geçerli bir imaj değil"
+      dimension_min_inclusion: "%{width} x %{height} piksele eşit ya da büyük olmalı"
+      dimension_max_inclusion: "%{width} x %{height} piksele eşit ya da küçük olmalı"
+      dimension_width_inclusion: "en %{min} ve %{max} piksel aralığı dışında"
+      dimension_height_inclusion: "boy %{min} ve %{max} piksel aralığı dışında"
+      dimension_width_greater_than_or_equal_to: "en %{length} piksele eşit ya da büyük olmalı"
+      dimension_height_greater_than_or_equal_to: "boy %{length} piksele eşit ya da büyük olmalı"
+      dimension_width_less_than_or_equal_to: "en %{length} piksele eşit ya da küçük olmalı"
+      dimension_height_less_than_or_equal_to: "boy %{length} piksele eşit ya da küçük olmalı"
+      dimension_width_equal_to: "en %{length} piksele eşit olmalı"
+      dimension_height_equal_to: "boy %{length} piksele eşit olmalı"
+      aspect_ratio_not_square: "kare bir imaj olmalı"
+      aspect_ratio_not_portrait: "dikey bir imaj olmalı"
+      aspect_ratio_not_landscape: "yatay bir imaj olmalı"
+      aspect_ratio_is_not: "%{aspect_ratio} en boy oranına sahip olmalı"
+      aspect_ratio_unknown: "bilinmeyen en boy oranı"
