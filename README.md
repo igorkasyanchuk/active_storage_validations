@@ -1,6 +1,6 @@
 # Active Storage Validations
 
-If you are using `active_storage` gem and you want to add simple validations for it, like presence or content_type you need to write a custom valiation method.
+If you are using `active_storage` gem and you want to add simple validations for it, like presence or content_type you need to write a custom validation method.
 
 This gems doing it for you. Just use `attached: true` or `content_type: 'image/png'` validation.
 
