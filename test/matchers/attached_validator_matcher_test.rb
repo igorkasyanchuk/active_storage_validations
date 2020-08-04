@@ -33,4 +33,14 @@ class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < Activ
     matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:non_existing)
     refute matcher.matches?(User.new)
   end
+
+  test 'positive match with valid conditional validation' do
+    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:conditional_image)
+    assert matcher.matches?(User.new(name: 'Foo'))
+  end
+
+  test 'negative match with invalid conditional validation' do
+    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:conditional_image)
+    refute matcher.matches?(User.new)
+  end
 end

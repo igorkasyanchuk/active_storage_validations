@@ -16,8 +16,7 @@ module ActiveStorageValidations
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject : subject.class
-
+        @subject = subject.is_a?(Class) ? subject.new : subject
         invalid_when_not_attached && valid_when_attached
       end
 
@@ -32,14 +31,14 @@ module ActiveStorageValidations
       private
 
       def valid_when_attached
-        instance = @subject.new
+        instance = @subject
         instance.public_send(@attribute_name).attach(attachable)
         instance.validate
         instance.errors.details[@attribute_name].exclude?(error: :blank)
       end
 
       def invalid_when_not_attached
-        instance = @subject.new
+        instance = @subject
         instance.validate
         instance.errors.details[@attribute_name].include?(error: :blank)
       end
