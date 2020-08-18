@@ -22,4 +22,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'mini_magick', ">= 4.9.5"
   s.add_development_dependency 'pry'
   s.add_development_dependency 'rubocop'
+  s.add_development_dependency 'sqlite3'
 end
