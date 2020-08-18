@@ -330,6 +330,8 @@ You are welcome to contribute.
 - https://github.com/mohanklein
 - https://github.com/High5Apps
 - https://github.com/mschnitzer
+- https://github.com/sinankeskin
+- https://github.com/alejandrodevs
 
 ## License
 

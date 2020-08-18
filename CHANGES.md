@@ -1,5 +1,6 @@
 - master
-  - ...
+  - added Turkish translation https://github.com/igorkasyanchuk/active_storage_validations/pull/75
+  - fixed attached matcher https://github.com/igorkasyanchuk/active_storage_validations/pull/79
 
 - 0.8.9
   - better DE translations
