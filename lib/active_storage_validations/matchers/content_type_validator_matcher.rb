@@ -29,7 +29,7 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        allowed_types_allowed? && rejected_types_rejected?
+        responds_to_methods && allowed_types_allowed? && rejected_types_rejected?
       end
 
       def failure_message
@@ -45,6 +45,12 @@ module ActiveStorageValidations
       end
 
       protected
+
+      def responds_to_methods
+        @subject.respond_to?(@attribute_name) &&
+          @subject.public_send(@attribute_name).respond_to?(:attach) &&
+          @subject.public_send(@attribute_name).respond_to?(:detach)
+      end
 
       def allowed_types
         @allowed_types || []

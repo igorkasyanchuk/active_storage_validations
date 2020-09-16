@@ -58,7 +58,8 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        width_smaller_than_min? && width_larger_than_min? && width_smaller_than_max? && width_larger_than_max? && width_equals? &&
+        responds_to_methods &&
+          width_smaller_than_min? && width_larger_than_min? && width_smaller_than_max? && width_larger_than_max? && width_equals? &&
           height_smaller_than_min? && height_larger_than_min? && height_smaller_than_max? && height_larger_than_max? && height_equals?
       end
 
@@ -71,6 +72,12 @@ module ActiveStorageValidations
       end
 
       protected
+
+      def responds_to_methods
+        @subject.respond_to?(@attribute_name) &&
+          @subject.public_send(@attribute_name).respond_to?(:attach) &&
+          @subject.public_send(@attribute_name).respond_to?(:detach)
+      end
 
       def valid_width
         ((@width_min || 0) + (@width_max || 2000)) / 2
