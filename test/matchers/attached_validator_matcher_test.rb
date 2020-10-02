@@ -43,4 +43,11 @@ class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < Activ
     matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:conditional_image)
     refute matcher.matches?(User.new)
   end
+
+  test 'positive match when providing instance with attachment' do
+    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:avatar)
+    user = User.new
+    user.avatar.attach(io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png')
+    assert matcher.matches?(user)
+  end
 end

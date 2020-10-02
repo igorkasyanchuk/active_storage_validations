@@ -45,7 +45,7 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        lower_than_low? && higher_than_low? && lower_than_high? && higher_than_high?
+        responds_to_methods && lower_than_low? && higher_than_low? && lower_than_high? && higher_than_high?
       end
 
       def failure_message
@@ -57,6 +57,12 @@ module ActiveStorageValidations
       end
 
       protected
+
+      def responds_to_methods
+        @subject.respond_to?(@attribute_name) &&
+          @subject.public_send(@attribute_name).respond_to?(:attach) &&
+          @subject.public_send(@attribute_name).respond_to?(:detach)
+      end
 
       def lower_than_low?
         @low.nil? || !passes_validation_with_size(@low - 1)

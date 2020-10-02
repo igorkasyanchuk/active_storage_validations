@@ -117,4 +117,22 @@ class ActiveStorageValidations::Matchers::DimensionValidatorMatcher::Test < Acti
     matcher.height 50
     refute matcher.matches?(Project)
   end
+
+  test 'works when providing an instance' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_range)
+    matcher.width_min 800
+    assert matcher.matches?(Project.new)
+  end
+
+  test 'unkown attached when providing class' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:non_existing)
+    matcher.width_min 800
+    refute matcher.matches?(Project)
+  end
+
+  test 'unkown attached when providing instance' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:non_existing)
+    matcher.width_min 800
+    refute matcher.matches?(Project.new)
+  end
 end
