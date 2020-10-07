@@ -2,7 +2,7 @@
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
-    def validate_each(record, attribute, _value)
+    def validate_each(record, attribute, value)
       return true if !record.send(attribute).attached? || types.empty?
 
       files = Array.wrap(record.send(attribute))
@@ -15,6 +15,8 @@ module ActiveStorageValidations
 
         errors_options[:content_type] = content_type(file)
         record.errors.add(attribute, :content_type_invalid, errors_options)
+
+        value.purge if "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}" == '5.2'
         break
       end
     end

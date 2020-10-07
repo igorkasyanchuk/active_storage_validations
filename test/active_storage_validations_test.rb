@@ -64,6 +64,17 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Image regex has an invalid content type']
   end
 
+  # ActiveStorage in Rails 5.2 *immediately* uploads files (before validation). So an invalid file must be purged
+  if "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}" == '5.2'
+    test 'file purge on content_type invalidation' do
+      u = User.new(name: 'John Smith')
+      u.avatar.attach(bad_dummy_file)
+      assert !u.valid?, 'Invalid content type was valid'
+      assert_not u.avatar.attached?, 'Invalid content type was attached'
+      assert_equal 0, ActiveStorage::Blob.count, 'Invalid content type was stored'
+    end
+  end
+
   # reads content type from file, not from webp_file_wrong method
   test 'webp content type 1' do
     u = User.new(name: 'John Smith')
