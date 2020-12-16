@@ -21,7 +21,17 @@ module ActiveStorageValidations
     def read_image
       is_string = file.is_a?(String)
       if is_string || file.is_a?(ActiveStorage::Blob)
-        blob = is_string ? ActiveStorage::Blob.find_signed(file) : file
+        if is_string
+          # If Rails 5.2 or 6.0, use `find_signed`
+          if Rails::VERSION::MAJOR < 6 || (Rails::VERSION::MAJOR == 6 && Rails::VERSION::MINOR == 0)
+            blob = ActiveStorage::Blob.find_signed(file)
+          # If Rails 6.1 or higher, use `find_signed!`
+          elsif Rails::VERSION::MAJOR > 6 || (Rails::VERSION::MAJOR == 6 && Rails::VERSION::MINOR >= 1)
+            blob = ActiveStorage::Blob.find_signed!(file)
+          end
+        else
+          blob = file
+        end
 
         tempfile = Tempfile.new(["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter])
         tempfile.binmode
