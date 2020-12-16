@@ -287,6 +287,7 @@ To run tests in root folder of gem:
 
 * `BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle exec rake test` to run for Rails 5.2
 * `BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test` to run for Rails 6.0
+* `BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test` to run for Rails 6.1 (TESTS ARE NOT READY, migration in DB is needed for specs)
 
 To play with app `cd test/dummy` and `rails s -b 0.0.0.0` (before `rails db:migrate`).
 
@@ -332,6 +333,9 @@ You are welcome to contribute.
 - https://github.com/mschnitzer
 - https://github.com/sinankeskin
 - https://github.com/alejandrodevs
+- https://github.com/molfar
+- https://github.com/connorshea
+- https://github.com/yshmarov
 
 ## License
 
