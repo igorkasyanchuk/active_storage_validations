@@ -50,4 +50,14 @@ class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < Activ
     user.avatar.attach(io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png')
     assert matcher.matches?(user)
   end
+
+  test 'positive match when providing persisted instance with attachment' do
+    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:avatar)
+    user = User.create!(
+      name: 'Pietje',
+      avatar: { io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' },
+      photos: [{ io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' }]
+    )
+    assert matcher.matches?(user)
+  end
 end
