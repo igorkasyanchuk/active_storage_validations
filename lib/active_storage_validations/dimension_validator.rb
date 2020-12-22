@@ -123,7 +123,7 @@ module ActiveStorageValidations
       key = options[:message].presence || type
       return if record.errors.added?(attribute, key)
       record.errors.add(attribute, key, *attrs)
-    end    
+    end
 
   end
 end

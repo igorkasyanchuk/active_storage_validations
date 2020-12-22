@@ -17,7 +17,7 @@ module ActiveStorageValidations
       errors_options = { min: options[:min], max: options[:max] }
 
       return true if files_count_valid?(files.count)
-      record.errors.add(attribute, options[:message].presence || :limit_out_of_range, errors_options)
+      record.errors.add(attribute, options[:message].presence || :limit_out_of_range, **errors_options)
     end
 
     def files_count_valid?(count)
