@@ -25,7 +25,7 @@ module ActiveStorageValidations
         next if content_size_valid?(file.blob.byte_size)
 
         errors_options[:file_size] = number_to_human_size(file.blob.byte_size)
-        record.errors.add(attribute, :file_size_out_of_range, errors_options)
+        record.errors.add(attribute, :file_size_out_of_range, **errors_options)
         break
       end
     end
