@@ -3,6 +3,7 @@ language: ruby
 rvm:
   - 2.5.5
   - 2.6.3
+  - 2.7.2
 
 gemfile:
   - gemfiles/rails_5_2.gemfile
