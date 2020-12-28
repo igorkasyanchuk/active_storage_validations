@@ -1,8 +1,12 @@
 - master
-  - Ensure to detach attachment before validating attached https://github.com/igorkasyanchuk/active_storage_validations/pull/81
+
+- 0.9.1
+  - ensure to detach attachment before validating attached https://github.com/igorkasyanchuk/active_storage_validations/pull/81
   - fixing UK translations https://github.com/igorkasyanchuk/active_storage_validations/pull/92
   - added ES translation https://github.com/igorkasyanchuk/active_storage_validations/pull/90
   - Rails 6.1 support https://github.com/igorkasyanchuk/active_storage_validations/pull/94
+  - added dutch translation https://github.com/igorkasyanchuk/active_storage_validations/pull/97
+  - fix deprecation warnings for Ruby 2.7 https://github.com/igorkasyanchuk/active_storage_validations/pull/100
 
 - 0.9.0
   - added Turkish translation https://github.com/igorkasyanchuk/active_storage_validations/pull/75
