@@ -52,7 +52,7 @@ module ActiveStorageValidations
       # Rails 5
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
-  
+
         files = Array.wrap(record.send(attribute))
         files.each do |file|
           # Analyze file first if not analyzed to get all required metadata.
@@ -110,7 +110,7 @@ module ActiveStorageValidations
           else
             if file_metadata[length] != options[length]
               add_error(record, attribute, options[:message].presence || :"dimension_#{length}_equal_to", length: options[length])
-              return false            
+              return false
             end
           end
         end
@@ -119,10 +119,10 @@ module ActiveStorageValidations
       true # valid file
     end
 
-    def add_error(record, attribute, type, *attrs)
+    def add_error(record, attribute, type, **attrs)
       key = options[:message].presence || type
       return if record.errors.added?(attribute, key)
-      record.errors.add(attribute, key, *attrs)
+      record.errors.add(attribute, key, **attrs)
     end
 
   end

@@ -1,0 +1,38 @@
+name: MiniTest
+on: push
+jobs:
+  minitest:
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - 2.5
+          - 2.6
+          - 2.7
+          - 3.0
+        gemfile:
+          - rails_5_2
+          - rails_6_0
+          - rails_6_1
+        exclude:
+          # ruby 3 only supports rails 6.1
+          - ruby: 3.0
+            gemfile: rails_5_2
+          - ruby: 3.0
+            gemfile: rails_6_0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set BUNDLE_GEMFILE
+        run: echo 'BUNDLE_GEMFILE=${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile' >> $GITHUB_ENV
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Run tests
+        run: bundle exec rake test

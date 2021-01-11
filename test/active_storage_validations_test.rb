@@ -253,7 +253,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.title, "Changed"
 
     assert_nil e.dimension_min.attachment
-    blob = ActiveStorage::Blob.create_after_upload!(image_800x600_file)
+    blob = ActiveStorage::Blob.create_after_upload!(**image_800x600_file)
     e.dimension_min = blob.signed_id
     e.save!
     e.reload
