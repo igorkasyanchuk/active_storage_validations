@@ -4,8 +4,6 @@ If you are using `active_storage` gem and you want to add simple validations for
 
 This gems doing it for you. Just use `attached: true` or `content_type: 'image/png'` validation.
 
-![CI](https://github.com/igorkasyanchuk/active_storage_validations/workflows/minitest/badge.svg)
-
 ## What it can do
 
 * validates if file(s) attached
