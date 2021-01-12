@@ -97,6 +97,10 @@ GEM
     nokogiri (1.11.1)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
+    nokogiri (1.11.1-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.11.1-x86_64-linux)
+      racc (~> 1.4)
     parallel (1.20.1)
     parser (3.0.0.0)
       ast (~> 2.4.1)
@@ -168,6 +172,8 @@ GEM
 
 PLATFORMS
   ruby
+  x86_64-darwin-19
+  x86_64-linux
 
 DEPENDENCIES
   active_storage_validations!
@@ -178,4 +184,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   2.1.3
+   2.2.3
