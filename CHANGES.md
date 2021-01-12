@@ -1,5 +1,9 @@
 - master
 
+- 0.9.2
+  - moved to github actions (@StefSchenkelaars)
+  - better support for ruby 3, rails 6.1 (@StefSchenkelaars)
+
 - 0.9.1
   - ensure to detach attachment before validating attached https://github.com/igorkasyanchuk/active_storage_validations/pull/81
   - fixing UK translations https://github.com/igorkasyanchuk/active_storage_validations/pull/92
