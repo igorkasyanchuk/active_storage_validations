@@ -336,3 +336,6 @@ You are welcome to contribute.
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+[<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
+/>](https://www.railsjazz.com/)
