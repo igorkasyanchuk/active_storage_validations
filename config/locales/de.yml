@@ -15,3 +15,8 @@ de:
       dimension_height_less_than_or_equal_to: "Höhe muss kleiner oder gleich %{length} Pixel sein"
       dimension_width_equal_to: "Bildbreite muss genau %{length} Pixel sein"
       dimension_height_equal_to: "Bildhöhe muss genau %{length} Pixel sein"
+      aspect_ratio_not_square: "muss quadratisch sein"
+      aspect_ratio_not_portrait: "muss Hochformat sein"
+      aspect_ratio_not_landscape: "muss Querformat sein"
+      aspect_ratio_is_not: "muss ein Bildseitenverhältnis von %{aspect_ratio} haben"
+      aspect_ratio_unknown: "hat ein unbekanntes Bildseitenverhältnis"
