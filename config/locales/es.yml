@@ -16,7 +16,7 @@ es:
       dimension_width_equal_to: "el ancho debe ser igual a %{length} pixel"
       dimension_height_equal_to: "la altura debe ser igual a %{length} pixel"
       aspect_ratio_not_square: "debe ser una imagen cuadrada"
-      aspect_ratio_not_portrait: "debe ser una imagen de retrato"
+      aspect_ratio_not_portrait: "debe ser una imagen vertical"
       aspect_ratio_not_landscape: "debe ser una imagen de paisaje"
       aspect_ratio_is_not: "debe tener una relación de aspecto de %{aspect_ratio}"
       aspect_ratio_unknown: "tiene una relación de aspecto desconocida"
