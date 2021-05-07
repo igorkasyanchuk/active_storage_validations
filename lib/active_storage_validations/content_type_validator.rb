@@ -36,10 +36,9 @@ module ActiveStorageValidations
     end
 
     def is_valid?(file)
-      if options[:with].is_a?(Regexp)
-        options[:with].match?(content_type(file).to_s)
-      else
-        content_type(file).in?(types)
+      file_type = content_type(file)
+      types.any? do |type|
+        type == file_type || (type.is_a?(Regexp) && type.match?(file_type.to_s))
       end
     end
   end

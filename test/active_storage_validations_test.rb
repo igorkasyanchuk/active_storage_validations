@@ -51,6 +51,12 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
 
     u = User.new(name: 'John Smith')
     u.avatar.attach(dummy_file)
+    u.image_regex.attach(dummy_file)
+    u.photos.attach(pdf_file) # Should be handled by regex match.
+    assert u.valid?
+
+    u = User.new(name: 'John Smith')
+    u.avatar.attach(dummy_file)
     u.image_regex.attach(bad_dummy_file)
     u.photos.attach(dummy_file)
     assert !u.valid?
