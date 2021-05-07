@@ -1,0 +1,22 @@
+pl:
+  errors:
+    messages:
+      content_type_invalid: "jest nieprawidłowego typu"
+      file_size_out_of_range: "rozmiar %{file_size} nie zawiera się w dopuszczalnym zakresie"
+      limit_out_of_range: "ilość przekracza dopuszczalny zakres"
+      image_metadata_missing: "nie jest prawidłowym obrazem"
+      dimension_min_inclusion: "musi być równe lub większe od %{width} x %{height} pixeli"
+      dimension_max_inclusion: "musi być równe lub mniejsze od %{width} x %{height} pixeli"
+      dimension_width_inclusion: "szerokość musi wynosić od %{min} do %{max} pixeli"
+      dimension_height_inclusion: "wysokość musi wynosić od %{min} do %{max} pixeli"
+      dimension_width_greater_than_or_equal_to: "szerokość musi mieć co najmniej %{length} pixeli"
+      dimension_height_greater_than_or_equal_to: "wysokość musi mieć co najmniej %{length} pixeli"
+      dimension_width_less_than_or_equal_to: "szerokość musi mieć co najwyżej %{length} pixeli"
+      dimension_height_less_than_or_equal_to: "wysokość musi mieć co najwyżej %{length} pixeli"
+      dimension_width_equal_to: "szerokość musi wynosić %{length} pixeli"
+      dimension_height_equal_to: "wysokość musi wynosić %{length} pixeli"
+      aspect_ratio_not_square: "musi mieć proporcje kwadratu"
+      aspect_ratio_not_portrait: "musi mieć proporcje portretu"
+      aspect_ratio_not_landscape: "musi mieć proporcje pejzażu"
+      aspect_ratio_is_not: "musi mieć proporcje %{aspect_ratio}"
+      aspect_ratio_unknown: "ma nieokreślone proporcje"

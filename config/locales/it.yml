@@ -1,0 +1,22 @@
+it:
+  errors:
+    messages:
+      content_type_invalid: "ha un tipo di contenuto non valido"
+      file_size_out_of_range: "la dimensione del file %{file_size} non è compresa nell’intervallo consentito"
+      limit_out_of_range: "il valore è al di fuori dell’intervallo consentito"
+      image_metadata_missing: "non è un'immagine valida"
+      dimension_min_inclusion: "deve essere maggiore o uguale a %{width} x %{height} pixel"
+      dimension_max_inclusion: "deve essere minore o uguale a %{width} x %{height} pixel"
+      dimension_width_inclusion: "la larghezza deve essere compresa tra %{min} e %{max} pixel"
+      dimension_height_inclusion: "l’altezza deve essere compresa tra %{min} e %{max} pixel"
+      dimension_width_greater_than_or_equal_to: "la larghezza deve essere maggiore o uguale a %{length} pixel"
+      dimension_height_greater_than_or_equal_to: "l’altezza deve essere maggiore o uguale a %{length} pixel"
+      dimension_width_less_than_or_equal_to: "la larghezza deve essere minore o uguale a %{length} pixel"
+      dimension_height_less_than_or_equal_to: "l’altezza deve essere minore o uguale a %{length} pixel"
+      dimension_width_equal_to: "la larghezza deve essere pari a %{length} pixel"
+      dimension_height_equal_to: "l’altezza deve essere pari a %{length} pixel"
+      aspect_ratio_not_square: "deve essere un’immagine quadrata"
+      aspect_ratio_not_portrait: "l’orientamento dell’immagine deve essere verticale"
+      aspect_ratio_not_landscape: "l’orientamento dell’immagine deve essere orizzontale"
+      aspect_ratio_is_not: "deve avere un rapporto altezza / larghezza di %{aspect_ratio}"
+      aspect_ratio_unknown: "ha un rapporto altezza / larghezza sconosciuto"

@@ -1,5 +1,9 @@
 # Active Storage Validations
 
+![MiniTest](https://github.com/igorkasyanchuk/active_storage_validations/workflows/MiniTest/badge.svg)
+[![RailsJazz](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/my_other.svg?raw=true)](https://www.railsjazz.com)
+[![https://www.patreon.com/igorkasyanchuk](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/patron.svg?raw=true)](https://www.patreon.com/igorkasyanchuk)
+
 If you are using `active_storage` gem and you want to add simple validations for it, like presence or content_type you need to write a custom validation method.
 
 This gems doing it for you. Just use `attached: true` or `content_type: 'image/png'` validation.
@@ -339,3 +343,6 @@ You are welcome to contribute.
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+[<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
+/>](https://www.railsjazz.com/)
