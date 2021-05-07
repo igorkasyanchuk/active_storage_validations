@@ -332,6 +332,9 @@ You are welcome to contribute.
 - https://github.com/molfar
 - https://github.com/connorshea
 - https://github.com/yshmarov
+- https://github.com/fongfan999
+- https://github.com/cooperka
+- https://github.com/dolarsrg
 
 ## License
 

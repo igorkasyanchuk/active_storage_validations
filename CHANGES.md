@@ -1,5 +1,10 @@
 - master
 
+- 0.9.3
+  - Addded Vietnamese translation https://github.com/igorkasyanchuk/active_storage_validations/pull/108
+  - Allow regex in content_type arrays https://github.com/igorkasyanchuk/active_storage_validations/pull/104
+  - fixes for spanish translation https://github.com/igorkasyanchuk/active_storage_validations/pull/114, https://github.com/igorkasyanchuk/active_storage_validations/pull/115/
+
 - 0.9.2
   - moved to github actions (@StefSchenkelaars)
   - better support for ruby 3, rails 6.1 (@StefSchenkelaars)
