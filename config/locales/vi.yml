@@ -1,0 +1,22 @@
+vi:
+  errors:
+    messages:
+      content_type_invalid: "tệp không hợp lệ"
+      file_size_out_of_range: "kích thước %{file_size} vượt giới hạn"
+      limit_out_of_range: "tổng số tệp vượt giới hạn"
+      image_metadata_missing: "không phải là ảnh"
+      dimension_min_inclusion: "phải lớn hơn hoặc bằng %{width} x %{height} pixel"
+      dimension_max_inclusion: "phải nhỏ hơn hoặc bằng %{width} x %{height} pixel"
+      dimension_width_inclusion: "chiều rộng không nằm trong %{min} và %{max} pixel"
+      dimension_height_inclusion: "chiều cao không nằm trong %{min} và %{max} pixel"
+      dimension_width_greater_than_or_equal_to: "chiều rộng phải lớn hơn hoặc bằng %{length} pixel"
+      dimension_height_greater_than_or_equal_to: "chiều cao phải lớn hơn hoặc bằng %{length} pixel"
+      dimension_width_less_than_or_equal_to: "chiều rộng phải nhỏ hơn hoặc bằng %{length} pixel"
+      dimension_height_less_than_or_equal_to: "chiều cao phải nhỏ hơn hoặc bằng %{length} pixel"
+      dimension_width_equal_to: "chiều rộng phải bằng %{length} pixel"
+      dimension_height_equal_to: "chiều cao phải bằng %{length} pixel"
+      aspect_ratio_not_square: "phải là ảnh hình vuông"
+      aspect_ratio_not_portrait: "phải là ảnh đứng"
+      aspect_ratio_not_landscape: "phải là ảnh ngang"
+      aspect_ratio_is_not: "phải có tỉ lệ ảnh %{aspect_ratio}"
+      aspect_ratio_unknown: "tỉ lệ ảnh không xác định"
