@@ -124,13 +124,13 @@ class ActiveStorageValidations::Matchers::DimensionValidatorMatcher::Test < Acti
     assert matcher.matches?(Project.new)
   end
 
-  test 'unkown attached when providing class' do
+  test 'unknown attached when providing class' do
     matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:non_existing)
     matcher.width_min 800
     refute matcher.matches?(Project)
   end
 
-  test 'unkown attached when providing instance' do
+  test 'unknown attached when providing instance' do
     matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:non_existing)
     matcher.width_min 800
     refute matcher.matches?(Project.new)
