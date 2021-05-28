@@ -21,7 +21,14 @@ module ActiveStorageValidations
 
     def types
       (Array.wrap(options[:with]) + Array.wrap(options[:in])).compact.map do |type|
-        Mime[type] || type
+        if type.is_a?(Regexp)
+          type
+        elsif type.is_a?(String) && type =~ %r{\A\w+/[-+.\w]+\z} # mime-type-ish string
+          type
+        else
+          Mime[type] || raise(ArgumentError, "content_type must be one of Regxep,"\
+          " supported mime types (e.g. :png, 'jpg'), or mime type String ('image/jpeg')")
+        end
       end
     end
 
