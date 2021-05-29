@@ -16,7 +16,7 @@ class User < ApplicationRecord
 
   validates :name, presence: true
 
-  validates :avatar, attached: true, content_type: :png
+  validates :avatar, attached: { message: "must not be blank" }, content_type: :png
   validates :photos, attached: true, content_type: ['image/png', 'image/jpg', /\A.*\/pdf\z/]
   validates :image_regex, content_type: /\Aimage\/.*\z/
   validates :conditional_image, attached: true, if: -> { name == 'Foo' }
