@@ -47,6 +47,14 @@ class ActiveStorageValidations::Matchers::DimensionValidatorMatcher::Test < Acti
     assert matcher.matches?(Project)
   end
 
+  test 'width positive exact match with custom message' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact_with_message)
+    matcher.width 150
+    matcher.height 150
+    matcher.with_message('Invalid dimensions.')
+    assert matcher.matches?(Project)
+  end
+
   test 'width bigger than exact match' do
     matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact)
     matcher.width 999

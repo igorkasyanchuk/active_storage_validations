@@ -220,6 +220,7 @@ describe User do
 
   it { is_expected.to validate_dimensions_of(:avatar).width(250) }
   it { is_expected.to validate_dimensions_of(:avatar).height(200) }
+  it { is_expected.to validate_dimensions_of(:avatar).width(250).height(200).with_message('Invalid dimensions.') }
   it { is_expected.to validate_dimensions_of(:avatar).width_min(200) }
   it { is_expected.to validate_dimensions_of(:avatar).width_max(500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_min(100) }
@@ -261,6 +262,7 @@ class UserTest < ActiveSupport::TestCase
 
   should validate_dimensions_of(:avatar).width(250)
   should validate_dimensions_of(:avatar).height(200)
+  should validate_dimensions_of(:avatar).width(250).height(200).with_message('Invalid dimensions.')
   should validate_dimensions_of(:avatar).width_min(200)
   should validate_dimensions_of(:avatar).width_max(500)
   should validate_dimensions_of(:avatar).height_min(100)

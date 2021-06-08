@@ -10,6 +10,7 @@ module ActiveStorageValidations
       def initialize(attribute_name)
         @attribute_name = attribute_name
         @width_min = @width_max = @height_min = @height_max = nil
+        @custom_message = nil
       end
 
       def description
@@ -23,6 +24,11 @@ module ActiveStorageValidations
 
       def width_max(width)
         @width_max = width
+        self
+      end
+
+      def with_message(message)
+        @custom_message = message
         self
       end
 
@@ -133,7 +139,8 @@ module ActiveStorageValidations
         attachment = @subject.public_send(@attribute_name)
         Matchers.mock_metadata(attachment, width, height) do
           @subject.validate
-          @subject.errors.details[@attribute_name].all? { |error| error[:error].to_s.exclude?("dimension_#{check}") }
+          exclude_error_message = @custom_message || "dimension_#{check}"
+          @subject.errors.details[@attribute_name].all? { |error| error[:error].to_s.exclude?(exclude_error_message) }
         end
       end
 
