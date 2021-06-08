@@ -14,7 +14,7 @@ class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < Activ
     refute matcher.matches?(User)
   end
 
-  test 'unkown attached when providing class' do
+  test 'unknown attached when providing class' do
     matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:non_existing)
     refute matcher.matches?(User)
   end
@@ -29,7 +29,7 @@ class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < Activ
     refute matcher.matches?(User.new)
   end
 
-  test 'unkown attached when providing instance' do
+  test 'unknown attached when providing instance' do
     matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:non_existing)
     refute matcher.matches?(User.new)
   end

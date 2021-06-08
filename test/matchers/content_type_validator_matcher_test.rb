@@ -17,7 +17,7 @@ class ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test < Ac
     refute matcher.matches?(User)
   end
 
-  test 'unkown attached when providing class' do
+  test 'unknown attached when providing class' do
     matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:non_existing)
     matcher.allowing('image/png')
     refute matcher.matches?(User)
@@ -36,7 +36,7 @@ class ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test < Ac
     refute matcher.matches?(User.new)
   end
 
-  test 'unkown attached when providing instance' do
+  test 'unknown attached when providing instance' do
     matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:non_existing)
     matcher.allowing('image/png')
     refute matcher.matches?(User.new)
