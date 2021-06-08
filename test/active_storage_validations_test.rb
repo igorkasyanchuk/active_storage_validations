@@ -14,7 +14,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
   test 'validates presence' do
     u = User.new(name: 'John Smith')
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Avatar can't be blank", "Photos can't be blank"]
+    assert_equal u.errors.full_messages, ["Avatar must not be blank", "Photos can't be blank"]
 
     u = User.new(name: 'John Smith')
     u.avatar.attach(dummy_file)
@@ -24,7 +24,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u = User.new(name: 'John Smith')
     u.photos.attach(dummy_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Avatar can't be blank"]
+    assert_equal u.errors.full_messages, ["Avatar must not be blank"]
   end
 
   test 'validates content type' do
