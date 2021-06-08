@@ -1,5 +1,12 @@
 - master
 
+- 0.9.4
+  - Add with_message for dimension_validator_matcher  https://github.com/igorkasyanchuk/active_storage_validations/pull/117
+  - Fix typo in tests https://github.com/igorkasyanchuk/active_storage_validations/pull/119
+  - Raise error when undefined mime type symbol is given https://github.com/igorkasyanchuk/active_storage_validations/pull/120
+  - Enable to set message on error of attached validator https://github.com/igorkasyanchuk/active_storage_validations/pull/121
+
+
 - 0.9.3
   - Addded Vietnamese translation https://github.com/igorkasyanchuk/active_storage_validations/pull/108
   - Allow regex in content_type arrays https://github.com/igorkasyanchuk/active_storage_validations/pull/104

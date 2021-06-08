@@ -341,6 +341,9 @@ You are welcome to contribute.
 - https://github.com/fongfan999
 - https://github.com/cooperka
 - https://github.com/dolarsrg
+- https://github.com/jayshepherd
+- https://github.com/ohbarye
+- https://github.com/...
 
 ## License
 
