@@ -90,6 +90,12 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type']
   end
 
+  test 'invalid content_type validation setting' do
+    i = InvalidContentType.new(document: webp_file)
+    ex = assert_raises(ArgumentError) { i.valid? }
+    assert_equal ex.message, "content_type must be one of Regxep, supported mime types (e.g. :png, 'jpg'), or mime type String ('image/jpeg')"
+  end
+
   test 'validates size' do
     e = Project.new(title: 'Death Star')
     e.preview.attach(big_file)

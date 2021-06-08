@@ -34,6 +34,9 @@ ActiveRecord::Schema.define do
     end
   end
 
+  create_table :invalid_content_types, force: :cascade do |t|
+  end
+
   create_table :limit_attachments, force: :cascade do |t|
     t.string :name
   end
