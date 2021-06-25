@@ -58,14 +58,14 @@ end
 
 ### More examples
 
-- Content type validation using symbols. In order to infer the correct mime type from the symbol, the types must be registered with `Mime::Type`.
+- Content type validation using symbols. In order to infer the correct mime type from the symbol, the types must be registered with `MimeMagic::EXTENSIONS`.
 
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
   has_many_attached :photos
 
-  validates :avatar, attached: true, content_type: :png # Mime[:png].to_s => 'image/png'
+  validates :avatar, attached: true, content_type: :png # MimeMagic.by_extension(:png).to_s => 'image/png'
   # or
   validates :photos, attached: true, content_type: [:png, :jpg, :jpeg]
   # or

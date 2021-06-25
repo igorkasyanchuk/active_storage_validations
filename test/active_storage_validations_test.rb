@@ -80,7 +80,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type']
   end
 
-  # trying to attache webp file with PNG extension, but real content type is detected
+  # trying to attach webp file with PNG extension, but real content type is detected
   test 'webp content type 2' do
     u = User.new(name: 'John Smith')
     u.avatar.attach(webp_file)
@@ -90,10 +90,34 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type']
   end
 
-  test 'invalid content_type validation setting' do
-    i = InvalidContentType.new(document: webp_file)
-    ex = assert_raises(ArgumentError) { i.valid? }
-    assert_equal ex.message, "content_type must be one of Regxep, supported mime types (e.g. :png, 'jpg'), or mime type String ('image/jpeg')"
+  test 'validates microsoft office document' do
+    d = Document.new
+    d.attachment.attach(docx_file)
+    assert d.valid?
+  end
+
+  test 'validates microsoft office sheet' do
+    d = Document.new
+    d.attachment.attach(sheet_file)
+    assert d.valid?
+  end
+
+  test 'validates apple office document' do
+    d = Document.new
+    d.attachment.attach(pages_file)
+    assert d.valid?
+  end
+
+  test 'validates apple office sheet' do
+    d = Document.new
+    d.attachment.attach(numbers_file)
+    assert d.valid?
+  end
+
+  test 'validates archived content_type' do
+    d = Document.new
+    d.file.attach(tar_file)
+    assert d.valid?
   end
 
   test 'validates size' do
@@ -352,4 +376,24 @@ end
 
 def webp_file_wrong
   { io: File.open(Rails.root.join('public', '1_sm_webp.png')), filename: '1_sm_webp.png', content_type: 'image/png' }
+end
+
+def docx_file
+  { io: File.open(Rails.root.join('public', 'example.docx')), filename: 'example.docx', content_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }
+end
+
+def sheet_file
+  { io: File.open(Rails.root.join('public', 'example.xlsx')), filename: 'example.xlsx', content_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
+end
+
+def pages_file
+  { io: File.open(Rails.root.join('public', 'example.pages')), filename: 'example.pages', content_type: 'application/vnd.apple.pages' }
+end
+
+def numbers_file
+  { io: File.open(Rails.root.join('public', 'example.numbers')), filename: 'example.numbers', content_type: 'application/vnd.apple.numbers' }
+end
+
+def tar_file
+  { io: File.open(Rails.root.join('public', '404.html.tar')), filename: '404.html.tar', content_type: 'application/x-tar' }
 end
