@@ -16,11 +16,16 @@ jobs:
           - rails_6_1
           - rails_next
         exclude:
-          # ruby 3 only supports rails 6.1
+          # ruby 3 only supports rails 6.1+
           - ruby: 3.0
             gemfile: rails_5_2
           - ruby: 3.0
             gemfile: rails_6_0
+          # rails 7 only supports ruby 2.7+
+          - ruby: 2.5
+            gemfile: rails_next
+          - ruby: 2.6
+            gemfile: rails_next
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
