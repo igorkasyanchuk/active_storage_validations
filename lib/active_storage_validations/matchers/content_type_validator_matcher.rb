@@ -57,7 +57,7 @@ module ActiveStorageValidations
       end
 
       def rejected_types
-        @rejected_types || (Mime::LOOKUP.keys - allowed_types)
+        @rejected_types || (Marcel::TYPES.keys - allowed_types)
       end
 
       def allowed_types_allowed?
