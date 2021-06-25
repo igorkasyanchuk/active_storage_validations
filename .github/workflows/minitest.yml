@@ -1,5 +1,5 @@
 name: MiniTest
-on: push
+on: [push, pull_request]
 jobs:
   minitest:
     strategy:
