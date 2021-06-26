@@ -1,5 +1,11 @@
 - master
 
+- 0.9.5
+  - add latest Rails support in tests https://github.com/igorkasyanchuk/active_storage_validations/pull/126
+  - file permissions set to 0644 https://github.com/igorkasyanchuk/active_storage_validations/pull/125
+  - use Marcel to detect the correct content_type https://github.com/igorkasyanchuk/active_storage_validations/pull/123
+  - enable CI for pull requests https://github.com/igorkasyanchuk/active_storage_validations/pull/124
+
 - 0.9.4
   - Add with_message for dimension_validator_matcher  https://github.com/igorkasyanchuk/active_storage_validations/pull/117
   - Fix typo in tests https://github.com/igorkasyanchuk/active_storage_validations/pull/119
