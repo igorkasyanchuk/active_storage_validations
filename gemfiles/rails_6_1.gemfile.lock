@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    active_storage_validations (0.9.4)
+    active_storage_validations (0.9.5)
       rails (>= 5.2.0)
 
 GEM
