@@ -7,7 +7,7 @@ ENV['RAILS_ENV'] = 'test'
 require 'combustion'
 Combustion.path = 'test/dummy'
 Combustion.initialize! :active_record, :active_storage, :active_job do
-  config.active_job.queue_adapter = :inline if Rails::VERSION::MAJOR >= 6
+  config.active_job.queue_adapter = :inline if Rails.gem_version >= Gem::Version.new('6.0.0')
 end
 
 # Load other test helpers

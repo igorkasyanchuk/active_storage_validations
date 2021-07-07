@@ -150,7 +150,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
 
     assert_equal 6, la.files.count
 
-    if Rails.version < "6.0.0"
+    if Rails.gem_version < Gem::Version.new('6.0.0')
       assert_equal 6, la.files_blobs.count
     else
       assert_equal 0, la.files_blobs.count
@@ -158,7 +158,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
 
     assert_equal ['Files total number is out of range'], la.errors.full_messages
 
-    if Rails.version < "6.0.0"
+    if Rails.gem_version < Gem::Version.new('6.0.0')
       la.files.first.purge
       la.files.first.purge
       la.files.first.purge
@@ -289,7 +289,12 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.title, "Changed"
 
     assert_nil e.dimension_min.attachment
-    blob = ActiveStorage::Blob.create_after_upload!(**image_800x600_file)
+    blob =
+      if Rails.gem_version >= Gem::Version.new('6.1.0')
+        ActiveStorage::Blob.create_and_upload!(**image_800x600_file)
+      else
+        ActiveStorage::Blob.create_after_upload!(**image_800x600_file)
+      end
     e.dimension_min = blob.signed_id
     e.save!
     e.reload

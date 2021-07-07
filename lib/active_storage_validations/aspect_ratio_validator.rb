@@ -18,7 +18,7 @@ module ActiveStorageValidations
       raise ArgumentError, 'You must pass "aspect_ratio: :OPTION" option to the validator'
     end
 
-    if Rails::VERSION::MAJOR >= 6
+    if Rails.gem_version >= Gem::Version.new('6.0.0')
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
 
