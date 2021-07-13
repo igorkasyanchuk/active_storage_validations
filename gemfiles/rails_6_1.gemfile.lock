@@ -2,6 +2,7 @@ PATH
   remote: ..
   specs:
     active_storage_validations (0.9.5)
+      activejob (>= 5.2.0)
       activemodel (>= 5.2.0)
       activestorage (>= 5.2.0)
       activesupport (>= 5.2.0)
@@ -127,6 +128,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_storage_validations!
+  activejob (~> 6.1.0)
   activemodel (~> 6.1.0)
   activestorage (~> 6.1.0)
   activesupport (~> 6.1.0)
