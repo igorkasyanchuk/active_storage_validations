@@ -126,6 +126,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_storage_validations!
+  activejob (~> 5.2)
   activemodel (~> 5.2)
   activestorage (~> 5.2)
   activesupport (~> 5.2)
