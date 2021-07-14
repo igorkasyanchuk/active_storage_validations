@@ -125,11 +125,12 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.preview.attach(big_file)
     e.small_file.attach(big_file)
     e.attachment.attach(pdf_file)
+    e.documents.attach(pdf_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ['Small file size 1.6 KB is not between required range']
   end
 
-  test 'validates number of files' do
+  test 'validates maximum number of files' do
     e = Project.new(title: 'Death Star')
     e.preview.attach(big_file)
     e.small_file.attach(dummy_file)
@@ -140,6 +141,15 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.documents.attach(pdf_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ['Documents total number is out of range']
+  end
+
+  test 'validates minimum number of files' do
+    e = Project.new(title: 'Death Star')
+    e.preview.attach(big_file)
+    e.small_file.attach(dummy_file)
+    e.attachment.attach(pdf_file)
+    assert !e.valid?
+    assert_equal e.errors.full_messages, ["Documents total number is out of range"]
   end
 
   test 'validates number of files for Rails 6' do
@@ -221,6 +231,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
     e.dimension_exact.attach(html_file)
+    e.documents.attach(pdf_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ['Dimension exact is not a valid image']
 
@@ -229,7 +240,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
-    e.documents.attach(pdf_file)
     e.valid?
     assert e.valid?
 
@@ -237,6 +247,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.preview.attach(big_file)
     e.small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
+    e.documents.attach(pdf_file)
     e.dimension_exact.attach(image_150x150_file)
     assert e.valid?, 'Dimension exact: width and height must be equal to 150 x 150 pixel.'
 
@@ -244,6 +255,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.preview.attach(big_file)
     e.small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
+    e.documents.attach(pdf_file)
     e.dimension_range.attach(image_800x600_file)
     assert e.valid?, 'Dimension range: width and height must be greater than or equal to 800 x 600 pixel.'
 
@@ -251,6 +263,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.preview.attach(big_file)
     e.small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
+    e.documents.attach(pdf_file)
     e.dimension_range.attach(image_1200x900_file)
     assert e.valid?, 'Dimension range: width and height must be less than or equal to 1200 x 900 pixel.'
 
@@ -258,6 +271,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.preview.attach(big_file)
     e.small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
+    e.documents.attach(pdf_file)
     e.dimension_min.attach(image_800x600_file)
     assert e.valid?, 'Dimension min: width and height must be greater than or equal to 800 x 600 pixel.'
 
@@ -265,6 +279,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.preview.attach(big_file)
     e.small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
+    e.documents.attach(pdf_file)
     e.dimension_max.attach(image_1200x900_file)
     assert e.valid?, 'Dimension max: width and height must be greater than or equal to 1200 x 900 pixel.'
 
@@ -272,6 +287,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.preview.attach(big_file)
     e.small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
+    e.documents.attach(pdf_file)
     e.dimension_images.attach([image_800x600_file, image_1200x900_file])
     assert e.valid?, 'Dimension many: width and height must be between or equal to 800 x 600 and 1200 x 900 pixel.'
 
@@ -279,6 +295,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.preview.attach(big_file)
     e.small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
+    e.documents.attach(pdf_file)
     e.dimension_images.attach([image_800x600_file])
     e.save!
     e.dimension_images.attach([image_800x600_file])

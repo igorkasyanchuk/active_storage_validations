@@ -11,8 +11,6 @@ module ActiveStorageValidations
     end
 
     def validate_each(record, attribute, _)
-      return true unless record.send(attribute).attached?
-
       files = Array.wrap(record.send(attribute)).compact.uniq
       errors_options = { min: options[:min], max: options[:max] }
 
