@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'rails', '~> 6.0.0'
+%w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| gem rails_subcomponent, '~> 6.0.0' }
 
 gemspec :path => '../'
