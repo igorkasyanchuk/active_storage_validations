@@ -87,7 +87,10 @@ PATH
   remote: ..
   specs:
     active_storage_validations (0.9.5)
-      rails (>= 5.2.0)
+      activejob (>= 5.2.0)
+      activemodel (>= 5.2.0)
+      activestorage (>= 5.2.0)
+      activesupport (>= 5.2.0)
 
 GEM
   remote: https://rubygems.org/
