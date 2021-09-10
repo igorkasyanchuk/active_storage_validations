@@ -44,13 +44,15 @@ or
 
 ```ruby
 class Project < ApplicationRecord
+  has_one_attached :logo
   has_one_attached :preview
   has_one_attached :attachment
   has_many_attached :documents
 
   validates :title, presence: true
 
-  validates :preview, attached: true, size: { less_than: 100.megabytes , message: 'is not given between size' }
+  validates :logo, attached: true, size: { less_than: 100.megabytes , message: 'is too large' }
+  validates :preview, attached: true, size: { between: 1.kilobyte..100.megabytes , message: 'is not given between size' }
   validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' }
   validates :documents, limit: { min: 1, max: 3 }
 end
