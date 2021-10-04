@@ -9,7 +9,7 @@ module ActiveStorageValidations
 
     def initialize(options)
       require 'mini_magick' unless defined?(MiniMagick)
-      super(options)
+      super
     end
 
 
@@ -25,11 +25,12 @@ module ActiveStorageValidations
         changes = record.attachment_changes[attribute.to_s]
         return true if changes.blank?
 
+        options = self.options.merge(AVAILABLE_CHECKS.each_with_object(Hash.new) {|k, o| o[k] = self.options[k].call(record) if self.options[k].is_a?(Proc)})
         files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
 
         files.each do |file|
           metadata = Metadata.new(file).metadata
-          next if is_valid?(record, attribute, metadata)
+          next if is_valid?(record, attribute, metadata, options)
           break
         end
       end
@@ -38,6 +39,7 @@ module ActiveStorageValidations
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
   
+        options = self.options.merge(AVAILABLE_CHECKS.each_with_object(Hash.new) {|k, o| o[k] = self.options[k].call(record) if self.options[k].is_a?(Proc)})
         files = Array.wrap(record.send(attribute))
   
         files.each do |file|
@@ -45,7 +47,7 @@ module ActiveStorageValidations
           file.analyze; file.reload unless file.analyzed?
           metadata = file.metadata
   
-          next if is_valid?(record, attribute, metadata)
+          next if is_valid?(record, attribute, metadata, options)
           break
         end
       end
@@ -55,24 +57,24 @@ module ActiveStorageValidations
     private
 
 
-    def is_valid?(record, attribute, metadata)
+    def is_valid?(record, attribute, metadata, options)
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
-        add_error(record, attribute, options[:message].presence || :image_metadata_missing)
+        add_error(record, attribute, options[:message].presence || :image_metadata_missing, options[:with])
         return false
       end
 
       case options[:with]
       when :square
         return true if metadata[:width] == metadata[:height]
-        add_error(record, attribute, :aspect_ratio_not_square)
+        add_error(record, attribute, :aspect_ratio_not_square, options[:with])
 
       when :portrait
         return true if metadata[:height] > metadata[:width]
-        add_error(record, attribute, :aspect_ratio_not_portrait)
+        add_error(record, attribute, :aspect_ratio_not_portrait, options[:with])
 
       when :landscape
         return true if metadata[:width] > metadata[:height]
-        add_error(record, attribute, :aspect_ratio_not_landscape)
+        add_error(record, attribute, :aspect_ratio_not_landscape, options[:with])
 
       else
         if options[:with] =~ /is\_(\d*)\_(\d*)/
@@ -83,14 +85,14 @@ module ActiveStorageValidations
 
           add_error(record, attribute, :aspect_ratio_is_not, "#{x}x#{y}")
         else
-          add_error(record, attribute, :aspect_ratio_unknown)
+          add_error(record, attribute, :aspect_ratio_unknown, options[:with])
         end
       end
       false
     end
 
 
-    def add_error(record, attribute, type, interpolate = options[:with])
+    def add_error(record, attribute, type, interpolate)
       key = options[:message].presence || type
       return if record.errors.added?(attribute, key)
       record.errors.add(attribute, key, aspect_ratio: interpolate)

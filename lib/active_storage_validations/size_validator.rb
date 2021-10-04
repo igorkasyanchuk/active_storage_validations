@@ -18,11 +18,12 @@ module ActiveStorageValidations
 
       files = Array.wrap(record.send(attribute))
 
+      options = self.options.merge(AVAILABLE_CHECKS.each_with_object(Hash.new) {|k, o| o[k] = self.options[k].call(record) if self.options[k].is_a?(Proc)})
       errors_options = {}
       errors_options[:message] = options[:message] if options[:message].present?
 
       files.each do |file|
-        next if content_size_valid?(file.blob.byte_size)
+        next if content_size_valid?(file.blob.byte_size, options)
 
         errors_options[:file_size] = number_to_human_size(file.blob.byte_size)
         record.errors.add(attribute, :file_size_out_of_range, **errors_options)
@@ -30,7 +31,7 @@ module ActiveStorageValidations
       end
     end
 
-    def content_size_valid?(file_size)
+    def content_size_valid?(file_size, options)
       if options[:between].present?
         options[:between].include?(file_size)
       elsif options[:less_than].present?
