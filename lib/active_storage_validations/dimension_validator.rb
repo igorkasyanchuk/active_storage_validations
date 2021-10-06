@@ -24,21 +24,11 @@ module ActiveStorageValidations
               max: range.max
             }
           end
-          if min = options[length][:min] && min.is_a?(Proc)
-            resolved_options[length] = {
-              min: min.call(record)
-            }
+          if (min = options[length][:min]) && min.is_a?(Proc)
+            (resolved_options[length] ||= {})[:min] = min.call(record)
           end
-          if max = options[length][:max] && max.is_a?(Proc)
-            resolved_options[length] = {
-                max: max.call(record)
-            }
-          end
-          if (options[length][:max] && options[length][:max].is_a?(Proc)) && (options[length][:min] && options[length][:min].is_a?(Proc))
-            resolved_options[length] = {
-              min: options[length][:min].call(record),
-              max: options[length][:max].call(record)
-            }
+          if (max = options[length][:max]) && max.is_a?(Proc)
+            (resolved_options[length] ||= {})[:max] = max.call(record)
           end
         elsif options[length].is_a?(Proc)
           resolved_options[length] = options[length].call(record)
