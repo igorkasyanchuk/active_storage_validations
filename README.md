@@ -120,6 +120,7 @@ end
 
 - Proc Usage:
 
+Procs can be used instead of values in all the above examples.
 ```ruby
 class User < ApplicationRecord
   has_one_attached :proc_image
@@ -128,7 +129,6 @@ class User < ApplicationRecord
             aspect_ratio: -> (record) {:is_16_9},
             content_type: -> (record) {['image/png', 'image/jpg']} 
   # Example -> (record) {current_user.max_size}
-  # Proc can be used in all the above examples
 end
 
 ```
