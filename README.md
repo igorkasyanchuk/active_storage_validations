@@ -17,6 +17,7 @@ This gems doing it for you. Just use `attached: true` or `content_type: 'image/p
 * validates number of uploaded files (min/max required)
 * validates aspect ratio (if square, portrait, landscape, is_16_9, ...)
 * custom error messages
+* allow procs for dynamic determination of values
 
 ## Usage
 
@@ -115,6 +116,20 @@ class User < ApplicationRecord
   # you can also pass dynamic aspect ratio, like :is_4_3, :is_16_9, etc
   validates :photos, aspect_ratio: :is_4_3
 end
+```
+
+- Proc Usage:
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :proc_image
+  
+  validates :proc_image, dimension: { width: { min: -> (record) {100}, max: -> (record) {2000} }, height: { min: -> (record) {100}, max: -> (record) {1500} } },
+            aspect_ratio: -> (record) {:is_16_9},
+            content_type: -> (record) {['image/png', 'image/jpg']} 
+  # Proc can be used in all the above examples
+end
+
 ```
 
 ## Internationalization (I18n)
