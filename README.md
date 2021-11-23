@@ -295,6 +295,19 @@ To run tests in root folder of gem:
 * `BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test` to run for Rails 6.1
 * `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main branch
 
+Snippet to run in console:
+
+```
+BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
+```
+
 ## Known issues
 
 - There is an issue in Rails which it possible to get if you have added a validation and generating for example an image preview of attachments. It can be fixed with this:
