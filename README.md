@@ -346,7 +346,9 @@ You are welcome to contribute.
 - https://github.com/jayshepherd
 - https://github.com/ohbarye
 - https://github.com/randsina
-- https://github.com/...
+- https://github.com/vietqhoang
+- https://github.com/kemenaran
+- https://github.com/jrmhaig
 
 ## License
 

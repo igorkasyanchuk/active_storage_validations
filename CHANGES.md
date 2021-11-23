@@ -1,5 +1,9 @@
 - master
 
+- 0.9.6
+  - Add min_size and max_size to :file_size_out_of_range error message https://github.com/igorkasyanchuk/active_storage_validations/pull/134
+  - Reference Marcel::EXTENSIONS https://github.com/igorkasyanchuk/active_storage_validations/pull/137
+
 - 0.9.5
   - add latest Rails support in tests https://github.com/igorkasyanchuk/active_storage_validations/pull/126
   - file permissions set to 0644 https://github.com/igorkasyanchuk/active_storage_validations/pull/125
