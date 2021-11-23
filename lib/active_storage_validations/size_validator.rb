@@ -25,6 +25,9 @@ module ActiveStorageValidations
         next if content_size_valid?(file.blob.byte_size)
 
         errors_options[:file_size] = number_to_human_size(file.blob.byte_size)
+        errors_options[:min_size] = number_to_human_size(min_size)
+        errors_options[:max_size] = number_to_human_size(max_size)
+
         record.errors.add(attribute, :file_size_out_of_range, **errors_options)
         break
       end
@@ -42,6 +45,14 @@ module ActiveStorageValidations
       elsif options[:greater_than_or_equal_to].present?
         file_size >= options[:greater_than_or_equal_to]
       end
+    end
+
+    def min_size
+      options[:between]&.min || options[:greater_than] || options[:greater_than_or_equal_to]
+    end
+
+    def max_size
+      options[:between]&.max || options[:less_than] || options[:less_than_or_equal_to]
     end
   end
 end
