@@ -8,7 +8,7 @@ module ActiveStorageValidations
       return true unless record.send(attribute).attached?
       
       options = self.options.merge(AVAILABLE_CHECKS.each_with_object(Hash.new) {|k, o| o[k] = self.options[k].call(record) if self.options[k].is_a?(Proc)})
-      types = types(options)
+      types = authorized_types(options)
       return true if types.empty?
       
       files = Array.wrap(record.send(attribute))
@@ -25,7 +25,7 @@ module ActiveStorageValidations
       end
     end
 
-    def types(options)
+    def authorized_types(options)
       (Array.wrap(options[:with]) + Array.wrap(options[:in])).compact.map do |type|
         if type.is_a?(Regexp)
           type
