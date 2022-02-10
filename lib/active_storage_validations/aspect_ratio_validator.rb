@@ -8,7 +8,12 @@ module ActiveStorageValidations
     PRECISION = 3
 
     def initialize(options)
-      require 'mini_magick' unless defined?(MiniMagick)
+      if ActiveStorageValidations::IMAGE_PROCESSOR == :vips
+        require 'vips' unless defined?(Vips)
+      else
+        require 'mini_magick' unless defined?(MiniMagick)
+      end
+
       super(options)
     end
 
@@ -37,14 +42,14 @@ module ActiveStorageValidations
       # Rails 5
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
-  
+
         files = Array.wrap(record.send(attribute))
-  
+
         files.each do |file|
           # Analyze file first if not analyzed to get all required metadata.
           file.analyze; file.reload unless file.analyzed?
           metadata = file.metadata
-  
+
           next if is_valid?(record, attribute, metadata)
           break
         end

@@ -15,6 +15,9 @@ jobs:
           - rails_6_0
           - rails_6_1
           - rails_next
+        image_processor:
+          - vips
+          - mini_magick
         exclude:
           # ruby 3 only supports rails 6.1+
           - ruby: 3.0
@@ -28,11 +31,17 @@ jobs:
             gemfile: rails_next
     runs-on: ubuntu-latest
     steps:
+      - name: Install libvips
+        run: sudo apt-get update && sudo apt-get -y install libvips
+
       - name: Check out code
         uses: actions/checkout@v2
 
       - name: Set BUNDLE_GEMFILE
         run: echo 'BUNDLE_GEMFILE=${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile' >> $GITHUB_ENV
+
+      - name: Set IMAGE_PROCESSOR
+        run: echo 'IMAGE_PROCESSOR=${{ matrix.image_processor }}' >> $GITHUB_ENV
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1

@@ -177,6 +177,8 @@ gem 'active_storage_validations'
 
 # Optional, to use :dimension validator or :aspect_ratio validator
 gem 'mini_magick', '>= 4.9.5'
+# Or
+gem 'ruby-vips', '>= 2.1.0'
 ```
 
 And then execute:

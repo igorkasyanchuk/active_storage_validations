@@ -7,7 +7,11 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[width height min max].freeze
 
     def initialize(options)
-      require 'mini_magick' unless defined?(MiniMagick)
+      if ActiveStorageValidations::IMAGE_PROCESSOR == :vips
+        require 'vips' unless defined?(Vips)
+      else
+        require 'mini_magick' unless defined?(MiniMagick)
+      end
 
       [:width, :height].each do |length|
         if options[length] and options[length].is_a?(Hash)
