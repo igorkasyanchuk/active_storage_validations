@@ -8,12 +8,6 @@ module ActiveStorageValidations
     PRECISION = 3
 
     def initialize(options)
-      if ActiveStorageValidations::IMAGE_PROCESSOR == :vips
-        require 'vips' unless defined?(Vips)
-      else
-        require 'mini_magick' unless defined?(MiniMagick)
-      end
-
       super(options)
     end
 

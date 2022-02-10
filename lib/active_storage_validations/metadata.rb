@@ -3,11 +3,20 @@ module ActiveStorageValidations
     attr_reader :file
 
     def initialize(file)
+      require_image_processor
       @file = file
     end
 
     def image_processor
-      ActiveStorageValidations::IMAGE_PROCESSOR
+      Rails.application.config.active_storage.variant_processor
+    end
+
+    def require_image_processor
+      if image_processor == :vips
+        require 'vips' unless defined?(Vips)
+      else
+        require 'mini_magick' unless defined?(MiniMagick)
+      end
     end
 
     def metadata
