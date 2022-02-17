@@ -28,7 +28,6 @@ class User < ApplicationRecord
   has_many_attached :photos
   has_one_attached :image
 
-
   validates :name, presence: true
 
   validates :avatar, attached: true, content_type: 'image/png',
