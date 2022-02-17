@@ -26,6 +26,8 @@ For example you have a model like this and you want to add validation.
 class User < ApplicationRecord
   has_one_attached :avatar
   has_many_attached :photos
+  has_one_attached :image
+
 
   validates :name, presence: true
 
