@@ -112,6 +112,7 @@ GEM
     crass (1.0.6)
     digest (3.1.0)
     erubi (1.10.0)
+    ffi (1.15.5)
     globalid (1.0.0)
       activesupport (>= 5.0)
     i18n (1.10.0)
@@ -182,6 +183,8 @@ GEM
     rubocop-ast (1.16.0)
       parser (>= 3.1.1.0)
     ruby-progressbar (1.11.0)
+    ruby-vips (2.1.4)
+      ffi (~> 1.12)
     sqlite3 (1.4.2)
     strscan (3.0.1)
     thor (1.2.1)
@@ -207,6 +210,7 @@ DEPENDENCIES
   pry
   rails!
   rubocop
+  ruby-vips (>= 2.1.0)
   sqlite3
 
 BUNDLED WITH
