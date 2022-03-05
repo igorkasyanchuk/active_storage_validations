@@ -304,10 +304,12 @@ Snippet to run in console:
 BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 ```
 
@@ -370,6 +372,7 @@ You are welcome to contribute.
 - https://github.com/JuanVqz
 - https://github.com/luiseugenio
 - https://github.com/equivalent
+- https://github.com/NARKOZ
 
 ## License
 

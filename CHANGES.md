@@ -7,7 +7,7 @@
   - missing relationship in dummy app https://github.com/igorkasyanchuk/active_storage_validations/pull/142
   - References Marcel::TYPES only for Rails < 6.1 https://github.com/igorkasyanchuk/active_storage_validations/pull/138
   - better clarify how to define between size https://github.com/igorkasyanchuk/active_storage_validations/pull/133
-  - 
+  - Add vips support for aspect ratio and dimension validators https://github.com/igorkasyanchuk/active_storage_validations/pull/140
 
 - 0.9.6
   - Add min_size and max_size to :file_size_out_of_range error message https://github.com/igorkasyanchuk/active_storage_validations/pull/134
