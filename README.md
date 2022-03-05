@@ -31,11 +31,11 @@ class User < ApplicationRecord
 
   validates :avatar, attached: true, content_type: 'image/png',
                                      dimension: { width: 200, height: 200 }
-  validates :photos, attached: true, content_type: ['image/png', 'image/jpg', 'image/jpeg'],
+  validates :photos, attached: true, content_type: ['image/png', 'image/jpeg'],
                                      dimension: { width: { min: 800, max: 2400 },
                                                   height: { min: 600, max: 1800 }, message: 'is not given between dimension' }
   validates :image, attached: true,
-                    content_type: ['image/png', 'image/jpg'],
+                    content_type: ['image/png', 'image/jpeg'],
                     aspect_ratio: :landscape
 end
 ```
