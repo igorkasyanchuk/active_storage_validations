@@ -13,7 +13,7 @@ class ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test < Ac
 
   test 'negative match when providing class' do
     matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
-    matcher.allowing('image/jpg')
+    matcher.allowing('image/jpeg')
     refute matcher.matches?(User)
   end
 
@@ -32,7 +32,7 @@ class ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test < Ac
 
   test 'negative match when providing instance' do
     matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
-    matcher.allowing('image/jpg')
+    matcher.allowing('image/jpeg')
     refute matcher.matches?(User.new)
   end
 

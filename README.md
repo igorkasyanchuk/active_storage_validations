@@ -26,16 +26,17 @@ For example you have a model like this and you want to add validation.
 class User < ApplicationRecord
   has_one_attached :avatar
   has_many_attached :photos
+  has_one_attached :image
 
   validates :name, presence: true
 
   validates :avatar, attached: true, content_type: 'image/png',
                                      dimension: { width: 200, height: 200 }
-  validates :photos, attached: true, content_type: ['image/png', 'image/jpg', 'image/jpeg'],
+  validates :photos, attached: true, content_type: ['image/png', 'image/jpeg'],
                                      dimension: { width: { min: 800, max: 2400 },
                                                   height: { min: 600, max: 1800 }, message: 'is not given between dimension' }
   validates :image, attached: true,
-                    content_type: ['image/png', 'image/jpg'],
+                    content_type: ['image/png', 'image/jpeg'],
                     aspect_ratio: :landscape
 end
 ```
@@ -44,13 +45,15 @@ or
 
 ```ruby
 class Project < ApplicationRecord
+  has_one_attached :logo
   has_one_attached :preview
   has_one_attached :attachment
   has_many_attached :documents
 
   validates :title, presence: true
 
-  validates :preview, attached: true, size: { less_than: 100.megabytes , message: 'is not given between size' }
+  validates :logo, attached: true, size: { less_than: 100.megabytes , message: 'is too large' }
+  validates :preview, attached: true, size: { between: 1.kilobyte..100.megabytes , message: 'is not given between size' }
   validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' }
   validates :documents, limit: { min: 1, max: 3 }
 end
@@ -364,6 +367,11 @@ You are welcome to contribute.
 - https://github.com/vietqhoang
 - https://github.com/kemenaran
 - https://github.com/jrmhaig
+- https://github.com/tagliala
+- https://github.com/evedovelli
+- https://github.com/JuanVqz
+- https://github.com/luiseugenio
+- https://github.com/equivalent
 
 ## License
 

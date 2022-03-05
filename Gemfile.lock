@@ -132,6 +132,7 @@ PLATFORMS
 DEPENDENCIES
   active_storage_validations!
   combustion (~> 1.3)
+  marcel
   mini_magick (>= 4.9.5)
   pry
   rubocop
