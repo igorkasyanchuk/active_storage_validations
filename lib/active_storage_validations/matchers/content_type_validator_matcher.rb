@@ -35,7 +35,7 @@ module ActiveStorageValidations
       def failure_message
         <<~MESSAGE
           Expected #{@attribute_name}
-            
+
             Accept content types: #{allowed_types.join(", ")}
               #{accepted_types_and_failures}
 
@@ -57,7 +57,7 @@ module ActiveStorageValidations
       end
 
       def rejected_types
-        @rejected_types || (Marcel::TYPES.keys - allowed_types)
+        @rejected_types || (content_type_keys - allowed_types)
       end
 
       def allowed_types_allowed?
@@ -95,6 +95,16 @@ module ActiveStorageValidations
       def attachment_for(type)
         suffix = type.to_s.split('/').last
         { io: Tempfile.new('.'), filename: "test.#{suffix}", content_type: type }
+      end
+
+      private
+
+      def content_type_keys
+        if Rails.gem_version < Gem::Version.new('6.1.0')
+          Mime::LOOKUP.keys
+        else
+          Marcel::TYPES.keys
+        end
       end
     end
   end
