@@ -365,6 +365,11 @@ You are welcome to contribute.
 - https://github.com/vietqhoang
 - https://github.com/kemenaran
 - https://github.com/jrmhaig
+- https://github.com/tagliala
+- https://github.com/evedovelli
+- https://github.com/JuanVqz
+- https://github.com/luiseugenio
+- https://github.com/equivalent
 
 ## License
 
