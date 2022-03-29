@@ -94,7 +94,7 @@ module ActiveStorageValidations
 
     def valid_image?(image)
       image_processor == :vips ? image.avg : image.valid?
-    rescue Vips::Error
+    rescue exception_class
       false
     end
 
@@ -105,7 +105,7 @@ module ActiveStorageValidations
       else
         %w[ RightTop LeftBottom ].include?(image["%[orientation]"])
       end
-    rescue Vips::Error # field "exif-ifd0-Orientation" not found
+    rescue exception_class # field "exif-ifd0-Orientation" not found
       false
     end
 
