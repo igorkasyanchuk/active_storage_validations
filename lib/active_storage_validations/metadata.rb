@@ -10,6 +10,14 @@ module ActiveStorageValidations
     def image_processor
       Rails.application.config.active_storage.variant_processor
     end
+    
+    def exception_class
+      if image_processor == :vips
+        Vips::Error
+      else
+        MiniMagick::Error
+      end
+    end
 
     def require_image_processor
       if image_processor == :vips
@@ -77,11 +85,8 @@ module ActiveStorageValidations
     rescue LoadError, NameError
       logger.info "Skipping image analysis because the mini_magick or ruby-vips gem isn't installed"
       {}
-    rescue MiniMagick::Error => error
-      logger.error "Skipping image analysis due to an ImageMagick error: #{error.message}"
-      {}
-    rescue Vips::Error => error
-      logger.error "Skipping image analysis due to a Vips error: #{error.message}"
+    rescue exception_class => error
+      logger.error "Skipping image analysis due to an #{exception_class.name.split('::').map(&:downcase).join(' ').capitalize} error: #{error.message}"
       {}
     ensure
       image = nil
