@@ -12,9 +12,9 @@ module ActiveStorageValidations
     end
     
     def exception_class
-      if image_processor == :vips
+      if defined?(Vips)
         Vips::Error
-      else
+      elsif defined?(MiniMagick)
         MiniMagick::Error
       end
     end
