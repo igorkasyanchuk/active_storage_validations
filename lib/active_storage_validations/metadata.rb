@@ -63,15 +63,15 @@ module ActiveStorageValidations
         tempfile.flush
         tempfile.rewind
 
-        image = if image_processor == :vips && Vips::get_suffixes.include?(File.extname(tempfile.path).downcase)
+        image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(tempfile.path).downcase)
                   Vips::Image.new_from_file(tempfile.path)
-                else
+                elsif defined?(MiniMagick)
                   MiniMagick::Image.new(tempfile.path)
                 end
       else
-        image = if image_processor == :vips && Vips::get_suffixes.include?(File.extname(read_file_path).downcase)
+        image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(read_file_path).downcase)
                   Vips::Image.new_from_file(read_file_path)
-                else
+                elsif defined?(MiniMagick)
                   MiniMagick::Image.new(read_file_path)
                 end
       end
@@ -93,13 +93,13 @@ module ActiveStorageValidations
     end
 
     def valid_image?(image)
-      image_processor == :vips ? image.avg : image.valid?
+      image.is_a?(Vips::Image) ? image.avg : image.valid?
     rescue exception_class
       false
     end
 
     def rotated_image?(image)
-      if image_processor == :vips
+      if image.is_a?(Vips::Image)
         image.get('exif-ifd0-Orientation').include?('Right-top') ||
           image.get('exif-ifd0-Orientation').include?('Left-bottom')
       else
