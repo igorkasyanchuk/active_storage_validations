@@ -12,7 +12,7 @@ module ActiveStorageValidations
     end
     
     def exception_class
-      if defined?(Vips)
+      if image_processor == :vips && defined?(Vips)
         Vips::Error
       elsif defined?(MiniMagick)
         MiniMagick::Error
@@ -93,13 +93,13 @@ module ActiveStorageValidations
     end
 
     def valid_image?(image)
-      image.is_a?(Vips::Image) ? image.avg : image.valid?
+      image_processor == :vips && image.is_a?(Vips::Image) ? image.avg : image.valid?
     rescue exception_class
       false
     end
 
     def rotated_image?(image)
-      if image.is_a?(Vips::Image)
+      if image_processor == :vips && image.is_a?(Vips::Image)
         image.get('exif-ifd0-Orientation').include?('Right-top') ||
           image.get('exif-ifd0-Orientation').include?('Left-bottom')
       else
