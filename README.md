@@ -376,6 +376,7 @@ You are welcome to contribute.
 - https://github.com/equivalent
 - https://github.com/NARKOZ
 - https://github.com/stephensolis
+- https://github.com/kwent
 
 ## License
 
