@@ -320,6 +320,12 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal e.errors.full_messages, ["Ratio many must be a portrait image"]
 
     e = RatioModel.new(name: 'Princess Leia')
+    e.ratio_one.attach(io_150x150_file)
+    e.image1.attach([io_150x150_file])
+    assert !e.valid?
+    assert_equal e.errors.full_messages, ["Ratio many must be a portrait image"]
+
+    e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(image_150x150_file)
     e.ratio_many.attach([image_600x800_file])
     e.image1.attach(image_150x150_file)
@@ -332,12 +338,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.image1.attach(image_1920x1080_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ["Ratio one is not a valid image"]
-
-    e = RatioModel.new(name: 'Princess Leia')
-    e.ratio_one.attach(io_150x150_file)
-    e.ratio_many.attach([io_600x800_file])
-    assert e.valid?
-    assert_equal e.errors.full_messages, ["Ratio many is not a valid image"]
   end
 end
 
