@@ -41,7 +41,9 @@ module ActiveStorageValidations
 
     def read_image
       is_string = file.is_a?(String)
-      if is_string || file.is_a?(ActiveStorage::Blob)
+      is_io = file.is_a?(Hash) && file.fetch(:io)&.is_a?(StringIO)
+
+      if is_string || is_io || file.is_a?(ActiveStorage::Blob)
         blob =
           if is_string
             if Rails.gem_version < Gem::Version.new('6.1.0')
@@ -56,8 +58,12 @@ module ActiveStorageValidations
         tempfile = Tempfile.new(["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter])
         tempfile.binmode
 
-        blob.download do |chunk|
-          tempfile.write(chunk)
+        if is_io
+          tempfile.write(file[:io].read)
+        else
+          blob.download do |chunk|
+            tempfile.write(chunk)
+          end
         end
 
         tempfile.flush
@@ -67,12 +73,6 @@ module ActiveStorageValidations
           Vips::Image.new_from_file(tempfile.path)
         elsif defined?(MiniMagick)
           MiniMagick::Image.new(tempfile.path)
-        end
-      elsif file.is_a?(Hash) && file.fetch(:io)&.is_a?(StringIO)
-        image = if image_processor == :vips && defined?(Vips)
-          Vips::Image.new_from_memory(file)
-            elsif defined?(MiniMagick)
-          MiniMagick::Image.read(file)
         end
       else
         image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(read_file_path).downcase)
