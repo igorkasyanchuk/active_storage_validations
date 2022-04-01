@@ -45,25 +45,23 @@ module ActiveStorageValidations
 
       if is_string || is_io || file.is_a?(ActiveStorage::Blob)
         blob =
-          if is_string
+          if is_string || file.is_a?(ActiveStorage::Blob)
             if Rails.gem_version < Gem::Version.new('6.1.0')
               ActiveStorage::Blob.find_signed(file)
             else
               ActiveStorage::Blob.find_signed!(file)
             end
-          else
-            file
           end
 
-        tempfile = Tempfile.new(["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter])
+        tempfile = Tempfile.new(blob ? ["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter] : file[:filename])
         tempfile.binmode
 
-        if is_io
-          tempfile.write(file[:io].read)
-        else
+        if blob
           blob.download do |chunk|
             tempfile.write(chunk)
           end
+        else
+          tempfile.write(file[:io].read)
         end
 
         tempfile.flush
