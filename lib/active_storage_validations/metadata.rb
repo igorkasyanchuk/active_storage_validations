@@ -68,7 +68,7 @@ module ActiveStorageValidations
         elsif defined?(MiniMagick)
           MiniMagick::Image.new(tempfile.path)
         end
-      elsif file.is_a?(StringIO)
+      elsif file.is_a?(Hash) && file.fetch(:io)&.is_a?(StringIO)
         image = if image_processor == :vips && defined?(Vips)
           Vips::Image.new_from_memory(file)
             elsif defined?(MiniMagick)
