@@ -410,9 +410,9 @@ def tar_file
 end
 
 def io_150x150_file
-  { io: StringIO.new(File.open(Rails.root.join('public', 'image_150x150.png').read)), filename: 'dummy_file.png', content_type: 'image/png' }
+  { io: StringIO.new(File.open(Rails.root.join('public', 'image_150x150.png')).read), filename: 'image_150x150_file.png', content_type: 'image/png' }
 end
 
 def io_600x800_file
-  { io: StringIO.new(File.open(Rails.root.join('public', 'image_600x800.png').read)), filename: 'dummy_file.png', content_type: 'image/png' }
+  { io: StringIO.new(File.open(Rails.root.join('public', 'image_600x800.png')).read), filename: 'image_600x800_file.png', content_type: 'image/png' }
 end
