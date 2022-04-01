@@ -114,9 +114,7 @@ module ActiveStorageValidations
       when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
         file.path
       when Hash
-        io = file.fetch(:io)
-        io = io.is_a?(StringIo) ? io.read : io
-        File.open(io).path
+        File.open(file.fetch(:io)).path
       else
         raise "Something wrong with params."
       end
