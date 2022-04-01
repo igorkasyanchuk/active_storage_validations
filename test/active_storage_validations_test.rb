@@ -332,6 +332,12 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.image1.attach(image_1920x1080_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ["Ratio one is not a valid image"]
+
+    e = RatioModel.new(name: 'Princess Leia')
+    e.ratio_one.attach(io_file)
+    e.ratio_many.attach([io_file])
+    assert !e.valid?
+    assert_equal e.errors.full_messages, ["Ratio one is not a valid image", "Ratio many is not a valid image"]
   end
 end
 
@@ -401,4 +407,8 @@ end
 
 def tar_file
   { io: File.open(Rails.root.join('public', '404.html.tar')), filename: '404.html.tar', content_type: 'application/x-tar' }
+end
+
+def io_file
+  { io: StringIO.new("binary"), filename: 'dummy_file.png', content_type: 'image/png' }
 end

@@ -68,12 +68,18 @@ module ActiveStorageValidations
                 elsif defined?(MiniMagick)
                   MiniMagick::Image.new(tempfile.path)
                 end
+      elsif file.is_a?(StringIo)
+        image = if image_processor == :vips && defined?(Vips)
+                  Vips::Image.new_from_memory(file)
+                elsif defined?(MiniMagick)
+                  MiniMagick::Image.read(file)
+                end
       else
         image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(read_file_path).downcase)
-                  Vips::Image.new_from_file(read_file_path)
-                elsif defined?(MiniMagick)
-                  MiniMagick::Image.new(read_file_path)
-                end
+          Vips::Image.new_from_file(read_file_path)
+        elsif defined?(MiniMagick)
+          MiniMagick::Image.new(read_file_path)
+        end
       end
 
       if image && valid_image?(image)
