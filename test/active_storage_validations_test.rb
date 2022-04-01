@@ -321,7 +321,8 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
 
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(io_150x150_file)
-    e.image1.attach([io_150x150_file])
+    e.ratio_many.attach([io_150x150_file])
+    e.save
     assert !e.valid?
     assert_equal e.errors.full_messages, ["Ratio many must be a portrait image"]
 
