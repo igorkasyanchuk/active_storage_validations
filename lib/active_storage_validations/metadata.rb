@@ -41,7 +41,11 @@ module ActiveStorageValidations
 
     def read_image
       is_string = file.is_a?(String)
-      is_io = file.is_a?(Hash) && file.fetch(:io)&.is_a?(StringIO)
+      is_io = if Rails.gem_version > Gem::Version.new('6.1.0')
+          file.is_a?(StringIO)
+        else
+          file.is_a?(Hash) && file.fetch(:io)&.is_a?(StringIO)
+        end
 
       if is_string || is_io || file.is_a?(ActiveStorage::Blob)
         blob =
