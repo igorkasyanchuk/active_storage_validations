@@ -115,7 +115,7 @@ module ActiveStorageValidations
         file.path
       when Hash
         io = file.fetch(:io)
-        io = io.read if io.respond_to(:read)
+        io = io.read if io.respond_to?(:read)
         File.open(io).path
       else
         raise "Something wrong with params."
