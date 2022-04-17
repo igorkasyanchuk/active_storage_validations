@@ -89,29 +89,32 @@ module ActiveStorageValidations
 
       # Validation based on checks :width and :height.
       else
+        width_or_height_invalid = false
         [:width, :height].each do |length|
           next unless options[length]
           if options[length].is_a?(Hash)
             if options[length][:in] && (file_metadata[length] < options[length][:min] || file_metadata[length] > options[length][:max])
               add_error(record, attribute, options[:message].presence || :"dimension_#{length}_inclusion", min: options[length][:min], max: options[length][:max])
-              return false
+              width_or_height_invalid = true
             else
               if options[length][:min] && file_metadata[length] < options[length][:min]
                 add_error(record, attribute, options[:message].presence || :"dimension_#{length}_greater_than_or_equal_to", length: options[length][:min])
-                return false
+                width_or_height_invalid = true
               end
               if options[length][:max] && file_metadata[length] > options[length][:max]
                 add_error(record, attribute, options[:message].presence || :"dimension_#{length}_less_than_or_equal_to", length: options[length][:max])
-                return false
+                width_or_height_invalid = true
               end
             end
           else
             if file_metadata[length] != options[length]
               add_error(record, attribute, options[:message].presence || :"dimension_#{length}_equal_to", length: options[length])
-              return false
+              width_or_height_invalid = true
             end
           end
         end
+
+        return false if width_or_height_invalid
       end
 
       true # valid file
