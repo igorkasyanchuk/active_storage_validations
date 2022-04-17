@@ -1,6 +1,12 @@
 - master
+  - ....
 
-- 0.9.7 (unreleased)
+- 0.9.8
+  - Fix a file extension issue in Metadata#read_image https://github.com/igorkasyanchuk/active_storage_validations/pull/148/files
+  - Dynamic exception class https://github.com/igorkasyanchuk/active_storage_validations/pull/150
+  - Display All Validation Errors https://github.com/igorkasyanchuk/active_storage_validations/pull/152
+
+- 0.9.7
   - tests for Rails 7 and Ruby 3.1 https://github.com/igorkasyanchuk/active_storage_validations/pull/143 
   - Fix pt-BR translations https://github.com/igorkasyanchuk/active_storage_validations/pull/132
   - Remove references to image/jpg content type https://github.com/igorkasyanchuk/active_storage_validations/pull/144 

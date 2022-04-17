@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    active_storage_validations (0.9.7)
+    active_storage_validations (0.9.8)
       activejob (>= 5.2.0)
       activemodel (>= 5.2.0)
       activestorage (>= 5.2.0)
@@ -135,4 +135,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   2.3.6
+   2.3.7

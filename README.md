@@ -377,6 +377,7 @@ You are welcome to contribute.
 - https://github.com/NARKOZ
 - https://github.com/stephensolis
 - https://github.com/kwent
+= https://github.com/Animesh-Ghosh
 
 ## License
 

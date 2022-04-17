@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_storage_validations (0.9.6)
+    active_storage_validations (0.9.8)
       activejob (>= 5.2.0)
       activemodel (>= 5.2.0)
       activestorage (>= 5.2.0)
@@ -55,7 +55,7 @@ GEM
     crass (1.0.6)
     erubi (1.10.0)
     ffi (1.15.5)
-    globalid (0.5.2)
+    globalid (1.0.0)
       activesupport (>= 5.0)
     i18n (1.8.7)
       concurrent-ruby (~> 1.0)
@@ -140,4 +140,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   2.2.25
+   2.3.7
