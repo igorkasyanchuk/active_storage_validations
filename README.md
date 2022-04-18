@@ -62,7 +62,7 @@ end
 
 ### More examples
 
-- Content type validation using symbols. In order to infer the correct mime type from the symbol, the types must be registered with `Marcel::EXTENSIONS` (`MimeMagic::EXTENSIONS` for Rails <= 6.1.3).
+- Content type validation using symbols. In order to infer the correct mime type from the symbol, the types must be registered with `Marcel::EXTENSIONS` (`MimeMagic::EXTENSIONS` for Rails `<= 6.1.3`).
 
 ```ruby
 class User < ApplicationRecord
@@ -126,7 +126,7 @@ end
 
 Active Storage Validations uses I18n for error messages. For this, add these keys in your translation file:
 
-```yml
+```yaml
 en:
   errors:
     messages:
@@ -384,5 +384,4 @@ You are welcome to contribute.
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
 
-[<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
-/>](https://www.railsjazz.com/)
+[<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true" />](https://www.railsjazz.com/)
