@@ -3,6 +3,7 @@
 [![MiniTest](https://github.com/igorkasyanchuk/active_storage_validations/workflows/MiniTest/badge.svg)](https://github.com/igorkasyanchuk/active_storage_validations/actions)
 [![RailsJazz](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/my_other.svg?raw=true)](https://www.railsjazz.com)
 [![https://www.patreon.com/igorkasyanchuk](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/patron.svg?raw=true)](https://www.patreon.com/igorkasyanchuk)
+[![Open Source Helpers](https://www.codetriage.com/igorkasyanchuk/active_storage_validations/badges/users.svg)](https://www.codetriage.com/igorkasyanchuk/active_storage_validations)
 
 If you are using `active_storage` gem and you want to add simple validations for it, like presence or content_type you need to write a custom validation method.
 
