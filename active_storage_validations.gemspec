@@ -26,4 +26,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rubocop'
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'marcel'
+  s.add_development_dependency 'simplecov', '~> 0.21.2'
 end

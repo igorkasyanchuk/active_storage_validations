@@ -53,6 +53,7 @@ GEM
       thor (>= 0.14.6)
     concurrent-ruby (1.1.7)
     crass (1.0.6)
+    docile (1.4.0)
     erubi (1.10.0)
     ffi (1.15.5)
     globalid (0.4.2)
@@ -117,6 +118,12 @@ GEM
     ruby-progressbar (1.11.0)
     ruby-vips (2.1.4)
       ffi (~> 1.12)
+    simplecov (0.21.2)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.12.3)
+    simplecov_json_formatter (0.1.4)
     sqlite3 (1.4.2)
     thor (1.0.1)
     tzinfo (2.0.4)
@@ -141,6 +148,7 @@ DEPENDENCIES
   pry
   rubocop
   ruby-vips (>= 2.1.0)
+  simplecov (~> 0.21.2)
   sqlite3
 
 BUNDLED WITH
