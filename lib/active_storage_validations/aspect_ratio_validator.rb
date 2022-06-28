@@ -73,18 +73,18 @@ module ActiveStorageValidations
         return true if metadata[:width] > metadata[:height]
         add_error(record, attribute, :aspect_ratio_not_landscape)
 
+      when /is_(\d*)_(\d*)/
+        x = $1.to_i
+        y = $2.to_i
+
+        return true if (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
+
+        add_error(record, attribute, :aspect_ratio_is_not, "#{x}:#{y}")
+
       else
-        if options[:with] =~ /is\_(\d*)\_(\d*)/
-          x = $1.to_i
-          y = $2.to_i
-
-          return true if (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
-
-          add_error(record, attribute, :aspect_ratio_is_not, "#{x}:#{y}")
-        else
-          add_error(record, attribute, :aspect_ratio_unknown)
-        end
+        add_error(record, attribute, :aspect_ratio_unknown)
       end
+
       false
     end
 
