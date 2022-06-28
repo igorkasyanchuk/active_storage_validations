@@ -80,7 +80,7 @@ module ActiveStorageValidations
 
           return true if (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
 
-          add_error(record, attribute, :aspect_ratio_is_not, "#{x}x#{y}")
+          add_error(record, attribute, :aspect_ratio_is_not, "#{x}:#{y}")
         else
           add_error(record, attribute, :aspect_ratio_unknown)
         end
