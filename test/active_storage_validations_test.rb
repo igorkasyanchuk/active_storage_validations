@@ -410,6 +410,38 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     raise ex
   end
 
+  test 'all dimension validation errors are shown together' do
+    # image dimensions are lower than the specified range
+    project = Project.new(title: 'Death Star')
+    project.dimension_range.attach(image_700x500_file)
+    assert_not project.valid?
+    assert_includes project.errors.full_messages, 'Dimension range width is not included between 800 and 1200 pixel'
+    assert_includes project.errors.full_messages, 'Dimension range height is not included between 600 and 900 pixel'
+
+    project = Project.new(title: 'Death Star')
+    project.dimension_images.attach([image_700x500_file])
+    assert_not project.valid?
+    assert_includes project.errors.full_messages, 'Dimension images width must be greater than or equal to 800 pixel'
+    assert_includes project.errors.full_messages, 'Dimension images height must be greater than or equal to 600 pixel'
+
+    # image dimensions are greater than the specified range
+    project = Project.new(title: 'Death Star')
+    project.dimension_range.attach(image_1300x1000_file)
+    assert_not project.valid?
+    assert_includes project.errors.full_messages, 'Dimension range width is not included between 800 and 1200 pixel'
+    assert_includes project.errors.full_messages, 'Dimension range height is not included between 600 and 900 pixel'
+
+    project = Project.new(title: 'Death Star')
+    project.dimension_images.attach([image_1300x1000_file])
+    assert_not project.valid?
+    assert_includes project.errors.full_messages, 'Dimension images width must be less than or equal to 1200 pixel'
+    assert_includes project.errors.full_messages, 'Dimension images height must be less than or equal to 900 pixel'
+  rescue Exception => ex
+    puts ex.message
+    puts ex.backtrace.join("\n")
+    raise ex
+  end
+
   test 'aspect ratio validation' do
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(image_150x150_file)
@@ -469,6 +501,10 @@ def image_150x150_file
   { io: File.open(Rails.root.join('public', 'image_150x150.png')), filename: 'image_150x150_file.png', content_type: 'image/png' }
 end
 
+def image_700x500_file
+  { io: File.open(Rails.root.join('public', 'image_700x500.png')), filename: 'image_700x500_file.png', content_type: 'image/png' }
+end
+
 def image_800x600_file
   { io: File.open(Rails.root.join('public', 'image_800x600.png')), filename: 'image_800x600_file.png', content_type: 'image/png' }
 end
@@ -479,6 +515,10 @@ end
 
 def image_1200x900_file
   { io: File.open(Rails.root.join('public', 'image_1200x900.png')), filename: 'image_1200x900_file.png', content_type: 'image/png' }
+end
+
+def image_1300x1000_file
+  { io: File.open(Rails.root.join('public', 'image_1300x1000.png')), filename: 'image_1300x1000_file.png', content_type: 'image/png' }
 end
 
 def image_1920x1080_file

@@ -1,4 +1,23 @@
 - master
+  - ....
+
+- 0.9.8
+  - Fix a file extension issue in Metadata#read_image https://github.com/igorkasyanchuk/active_storage_validations/pull/148/files
+  - Dynamic exception class https://github.com/igorkasyanchuk/active_storage_validations/pull/150
+  - Display All Validation Errors https://github.com/igorkasyanchuk/active_storage_validations/pull/152
+
+- 0.9.7
+  - tests for Rails 7 and Ruby 3.1 https://github.com/igorkasyanchuk/active_storage_validations/pull/143 
+  - Fix pt-BR translations https://github.com/igorkasyanchuk/active_storage_validations/pull/132
+  - Remove references to image/jpg content type https://github.com/igorkasyanchuk/active_storage_validations/pull/144 
+  - missing relationship in dummy app https://github.com/igorkasyanchuk/active_storage_validations/pull/142
+  - References Marcel::TYPES only for Rails < 6.1 https://github.com/igorkasyanchuk/active_storage_validations/pull/138
+  - better clarify how to define between size https://github.com/igorkasyanchuk/active_storage_validations/pull/133
+  - Add vips support for aspect ratio and dimension validators https://github.com/igorkasyanchuk/active_storage_validations/pull/140
+
+- 0.9.6
+  - Add min_size and max_size to :file_size_out_of_range error message https://github.com/igorkasyanchuk/active_storage_validations/pull/134
+  - Reference Marcel::EXTENSIONS https://github.com/igorkasyanchuk/active_storage_validations/pull/137
 
 - 0.9.5
   - add latest Rails support in tests https://github.com/igorkasyanchuk/active_storage_validations/pull/126

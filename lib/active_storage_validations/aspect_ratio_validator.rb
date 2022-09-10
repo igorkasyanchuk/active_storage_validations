@@ -10,8 +10,7 @@ module ActiveStorageValidations
     PRECISION = 3
 
     def initialize(options)
-      require 'mini_magick' unless defined?(MiniMagick)
-      super
+      super(options)
     end
 
 
@@ -40,15 +39,15 @@ module ActiveStorageValidations
       # Rails 5
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
-  
+
         options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
         files = Array.wrap(record.send(attribute))
-  
+
         files.each do |file|
           # Analyze file first if not analyzed to get all required metadata.
           file.analyze; file.reload unless file.analyzed?
           metadata = file.metadata
-  
+
           next if is_valid?(record, attribute, metadata, options)
           break
         end
