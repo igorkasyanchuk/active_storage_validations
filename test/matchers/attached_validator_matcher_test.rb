@@ -57,8 +57,8 @@ class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < Activ
     user = User.create!(
       name: 'Pietje',
       avatar: { io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' },
-      proc_avatar: { io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' },
       photos: [{ io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' }],
+      proc_avatar: { io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' },
       proc_photos: [{ io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' }]
     )
     assert matcher.matches?(user)

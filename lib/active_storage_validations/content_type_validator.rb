@@ -14,7 +14,7 @@ module ActiveStorageValidations
       return true if types.empty?
       
       files = Array.wrap(record.send(attribute))
-      
+
       errors_options = { authorized_types: types_to_human_format(types) }
       errors_options[:message] = options[:message] if options[:message].present?
 
