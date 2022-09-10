@@ -120,15 +120,12 @@ end
 
 - Proc Usage:
 
-Procs can be used instead of values in all the above examples.
+Procs can be used instead of values in all the above examples. They will be called on every validation.
 ```ruby
 class User < ApplicationRecord
-  has_one_attached :proc_image
-  
-  validates :proc_image, dimension: { width: { min: -> (record) {100}, max: -> (record) {2000} }, height: { min: -> (record) {100}, max: -> (record) {1500} } },
-            aspect_ratio: -> (record) {:is_16_9},
-            content_type: -> (record) {['image/png', 'image/jpg']} 
-  # Example -> (record) {current_user.max_size}
+  has_many_attached :proc_files
+
+  validates :proc_files, limit: { max: -> (record) { record.admin? ? 100 : 10 } }
 end
 
 ```
