@@ -16,7 +16,7 @@ module ActiveStorageValidations
       return true unless record.send(attribute).attached?
 
       files = Array.wrap(record.send(attribute)).compact.uniq
-      options = self.options.merge(AVAILABLE_CHECKS.each_with_object(Hash.new) {|k, o| o[k] = self.options[k].call(record) if self.options[k].is_a?(Proc)})
+      options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
       errors_options = { min: options[:min], max: options[:max] }
 
       return true if files_count_valid?(files.count, options)

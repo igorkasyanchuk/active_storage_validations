@@ -12,41 +12,27 @@ module ActiveStorageValidations
       require 'mini_magick' unless defined?(MiniMagick)
       super
     end
-    
-    def resolve_proc_options(record)
-      resolved_options = {}
+
+    def process_options(record)
+      options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+
       [:width, :height].each do |length|
         if options[length] and options[length].is_a?(Hash)
           if range = options[length][:in]
-            range = range.call(record) if range.is_a?(Proc)
             raise ArgumentError, ":in must be a Range" unless range.is_a?(Range)
-            resolved_options[length] = {
-              in: range,
-              min: range.min,
-              max: range.max
-            }
+            options[length][:min], options[length][:max] = range.min, range.max
           end
-          if (min = options[length][:min]) && min.is_a?(Proc)
-            (resolved_options[length] ||= {})[:min] = min.call(record)
-          end
-          if (max = options[length][:max]) && max.is_a?(Proc)
-            (resolved_options[length] ||= {})[:max] = max.call(record)
-          end
-        elsif options[length].is_a?(Proc)
-          resolved_options[length] = options[length].call(record)
         end
       end
       [:min, :max].each do |dim|
         if range = options[dim]
-          range = range.call(record) if range.is_a?(Proc)
           raise ArgumentError, ":#{dim} must be a Range (width..height)" unless range.is_a?(Range)
-          resolved_options[dim]     = range
-          resolved_options[:width]  = { dim => range.first }
-          resolved_options[:height] = { dim => range.last }
+          options[:width] = { dim => range.first }
+          options[:height] = { dim => range.last }
         end
       end
 
-      resolved_options
+      options
     end
 
 
@@ -63,7 +49,7 @@ module ActiveStorageValidations
         changes = record.attachment_changes[attribute.to_s]
         return true if changes.blank?
 
-        options = self.options.deep_merge(resolve_proc_options(record))
+        options = process_options(record)
         files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
         files.each do |file|
           metadata = Metadata.new(file).metadata
@@ -76,7 +62,7 @@ module ActiveStorageValidations
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
 
-        options = self.options.deep_merge(resolve_proc_options(record))
+        options = process_options(record)
         files = Array.wrap(record.send(attribute))
         files.each do |file|
           # Analyze file first if not analyzed to get all required metadata.
@@ -143,9 +129,9 @@ module ActiveStorageValidations
       true # valid file
     end
 
-    def add_error(record, attribute, type, **attrs)
-      return if record.errors.added?(attribute, type)
-      record.errors.add(attribute, type, **attrs)
+    def add_error(record, attribute, message, **attrs)
+      return if record.errors.added?(attribute, message)
+      record.errors.add(attribute, message, **attrs)
     end
 
   end

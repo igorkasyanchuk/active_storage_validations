@@ -9,12 +9,7 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return true unless record.send(attribute).attached?
 
-      options =
-        self.options.merge(
-          AVAILABLE_CHECKS.each_with_object(Hash.new) { |k, o|
-            o[k] = self.options[k].call(record) if self.options[k].is_a?(Proc)
-          }
-        )
+      options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
       types = authorized_types(options)
       return true if types.empty?
       

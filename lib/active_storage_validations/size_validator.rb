@@ -20,7 +20,7 @@ module ActiveStorageValidations
 
       files = Array.wrap(record.send(attribute))
 
-      options = self.options.merge(AVAILABLE_CHECKS.each_with_object(Hash.new) {|k, o| o[k] = self.options[k].call(record) if self.options[k].is_a?(Proc)})
+      options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
       errors_options = {}
       errors_options[:message] = options[:message] if options[:message].present?
 
