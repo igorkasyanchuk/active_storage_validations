@@ -2,6 +2,8 @@
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
+    include OptionProcUnfolding
+
     AVAILABLE_CHECKS = %i[with in].freeze
     
     def validate_each(record, attribute, _value)

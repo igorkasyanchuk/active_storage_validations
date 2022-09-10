@@ -4,6 +4,8 @@ require_relative 'metadata.rb'
 
 module ActiveStorageValidations
   class DimensionValidator < ActiveModel::EachValidator # :nodoc
+    include OptionProcUnfolding
+
     AVAILABLE_CHECKS = %i[width height min max].freeze
 
     def initialize(options)

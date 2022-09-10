@@ -4,6 +4,8 @@ require_relative 'metadata.rb'
 
 module ActiveStorageValidations
   class AspectRatioValidator < ActiveModel::EachValidator # :nodoc
+    include OptionProcUnfolding
+
     AVAILABLE_CHECKS = %i[with].freeze
     PRECISION = 3
 

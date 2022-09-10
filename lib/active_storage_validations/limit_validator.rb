@@ -2,6 +2,8 @@
 
 module ActiveStorageValidations
   class LimitValidator < ActiveModel::EachValidator # :nodoc:
+    include OptionProcUnfolding
+
     AVAILABLE_CHECKS = %i[max min].freeze
 
     def check_validity!

@@ -2,6 +2,8 @@
 
 module ActiveStorageValidations
   class SizeValidator < ActiveModel::EachValidator # :nodoc:
+    include OptionProcUnfolding
+
     delegate :number_to_human_size, to: ActiveSupport::NumberHelper
 
     AVAILABLE_CHECKS = %i[less_than less_than_or_equal_to greater_than greater_than_or_equal_to between].freeze
