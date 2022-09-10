@@ -8,7 +8,7 @@ module ActiveStorageValidations
       when Array
         object.map { |o| unfold_procs(record, o, only_keys) }
       else
-        object.is_a?(Proc) ? object.call : object
+        object.is_a?(Proc) ? object.call(record) : object
       end
     end
 
