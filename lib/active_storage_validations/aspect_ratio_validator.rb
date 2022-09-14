@@ -55,7 +55,7 @@ module ActiveStorageValidations
 
     def is_valid?(record, attribute, metadata, flat_options)
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
-        add_error(record, attribute, :image_metadata_missing, options[:with])
+        add_error(record, attribute, :image_metadata_missing, flat_options[:with])
         return false
       end
 
@@ -73,7 +73,7 @@ module ActiveStorageValidations
         add_error(record, attribute, :aspect_ratio_not_landscape, flat_options[:with])
 
       else
-        if options[:with] =~ /is_(\d*)_(\d*)/
+        if flat_options[:with] =~ /is_(\d*)_(\d*)/
           x = $1.to_i
           y = $2.to_i
 
