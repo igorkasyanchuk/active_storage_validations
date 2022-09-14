@@ -9,8 +9,8 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return true unless record.send(attribute).attached?
 
-      options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
-      types = authorized_types(options)
+      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+      types = authorized_types(flat_options)
       return true if types.empty?
       
       files = Array.wrap(record.send(attribute))
@@ -27,8 +27,8 @@ module ActiveStorageValidations
       end
     end
 
-    def authorized_types(options)
-      (Array.wrap(options[:with]) + Array.wrap(options[:in])).compact.map do |type|
+    def authorized_types(flat_options)
+      (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).compact.map do |type|
         if type.is_a?(Regexp)
           type
         else

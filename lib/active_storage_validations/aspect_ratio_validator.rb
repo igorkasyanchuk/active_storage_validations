@@ -21,12 +21,12 @@ module ActiveStorageValidations
         changes = record.attachment_changes[attribute.to_s]
         return true if changes.blank?
 
-        options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+        flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
         files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
 
         files.each do |file|
           metadata = Metadata.new(file).metadata
-          next if is_valid?(record, attribute, metadata, options)
+          next if is_valid?(record, attribute, metadata, flat_options)
           break
         end
       end
@@ -35,7 +35,7 @@ module ActiveStorageValidations
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
 
-        options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+        flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
         files = Array.wrap(record.send(attribute))
 
         files.each do |file|
@@ -43,7 +43,7 @@ module ActiveStorageValidations
           file.analyze; file.reload unless file.analyzed?
           metadata = file.metadata
 
-          next if is_valid?(record, attribute, metadata, options)
+          next if is_valid?(record, attribute, metadata, flat_options)
           break
         end
       end
@@ -53,24 +53,24 @@ module ActiveStorageValidations
     private
 
 
-    def is_valid?(record, attribute, metadata, options)
+    def is_valid?(record, attribute, metadata, flat_options)
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
         add_error(record, attribute, :image_metadata_missing, options[:with])
         return false
       end
 
-      case options[:with]
+      case flat_options[:with]
       when :square
         return true if metadata[:width] == metadata[:height]
-        add_error(record, attribute, :aspect_ratio_not_square, options[:with])
+        add_error(record, attribute, :aspect_ratio_not_square, flat_options[:with])
 
       when :portrait
         return true if metadata[:height] > metadata[:width]
-        add_error(record, attribute, :aspect_ratio_not_portrait, options[:with])
+        add_error(record, attribute, :aspect_ratio_not_portrait, flat_options[:with])
 
       when :landscape
         return true if metadata[:width] > metadata[:height]
-        add_error(record, attribute, :aspect_ratio_not_landscape, options[:with])
+        add_error(record, attribute, :aspect_ratio_not_landscape, flat_options[:with])
 
       else
         if options[:with] =~ /is_(\d*)_(\d*)/
@@ -81,7 +81,7 @@ module ActiveStorageValidations
 
           add_error(record, attribute, :aspect_ratio_is_not, "#{x}x#{y}")
         else
-          add_error(record, attribute, :aspect_ratio_unknown, options[:with])
+          add_error(record, attribute, :aspect_ratio_unknown, flat_options[:with])
         end
       end
       false
