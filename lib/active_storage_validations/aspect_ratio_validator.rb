@@ -9,14 +9,9 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[with].freeze
     PRECISION = 3
 
-    def initialize(options)
-      super(options)
-    end
-
-
     def check_validity!
       return true if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-      raise ArgumentError, 'You must pass "aspect_ratio: :OPTION" option to the validator'
+      raise ArgumentError, 'You must pass :with to the validator'
     end
 
     if Rails.gem_version >= Gem::Version.new('6.0.0')
@@ -60,7 +55,7 @@ module ActiveStorageValidations
 
     def is_valid?(record, attribute, metadata, options)
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
-        add_error(record, attribute, options[:message].presence || :image_metadata_missing, options[:with])
+        add_error(record, attribute, :image_metadata_missing, options[:with])
         return false
       end
 
@@ -78,7 +73,7 @@ module ActiveStorageValidations
         add_error(record, attribute, :aspect_ratio_not_landscape, options[:with])
 
       else
-        if options[:with] =~ /is\_(\d*)\_(\d*)/
+        if options[:with] =~ /is_(\d*)_(\d*)/
           x = $1.to_i
           y = $2.to_i
 
@@ -93,10 +88,10 @@ module ActiveStorageValidations
     end
 
 
-    def add_error(record, attribute, type, interpolate)
-      key = options[:message].presence || type
-      return if record.errors.added?(attribute, key)
-      record.errors.add(attribute, key, aspect_ratio: interpolate)
+    def add_error(record, attribute, default_message, interpolate)
+      message = options[:message].presence || default_message
+      return if record.errors.added?(attribute, message)
+      record.errors.add(attribute, message, aspect_ratio: interpolate)
     end
 
   end
