@@ -21,12 +21,11 @@ module ActiveStorageValidations
         changes = record.attachment_changes[attribute.to_s]
         return true if changes.blank?
 
-        flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
         files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
 
         files.each do |file|
           metadata = Metadata.new(file).metadata
-          next if is_valid?(record, attribute, metadata, flat_options)
+          next if is_valid?(record, attribute, metadata)
           break
         end
       end
@@ -35,7 +34,6 @@ module ActiveStorageValidations
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
 
-        flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
         files = Array.wrap(record.send(attribute))
 
         files.each do |file|
@@ -43,7 +41,7 @@ module ActiveStorageValidations
           file.analyze; file.reload unless file.analyzed?
           metadata = file.metadata
 
-          next if is_valid?(record, attribute, metadata, flat_options)
+          next if is_valid?(record, attribute, metadata)
           break
         end
       end
@@ -53,7 +51,8 @@ module ActiveStorageValidations
     private
 
 
-    def is_valid?(record, attribute, metadata, flat_options)
+    def is_valid?(record, attribute, metadata)
+      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
         add_error(record, attribute, :image_metadata_missing, flat_options[:with])
         return false

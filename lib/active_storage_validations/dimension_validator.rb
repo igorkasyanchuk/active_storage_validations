@@ -44,11 +44,10 @@ module ActiveStorageValidations
         changes = record.attachment_changes[attribute.to_s]
         return true if changes.blank?
 
-        flat_options = process_options(record)
         files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
         files.each do |file|
           metadata = Metadata.new(file).metadata
-          next if is_valid?(record, attribute, metadata, flat_options)
+          next if is_valid?(record, attribute, metadata)
           break
         end
       end
@@ -57,20 +56,20 @@ module ActiveStorageValidations
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
 
-        flat_options = process_options(record)
         files = Array.wrap(record.send(attribute))
         files.each do |file|
           # Analyze file first if not analyzed to get all required metadata.
           file.analyze; file.reload unless file.analyzed?
           metadata = file.metadata rescue {}
-          next if is_valid?(record, attribute, metadata, flat_options)
+          next if is_valid?(record, attribute, metadata)
           break
         end
       end
     end
 
 
-    def is_valid?(record, attribute, file_metadata, flat_options)
+    def is_valid?(record, attribute, file_metadata)
+      flat_options = process_options(record)
       # Validation fails unless file metadata contains valid width and height.
       if file_metadata[:width].to_i <= 0 || file_metadata[:height].to_i <= 0
         add_error(record, attribute, :image_metadata_missing)
