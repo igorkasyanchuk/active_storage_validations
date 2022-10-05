@@ -6,13 +6,11 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 2.5
           - 2.6
           - 2.7
-          - '3.0'
+          - 3.0
           - 3.1
         gemfile:
-          - rails_5_2
           - rails_6_0
           - rails_6_1
           - rails_7_0
@@ -23,24 +21,16 @@ jobs:
         exclude:
           # ruby 3.1 only supports rails 7.0+
           - ruby: 3.1
-            gemfile: rails_5_2
-          - ruby: 3.1
             gemfile: rails_6_0
           - ruby: 3.1
             gemfile: rails_6_1
           # ruby 3 only supports rails 6.1+
           - ruby: '3.0'
-            gemfile: rails_5_2
-          - ruby: '3.0'
             gemfile: rails_6_0
           # rails 7.0 only supports ruby 2.7+
-          - ruby: 2.5
-            gemfile: rails_7_0
           - ruby: 2.6
             gemfile: rails_7_0
           # rails next only supports ruby 2.7+
-          - ruby: 2.5
-            gemfile: rails_next
           - ruby: 2.6
             gemfile: rails_next
     runs-on: ubuntu-latest

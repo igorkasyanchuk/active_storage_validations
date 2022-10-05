@@ -319,12 +319,10 @@ To run tests in root folder of gem:
 Snippet to run in console:
 
 ```
-BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
@@ -394,6 +392,9 @@ You are welcome to contribute.
 - https://github.com/stephensolis
 - https://github.com/kwent
 = https://github.com/Animesh-Ghosh
+= https://github.com/gr8bit
+= https://github.com/codegeek319
+= https://github.com/clwy-cn
 
 ## License
 
