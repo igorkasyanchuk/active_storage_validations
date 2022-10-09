@@ -271,6 +271,19 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_image.attach(pdf_file)
     assert !e.valid?
     assert e.errors.full_messages.include?("Image has an invalid content type")
+
+    e = OnlyImage.new
+    e.image.attach(image_1920x1080_file)
+    e.proc_image.attach(image_1920x1080_file)
+    e.another_image.attach(tar_file_with_image_content_type)
+    assert !e.valid?
+    assert_equal e.errors.full_messages, ["Another image is not a valid image"]
+
+    e = OnlyImage.new
+    e.image.attach(image_1920x1080_file)
+    e.proc_image.attach(image_1920x1080_file)
+    e.any_image.attach(tar_file_with_image_content_type)
+    assert e.valid?
   rescue Exception => ex
     puts ex.message
     puts ex.backtrace.take(20).join("\n")
@@ -555,4 +568,8 @@ end
 
 def tar_file
   { io: File.open(Rails.root.join('public', '404.html.tar')), filename: '404.html.tar', content_type: 'application/x-tar' }
+end
+
+def tar_file_with_image_content_type
+  { io: File.open(Rails.root.join('public', '404.html.tar')), filename: '404.png', content_type: 'image/png' }
 end

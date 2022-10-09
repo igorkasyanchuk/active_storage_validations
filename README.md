@@ -19,6 +19,7 @@ This gems doing it for you. Just use `attached: true` or `content_type: 'image/p
 * validates dimension of images/videos
 * validates number of uploaded files (min/max required)
 * validates aspect ratio (if square, portrait, landscape, is_16_9, ...)
+* validates if file can be processed by MiniMagick or Vips
 * custom error messages
 * allow procs for dynamic determination of values
 
@@ -40,6 +41,7 @@ class User < ApplicationRecord
                                      dimension: { width: { min: 800, max: 2400 },
                                                   height: { min: 600, max: 1800 }, message: 'is not given between dimension' }
   validates :image, attached: true,
+                    processable_image: true,
                     content_type: ['image/png', 'image/jpeg'],
                     aspect_ratio: :landscape
 end
@@ -164,6 +166,7 @@ en:
       aspect_ratio_not_landscape: "must be a landscape image"
       aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
       aspect_ratio_unknown: "has an unknown aspect ratio"
+      image_not_processable: "is not a valid image"
 ```
 
 In some cases, Active Storage Validations provides variables to help you customize messages:
