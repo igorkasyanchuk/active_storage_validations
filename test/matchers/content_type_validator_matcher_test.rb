@@ -4,10 +4,21 @@ require 'test_helper'
 require 'active_storage_validations/matchers'
 
 class ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test < ActiveSupport::TestCase
+  test 'positive and negative' do
+    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
+    matcher.allowing('image/png')
+    assert_raise(ArgumentError) { matcher.rejecting('image/jpg') }
+  end
+
+  test 'negative and positive' do
+    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
+    matcher.rejecting('image/png')
+    assert_raise(ArgumentError) { matcher.allowing('image/jpg') }
+  end
+
   test 'positive match when providing class' do
     matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
     matcher.allowing('image/png')
-    matcher.rejecting('application/pdf')
     assert matcher.matches?(User)
   end
 
@@ -26,7 +37,6 @@ class ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test < Ac
   test 'positive match when providing instance' do
     matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
     matcher.allowing('image/png')
-    matcher.rejecting('application/pdf')
     assert matcher.matches?(User.new)
   end
 
