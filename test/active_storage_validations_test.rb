@@ -91,6 +91,24 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_photos.attach(bad_dummy_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Image regex has an invalid content type', 'Proc avatar has an invalid content type', 'Proc photos has an invalid content type', 'Proc image regex has an invalid content type']
+
+    u = User.new(name: 'Peter Griffin')
+    u.avatar.attach(dummy_file)
+    u.proc_avatar.attach(dummy_file)
+    u.photos.attach(dummy_file)
+    u.proc_photos.attach(dummy_file)
+    u.conditional_image_2.attach(dummy_file)
+    assert u.valid?
+    assert_equal u.errors.full_messages, []
+
+    u = User.new(name: 'Peter Griffin')
+    u.avatar.attach(bad_dummy_file)
+    u.proc_avatar.attach(bad_dummy_file)
+    u.photos.attach(bad_dummy_file)
+    u.proc_photos.attach(dummy_file)
+    u.conditional_image_2.attach(bad_dummy_file)
+    assert !u.valid?
+    assert_equal u.errors.full_messages, ["Avatar has an invalid content type", "Photos has an invalid content type", "Conditional image 2 has an invalid content type", "Proc avatar has an invalid content type"]
   end
 
   # reads content type from file, not from webp_file_wrong method
