@@ -1,5 +1,5 @@
 - master
-  ...
+  - add ProcessableImageValidator
 
 - 1.0.0
   - allow Procs as an input for validation options https://github.com/igorkasyanchuk/active_storage_validations/pull/135/files
