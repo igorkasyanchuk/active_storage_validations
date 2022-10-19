@@ -19,11 +19,13 @@ module ActiveStorageValidations
 
       def allowing(*types)
         @allowed_types = types.flatten
+        either_allowing_or_rejecting
         self
       end
 
       def rejecting(*types)
         @rejected_types = types.flatten
+        either_allowing_or_rejecting
         self
       end
 
@@ -33,18 +35,28 @@ module ActiveStorageValidations
       end
 
       def failure_message
-        <<~MESSAGE
-          Expected #{@attribute_name}
+        message = ["Expected #{@attribute_name}"]
 
-            Accept content types: #{allowed_types.join(", ")}
-              #{accepted_types_and_failures}
+        if @allowed_types
+          message << "Accept content types: #{allowed_types.join(", ")}"
+          message << "#{@missing_allowed_types.join(", ")} were rejected"
+        end
 
-            Reject content types: #{rejected_types.join(", ")}
-              #{rejected_types_and_failures}
-        MESSAGE
+        if @rejected_types
+          message << "Reject content types: #{rejected_types.join(", ")}"
+          message << "#{@missing_rejected_types.join(", ")} were accepted"
+        end
+
+        message.join("\n")
       end
 
       protected
+
+      def either_allowing_or_rejecting
+        if @allowed_types && @rejected_types
+          raise ArgumentError, "You must specify either allowing or rejecting"
+        end
+      end
 
       def responds_to_methods
         @subject.respond_to?(@attribute_name) &&
@@ -57,7 +69,7 @@ module ActiveStorageValidations
       end
 
       def rejected_types
-        @rejected_types || (content_type_keys - allowed_types)
+        @rejected_types || []
       end
 
       def allowed_types_allowed?
@@ -70,22 +82,6 @@ module ActiveStorageValidations
         @missing_rejected_types.none?
       end
 
-      def accepted_types_and_failures
-        if @missing_allowed_types.present?
-          "#{@missing_allowed_types.join(", ")} were rejected."
-        else
-          "All were accepted successfully."
-        end
-      end
-
-      def rejected_types_and_failures
-        if @missing_rejected_types.present?
-          "#{@missing_rejected_types.join(", ")} were accepted."
-        else
-          "All were rejected successfully."
-        end
-      end
-
       def type_allowed?(type)
         @subject.public_send(@attribute_name).attach(attachment_for(type))
         @subject.validate
@@ -95,16 +91,6 @@ module ActiveStorageValidations
       def attachment_for(type)
         suffix = type.to_s.split('/').last
         { io: Tempfile.new('.'), filename: "test.#{suffix}", content_type: type }
-      end
-
-      private
-
-      def content_type_keys
-        if Rails.gem_version < Gem::Version.new('6.1.0')
-          Mime::LOOKUP.keys
-        else
-          Marcel::TYPES.keys
-        end
       end
     end
   end
