@@ -1,5 +1,8 @@
 - master
-  - add ProcessableImageValidator
+
+- 1.0.1
+  - add ProcessableImageValidator https://github.com/igorkasyanchuk/active_storage_validations/pull/168
+  - fix slowness https://github.com/igorkasyanchuk/active_storage_validations/pull/169
 
 - 1.0.0
   - allow Procs as an input for validation options https://github.com/igorkasyanchuk/active_storage_validations/pull/135/files

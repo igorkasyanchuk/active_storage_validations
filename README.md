@@ -398,6 +398,8 @@ You are welcome to contribute.
 = https://github.com/gr8bit
 = https://github.com/codegeek319
 = https://github.com/clwy-cn
+= https://github.com/kukicola
+= https://github.com/sobrinho
 
 ## License
 
