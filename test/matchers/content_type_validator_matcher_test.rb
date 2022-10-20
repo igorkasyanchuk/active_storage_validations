@@ -51,4 +51,16 @@ class ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test < Ac
     matcher.allowing('image/png')
     refute matcher.matches?(User.new)
   end
+
+  test 'positive match for rejecting' do
+    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
+    matcher.rejecting('image/jpeg')
+    assert matcher.matches?(User)
+  end
+
+  test 'negative match for rejecting' do
+    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
+    matcher.rejecting('image/png')
+    refute matcher.matches?(User)
+  end
 end
