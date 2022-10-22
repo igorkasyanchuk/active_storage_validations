@@ -1,5 +1,8 @@
 - master
 
+- 1.0.2
+  - Support using allowing and rejecting together on content type matcher https://github.com/igorkasyanchuk/active_storage_validations/pull/172
+
 - 1.0.1
   - add ProcessableImageValidator https://github.com/igorkasyanchuk/active_storage_validations/pull/168
   - fix slowness https://github.com/igorkasyanchuk/active_storage_validations/pull/169
