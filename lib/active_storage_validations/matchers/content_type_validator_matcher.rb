@@ -19,13 +19,11 @@ module ActiveStorageValidations
 
       def allowing(*types)
         @allowed_types = types.flatten
-        either_allowing_or_rejecting
         self
       end
 
       def rejecting(*types)
         @rejected_types = types.flatten
-        either_allowing_or_rejecting
         self
       end
 
@@ -51,12 +49,6 @@ module ActiveStorageValidations
       end
 
       protected
-
-      def either_allowing_or_rejecting
-        if @allowed_types && @rejected_types
-          raise ArgumentError, "You must specify either allowing or rejecting"
-        end
-      end
 
       def responds_to_methods
         @subject.respond_to?(@attribute_name) &&
