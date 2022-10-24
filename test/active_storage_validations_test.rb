@@ -282,6 +282,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e = OnlyImage.new
     e.image.attach(image_1920x1080_file)
     e.proc_image.attach(image_1920x1080_file)
+    e.another_image.attach(image_1920x1080_file)
     assert e.valid?
 
     e = OnlyImage.new
