@@ -90,7 +90,7 @@ module ActiveStorageValidations
 
 
       raise InvalidImageError unless valid_image?(image)
-      yield image
+      yield image if block_given?
     rescue LoadError, NameError
       logger.info "Skipping image analysis because the mini_magick or ruby-vips gem isn't installed"
       {}
