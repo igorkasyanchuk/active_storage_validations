@@ -1,5 +1,8 @@
 - master
 
+- 1.0.3
+  - Fix missing block when using valid? method https://github.com/igorkasyanchuk/active_storage_validations/pull/174
+
 - 1.0.2
   - Support using allowing and rejecting together on content type matcher https://github.com/igorkasyanchuk/active_storage_validations/pull/172
 
