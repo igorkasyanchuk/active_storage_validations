@@ -81,10 +81,11 @@ module ActiveStorageValidations
                   MiniMagick::Image.new(tempfile.path)
                 end
       else
-        image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(read_file_path).downcase)
-                  Vips::Image.new_from_file(read_file_path)
+        file_path = read_file_path
+        image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(file_path).downcase)
+                  Vips::Image.new_from_file(file_path)
                 elsif defined?(MiniMagick)
-                  MiniMagick::Image.new(read_file_path)
+                  MiniMagick::Image.new(file_path)
                 end
       end
 
@@ -125,7 +126,18 @@ module ActiveStorageValidations
       when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
         file.path
       when Hash
-        File.open(file.fetch(:io)).path
+        io = file.fetch(:io)
+        if io.is_a?(StringIO)
+          tempfile = Tempfile.new([File.basename(file[:filename], '.*'), File.extname(file[:filename])])
+          tempfile.binmode
+          IO.copy_stream(io, tempfile)
+          io.rewind
+          tempfile.flush
+          tempfile.rewind
+          tempfile.path
+        else
+          File.open(io).path
+        end
       else
         raise "Something wrong with params."
       end
