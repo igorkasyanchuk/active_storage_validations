@@ -1,0 +1,22 @@
+zh-CN:
+  errors:
+    messages:
+      content_type_invalid: "文件类型错误"
+      file_size_out_of_range: "文件大小 %{file_size} 超出限定范围"
+      limit_out_of_range: "文件数超出限定范围"
+      image_metadata_missing: "不是有效的图像"
+      dimension_min_inclusion: "必须大于或等于 %{width} x %{height} 像素"
+      dimension_max_inclusion: "必须小于或等于 %{width} x %{height} 像素"
+      dimension_width_inclusion: "宽度不在 %{min} 和 %{max} 像素之间"
+      dimension_height_inclusion: "高度不在 %{min} 和 %{max} 像素之间"
+      dimension_width_greater_than_or_equal_to: "宽度必须大于或等于 %{length} 像素"
+      dimension_height_greater_than_or_equal_to: "高度必须大于或等于 %{length} 像素"
+      dimension_width_less_than_or_equal_to: "宽度必须小于或等于 %{length} 像素"
+      dimension_height_less_than_or_equal_to: "高度必须小于或等于 %{length} 像素"
+      dimension_width_equal_to: "宽度必须等于 %{length} 像素"
+      dimension_height_equal_to: "高度必须等于 %{length} 像素"
+      aspect_ratio_not_square: "必须是方形图片"
+      aspect_ratio_not_portrait: "必须是竖屏图片"
+      aspect_ratio_not_landscape: "必须是横屏图片"
+      aspect_ratio_is_not: "纵横比必须是 %{aspect_ratio}"
+      aspect_ratio_unknown: "未知的纵横比"

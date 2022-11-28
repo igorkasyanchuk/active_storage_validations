@@ -1,3 +1,6 @@
+[<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
+/>](https://www.railsjazz.com/?utm_source=github&utm_medium=top&utm_campaign=active_storage_validations)
+
 # Active Storage Validations
 
 [![MiniTest](https://github.com/igorkasyanchuk/active_storage_validations/workflows/MiniTest/badge.svg)](https://github.com/igorkasyanchuk/active_storage_validations/actions)
@@ -16,7 +19,9 @@ This gems doing it for you. Just use `attached: true` or `content_type: 'image/p
 * validates dimension of images/videos
 * validates number of uploaded files (min/max required)
 * validates aspect ratio (if square, portrait, landscape, is_16_9, ...)
+* validates if file can be processed by MiniMagick or Vips
 * custom error messages
+* allow procs for dynamic determination of values
 
 ## Usage
 
@@ -36,6 +41,7 @@ class User < ApplicationRecord
                                      dimension: { width: { min: 800, max: 2400 },
                                                   height: { min: 600, max: 1800 }, message: 'is not given between dimension' }
   validates :image, attached: true,
+                    processable_image: true,
                     content_type: ['image/png', 'image/jpeg'],
                     aspect_ratio: :landscape
 end
@@ -121,6 +127,18 @@ class User < ApplicationRecord
 end
 ```
 
+- Proc Usage:
+
+Procs can be used instead of values in all the above examples. They will be called on every validation.
+```ruby
+class User < ApplicationRecord
+  has_many_attached :proc_files
+
+  validates :proc_files, limit: { max: -> (record) { record.admin? ? 100 : 10 } }
+end
+
+```
+
 ## Internationalization (I18n)
 
 Active Storage Validations uses I18n for error messages. For this, add these keys in your translation file:
@@ -148,6 +166,7 @@ en:
       aspect_ratio_not_landscape: "must be a landscape image"
       aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
       aspect_ratio_unknown: "has an unknown aspect ratio"
+      image_not_processable: "is not a valid image"
 ```
 
 In some cases, Active Storage Validations provides variables to help you customize messages:
@@ -295,20 +314,18 @@ end
 
 To run tests in root folder of gem:
 
-* `BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle exec rake test` to run for Rails 5.2
 * `BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test` to run for Rails 6.0
 * `BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test` to run for Rails 6.1
+* `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
 * `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main branch
 
 Snippet to run in console:
 
 ```
-BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
@@ -378,10 +395,15 @@ You are welcome to contribute.
 - https://github.com/stephensolis
 - https://github.com/kwent
 = https://github.com/Animesh-Ghosh
+= https://github.com/gr8bit
+= https://github.com/codegeek319
+= https://github.com/clwy-cn
+= https://github.com/kukicola
+= https://github.com/sobrinho
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
 
 [<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
-/>](https://www.railsjazz.com/)
+/>](https://www.railsjazz.com/?utm_source=github&utm_medium=bottom&utm_campaign=active_storage_validations)

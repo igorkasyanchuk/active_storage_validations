@@ -1,5 +1,19 @@
 - master
-  - ....
+
+- 1.0.3
+  - Fix missing block when using valid? method https://github.com/igorkasyanchuk/active_storage_validations/pull/174
+
+- 1.0.2
+  - Support using allowing and rejecting together on content type matcher https://github.com/igorkasyanchuk/active_storage_validations/pull/172
+
+- 1.0.1
+  - add ProcessableImageValidator https://github.com/igorkasyanchuk/active_storage_validations/pull/168
+  - fix slowness https://github.com/igorkasyanchuk/active_storage_validations/pull/169
+
+- 1.0.0
+  - allow Procs as an input for validation options https://github.com/igorkasyanchuk/active_storage_validations/pull/135/files
+  - new translation zh-CN https://github.com/igorkasyanchuk/active_storage_validations/pull/162
+  - drop support of Rails 5.2 (in tests, but in reality it should work, just check PR in this version)
 
 - 0.9.8
   - Fix a file extension issue in Metadata#read_image https://github.com/igorkasyanchuk/active_storage_validations/pull/148/files
@@ -7,9 +21,9 @@
   - Display All Validation Errors https://github.com/igorkasyanchuk/active_storage_validations/pull/152
 
 - 0.9.7
-  - tests for Rails 7 and Ruby 3.1 https://github.com/igorkasyanchuk/active_storage_validations/pull/143 
+  - tests for Rails 7 and Ruby 3.1 https://github.com/igorkasyanchuk/active_storage_validations/pull/143
   - Fix pt-BR translations https://github.com/igorkasyanchuk/active_storage_validations/pull/132
-  - Remove references to image/jpg content type https://github.com/igorkasyanchuk/active_storage_validations/pull/144 
+  - Remove references to image/jpg content type https://github.com/igorkasyanchuk/active_storage_validations/pull/144
   - missing relationship in dummy app https://github.com/igorkasyanchuk/active_storage_validations/pull/142
   - References Marcel::TYPES only for Rails < 6.1 https://github.com/igorkasyanchuk/active_storage_validations/pull/138
   - better clarify how to define between size https://github.com/igorkasyanchuk/active_storage_validations/pull/133

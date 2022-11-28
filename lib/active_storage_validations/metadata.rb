@@ -1,5 +1,7 @@
 module ActiveStorageValidations
   class Metadata
+    class InvalidImageError < StandardError; end
+
     attr_reader :file
 
     def initialize(file)
@@ -10,7 +12,7 @@ module ActiveStorageValidations
     def image_processor
       Rails.application.config.active_storage.variant_processor
     end
-    
+
     def exception_class
       if image_processor == :vips && defined?(Vips)
         Vips::Error
@@ -35,6 +37,16 @@ module ActiveStorageValidations
           { width: image.width, height: image.height }
         end
       end
+    rescue InvalidImageError
+      logger.info "Skipping image analysis because ImageMagick or Vips doesn't support the file"
+      {}
+    end
+
+    def valid?
+      read_image
+      true
+    rescue InvalidImageError
+      false
     end
 
     private
@@ -76,12 +88,9 @@ module ActiveStorageValidations
                 end
       end
 
-      if image && valid_image?(image)
-        yield image
-      else
-        logger.info "Skipping image analysis because ImageMagick or Vips doesn't support the file"
-        {}
-      end
+
+      raise InvalidImageError unless valid_image?(image)
+      yield image if block_given?
     rescue LoadError, NameError
       logger.info "Skipping image analysis because the mini_magick or ruby-vips gem isn't installed"
       {}
@@ -93,6 +102,8 @@ module ActiveStorageValidations
     end
 
     def valid_image?(image)
+      return false unless image
+
       image_processor == :vips && image.is_a?(Vips::Image) ? image.avg : image.valid?
     rescue exception_class
       false
