@@ -1,7 +1,7 @@
 en:
   errors:
     messages:
-      content_type_invalid: "has an invalid content type"
+      content_type_invalid: "has not allowed to upload %{content_type} files, allowed types: %{authorized_types}"
       file_size_out_of_range: "size %{file_size} is not between required range"
       limit_out_of_range: "total number is out of range"
       image_metadata_missing: "is not a valid image"
