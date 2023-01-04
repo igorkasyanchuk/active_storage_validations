@@ -1,4 +1,6 @@
 - master
+  - Support for StringIO attachments https://github.com/igorkasyanchuk/active_storage_validations/pull/176
+  - Test against Ruby 3.2
 
 - 1.0.3
   - Fix missing block when using valid? method https://github.com/igorkasyanchuk/active_storage_validations/pull/174
