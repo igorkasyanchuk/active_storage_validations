@@ -140,7 +140,11 @@ module ActiveStorageValidations
         Matchers.mock_metadata(attachment, width, height) do
           @subject.validate
           exclude_error_message = @custom_message || "dimension_#{check}"
-          @subject.errors.details[@attribute_name].all? { |error| error[:error].to_s.exclude?(exclude_error_message) }
+          @subject.errors.details[@attribute_name].all? do |error|
+            error[:error].to_s.exclude?(exclude_error_message) &&
+            error[:error].to_s.exclude?("dimension_min") &&
+            error[:error].to_s.exclude?("dimension_max")
+          end
         end
       end
 
