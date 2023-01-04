@@ -394,12 +394,12 @@ You are welcome to contribute.
 - https://github.com/NARKOZ
 - https://github.com/stephensolis
 - https://github.com/kwent
-= https://github.com/Animesh-Ghosh
-= https://github.com/gr8bit
-= https://github.com/codegeek319
-= https://github.com/clwy-cn
-= https://github.com/kukicola
-= https://github.com/sobrinho
+- https://github.com/Animesh-Ghosh
+- https://github.com/gr8bit
+- https://github.com/codegeek319
+- https://github.com/clwy-cn
+- https://github.com/kukicola
+- https://github.com/sobrinho
 
 ## License
 
