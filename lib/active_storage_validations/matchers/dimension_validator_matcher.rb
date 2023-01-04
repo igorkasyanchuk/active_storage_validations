@@ -65,8 +65,8 @@ module ActiveStorageValidations
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
         responds_to_methods &&
-          width_smaller_than_min? && width_larger_than_min? && width_smaller_than_max? && width_larger_than_max? && width_equals? &&
-          height_smaller_than_min? && height_larger_than_min? && height_smaller_than_max? && height_larger_than_max? && height_equals?
+          width_not_smaller_than_min? && width_larger_than_min? && width_smaller_than_max? && width_not_larger_than_max? && width_equals? &&
+          height_not_smaller_than_min? && height_larger_than_min? && height_smaller_than_max? && height_not_larger_than_max? && height_equals?
       end
 
       def failure_message
@@ -93,7 +93,7 @@ module ActiveStorageValidations
         ((@height_min || 0) + (@height_max || 2000)) / 2
       end
 
-      def width_smaller_than_min?
+      def width_not_smaller_than_min?
         @width_min.nil? || !passes_validation_with_dimensions(@width_min - 1, valid_height, 'width')
       end
 
@@ -105,7 +105,7 @@ module ActiveStorageValidations
         @width_max.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_max - 1, valid_height, 'width')
       end
 
-      def width_larger_than_max?
+      def width_not_larger_than_max?
         @width_max.nil? || !passes_validation_with_dimensions(@width_max + 1, valid_height, 'width')
       end
 
@@ -113,7 +113,7 @@ module ActiveStorageValidations
         @width_min.nil? || @width_min != @width_max || passes_validation_with_dimensions(@width_min, valid_height, 'width')
       end
 
-      def height_smaller_than_min?
+      def height_not_smaller_than_min?
         @height_min.nil? || !passes_validation_with_dimensions(valid_width, @height_min - 1, 'height')
       end
 
@@ -125,7 +125,7 @@ module ActiveStorageValidations
         @height_max.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_max - 1, 'height')
       end
 
-      def height_larger_than_max?
+      def height_not_larger_than_max?
         @height_max.nil? || !passes_validation_with_dimensions(valid_width, @height_max + 1, 'height')
       end
 
@@ -140,10 +140,10 @@ module ActiveStorageValidations
         Matchers.mock_metadata(attachment, width, height) do
           @subject.validate
           exclude_error_message = @custom_message || "dimension_#{check}"
-          @subject.errors.details[@attribute_name].all? do |error|
-            error[:error].to_s.exclude?(exclude_error_message) &&
-            error[:error].to_s.exclude?("dimension_min") &&
-            error[:error].to_s.exclude?("dimension_max")
+          @subject.errors.details[@attribute_name].none? do |error|
+            error[:error].to_s.include?(exclude_error_message) ||
+            error[:error].to_s.include?("dimension_min") ||
+            error[:error].to_s.include?("dimension_max")
           end
         end
       end
