@@ -309,6 +309,15 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     raise ex
   end
 
+  test 'dimensions with attached StringIO' do
+    e = OnlyImage.new
+    e.image.attach(image_string_io)
+    e.proc_image.attach(image_string_io)
+    e.another_image.attach(image_string_io)
+    e.any_image.attach(image_string_io)
+    assert e.valid?
+  end
+
   test 'dimensions test' do
     e = Project.new(title: 'Death Star')
     e.preview.attach(big_file)
@@ -591,4 +600,11 @@ end
 
 def tar_file_with_image_content_type
   { io: File.open(Rails.root.join('public', '404.html.tar')), filename: '404.png', content_type: 'image/png' }
+end
+
+def image_string_io
+  string_io = StringIO.new().tap {|io| io.binmode }
+  IO.copy_stream(File.open(Rails.root.join('public', 'image_1920x1080.png')), string_io)
+  string_io.rewind
+  { io: string_io, filename: 'image_1920x1080.png', content_type: 'image/png' }
 end
