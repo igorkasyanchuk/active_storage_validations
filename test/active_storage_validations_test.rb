@@ -180,7 +180,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_small_file.attach(big_file)
     e.attachment.attach(pdf_file)
     e.proc_attachment.attach(pdf_file)
-    e.documents.attach(pdf_file) # ROBIN
+    e.documents.attach(pdf_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ['Small file size 1.6 KB is not between required range', 'Proc small file size 1.6 KB is not between required range']
   end
@@ -338,6 +338,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_attachment.attach(pdf_file)
     e.dimension_exact.attach(html_file)
     e.documents.attach(pdf_file)
+    e.proc_dimension_exact.attach(html_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ['Dimension exact is not a valid image', 'Proc dimension exact is not a valid image']
 
@@ -386,7 +387,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
     e.proc_attachment.attach(pdf_file)
-    e.documents.attach(pdf_file) # ROBIN
+    e.documents.attach(pdf_file)
     e.dimension_range.attach(image_1200x900_file)
     e.proc_dimension_range.attach(image_1200x900_file)
     assert e.valid?, 'Dimension range: width and height must be less than or equal to 1200 x 900 pixel.'
@@ -398,7 +399,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
     e.proc_attachment.attach(pdf_file)
-    e.documents.attach(pdf_file) # ROBIN
+    e.documents.attach(pdf_file)
     e.dimension_min.attach(image_800x600_file)
     e.proc_dimension_min.attach(image_800x600_file)
     assert e.valid?, 'Dimension min: width and height must be greater than or equal to 800 x 600 pixel.'
@@ -410,7 +411,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
     e.proc_attachment.attach(pdf_file)
-    e.documents.attach(pdf_file) # ROBIN
+    e.documents.attach(pdf_file)
     e.dimension_max.attach(image_1200x900_file)
     e.proc_dimension_max.attach(image_1200x900_file)
     assert e.valid?, 'Dimension max: width and height must be greater than or equal to 1200 x 900 pixel.'
@@ -422,7 +423,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
     e.proc_attachment.attach(pdf_file)
-    e.documents.attach(pdf_file) # ROBIN
+    e.documents.attach(pdf_file)
     e.dimension_images.attach([image_800x600_file, image_1200x900_file])
     e.proc_dimension_images.attach([image_800x600_file, image_1200x900_file])
     assert e.valid?, 'Dimension many: width and height must be between or equal to 800 x 600 and 1200 x 900 pixel.'
@@ -434,7 +435,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_small_file.attach(dummy_file)
     e.attachment.attach(pdf_file)
     e.proc_attachment.attach(pdf_file)
-    e.documents.attach(pdf_file) # ROBIN
+    e.documents.attach(pdf_file)
     e.dimension_images.attach([image_800x600_file])
     e.proc_dimension_images.attach([image_800x600_file])
     e.save!

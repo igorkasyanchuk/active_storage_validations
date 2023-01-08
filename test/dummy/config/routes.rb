@@ -1,6 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
-  resources :ratio_models
-  resources :projects
-  resources :users
-  root 'users#index'
+  # Add your own routes here, or remove this file if you don't have need for it.
 end

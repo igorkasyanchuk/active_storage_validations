@@ -16,9 +16,8 @@ module ActiveStorageValidations
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject : subject.class
-
-        invalid_when_not_attached && valid_when_attached
+        @subject = subject.is_a?(Class) ? subject.new : subject
+        responds_to_methods && valid_when_attached && invalid_when_not_attached
       end
 
       def failure_message
@@ -31,17 +30,25 @@ module ActiveStorageValidations
 
       private
 
+      def responds_to_methods
+        @subject.respond_to?(@attribute_name) &&
+          @subject.public_send(@attribute_name).respond_to?(:attach) &&
+          @subject.public_send(@attribute_name).respond_to?(:detach)
+      end
+
       def valid_when_attached
-        instance = @subject.new
-        instance.public_send(@attribute_name).attach(attachable)
-        instance.validate
-        instance.errors.details[@attribute_name].exclude?(error: :blank)
+        @subject.public_send(@attribute_name).attach(attachable) unless @subject.public_send(@attribute_name).attached?
+        @subject.validate
+        @subject.errors.details[@attribute_name].exclude?(error: :blank)
       end
 
       def invalid_when_not_attached
-        instance = @subject.new
-        instance.validate
-        instance.errors.details[@attribute_name].include?(error: :blank)
+        @subject.public_send(@attribute_name).detach
+        # Unset the direct relation since `detach` on an unpersisted record does not set `attached?` to false.
+        @subject.public_send("#{@attribute_name}=", nil)
+
+        @subject.validate
+        @subject.errors.details[@attribute_name].include?(error: :blank)
       end
 
       def attachable

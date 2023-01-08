@@ -1,0 +1,22 @@
+nl:
+  errors:
+    messages:
+      content_type_invalid: "heeft een ongeldig inhoudstype"
+      file_size_out_of_range: "bestandsgrootte %{file_size} valt niet tussen het vereiste bereik"
+      limit_out_of_range: "totaal aantal valt buiten het vereiste bereik"
+      image_metadata_missing: "is geen geldige afbeelding"
+      dimension_min_inclusion: "moet groter of gelijk zijn aan %{width} x %{height} pixels"
+      dimension_max_inclusion: "moet kleiner of gelijk zijn aan %{width} x %{height} pixels"
+      dimension_width_inclusion: "breedte niet tussen de %{min} en %{max} pixels"
+      dimension_height_inclusion: "hoogte niet tussen de %{min} en %{max} pixels"
+      dimension_width_greater_than_or_equal_to: "breedte moet groter of gelijk zijn aan %{length} pixels"
+      dimension_height_greater_than_or_equal_to: "hoogte moet groter of gelijk zijn aan %{length} pixels"
+      dimension_width_less_than_or_equal_to: "breedte moet kleiner of gelijk zijn aan %{length} pixels"
+      dimension_height_less_than_or_equal_to: "hoogte moet kleiner of gelijk zijn aan %{length} pixels"
+      dimension_width_equal_to: "breedte moet gelijk zijn aan %{length} pixels"
+      dimension_height_equal_to: "hoogte moet gelijk zijn aan %{length} pixels"
+      aspect_ratio_not_square: "moet een vierkante afbeelding zijn"
+      aspect_ratio_not_portrait: "moet een staande afbeelding zijn"
+      aspect_ratio_not_landscape: "moet een liggende afbeelding zijn"
+      aspect_ratio_is_not: "moet een beeldverhouding hebben van %{aspect_ratio}"
+      aspect_ratio_unknown: "heeft een onbekende beeldverhouding"

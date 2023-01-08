@@ -63,4 +63,22 @@ class ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test < ActiveSup
     matcher.less_than 0.5.kilobyte
     refute matcher.matches?(Project)
   end
+
+  test 'works when providing an instance' do
+    matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:preview)
+    matcher.greater_than 1.kilobyte
+    assert matcher.matches?(Project.new)
+  end
+
+  test 'unknown attached when providing class' do
+    matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:non_existing)
+    matcher.greater_than 1.kilobyte
+    refute matcher.matches?(Project)
+  end
+
+  test 'unknown attached when providing instance' do
+    matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:non_existing)
+    matcher.greater_than 1.kilobyte
+    refute matcher.matches?(Project.new)
+  end
 end

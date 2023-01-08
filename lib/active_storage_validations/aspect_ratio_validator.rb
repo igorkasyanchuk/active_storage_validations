@@ -4,21 +4,17 @@ require_relative 'metadata.rb'
 
 module ActiveStorageValidations
   class AspectRatioValidator < ActiveModel::EachValidator # :nodoc
+    include OptionProcUnfolding
+
     AVAILABLE_CHECKS = %i[with].freeze
     PRECISION = 3
 
-    def initialize(options)
-      require 'mini_magick' unless defined?(MiniMagick)
-      super(options)
-    end
-
-
     def check_validity!
       return true if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-      raise ArgumentError, 'You must pass "aspect_ratio: :OPTION" option to the validator'
+      raise ArgumentError, 'You must pass :with to the validator'
     end
 
-    if Rails::VERSION::MAJOR >= 6
+    if Rails.gem_version >= Gem::Version.new('6.0.0')
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
 
@@ -37,14 +33,14 @@ module ActiveStorageValidations
       # Rails 5
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
-  
+
         files = Array.wrap(record.send(attribute))
-  
+
         files.each do |file|
           # Analyze file first if not analyzed to get all required metadata.
           file.analyze; file.reload unless file.analyzed?
           metadata = file.metadata
-  
+
           next if is_valid?(record, attribute, metadata)
           break
         end
@@ -56,26 +52,27 @@ module ActiveStorageValidations
 
 
     def is_valid?(record, attribute, metadata)
+      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
-        add_error(record, attribute, options[:message].presence || :image_metadata_missing)
+        add_error(record, attribute, :image_metadata_missing, flat_options[:with])
         return false
       end
 
-      case options[:with]
+      case flat_options[:with]
       when :square
         return true if metadata[:width] == metadata[:height]
-        add_error(record, attribute, :aspect_ratio_not_square)
+        add_error(record, attribute, :aspect_ratio_not_square, flat_options[:with])
 
       when :portrait
         return true if metadata[:height] > metadata[:width]
-        add_error(record, attribute, :aspect_ratio_not_portrait)
+        add_error(record, attribute, :aspect_ratio_not_portrait, flat_options[:with])
 
       when :landscape
         return true if metadata[:width] > metadata[:height]
-        add_error(record, attribute, :aspect_ratio_not_landscape)
+        add_error(record, attribute, :aspect_ratio_not_landscape, flat_options[:with])
 
       else
-        if options[:with] =~ /is\_(\d*)\_(\d*)/
+        if flat_options[:with] =~ /is_(\d*)_(\d*)/
           x = $1.to_i
           y = $2.to_i
 
@@ -83,17 +80,17 @@ module ActiveStorageValidations
 
           add_error(record, attribute, :aspect_ratio_is_not, "#{x}x#{y}")
         else
-          add_error(record, attribute, :aspect_ratio_unknown)
+          add_error(record, attribute, :aspect_ratio_unknown, flat_options[:with])
         end
       end
       false
     end
 
 
-    def add_error(record, attribute, type, interpolate = options[:with])
-      key = options[:message].presence || type
-      return if record.errors.added?(attribute, key)
-      record.errors.add(attribute, key, aspect_ratio: interpolate)
+    def add_error(record, attribute, default_message, interpolate)
+      message = options[:message].presence || default_message
+      return if record.errors.added?(attribute, message)
+      record.errors.add(attribute, message, aspect_ratio: interpolate)
     end
 
   end

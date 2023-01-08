@@ -47,6 +47,14 @@ class ActiveStorageValidations::Matchers::DimensionValidatorMatcher::Test < Acti
     assert matcher.matches?(Project)
   end
 
+  test 'width positive exact match with custom message' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact_with_message)
+    matcher.width 150
+    matcher.height 150
+    matcher.with_message('Invalid dimensions.')
+    assert matcher.matches?(Project)
+  end
+
   test 'width bigger than exact match' do
     matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact)
     matcher.width 999
@@ -115,6 +123,82 @@ class ActiveStorageValidations::Matchers::DimensionValidatorMatcher::Test < Acti
     matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_exact)
     matcher.width 150 # Make sure the validation on width is ok
     matcher.height 50
+    refute matcher.matches?(Project)
+  end
+
+  test 'works when providing an instance' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_range)
+    matcher.width_min 800
+    assert matcher.matches?(Project.new)
+  end
+
+  test 'unknown attached when providing class' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:non_existing)
+    matcher.width_min 800
+    refute matcher.matches?(Project)
+  end
+
+  test 'unknown attached when providing instance' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:non_existing)
+    matcher.width_min 800
+    refute matcher.matches?(Project.new)
+  end
+
+  # width_min and height_min combined
+  test 'both width_min and height_min on higher combined are a positive match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_min)
+    matcher.width_min 800
+    matcher.height_min 600
+    assert matcher.matches?(Project)
+  end
+
+  test 'width_min less than lower and height_min on higher combined are a negative match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_min)
+    matcher.width_min 700
+    matcher.height_min 600
+    refute matcher.matches?(Project)
+  end
+
+  test 'width_min on higher and height_min less than lower combined are a negative match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_min)
+    matcher.width_min 800
+    matcher.height_min 500
+    refute matcher.matches?(Project)
+  end
+
+  test 'both width_min and height_min less than lower combined are a negative match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_min)
+    matcher.width_min 700
+    matcher.height_min 500
+    refute matcher.matches?(Project)
+  end
+
+  # width_max and height_max combined
+  test 'both width_max and height_max on higher combined are a positive match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_max)
+    matcher.width_max 1200
+    matcher.height_max 900
+    assert matcher.matches?(Project)
+  end
+
+  test 'width_max higher than higher and height_max on higher combined are a negative match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_max)
+    matcher.width_max 1500
+    matcher.height_max 900
+    refute matcher.matches?(Project)
+  end
+
+  test 'width_max on higher and height_max higher than higher combined are a negative match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_max)
+    matcher.width_max 1200
+    matcher.height_max 1100
+    refute matcher.matches?(Project)
+  end
+
+  test 'both width_max and height_max higher than higher combined are a negative match' do
+    matcher = ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(:dimension_max)
+    matcher.width_min 1500
+    matcher.height_max 1100
     refute matcher.matches?(Project)
   end
 end

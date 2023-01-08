@@ -1,0 +1,22 @@
+es:
+  errors:
+    messages:
+      content_type_invalid: "tiene un tipo de contenido inválido"
+      file_size_out_of_range: "tamaño %{file_size} no está entre el rango requerido"
+      limit_out_of_range: "el número total está fuera de rango"
+      image_metadata_missing: "no es una imagen válida"
+      dimension_min_inclusion: "debe ser mayor o igual a %{width} x %{height} pixel"
+      dimension_max_inclusion: "debe ser menor o igual a %{width} x %{height} pixel"
+      dimension_width_inclusion: "el ancho no se incluye entre %{min} y %{max} pixel"
+      dimension_height_inclusion: "la altura no se incluye entre %{min} y %{max} pixel"
+      dimension_width_greater_than_or_equal_to: "el ancho debe ser mayor o igual a %{length} pixel"
+      dimension_height_greater_than_or_equal_to: "la altura debe ser mayor o igual a %{length} pixel"
+      dimension_width_less_than_or_equal_to: "el ancho debe ser menor o igual a %{length} pixel"
+      dimension_height_less_than_or_equal_to: "la altura debe ser menor o igual a %{length} pixel"
+      dimension_width_equal_to: "el ancho debe ser igual a %{length} pixel"
+      dimension_height_equal_to: "la altura debe ser igual a %{length} pixel"
+      aspect_ratio_not_square: "debe ser una imagen cuadrada"
+      aspect_ratio_not_portrait: "debe ser una imagen vertical"
+      aspect_ratio_not_landscape: "debe ser una imagen apaisada"
+      aspect_ratio_is_not: "debe tener una relación de aspecto de %{aspect_ratio}"
+      aspect_ratio_unknown: "tiene una relación de aspecto desconocida"

@@ -1,10 +1,15 @@
+[<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
+/>](https://www.railsjazz.com/?utm_source=github&utm_medium=top&utm_campaign=active_storage_validations)
+
 # Active Storage Validations
 
-If you are using `active_storage` gem and you want to add simple validations for it, like presence or content_type you need to write a custom valiation method.
+[![MiniTest](https://github.com/igorkasyanchuk/active_storage_validations/workflows/MiniTest/badge.svg)](https://github.com/igorkasyanchuk/active_storage_validations/actions)
+[![RailsJazz](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/my_other.svg?raw=true)](https://www.railsjazz.com)
+[![https://www.patreon.com/igorkasyanchuk](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/patron.svg?raw=true)](https://www.patreon.com/igorkasyanchuk)
+
+If you are using `active_storage` gem and you want to add simple validations for it, like presence or content_type you need to write a custom validation method.
 
 This gems doing it for you. Just use `attached: true` or `content_type: 'image/png'` validation.
-
-[![Build Status](https://travis-ci.org/igorkasyanchuk/active_storage_validations.svg?branch=master)](https://travis-ci.org/igorkasyanchuk/active_storage_validations)
 
 ## What it can do
 
@@ -14,7 +19,9 @@ This gems doing it for you. Just use `attached: true` or `content_type: 'image/p
 * validates dimension of images/videos
 * validates number of uploaded files (min/max required)
 * validates aspect ratio (if square, portrait, landscape, is_16_9, ...)
+* validates if file can be processed by MiniMagick or Vips
 * custom error messages
+* allow procs for dynamic determination of values
 
 ## Usage
 
@@ -24,16 +31,18 @@ For example you have a model like this and you want to add validation.
 class User < ApplicationRecord
   has_one_attached :avatar
   has_many_attached :photos
+  has_one_attached :image
 
   validates :name, presence: true
 
   validates :avatar, attached: true, content_type: 'image/png',
                                      dimension: { width: 200, height: 200 }
-  validates :photos, attached: true, content_type: ['image/png', 'image/jpg', 'image/jpeg'],
+  validates :photos, attached: true, content_type: ['image/png', 'image/jpeg'],
                                      dimension: { width: { min: 800, max: 2400 },
                                                   height: { min: 600, max: 1800 }, message: 'is not given between dimension' }
   validates :image, attached: true,
-                    content_type: ['image/png', 'image/jpg'],
+                    processable_image: true,
+                    content_type: ['image/png', 'image/jpeg'],
                     aspect_ratio: :landscape
 end
 ```
@@ -42,13 +51,15 @@ or
 
 ```ruby
 class Project < ApplicationRecord
+  has_one_attached :logo
   has_one_attached :preview
   has_one_attached :attachment
   has_many_attached :documents
 
   validates :title, presence: true
 
-  validates :preview, attached: true, size: { less_than: 100.megabytes , message: 'is not given between size' }
+  validates :logo, attached: true, size: { less_than: 100.megabytes , message: 'is too large' }
+  validates :preview, attached: true, size: { between: 1.kilobyte..100.megabytes , message: 'is not given between size' }
   validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' }
   validates :documents, limit: { min: 1, max: 3 }
 end
@@ -56,14 +67,15 @@ end
 
 ### More examples
 
-- Content type validation using symbols. In order to infer the correct mime type from the symbol, the types must be registered with `Mime::Type`.
+- Content type validation using symbols. In order to infer the correct mime type from the symbol, the types must be registered with `Marcel::EXTENSIONS` (`MimeMagic::EXTENSIONS` for Rails <= 6.1.3).
 
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
   has_many_attached :photos
 
-  validates :avatar, attached: true, content_type: :png # Mime[:png].to_s => 'image/png'
+  validates :avatar, attached: true, content_type: :png # Marcel::Magic.by_extension(:png).to_s => 'image/png'
+                                                        # Rails <= 6.1.3; MimeMagic.by_extension(:png).to_s => 'image/png'
   # or
   validates :photos, attached: true, content_type: [:png, :jpg, :jpeg]
   # or
@@ -115,6 +127,18 @@ class User < ApplicationRecord
 end
 ```
 
+- Proc Usage:
+
+Procs can be used instead of values in all the above examples. They will be called on every validation.
+```ruby
+class User < ApplicationRecord
+  has_many_attached :proc_files
+
+  validates :proc_files, limit: { max: -> (record) { record.admin? ? 100 : 10 } }
+end
+
+```
+
 ## Internationalization (I18n)
 
 Active Storage Validations uses I18n for error messages. For this, add these keys in your translation file:
@@ -142,6 +166,7 @@ en:
       aspect_ratio_not_landscape: "must be a landscape image"
       aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
       aspect_ratio_unknown: "has an unknown aspect ratio"
+      image_not_processable: "is not a valid image"
 ```
 
 In some cases, Active Storage Validations provides variables to help you customize messages:
@@ -174,6 +199,8 @@ gem 'active_storage_validations'
 
 # Optional, to use :dimension validator or :aspect_ratio validator
 gem 'mini_magick', '>= 4.9.5'
+# Or
+gem 'ruby-vips', '>= 2.1.0'
 ```
 
 And then execute:
@@ -218,6 +245,7 @@ describe User do
 
   it { is_expected.to validate_dimensions_of(:avatar).width(250) }
   it { is_expected.to validate_dimensions_of(:avatar).height(200) }
+  it { is_expected.to validate_dimensions_of(:avatar).width(250).height(200).with_message('Invalid dimensions.') }
   it { is_expected.to validate_dimensions_of(:avatar).width_min(200) }
   it { is_expected.to validate_dimensions_of(:avatar).width_max(500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_min(100) }
@@ -259,6 +287,7 @@ class UserTest < ActiveSupport::TestCase
 
   should validate_dimensions_of(:avatar).width(250)
   should validate_dimensions_of(:avatar).height(200)
+  should validate_dimensions_of(:avatar).width(250).height(200).with_message('Invalid dimensions.')
   should validate_dimensions_of(:avatar).width_min(200)
   should validate_dimensions_of(:avatar).width_max(500)
   should validate_dimensions_of(:avatar).height_min(100)
@@ -285,10 +314,23 @@ end
 
 To run tests in root folder of gem:
 
-* `BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle exec rake test` to run for Rails 5.2
 * `BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test` to run for Rails 6.0
+* `BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test` to run for Rails 6.1
+* `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
+* `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main branch
 
-To play with app `cd test/dummy` and `rails s -b 0.0.0.0` (before `rails db:migrate`).
+Snippet to run in console:
+
+```
+BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
+```
 
 ## Known issues
 
@@ -329,7 +371,39 @@ You are welcome to contribute.
 - https://github.com/willnet
 - https://github.com/mohanklein
 - https://github.com/High5Apps
+- https://github.com/mschnitzer
+- https://github.com/sinankeskin
+- https://github.com/alejandrodevs
+- https://github.com/molfar
+- https://github.com/connorshea
+- https://github.com/yshmarov
+- https://github.com/fongfan999
+- https://github.com/cooperka
+- https://github.com/dolarsrg
+- https://github.com/jayshepherd
+- https://github.com/ohbarye
+- https://github.com/randsina
+- https://github.com/vietqhoang
+- https://github.com/kemenaran
+- https://github.com/jrmhaig
+- https://github.com/tagliala
+- https://github.com/evedovelli
+- https://github.com/JuanVqz
+- https://github.com/luiseugenio
+- https://github.com/equivalent
+- https://github.com/NARKOZ
+- https://github.com/stephensolis
+- https://github.com/kwent
+- https://github.com/Animesh-Ghosh
+- https://github.com/gr8bit
+- https://github.com/codegeek319
+- https://github.com/clwy-cn
+- https://github.com/kukicola
+- https://github.com/sobrinho
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+[<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
+/>](https://www.railsjazz.com/?utm_source=github&utm_medium=bottom&utm_campaign=active_storage_validations)
