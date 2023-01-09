@@ -172,28 +172,8 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert d.valid?
   end
 
-  test 'validates size' do
-    e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(big_file)
-    e.proc_small_file.attach(big_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
-    e.documents.attach(pdf_file)
-    e.proc_documents.attach(pdf_file)
-    assert !e.valid?
-    assert_equal e.errors.full_messages, ['Small file size 1.6 KB is not between required range', 'Proc small file size 1.6 KB is not between required range']
-  end
-
   test 'validates maximum number of files' do
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(dummy_file)
-    e.proc_small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.documents.attach(pdf_file)
@@ -208,13 +188,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
 
   test 'validates minimum number of files' do
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.proc_attachment.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
-    e.proc_small_file.attach(dummy_file)
-    e.small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ["Documents total number is out of range"]
   end
@@ -335,12 +309,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
 
   test 'dimensions test' do
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(dummy_file)
-    e.proc_small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
     e.dimension_exact.attach(html_file)
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
@@ -349,12 +317,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal e.errors.full_messages, ['Dimension exact is not a valid image', 'Proc dimension exact is not a valid image']
 
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(dummy_file)
-    e.proc_small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.documents.attach(pdf_file)
@@ -363,12 +325,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.valid?
 
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(dummy_file)
-    e.proc_small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_exact.attach(image_150x150_file)
@@ -376,12 +332,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.valid?, 'Dimension exact: width and height must be equal to 150 x 150 pixel.'
 
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(dummy_file)
-    e.proc_small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_range.attach(image_800x600_file)
@@ -389,12 +339,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.valid?, 'Dimension range: width and height must be greater than or equal to 800 x 600 pixel.'
 
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(dummy_file)
-    e.proc_small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_range.attach(image_1200x900_file)
@@ -402,12 +346,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.valid?, 'Dimension range: width and height must be less than or equal to 1200 x 900 pixel.'
 
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(dummy_file)
-    e.proc_small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_min.attach(image_800x600_file)
@@ -415,12 +353,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.valid?, 'Dimension min: width and height must be greater than or equal to 800 x 600 pixel.'
 
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(dummy_file)
-    e.proc_small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_max.attach(image_1200x900_file)
@@ -428,12 +360,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.valid?, 'Dimension max: width and height must be greater than or equal to 1200 x 900 pixel.'
 
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(dummy_file)
-    e.proc_small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_images.attach([image_800x600_file, image_1200x900_file])
@@ -441,12 +367,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.valid?, 'Dimension many: width and height must be between or equal to 800 x 600 and 1200 x 900 pixel.'
 
     e = Project.new(title: 'Death Star')
-    e.preview.attach(big_file)
-    e.proc_preview.attach(big_file)
-    e.small_file.attach(dummy_file)
-    e.proc_small_file.attach(dummy_file)
-    e.attachment.attach(pdf_file)
-    e.proc_attachment.attach(pdf_file)
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_images.attach([image_800x600_file])
@@ -555,10 +475,6 @@ end
 
 def dummy_file
   { io: File.open(Rails.root.join('public', 'apple-touch-icon.png')), filename: 'dummy_file.png', content_type: 'image/png' }
-end
-
-def big_file
-  { io: File.open(Rails.root.join('public', '500.html')), filename: 'big_file.png', content_type: 'image/png' }
 end
 
 def pdf_file

@@ -149,7 +149,11 @@ en:
   errors:
     messages:
       content_type_invalid: "has an invalid content type"
-      file_size_out_of_range: "size %{file_size} is not between required range"
+      file_size_not_less_than: "file size must be less than %{max_size} (current size is %{file_size})"
+      file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max_size} (current size is %{file_size})"
+      file_size_not_greater_than: "file size must be greater than %{min_size} (current size is %{file_size})"
+      file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min_size} (current size is %{file_size})"
+      file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
       limit_out_of_range: "total number is out of range"
       image_metadata_missing: "is not a valid image"
       dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel."
@@ -172,22 +176,48 @@ en:
 
 In some cases, Active Storage Validations provides variables to help you customize messages:
 
-The "content_type_invalid" key has two variables that you can use, a variable named "content_type" containing the content type of the send file and a variable named "authorized_types" containing the list of authorized content types.
-
-The variables are not used by default to leave the choice to the user.
+### Content type
+The `content_type_invalid` key has two variables that you can use:
+- `content_type` containing the content type of the sent file
+- `authorized_types` containing the list of authorized content types
 
 For example :
 
 ```yml
-content_type_invalid: "has an invalid content type : %{content_type}"
+content_type_invalid: "has an invalid content type : %{content_type}, authorized types are %{authorized_types}"
 ```
 
-Also the "limit_out_of_range" key supports two variables the "min" and "max".
+### Number of files
+The `limit_out_of_range` key supports two variables that you can use:
+- `min` containing the minimum number of files
+- `max` containing the maximum number of files
 
 For example :
 
 ```yml
 limit_out_of_range: "total number is out of range. range: [%{min}, %{max}]"
+```
+
+### File size
+The keys starting with `file_size_not_` support three variables that you can use:
+- `file_size` containing the current file size
+- `min` containing the minimum file size
+- `max` containing the maxmimum file size
+
+For example :
+
+```yml
+file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
+```
+
+### Aspect ratio
+The keys starting with `aspect_ratio_` support one variable that you can use:
+- `aspect_ratio` containing the expected aspect ratio, especially usefull for custom aspect ratio
+
+For example :
+
+```yml
+aspect_ratio_is_not: "must be a %{aspect_ratio} image"
 ```
 
 ## Installation
@@ -257,6 +287,7 @@ describe User do
   it { is_expected.to validate_size_of(:avatar).less_than(50.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).less_than_or_equal_to(50.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).greater_than(1.kilobyte) }
+  it { is_expected.to validate_size_of(:avatar).greater_than(1.kilobyte).with_message('is not in required file size range') }
   it { is_expected.to validate_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
   it { is_expected.to validate_size_of(:avatar).between(100..500.kilobytes) }
 end
@@ -299,6 +330,7 @@ class UserTest < ActiveSupport::TestCase
   should validate_size_of(:avatar).less_than(50.kilobytes)
   should validate_size_of(:avatar).less_than_or_equal_to(50.kilobytes)
   should validate_size_of(:avatar).greater_than(1.kilobyte)
+  should validate_size_of(:avatar).greater_than(1.kilobyte).with_message('is not in required file size range')
   should validate_size_of(:avatar).greater_than_or_equal_to(1.kilobyte)
   should validate_size_of(:avatar).between(100..500.kilobytes)
 end
@@ -308,7 +340,6 @@ end
 
 * verify with remote storages (s3, etc)
 * verify how it works with direct upload
-* better error message when content_size is invalid
 * add more translations
 
 ## Tests & Contributing
@@ -407,6 +438,7 @@ You are welcome to contribute.
 - https://github.com/sobrinho
 - https://github.com/iainbeeston
 - https://github.com/marckohlbrugge
+- https://github.com/Mth0158
 
 ## License
 

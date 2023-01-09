@@ -12,6 +12,7 @@ module ActiveStorageValidations
       def initialize(attribute_name)
         @attribute_name = attribute_name
         @low = @high = nil
+        @custom_message = nil
       end
 
       def description
@@ -40,6 +41,11 @@ module ActiveStorageValidations
 
       def between(range)
         @low, @high = range.first, range.last
+        self
+      end
+
+      def with_message(message)
+        @custom_message = message
         self
       end
 
@@ -85,7 +91,10 @@ module ActiveStorageValidations
         Matchers.stub_method(io, :size, new_size) do
           @subject.public_send(@attribute_name).attach(io: io, filename: 'test.png', content_type: 'image/pg')
           @subject.validate
-          @subject.errors.details[@attribute_name].all? { |error| error[:error] != :file_size_out_of_range }
+          exclude_error_message = @custom_message || "file_size_not_"
+          @subject.errors.details[@attribute_name].all? do |error|
+            error[:error].to_s.exclude?(exclude_error_message)
+          end
         end
       end
     end

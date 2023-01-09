@@ -9,7 +9,7 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[less_than less_than_or_equal_to greater_than greater_than_or_equal_to between].freeze
 
     def check_validity!
-      return true if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
+      return true if AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
       raise ArgumentError, 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
     end
 
@@ -29,8 +29,9 @@ module ActiveStorageValidations
         errors_options[:file_size] = number_to_human_size(file.blob.byte_size)
         errors_options[:min_size] = number_to_human_size(min_size(flat_options))
         errors_options[:max_size] = number_to_human_size(max_size(flat_options))
+        error_type = "file_size_not_#{flat_options.keys.first}".to_sym
 
-        record.errors.add(attribute, :file_size_out_of_range, **errors_options)
+        add_error(record, attribute, error_type, **errors_options)
         break
       end
     end
@@ -55,6 +56,12 @@ module ActiveStorageValidations
 
     def max_size(flat_options)
       flat_options[:between]&.max || flat_options[:less_than] || flat_options[:less_than_or_equal_to]
+    end
+
+    def add_error(record, attribute, default_message, **attrs)
+      message = options[:message].presence || default_message
+      return if record.errors.added?(attribute, message)
+      record.errors.add(attribute, message, **attrs)
     end
   end
 end

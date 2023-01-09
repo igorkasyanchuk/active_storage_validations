@@ -2,7 +2,11 @@ en:
   errors:
     messages:
       content_type_invalid: "has an invalid content type"
-      file_size_out_of_range: "size %{file_size} is not between required range"
+      file_size_not_less_than: "file size must be less than %{max_size} (current size is %{file_size})"
+      file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max_size} (current size is %{file_size})"
+      file_size_not_greater_than: "file size must be greater than %{min_size} (current size is %{file_size})"
+      file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min_size} (current size is %{file_size})"
+      file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
       limit_out_of_range: "total number is out of range"
       image_metadata_missing: "is not a valid image"
       dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel"

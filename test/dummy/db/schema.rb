@@ -54,6 +54,36 @@ ActiveRecord::Schema.define do
     t.datetime :updated_at, null: false
   end
 
+  create_table :portfolios, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :zero_validators, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :zero_validator_procs, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :several_validators, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :several_validator_procs, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
   create_table :ratio_models, force: :cascade do |t|
     t.string :name
     t.datetime :created_at, precision: 6, null: false
