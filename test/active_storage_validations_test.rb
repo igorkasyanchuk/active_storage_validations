@@ -372,7 +372,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_exact.attach(image_150x150_file)
-    e.proc_documents.attach(pdf_file)
     # e.proc_dimension_exact.attach(image_150x150_file)
     assert e.valid?, 'Dimension exact: width and height must be equal to 150 x 150 pixel.'
 
