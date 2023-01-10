@@ -5,6 +5,7 @@ require_relative 'metadata.rb'
 module ActiveStorageValidations
   class AspectRatioValidator < ActiveModel::EachValidator # :nodoc
     include OptionProcUnfolding
+    include ErrorHandler
 
     AVAILABLE_CHECKS = %i[with].freeze
     PRECISION = 3
@@ -54,23 +55,30 @@ module ActiveStorageValidations
 
     def is_valid?(record, attribute, metadata)
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+      errors_options = initialize_error_options(options)
+
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
-        add_error(record, attribute, :image_metadata_missing, flat_options[:with])
+        errors_options[:aspect_ratio] = flat_options[:with]
+
+        add_error(record, attribute, :image_metadata_missing, **errors_options)
         return false
       end
 
       case flat_options[:with]
       when :square
         return true if metadata[:width] == metadata[:height]
-        add_error(record, attribute, :aspect_ratio_not_square, flat_options[:with])
+        errors_options[:aspect_ratio] = flat_options[:with]
+        add_error(record, attribute, :aspect_ratio_not_square, **errors_options)
 
       when :portrait
         return true if metadata[:height] > metadata[:width]
-        add_error(record, attribute, :aspect_ratio_not_portrait, flat_options[:with])
+        errors_options[:aspect_ratio] = flat_options[:with]
+        add_error(record, attribute, :aspect_ratio_not_portrait, **errors_options)
 
       when :landscape
         return true if metadata[:width] > metadata[:height]
-        add_error(record, attribute, :aspect_ratio_not_landscape, flat_options[:with])
+        errors_options[:aspect_ratio] = flat_options[:with]
+        add_error(record, attribute, :aspect_ratio_not_landscape, **errors_options)
 
       else
         if flat_options[:with] =~ /is_(\d*)_(\d*)/
@@ -79,20 +87,14 @@ module ActiveStorageValidations
 
           return true if (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
 
-          add_error(record, attribute, :aspect_ratio_is_not, "#{x}x#{y}")
+          errors_options[:aspect_ratio] = "#{x}x#{y}"
+          add_error(record, attribute, :aspect_ratio_is_not, **errors_options)
         else
-          add_error(record, attribute, :aspect_ratio_unknown, flat_options[:with])
+          errors_options[:aspect_ratio] = flat_options[:with]
+          add_error(record, attribute, :aspect_ratio_unknown, **errors_options)
         end
       end
       false
     end
-
-
-    def add_error(record, attribute, default_message, interpolate)
-      message = options[:message].presence || default_message
-      return if record.errors.added?(attribute, message)
-      record.errors.add(attribute, message, aspect_ratio: interpolate)
-    end
-
   end
 end

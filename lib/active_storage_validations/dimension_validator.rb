@@ -5,6 +5,7 @@ require_relative 'metadata.rb'
 module ActiveStorageValidations
   class DimensionValidator < ActiveModel::EachValidator # :nodoc
     include OptionProcUnfolding
+    include ErrorHandler
 
     AVAILABLE_CHECKS = %i[width height min max].freeze
 
@@ -71,9 +72,11 @@ module ActiveStorageValidations
 
     def is_valid?(record, attribute, file_metadata)
       flat_options = process_options(record)
+      errors_options = initialize_error_options(options)
+
       # Validation fails unless file metadata contains valid width and height.
       if file_metadata[:width].to_i <= 0 || file_metadata[:height].to_i <= 0
-        add_error(record, attribute, :image_metadata_missing)
+        add_error(record, attribute, :image_metadata_missing, **errors_options)
         return false
       end
 
@@ -83,39 +86,58 @@ module ActiveStorageValidations
           (flat_options[:width][:min] && file_metadata[:width] < flat_options[:width][:min]) ||
           (flat_options[:height][:min] && file_metadata[:height] < flat_options[:height][:min])
           )
-          add_error(record, attribute, :dimension_min_inclusion, width: flat_options[:width][:min], height: flat_options[:height][:min])
+          errors_options[:width] = flat_options[:width][:min]
+          errors_options[:height] = flat_options[:height][:min]
+
+          add_error(record, attribute, :dimension_min_inclusion, **errors_options)
           return false
         end
         if flat_options[:max] && (
           (flat_options[:width][:max] && file_metadata[:width] > flat_options[:width][:max]) ||
           (flat_options[:height][:max] && file_metadata[:height] > flat_options[:height][:max])
           )
-          add_error(record, attribute, :dimension_max_inclusion, width: flat_options[:width][:max], height: flat_options[:height][:max])
+          errors_options[:width] = flat_options[:width][:max]
+          errors_options[:height] = flat_options[:height][:max]
+
+          add_error(record, attribute, :dimension_max_inclusion, **errors_options)
           return false
         end
 
       # Validation based on checks :width and :height.
       else
         width_or_height_invalid = false
+
         [:width, :height].each do |length|
           next unless flat_options[length]
           if flat_options[length].is_a?(Hash)
             if flat_options[length][:in] && (file_metadata[length] < flat_options[length][:min] || file_metadata[length] > flat_options[length][:max])
-              add_error(record, attribute, :"dimension_#{length}_inclusion", min: flat_options[length][:min], max: flat_options[length][:max])
+              error_type = :"dimension_#{length}_inclusion"
+              errors_options[:min] = flat_options[length][:min]
+              errors_options[:max] = flat_options[length][:max]
+
+              add_error(record, attribute, error_type, **errors_options)
               width_or_height_invalid = true
             else
               if flat_options[length][:min] && file_metadata[length] < flat_options[length][:min]
-                add_error(record, attribute, :"dimension_#{length}_greater_than_or_equal_to", length: flat_options[length][:min])
+                error_type = :"dimension_#{length}_greater_than_or_equal_to"
+                errors_options[:length] = flat_options[length][:min]
+
+                add_error(record, attribute, error_type, **errors_options)
                 width_or_height_invalid = true
-              end
-              if flat_options[length][:max] && file_metadata[length] > flat_options[length][:max]
-                add_error(record, attribute, :"dimension_#{length}_less_than_or_equal_to", length: flat_options[length][:max])
+              elsif flat_options[length][:max] && file_metadata[length] > flat_options[length][:max]
+                error_type = :"dimension_#{length}_less_than_or_equal_to"
+                errors_options[:length] = flat_options[length][:max]
+
+                add_error(record, attribute, error_type, **errors_options)
                 width_or_height_invalid = true
               end
             end
           else
             if file_metadata[length] != flat_options[length]
-              add_error(record, attribute, :"dimension_#{length}_equal_to", length: flat_options[length])
+              error_type = :"dimension_#{length}_equal_to"
+              errors_options[:length] = flat_options[length]
+
+              add_error(record, attribute, error_type, **errors_options)
               width_or_height_invalid = true
             end
           end
@@ -126,12 +148,5 @@ module ActiveStorageValidations
 
       true # valid file
     end
-
-    def add_error(record, attribute, default_message, **attrs)
-      message = options[:message].presence || default_message
-      return if record.errors.added?(attribute, message)
-      record.errors.add(attribute, message, **attrs)
-    end
-
   end
 end

@@ -3,6 +3,7 @@
 module ActiveStorageValidations
   class SizeValidator < ActiveModel::EachValidator # :nodoc:
     include OptionProcUnfolding
+    include ErrorHandler
 
     delegate :number_to_human_size, to: ActiveSupport::NumberHelper
 
@@ -20,8 +21,8 @@ module ActiveStorageValidations
 
       files = Array.wrap(record.send(attribute))
 
-      errors_options = {}
-      errors_options[:message] = options[:message] if options[:message].present?
+      errors_options = initialize_error_options(options)
+
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
 
       files.each do |file|
@@ -57,12 +58,6 @@ module ActiveStorageValidations
 
     def max_size(flat_options)
       flat_options[:between]&.max || flat_options[:less_than] || flat_options[:less_than_or_equal_to]
-    end
-
-    def add_error(record, attribute, default_message, **attrs)
-      message = options[:message].presence || default_message
-      return if record.errors.added?(attribute, message)
-      record.errors.add(attribute, message, **attrs)
     end
   end
 end

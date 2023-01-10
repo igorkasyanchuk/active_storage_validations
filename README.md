@@ -270,9 +270,11 @@ Example (Note that the options are chainable):
 ```ruby
 describe User do
   it { is_expected.to validate_attached_of(:avatar) }
+  it { is_expected.to validate_attached_of(:avatar).with_message('must not be blank') }
 
   it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') }
   it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') }
+  it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml').with_message("must be an authorized type") }
 
   it { is_expected.to validate_dimensions_of(:avatar).width(250) }
   it { is_expected.to validate_dimensions_of(:avatar).height(200) }
@@ -313,9 +315,11 @@ Example (Note that the options are chainable):
 ```ruby
 class UserTest < ActiveSupport::TestCase
   should validate_attached_of(:avatar)
+  should validate_attached_of(:avatar).with_message('must not be blank')
 
   should validate_content_type_of(:avatar).allowing('image/png', 'image/gif')
   should validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml')
+  should validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml').with_message("must be an authorized type")
 
   should validate_dimensions_of(:avatar).width(250)
   should validate_dimensions_of(:avatar).height(200)
