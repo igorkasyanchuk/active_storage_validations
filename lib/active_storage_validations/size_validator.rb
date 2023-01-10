@@ -9,8 +9,9 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[less_than less_than_or_equal_to greater_than greater_than_or_equal_to between].freeze
 
     def check_validity!
-      return true if AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
-      raise ArgumentError, 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
+      unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
+        raise ArgumentError, 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
+      end
     end
 
     def validate_each(record, attribute, _value)

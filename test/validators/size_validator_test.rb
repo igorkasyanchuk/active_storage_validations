@@ -218,20 +218,24 @@ class ActiveStorageValidations::SizeValidator::Test < ActiveSupport::TestCase
   end
 
   class ValidatorValidity < ActiveStorageValidations::SizeValidator::Test
+    def error_message
+      'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
+    end
+
     test 'ensures that at least 1 size validator has been used' do
-      assert_raises(ArgumentError, 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator') { Size::ZeroValidator.new(title: 'Raises error') }
+      assert_raises(ArgumentError, error_message) { Size::ZeroValidator.new(title: 'Raises error') }
     end
 
     test 'ensures that at least 1 size validator has been used when using a Proc' do
-      assert_raises(ArgumentError, 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator') { Size::ZeroValidatorProc.new(title: 'Raises error') }
+      assert_raises(ArgumentError, error_message) { Size::ZeroValidatorProc.new(title: 'Raises error') }
     end
 
     test 'ensures that no more than 1 size validator has been used' do
-      assert_raises(ArgumentError, 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator') { Size::SeveralValidator.new(title: 'Raises error') }
+      assert_raises(ArgumentError, error_message) { Size::SeveralValidator.new(title: 'Raises error') }
     end
 
     test 'ensures that no more than 1 size validator has been used when using a Proc' do
-      assert_raises(ArgumentError, 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator') { Size::SeveralValidatorProc.new(title: 'Raises error') }
+      assert_raises(ArgumentError, error_message) { Size::SeveralValidatorProc.new(title: 'Raises error') }
     end
   end
 

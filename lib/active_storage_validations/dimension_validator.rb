@@ -32,8 +32,9 @@ module ActiveStorageValidations
 
 
     def check_validity!
-      return true if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-      raise ArgumentError, 'You must pass either :width, :height, :min or :max to the validator'
+      unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
+        raise ArgumentError, 'You must pass either :width, :height, :min or :max to the validator'
+      end
     end
 
 

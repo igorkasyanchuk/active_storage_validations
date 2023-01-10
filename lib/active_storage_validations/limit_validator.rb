@@ -7,8 +7,9 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[max min].freeze
 
     def check_validity!
-      return true if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-      raise ArgumentError, 'You must pass either :max or :min to the validator'
+      unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
+        raise ArgumentError, 'You must pass either :max or :min to the validator'
+      end
     end
 
     def validate_each(record, attribute, _)

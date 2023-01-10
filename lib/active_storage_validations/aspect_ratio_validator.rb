@@ -10,8 +10,9 @@ module ActiveStorageValidations
     PRECISION = 3
 
     def check_validity!
-      return true if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-      raise ArgumentError, 'You must pass :with to the validator'
+      unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
+        raise ArgumentError, 'You must pass :with to the validator'
+      end
     end
 
     if Rails.gem_version >= Gem::Version.new('6.0.0')
