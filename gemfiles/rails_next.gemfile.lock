@@ -219,7 +219,7 @@ DEPENDENCIES
   rails!
   rubocop
   ruby-vips (>= 2.1.0)
-  simplecov (~> 0.21.2)
+  simplecov
   sqlite3
 
 BUNDLED WITH
