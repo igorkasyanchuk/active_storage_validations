@@ -75,18 +75,10 @@ module ActiveStorageValidations
         tempfile.flush
         tempfile.rewind
 
-        image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(tempfile.path).downcase)
-                  Vips::Image.new_from_file(tempfile.path)
-                elsif defined?(MiniMagick)
-                  MiniMagick::Image.new(tempfile.path)
-                end
+        image = new_image_from_path(tempfile.path)
       else
         file_path = read_file_path
-        image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(file_path).downcase)
-                  Vips::Image.new_from_file(file_path)
-                elsif defined?(MiniMagick)
-                  MiniMagick::Image.new(file_path)
-                end
+        image = new_image_from_path(file_path)
       end
 
 
@@ -100,6 +92,14 @@ module ActiveStorageValidations
       {}
     ensure
       image = nil
+    end
+
+    def new_image_from_path(path)
+      if image_processor == :vips && defined?(Vips) && (Vips::get_suffixes.include?(File.extname(path).downcase) || !Vips::respond_to?(:vips_foreign_get_suffixes))
+        Vips::Image.new_from_file(path)
+      elsif defined?(MiniMagick)
+        MiniMagick::Image.new(path)
+      end
     end
 
     def valid_image?(image)
