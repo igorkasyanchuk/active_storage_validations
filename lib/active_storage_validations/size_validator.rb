@@ -24,9 +24,10 @@ module ActiveStorageValidations
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
 
       files.each do |file|
-        next if content_size_valid?(file.blob.byte_size, flat_options)
+        byte_size = file.blob&.byte_size.to_i
+        next if content_size_valid?(byte_size, flat_options)
 
-        errors_options[:file_size] = number_to_human_size(file.blob.byte_size)
+        errors_options[:file_size] = number_to_human_size(byte_size)
         errors_options[:min_size] = number_to_human_size(min_size(flat_options))
         errors_options[:max_size] = number_to_human_size(max_size(flat_options))
 
