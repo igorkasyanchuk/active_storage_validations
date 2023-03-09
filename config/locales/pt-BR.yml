@@ -20,3 +20,4 @@ pt-BR:
       aspect_ratio_not_landscape: "não está no formato paisagem"
       aspect_ratio_is_not: "não contém uma proporção de %{aspect_ratio}"
       aspect_ratio_unknown: "não tem uma proporção definida"
+      image_not_processable: "não é uma imagem válida"
