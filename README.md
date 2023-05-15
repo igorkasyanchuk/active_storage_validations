@@ -17,7 +17,7 @@ This gems doing it for you. Just use `attached: true` or `content_type: 'image/p
 * validates if file(s) attached
 * validates content type
 * validates size of files
-* validates dimension of images/videos
+* validates dimension of images
 * validates number of uploaded files (min/max required)
 * validates aspect ratio (if square, portrait, landscape, is_16_9, ...)
 * validates if file can be processed by MiniMagick or Vips
