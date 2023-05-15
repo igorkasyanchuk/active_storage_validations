@@ -333,6 +333,14 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert e.valid?
   end
 
+  # require "pry"
+  test 'video test' do
+    e = Video.new
+    e.video.attach(video_avi_file)
+    # binding.pry
+    assert !e.valid?
+  end
+
   test 'dimensions test' do
     e = Project.new(title: 'Death Star')
     e.preview.attach(big_file)
@@ -631,6 +639,14 @@ end
 
 def tar_file_with_image_content_type
   { io: File.open(Rails.root.join('public', '404.html.tar')), filename: '404.png', content_type: 'image/png' }
+end
+
+def video_avi_file
+  { io: File.open(Rails.root.join('public', 'file_example_AVI_480_750kB.avi')), filename: 'file_example_AVI_480_750kB.avi', content_type: 'video/x-msvideo' }
+end
+
+def video_mp4_file
+  { io: File.open(Rails.root.join('public', 'file_example_MP4_480_1_5MG.mp4')), filename: 'file_example_MP4_480_1_5MG.mp4', content_type: 'video/mp4' }
 end
 
 def image_string_io
