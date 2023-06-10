@@ -401,6 +401,8 @@ You are welcome to contribute.
 - https://github.com/clwy-cn
 - https://github.com/kukicola
 - https://github.com/sobrinho
+- https://github.com/iainbeeston
+- https://github.com/marckohlbrugge
 
 ## License
 

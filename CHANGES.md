@@ -1,5 +1,9 @@
 - master
+  ....
+
+- 1.0.4
   - Support for StringIO attachments https://github.com/igorkasyanchuk/active_storage_validations/pull/176
+  - Support libvips < 8.8 https://github.com/igorkasyanchuk/active_storage_validations/pull/185
   - Test against Ruby 3.2
 
 - 1.0.3
