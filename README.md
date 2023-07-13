@@ -346,7 +346,11 @@ BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 This is a Rails issue, and is fixed in Rails 6.
 
 ## Contributing
+
 You are welcome to contribute.
+
+[<img src="https://opensource-heroes.com/svg/embed/igorkasyanchuk/active_storage_validations"
+/>](https://opensource-heroes.com/r/igorkasyanchuk/active_storage_validations)
 
 ## Contributors (BIG THANK YOU)
 - https://github.com/schweigert
