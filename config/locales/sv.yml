@@ -1,0 +1,23 @@
+sv:
+  errors:
+    messages:
+      content_type_invalid: "Har en ogiltig filtyp"
+      file_size_out_of_range: "storleken %{file_size} är utanför det krävda intervallet"
+      limit_out_of_range: "antalet filer är utanför det godkända intervallet"
+      image_metadata_missing: "bilden sankar metadata"
+      dimension_min_inclusion: "måste minst vara %{width} x %{height} pixlar"
+      dimension_max_inclusion: "måste vara mindre eller lika med %{width} x %{height} pixlar"
+      dimension_width_inclusion: "bredden är utanför %{min} till %{max} pixlar"
+      dimension_height_inclusion: "höjden är utanför %{min} till %{max} pixlar"
+      dimension_width_greater_than_or_equal_to: "bredden måste minst vara %{length} pixlar"
+      dimension_height_greater_than_or_equal_to: "höjden måste minst vara %{length} pixlar"
+      dimension_width_less_than_or_equal_to: "bredden får max vara %{length} pixlar"
+      dimension_height_less_than_or_equal_to: "höjden får max vara %{length} pixlar"
+      dimension_width_equal_to: "bredden måste vara %{length} pixlar"
+      dimension_height_equal_to: "höjden måste vara %{length} pixlar"
+      aspect_ratio_not_square: "måste vara en kvadratisk bild"
+      aspect_ratio_not_portrait: "måste vara en porträttorienterad bild"
+      aspect_ratio_not_landscape: "måste vara en landskapsorienterad bild"
+      aspect_ratio_is_not: "måste ha en följande aspect ratio  %{aspect_ratio}"
+      aspect_ratio_unknown: "har en okänd aspect ratio"
+      image_not_processable: "är inte en giltig bild"
