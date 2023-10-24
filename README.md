@@ -443,6 +443,10 @@ You are welcome to contribute.
 - https://github.com/iainbeeston
 - https://github.com/marckohlbrugge
 - https://github.com/Mth0158
+- https://github.com/technicalpickles
+- https://github.com/ricsdeol
+- https://github.com/Fonsan
+
 
 ## License
 

@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    active_storage_validations (1.0.4)
+    active_storage_validations (1.1.0)
       activejob (>= 5.2.0)
       activemodel (>= 5.2.0)
       activestorage (>= 5.2.0)
