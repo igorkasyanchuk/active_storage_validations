@@ -6,6 +6,7 @@ require 'active_storage_validations/matchers'
 class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < ActiveSupport::TestCase
   test 'positive match when providing class' do
     matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:avatar)
+    matcher.with_message("must not be blank")
     assert matcher.matches?(User)
   end
 
@@ -21,6 +22,7 @@ class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < Activ
 
   test 'positive match when providing instance' do
     matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:avatar)
+    matcher.with_message("must not be blank")
     assert matcher.matches?(User.new)
   end
 
@@ -46,6 +48,7 @@ class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < Activ
 
   test 'positive match when providing instance with attachment' do
     matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:avatar)
+    matcher.with_message("must not be blank")
     user = User.new
     user.avatar.attach(io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png')
     user.proc_avatar.attach(io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png')
@@ -54,6 +57,7 @@ class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < Activ
 
   test 'positive match when providing persisted instance with attachment' do
     matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:avatar)
+    matcher.with_message("must not be blank")
     user = User.create!(
       name: 'Pietje',
       avatar: { io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' },

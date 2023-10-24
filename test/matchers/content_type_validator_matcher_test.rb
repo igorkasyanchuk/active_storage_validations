@@ -73,4 +73,20 @@ class ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test < Ac
     matcher.allowing('image/png')
     assert matcher.matches?(User)
   end
+
+  class WithMessageMatcher < ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test
+    test 'matches when provided with the model validation message' do
+      matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:photo_with_messages)
+      matcher.allowing('image/png')
+      matcher.with_message('must be an authorized type')
+      assert matcher.matches?(User)
+    end
+
+    test 'does not match when not provided with the model validation message2' do
+      matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:photo_with_messages)
+      matcher.allowing('image/png')
+      matcher.with_message('<wrong message>')
+      refute matcher.matches?(User)
+    end
+  end
 end

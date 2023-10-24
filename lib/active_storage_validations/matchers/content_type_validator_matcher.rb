@@ -11,6 +11,7 @@ module ActiveStorageValidations
     class ContentTypeValidatorMatcher
       def initialize(attribute_name)
         @attribute_name = attribute_name
+        @custom_message = nil
       end
 
       def description
@@ -27,9 +28,14 @@ module ActiveStorageValidations
         self
       end
 
+      def with_message(message)
+        @custom_message = message
+        self
+      end
+
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods && allowed_types_allowed? && rejected_types_rejected?
+        responds_to_methods && allowed_types_allowed? && rejected_types_rejected? && validate_error_message?
       end
 
       def failure_message
@@ -77,7 +83,21 @@ module ActiveStorageValidations
       def type_allowed?(type)
         @subject.public_send(@attribute_name).attach(attachment_for(type))
         @subject.validate
-        @subject.errors.details[@attribute_name].all? { |error| error[:error] != :content_type_invalid }
+        @subject.errors.details[@attribute_name].none? do |error|
+          error[:error].to_s.include?(error_message)
+        end
+      end
+
+      def validate_error_message?
+        @subject.public_send(@attribute_name).attach(attachment_for('fake/fake'))
+        @subject.validate
+        @subject.errors.details[@attribute_name].all? do |error|
+          error[:error].to_s.include?(error_message)
+        end
+      end
+
+      def error_message
+        @custom_message || :content_type_invalid.to_s
       end
 
       def attachment_for(type)

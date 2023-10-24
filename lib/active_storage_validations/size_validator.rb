@@ -3,14 +3,16 @@
 module ActiveStorageValidations
   class SizeValidator < ActiveModel::EachValidator # :nodoc:
     include OptionProcUnfolding
+    include ErrorHandler
 
     delegate :number_to_human_size, to: ActiveSupport::NumberHelper
 
     AVAILABLE_CHECKS = %i[less_than less_than_or_equal_to greater_than greater_than_or_equal_to between].freeze
 
     def check_validity!
-      return true if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-      raise ArgumentError, 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
+      unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
+        raise ArgumentError, 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
+      end
     end
 
     def validate_each(record, attribute, _value)
@@ -19,8 +21,8 @@ module ActiveStorageValidations
 
       files = Array.wrap(record.send(attribute))
 
-      errors_options = {}
-      errors_options[:message] = options[:message] if options[:message].present?
+      errors_options = initialize_error_options(options)
+
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
 
       files.each do |file|
@@ -29,8 +31,9 @@ module ActiveStorageValidations
         errors_options[:file_size] = number_to_human_size(file.blob.byte_size)
         errors_options[:min_size] = number_to_human_size(min_size(flat_options))
         errors_options[:max_size] = number_to_human_size(max_size(flat_options))
+        error_type = "file_size_not_#{flat_options.keys.first}".to_sym
 
-        record.errors.add(attribute, :file_size_out_of_range, **errors_options)
+        add_error(record, attribute, error_type, **errors_options)
         break
       end
     end

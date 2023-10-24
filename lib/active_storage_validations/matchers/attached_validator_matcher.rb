@@ -9,10 +9,16 @@ module ActiveStorageValidations
     class AttachedValidatorMatcher
       def initialize(attribute_name)
         @attribute_name = attribute_name
+        @custom_message = nil
       end
 
       def description
         "validate #{@attribute_name} must be attached"
+      end
+
+      def with_message(message)
+        @custom_message = message
+        self
       end
 
       def matches?(subject)
@@ -39,7 +45,7 @@ module ActiveStorageValidations
       def valid_when_attached
         @subject.public_send(@attribute_name).attach(attachable) unless @subject.public_send(@attribute_name).attached?
         @subject.validate
-        @subject.errors.details[@attribute_name].exclude?(error: :blank)
+        @subject.errors.details[@attribute_name].exclude?(error: error_message)
       end
 
       def invalid_when_not_attached
@@ -48,7 +54,11 @@ module ActiveStorageValidations
         @subject.public_send("#{@attribute_name}=", nil)
 
         @subject.validate
-        @subject.errors.details[@attribute_name].include?(error: :blank)
+        @subject.errors.details[@attribute_name].include?(error: error_message)
+      end
+
+      def error_message
+        @custom_message || :blank
       end
 
       def attachable

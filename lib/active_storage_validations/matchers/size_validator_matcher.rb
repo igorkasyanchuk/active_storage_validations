@@ -11,7 +11,8 @@ module ActiveStorageValidations
     class SizeValidatorMatcher
       def initialize(attribute_name)
         @attribute_name = attribute_name
-        @low = @high = nil
+        @min = @max = nil
+        @custom_message = nil
       end
 
       def description
@@ -19,41 +20,46 @@ module ActiveStorageValidations
       end
 
       def less_than(size)
-        @high = size - 1.byte
+        @max = size - 1.byte
         self
       end
 
       def less_than_or_equal_to(size)
-        @high = size
+        @max = size
         self
       end
 
       def greater_than(size)
-        @low = size + 1.byte
+        @min = size + 1.byte
         self
       end
 
       def greater_than_or_equal_to(size)
-        @low = size
+        @min = size
         self
       end
 
       def between(range)
-        @low, @high = range.first, range.last
+        @min, @max = range.first, range.last
+        self
+      end
+
+      def with_message(message)
+        @custom_message = message
         self
       end
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods && lower_than_low? && higher_than_low? && lower_than_high? && higher_than_high?
+        responds_to_methods && not_lower_than_min? && higher_than_min? && lower_than_max? && not_higher_than_max?
       end
 
       def failure_message
-        "is expected to validate file size of #{@attribute_name} to be between #{@low} and #{@high} bytes"
+        "is expected to validate file size of #{@attribute_name} to be between #{@min} and #{@max} bytes"
       end
 
       def failure_message_when_negated
-        "is expected to not validate file size of #{@attribute_name} to be between #{@low} and #{@high} bytes"
+        "is expected to not validate file size of #{@attribute_name} to be between #{@min} and #{@max} bytes"
       end
 
       protected
@@ -64,20 +70,20 @@ module ActiveStorageValidations
           @subject.public_send(@attribute_name).respond_to?(:detach)
       end
 
-      def lower_than_low?
-        @low.nil? || !passes_validation_with_size(@low - 1)
+      def not_lower_than_min?
+        @min.nil? || !passes_validation_with_size(@min - 1)
       end
 
-      def higher_than_low?
-        @low.nil? || passes_validation_with_size(@low + 1)
+      def higher_than_min?
+        @min.nil? || passes_validation_with_size(@min + 1)
       end
 
-      def lower_than_high?
-        @high.nil? || @high == Float::INFINITY || passes_validation_with_size(@high - 1)
+      def lower_than_max?
+        @max.nil? || @max == Float::INFINITY || passes_validation_with_size(@max - 1)
       end
 
-      def higher_than_high?
-        @high.nil? || @high == Float::INFINITY || !passes_validation_with_size(@high + 1)
+      def not_higher_than_max?
+        @max.nil? || @max == Float::INFINITY || !passes_validation_with_size(@max + 1)
       end
 
       def passes_validation_with_size(new_size)
@@ -85,7 +91,10 @@ module ActiveStorageValidations
         Matchers.stub_method(io, :size, new_size) do
           @subject.public_send(@attribute_name).attach(io: io, filename: 'test.png', content_type: 'image/pg')
           @subject.validate
-          @subject.errors.details[@attribute_name].all? { |error| error[:error] != :file_size_out_of_range }
+          exclude_error_message = @custom_message || "file_size_not_"
+          @subject.errors.details[@attribute_name].none? do |error|
+            error[:error].to_s.include?(exclude_error_message)
+          end
         end
       end
     end
