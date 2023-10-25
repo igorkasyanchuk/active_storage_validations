@@ -74,6 +74,12 @@ class ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test < Ac
     assert matcher.matches?(User)
   end
 
+  test 'matches when combined with a another validator which has errors (file size = 0)' do
+    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:moon_picture)
+    matcher.allowing('image/png')
+    assert matcher.matches?(User)
+  end
+
   class WithMessageMatcher < ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test
     test 'matches when provided with the model validation message' do
       matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:photo_with_messages)

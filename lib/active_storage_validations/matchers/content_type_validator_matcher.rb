@@ -35,7 +35,7 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods && allowed_types_allowed? && rejected_types_rejected? && validate_error_message?
+        responds_to_methods && allowed_types_allowed? && rejected_types_rejected? && validate_custom_message?
       end
 
       def failure_message
@@ -88,10 +88,12 @@ module ActiveStorageValidations
         end
       end
 
-      def validate_error_message?
+      def validate_custom_message?
+        return true unless @custom_message
+
         @subject.public_send(@attribute_name).attach(attachment_for('fake/fake'))
         @subject.validate
-        @subject.errors.details[@attribute_name].all? do |error|
+        @subject.errors.details[@attribute_name].select{|error| error[:content_type]}.all? do |error|
           error[:error].to_s.include?(error_message)
         end
       end
