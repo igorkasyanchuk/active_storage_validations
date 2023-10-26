@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_storage_validations (1.1.0)
+    active_storage_validations (1.1.1)
       activejob (>= 5.2.0)
       activemodel (>= 5.2.0)
       activestorage (>= 5.2.0)
@@ -72,6 +72,8 @@ GEM
     mini_magick (4.11.0)
     mini_portile2 (2.5.1)
     minitest (5.14.3)
+    minitest-focus (1.4.0)
+      minitest (>= 4, < 6)
     nokogiri (1.11.3)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
@@ -138,6 +140,7 @@ DEPENDENCIES
   globalid
   marcel
   mini_magick (>= 4.9.5)
+  minitest-focus (~> 1.4)
   pry
   rubocop
   ruby-vips (>= 2.1.0)

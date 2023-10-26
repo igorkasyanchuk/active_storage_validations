@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md']
 
   %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 5.2.0' }
+  s.add_development_dependency 'minitest-focus', "~> 1.4"
   s.add_development_dependency 'combustion', "~> 1.3"
   s.add_development_dependency 'mini_magick', ">= 4.9.5"
   s.add_development_dependency 'ruby-vips', ">= 2.1.0"

@@ -19,6 +19,7 @@ end
 # Load other test helpers
 require 'rails/test_help'
 require 'minitest/mock'
+require 'minitest/focus'
 
 # Filter out Minitest backtrace while allowing backtrace from other libraries
 # to be shown.
