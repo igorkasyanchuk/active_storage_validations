@@ -33,7 +33,6 @@ class Project < ApplicationRecord
   validates :documents, limit: { min: 1, max: 3 }
 
   validates :dimension_exact,               dimension: { width: 150, height: 150 }
-  validates :dimension_exact_with_message,  dimension: { width: 150, height: 150, message: 'Invalid dimensions.' }
   validates :dimension_range,               dimension: { width: { in: 800..1200 }, height: { in: 600..900 } }
   validates :dimension_min,                 dimension: { min: 800..600 }
   validates :dimension_max,                 dimension: { max: 1200..900 }
@@ -42,7 +41,6 @@ class Project < ApplicationRecord
   validates :proc_documents, limit: { min: -> (record) {1}, max: -> (record) {3} }
 
   validates :proc_dimension_exact,               dimension: { width: -> (record) {150}, height: -> (record) {150} }
-  validates :proc_dimension_exact_with_message,  dimension: { width: -> (record) {150}, height: -> (record) {150}, message: 'Invalid dimensions.' }
   validates :proc_dimension_range,               dimension: { width: { in: -> (record) {800..1200} }, height: { in: -> (record) {600..900} } }
   validates :proc_dimension_min,                 dimension: { min: -> (record) {800..600} }
   validates :proc_dimension_max,                 dimension: { max: -> (record) {1200..900} }

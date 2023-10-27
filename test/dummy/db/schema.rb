@@ -34,6 +34,11 @@ ActiveRecord::Schema.define do
     end
   end
 
+  create_table :dimension_matchers, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
   create_table :documents, force: :cascade do |t|
     t.datetime :created_at, precision: 6, null: false
     t.datetime :updated_at, precision: 6, null: false
