@@ -72,8 +72,14 @@ GEM
     mini_magick (4.11.0)
     mini_portile2 (2.8.0)
     minitest (5.16.3)
+    minitest-focus (1.4.0)
+      minitest (>= 4, < 6)
     nokogiri (1.13.8)
       mini_portile2 (~> 2.8.0)
+      racc (~> 1.4)
+    nokogiri (1.13.8-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.13.8-x86_64-linux)
       racc (~> 1.4)
     parallel (1.20.1)
     parser (3.0.0.0)
@@ -142,6 +148,7 @@ DEPENDENCIES
   globalid
   marcel
   mini_magick (>= 4.9.5)
+  minitest-focus (~> 1.4)
   pry
   rubocop
   ruby-vips (>= 2.1.0)
