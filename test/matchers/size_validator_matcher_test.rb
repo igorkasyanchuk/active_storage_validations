@@ -3,161 +3,182 @@
 require 'test_helper'
 require 'active_storage_validations/matchers'
 
-class ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test < ActiveSupport::TestCase
+describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
+  def is_expected_to_match_for(klass)
+    subject && assert(subject.matches?(klass))
+  end
 
-  class LessThanMatcher < ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test
-    test 'matches when provided with the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_less_than)
-      matcher.less_than 2.kilobytes
-      assert matcher.matches?(Size::Portfolio)
+  def is_expected_not_to_match_for(klass)
+    subject && refute(subject.matches?(klass))
+  end
+
+  let(:matcher) { ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(model_attribute) }
+  let(:klass) { Size::Portfolio }
+
+  describe '#less_than' do
+    let(:model_attribute) { :size_less_than }
+
+    describe 'when provided with the exact size specified in the model validations' do
+      subject { matcher.less_than 2.kilobytes }
+
+      it { is_expected_to_match_for(klass) }
     end
 
-    test 'does not match when provided a higher value than the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_less_than)
-      matcher.less_than 5.kilobytes
-      refute matcher.matches?(Size::Portfolio)
+    describe 'when provided with a higher size than the size specified in the model validations' do
+      subject { matcher.less_than 5.kilobytes }
+
+      it { is_expected_not_to_match_for(klass) }
     end
 
-    test 'does not match when provided a lower value than the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_less_than)
-      matcher.less_than 0.5.kilobyte
-      refute matcher.matches?(Size::Portfolio)
+    describe 'when provided with a lower size than the size specified in the model validations' do
+      subject { matcher.less_than 0.5.kilobyte }
+
+      it { is_expected_not_to_match_for(klass) }
     end
   end
 
+  describe '#less_than_or_equal_to' do
+    let(:model_attribute) { :size_less_than_or_equal_to }
 
-  class LessThanOrEqualToMatcher < ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test
-    test 'matches when provided with the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_less_than_or_equal_to)
-      matcher.less_than_or_equal_to 2.kilobytes
-      assert matcher.matches?(Size::Portfolio)
+    describe 'when provided with the exact size specified in the model validations' do
+      subject { matcher.less_than_or_equal_to 2.kilobytes }
+
+      it { is_expected_to_match_for(klass) }
     end
 
-    test 'does not match when provided a higher value than the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_less_than_or_equal_to)
-      matcher.less_than_or_equal_to 5.kilobytes
-      refute matcher.matches?(Size::Portfolio)
+    describe 'when provided with a higher size than the size specified in the model validations' do
+      subject { matcher.less_than_or_equal_to 5.kilobytes }
+
+      it { is_expected_not_to_match_for(klass) }
     end
 
-    test 'does not match when provided a lower value than the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_less_than_or_equal_to)
-      matcher.less_than_or_equal_to 0.5.kilobyte
-      refute matcher.matches?(Size::Portfolio)
-    end
-  end
+    describe 'when provided with a lower size than the size specified in the model validations' do
+      subject { matcher.less_than_or_equal_to 0.5.kilobyte }
 
-
-  class GreaterThanMatcher < ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test
-    test 'matches when provided with the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_greater_than)
-      matcher.greater_than 7.kilobytes
-      assert matcher.matches?(Size::Portfolio)
-    end
-
-    test 'does not match when provided a higher value than the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_greater_than)
-      matcher.greater_than 10.kilobytes
-      refute matcher.matches?(Size::Portfolio)
-    end
-
-    test 'does not match when provided a lower value than the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_greater_than)
-      matcher.greater_than 0.5.kilobyte
-      refute matcher.matches?(Size::Portfolio)
+      it { is_expected_not_to_match_for(klass) }
     end
   end
 
+  describe '#greater_than' do
+    let(:model_attribute) { :size_greater_than }
 
-  class GreaterThanOrEqualToMatcher < ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test
-    test 'matches when provided with the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_greater_than_or_equal_to)
-      matcher.greater_than_or_equal_to 7.kilobytes
-      assert matcher.matches?(Size::Portfolio)
+    describe 'when provided with the exact size specified in the model validations' do
+      subject { matcher.greater_than 7.kilobytes }
+
+      it { is_expected_to_match_for(klass) }
     end
 
-    test 'does not match when provided a higher value than the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_greater_than_or_equal_to)
-      matcher.greater_than_or_equal_to 10.kilobytes
-      refute matcher.matches?(Size::Portfolio)
+    describe 'when provided with a higher size than the size specified in the model validations' do
+      subject { matcher.greater_than 10.kilobytes }
+
+      it { is_expected_not_to_match_for(klass) }
     end
 
-    test 'does not match when provided a lower value than the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_greater_than_or_equal_to)
-      matcher.greater_than_or_equal_to 0.5.kilobyte
-      refute matcher.matches?(Size::Portfolio)
-    end
-  end
+    describe 'when provided with a lower size than the size specified in the model validations' do
+      subject { matcher.greater_than 0.5.kilobyte }
 
-
-  class BetweenMatcher < ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test
-    test 'matches when provided with the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_between)
-      matcher.between 2.kilobytes..7.kilobytes
-      assert matcher.matches?(Size::Portfolio)
-    end
-
-    test 'does not match when provided a higher value than the model validation value for highest possible size' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_between)
-      matcher.between 2.kilobytes..10.kilobytes
-      refute matcher.matches?(Size::Portfolio)
-    end
-
-    test 'does not match when provided a lower value than the model validation value for highest possible size' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_between)
-      matcher.between 1.kilobytes..7.kilobytes
-      refute matcher.matches?(Size::Portfolio)
-    end
-
-    test 'does not match when provided a higher value than the model validation value for lowest possible size' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_between)
-      matcher.between 5.kilobytes..7.kilobytes
-      refute matcher.matches?(Size::Portfolio)
-    end
-
-    test 'does not match when provided a lower value than the model validation value for lowest possible size' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_between)
-      matcher.between 1.kilobytes..7.kilobytes
-      refute matcher.matches?(Size::Portfolio)
-    end
-
-    test 'does not match when provided both lowest and highest possible values different than the model validation value' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_between)
-      matcher.between 4.kilobytes..20.kilobytes
-      refute matcher.matches?(Size::Portfolio)
+      it { is_expected_not_to_match_for(klass) }
     end
   end
 
+  describe '#greater_than_or_equal_to' do
+    let(:model_attribute) { :size_greater_than_or_equal_to }
 
-  class WithMessageMatcher < ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test
-    test 'matches when provided with the model validation message' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_with_message)
-      matcher.between 2.kilobytes..7.kilobytes
-      matcher.with_message('is not in required file size range')
-      assert matcher.matches?(Size::Portfolio)
+    describe 'when provided with the exact size specified in the model validations' do
+      subject { matcher.greater_than_or_equal_to 7.kilobytes }
+
+      it { is_expected_to_match_for(klass) }
     end
 
-    test 'does not match when not provided with the model validation' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_with_message)
-      matcher.between 2.kilobytes..7.kilobytes
-      matcher.with_message('<wrong message>')
-      refute matcher.matches?(Size::Portfolio)
+    describe 'when provided with a higher size than the size specified in the model validations' do
+      subject { matcher.greater_than_or_equal_to 10.kilobytes }
+
+      it { is_expected_not_to_match_for(klass) }
     end
-  end
 
+    describe 'when provided with a lower size than the size specified in the model validations' do
+      subject { matcher.greater_than_or_equal_to 0.5.kilobyte }
 
-  class UnknownAttachedAttribute < ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test
-    test 'does not match when provided with an unknown attached attribute' do
-      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:non_existing)
-      matcher.greater_than 2.kilobytes
-      refute matcher.matches?(Size::Portfolio)
+      it { is_expected_not_to_match_for(klass) }
     end
   end
 
+  describe '#between' do
+    let(:model_attribute) { :size_between }
 
-  # Other tests
-  test 'matches when provided with an instance' do
-    matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_less_than)
-    matcher.less_than 2.kilobytes
-    assert matcher.matches?(Size::Portfolio.new)
+    describe 'when provided with the exact sizes specified in the model validations' do
+      subject { matcher.between 2.kilobytes..7.kilobytes }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    describe 'when provided with a higher size than the size specified in the model validations' do
+      describe 'for the highest possible size' do
+        subject { matcher.between 2.kilobytes..10.kilobytes }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe 'for the lowest possible size' do
+        subject { matcher.between 5.kilobytes..7.kilobytes }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
+
+    describe 'when provided with a lower size than the size specified in the model validations' do
+      describe 'for the highest possible size' do
+        subject { matcher.between 1.kilobytes..7.kilobytes }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe 'for the lowest possible size' do
+        subject { matcher.between 1.kilobytes..7.kilobytes }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
+
+    describe 'when provided with both lowest and highest possible sizes different than the model validations' do
+      subject { matcher.between 4.kilobytes..20.kilobytes }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+  end
+
+  describe '#with_message' do
+    before { subject.between 2.kilobytes..7.kilobytes }
+
+    let(:model_attribute) { :size_with_message }
+
+    describe 'when provided with the model validation message' do
+      subject { matcher.with_message('is not in required file size range') }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    describe 'when provided with a different message than the model validation message' do
+      subject { matcher.with_message('<wrong message>') }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+  end
+
+  describe 'when the passed model attribute does not exist' do
+    subject { matcher.less_than 2.kilobytes }
+
+    let(:model_attribute) { :not_present_in_model }
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+
+  describe 'when the matcher is provided with an instance' do
+    subject { matcher.less_than 2.kilobytes }
+
+    let(:model_attribute) { :size_less_than }
+    let(:instance) { Size::Portfolio.new }
+
+    it { is_expected_to_match_for(instance) }
   end
 end
