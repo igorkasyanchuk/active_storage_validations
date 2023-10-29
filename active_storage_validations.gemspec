@@ -18,6 +18,8 @@ Gem::Specification.new do |s|
 
   s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md']
 
+  s.metadata['rubygems_mfa_required'] = 'true'
+
   %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 5.2.0' }
   s.add_development_dependency 'combustion', "~> 1.3"
   s.add_development_dependency 'mini_magick', ">= 4.9.5"
