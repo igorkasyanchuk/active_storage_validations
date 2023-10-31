@@ -49,6 +49,10 @@ module ActiveStorageValidations
         self
       end
 
+      def on(context)
+        @context = context
+      end
+
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
         responds_to_methods && not_lower_than_min? && higher_than_min? && lower_than_max? && not_higher_than_max?
@@ -86,11 +90,15 @@ module ActiveStorageValidations
         @max.nil? || @max == Float::INFINITY || !passes_validation_with_size(@max + 1)
       end
 
+      def validate
+        @subject.validate(@context)
+      end
+
       def passes_validation_with_size(new_size)
         io = Tempfile.new('Hello world!')
         Matchers.stub_method(io, :size, new_size) do
           @subject.public_send(@attribute_name).attach(io: io, filename: 'test.png', content_type: 'image/pg')
-          @subject.validate
+          validate
           exclude_error_message = @custom_message || "file_size_not_"
           @subject.errors.details[@attribute_name].none? do |error|
             error[:error].to_s.include?(exclude_error_message)

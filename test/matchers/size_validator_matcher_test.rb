@@ -153,6 +153,14 @@ class ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test < ActiveSup
     end
   end
 
+  class WithContextMatcher < ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test
+    test 'matches when provided with the validation context' do
+      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:size_with_context)
+      matcher.less_than 2.kilobytes
+      matcher.on(:custom_context)
+      assert matcher.matches?(Size::Portfolio)
+    end
+  end
 
   # Other tests
   test 'matches when provided with an instance' do
