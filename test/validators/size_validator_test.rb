@@ -239,6 +239,22 @@ class ActiveStorageValidations::SizeValidator::Test < ActiveSupport::TestCase
     end
   end
 
+  class WithContext < ActiveStorageValidations::SizeValidator::Test
+    # validates :size_with_context, size: { less_than: 2.kilobytes }, on: :custom_context
+
+    test 'generates correct error message' do
+      pt = Size::Portfolio.new(title: 'Matisse')
+      pt.size_with_context.attach(file_10ko)
+
+      refute pt.invalid?
+      pt.valid?(:custom_context)
+
+      assert_equal(
+        ['Size with context file size must be less than 2 KB (current size is 10 KB)'],
+        pt.errors.full_messages
+      )
+    end
+  end
 end
 
 def file_1ko

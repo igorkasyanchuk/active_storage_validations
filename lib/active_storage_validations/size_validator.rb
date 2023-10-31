@@ -31,7 +31,8 @@ module ActiveStorageValidations
         errors_options[:file_size] = number_to_human_size(file.blob.byte_size)
         errors_options[:min_size] = number_to_human_size(min_size(flat_options))
         errors_options[:max_size] = number_to_human_size(max_size(flat_options))
-        error_type = "file_size_not_#{flat_options.keys.first}".to_sym
+        keys = AVAILABLE_CHECKS & options.keys
+        error_type = "file_size_not_#{keys.first}".to_sym
 
         add_error(record, attribute, error_type, **errors_options)
         break
