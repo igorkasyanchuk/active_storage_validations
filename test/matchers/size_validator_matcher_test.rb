@@ -127,6 +127,43 @@ class ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test < ActiveSup
     end
   end
 
+  class BetweenMatcherForManyAttachments < ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test
+    test 'matches when provided with the model validation value' do
+      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:many_size_between)
+      matcher.between 2.kilobytes..7.kilobytes
+      assert matcher.matches?(Size::Portfolio)
+    end
+
+    test 'does not match when provided a higher value than the model validation value for highest possible size' do
+      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:many_size_between)
+      matcher.between 2.kilobytes..10.kilobytes
+      refute matcher.matches?(Size::Portfolio)
+    end
+
+    test 'does not match when provided a lower value than the model validation value for highest possible size' do
+      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:many_size_between)
+      matcher.between 1.kilobytes..7.kilobytes
+      refute matcher.matches?(Size::Portfolio)
+    end
+
+    test 'does not match when provided a higher value than the model validation value for lowest possible size' do
+      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:many_size_between)
+      matcher.between 5.kilobytes..7.kilobytes
+      refute matcher.matches?(Size::Portfolio)
+    end
+
+    test 'does not match when provided a lower value than the model validation value for lowest possible size' do
+      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:many_size_between)
+      matcher.between 1.kilobytes..7.kilobytes
+      refute matcher.matches?(Size::Portfolio)
+    end
+
+    test 'does not match when provided both lowest and highest possible values different than the model validation value' do
+      matcher = ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:many_size_between)
+      matcher.between 4.kilobytes..20.kilobytes
+      refute matcher.matches?(Size::Portfolio)
+    end
+  end
 
   class WithMessageMatcher < ActiveStorageValidations::Matchers::SizeValidatorMatcher::Test
     test 'matches when provided with the model validation message' do

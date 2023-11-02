@@ -92,9 +92,9 @@ module ActiveStorageValidations
           @subject.public_send(@attribute_name).attach(io: io, filename: 'test.png', content_type: 'image/pg')
           @subject.validate
           exclude_error_message = @custom_message || "file_size_not_"
-          @subject.errors.details[@attribute_name].none? do |error|
-            error[:error].to_s.include?(exclude_error_message)
-          end
+          @subject.errors.details[@attribute_name]
+            .none? { |error| error[:error].to_s.include?(exclude_error_message) }
+            .tap { @subject.attachment_changes["#{@attribute_name}"] = nil }
         end
       end
     end
