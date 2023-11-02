@@ -24,3 +24,4 @@ ru:
       aspect_ratio_not_landscape: "должно быть пейзажное изображение"
       aspect_ratio_is_not: "должен иметь соотношение сторон %{aspect_ratio}"
       aspect_ratio_unknown: "имеет неизвестное соотношение сторон"
+      image_not_processable: "не является допустимым изображением"

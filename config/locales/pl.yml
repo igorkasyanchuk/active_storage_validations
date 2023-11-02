@@ -24,3 +24,4 @@ pl:
       aspect_ratio_not_landscape: "musi mieć proporcje pejzażu"
       aspect_ratio_is_not: "musi mieć proporcje %{aspect_ratio}"
       aspect_ratio_unknown: "ma nieokreślone proporcje"
+      image_not_processable: "nie jest prawidłowym obrazem"

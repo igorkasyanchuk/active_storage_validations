@@ -24,3 +24,4 @@ zh-CN:
       aspect_ratio_not_landscape: "必须是横屏图片"
       aspect_ratio_is_not: "纵横比必须是 %{aspect_ratio}"
       aspect_ratio_unknown: "未知的纵横比"
+      image_not_processable: "不是有效的图像"

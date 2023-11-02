@@ -24,3 +24,4 @@ uk:
       aspect_ratio_not_landscape: "мусить бути пейзажне зображення"
       aspect_ratio_is_not: "мусить мати співвідношення сторін %{aspect_ratio}"
       aspect_ratio_unknown: "має невідоме співвідношення сторін"
+      image_not_processable: "не є допустимим зображенням"

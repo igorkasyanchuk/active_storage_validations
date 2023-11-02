@@ -24,3 +24,4 @@ vi:
       aspect_ratio_not_landscape: "phải là ảnh ngang"
       aspect_ratio_is_not: "phải có tỉ lệ ảnh %{aspect_ratio}"
       aspect_ratio_unknown: "tỉ lệ ảnh không xác định"
+      image_not_processable: "không phải là ảnh"
