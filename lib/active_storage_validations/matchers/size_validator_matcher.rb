@@ -13,6 +13,7 @@ module ActiveStorageValidations
         @attribute_name = attribute_name
         @min = @max = nil
         @custom_message = nil
+        @context = nil
       end
 
       def description
