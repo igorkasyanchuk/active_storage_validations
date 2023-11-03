@@ -255,6 +255,25 @@ class ActiveStorageValidations::SizeValidator::Test < ActiveSupport::TestCase
       )
     end
   end
+
+  class WithIf < ActiveStorageValidations::SizeValidator::Test
+    #   validates :size_with_if, size: { less_than: 2.kilobytes }, if: -> {  title == 'very_nice_title' }
+
+    test 'generates correct error message' do
+      pt = Size::Portfolio.new(title: 'Matisse')
+      pt.size_with_if.attach(file_10ko)
+
+      refute pt.invalid?
+
+      pt.title = 'very_nice_title'
+      refute pt.valid?
+
+      assert_equal(
+        ['Size with if file size must be less than 2 KB (current size is 10 KB)'],
+        pt.errors.full_messages
+      )
+    end
+  end
 end
 
 def file_1ko

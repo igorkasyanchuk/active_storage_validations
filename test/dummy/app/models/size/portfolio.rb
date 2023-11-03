@@ -18,6 +18,7 @@ class Size::Portfolio < ApplicationRecord
   has_one_attached :size_between
   has_one_attached :size_with_message
   has_one_attached :size_with_context
+  has_one_attached :size_with_if
 
   has_one_attached :proc_size_less_than
   has_one_attached :proc_size_less_than_or_equal_to
@@ -35,6 +36,7 @@ class Size::Portfolio < ApplicationRecord
   validates :size_between, size: { between: 2.kilobytes..7.kilobytes }
   validates :size_with_message, size: { between: 2.kilobytes..7.kilobytes, message: 'is not in required file size range' }
   validates :size_with_context, size: { less_than: 2.kilobytes }, on: :custom_context
+  validates :size_with_if, size: { less_than: 2.kilobytes }, if: -> {  title == 'very_nice_title' }
 
   validates :proc_size_less_than, size: { less_than: -> (record) { 2.kilobytes } }
   validates :proc_size_less_than_or_equal_to, size: { less_than_or_equal_to: -> (record) { 2.kilobytes } }
