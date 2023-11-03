@@ -314,61 +314,6 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
     end
   end
 
-  %i(min max).each do |bound|
-    describe "##{bound}" do
-      let(:model_attribute) { :"#{bound}" }
-
-      describe "when provided with both lower width and height than the width and height specified in the model validations" do
-        subject do
-          matcher.public_send(:"width_#{bound}", 1)
-          matcher.public_send(:"height_#{bound}", 1)
-        end
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-
-      %i(width height).each do |dimension|
-        describe "when provided with a lower #{dimension} than the #{dimension} specified in the model validations" do
-          subject do
-            matcher.public_send(:"width_#{bound}", dimension == :width ? 1 : 800)
-            matcher.public_send(:"height_#{bound}", dimension == :height ? 1 : 600)
-          end
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-      end
-
-      describe "when provided with the exact width and height specified in the model validations" do
-        subject do
-          matcher.public_send(:"width_#{bound}", 800)
-          matcher.public_send(:"height_#{bound}", 600)
-        end
-
-        it { is_expected_to_match_for(klass) }
-      end
-
-      %i(width height).each do |dimension|
-        describe "when provided with a higher #{dimension} than the #{dimension} specified in the model validations" do
-          subject do
-            matcher.public_send(:"width_#{bound}", dimension == :width ? 9999 : 800)
-            matcher.public_send(:"height_#{bound}", dimension == :height ? 9999 : 600)
-          end
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-      end
-
-      describe "when provided with both higher width and height than the width and height specified in the model validations" do
-        subject do
-          matcher.public_send(:"width_#{bound}", 9999)
-          matcher.public_send(:"height_#{bound}", 9999)
-        end
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
-  end
-
   describe '#with_message' do
     let(:model_attribute) { :with_message }
 
@@ -472,7 +417,60 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
     end
 
     %i(min max).each do |bound|
-      describe "##{bound} + #with_message" do
+      describe "#width_#{bound} + #height_#{bound}" do
+        let(:model_attribute) { :"#{bound}" }
+
+        describe "when provided with both lower width and height than the width and height specified in the model validations" do
+          subject do
+            matcher.public_send(:"width_#{bound}", 1)
+            matcher.public_send(:"height_#{bound}", 1)
+          end
+
+          it { is_expected_not_to_match_for(klass) }
+        end
+
+        %i(width height).each do |dimension|
+          describe "when provided with a lower #{dimension} than the #{dimension} specified in the model validations" do
+            subject do
+              matcher.public_send(:"width_#{bound}", dimension == :width ? 1 : 800)
+              matcher.public_send(:"height_#{bound}", dimension == :height ? 1 : 600)
+            end
+
+            it { is_expected_not_to_match_for(klass) }
+          end
+        end
+
+        describe "when provided with the exact width and height specified in the model validations" do
+          subject do
+            matcher.public_send(:"width_#{bound}", 800)
+            matcher.public_send(:"height_#{bound}", 600)
+          end
+
+          it { is_expected_to_match_for(klass) }
+        end
+
+        %i(width height).each do |dimension|
+          describe "when provided with a higher #{dimension} than the #{dimension} specified in the model validations" do
+            subject do
+              matcher.public_send(:"width_#{bound}", dimension == :width ? 9999 : 800)
+              matcher.public_send(:"height_#{bound}", dimension == :height ? 9999 : 600)
+            end
+
+            it { is_expected_not_to_match_for(klass) }
+          end
+        end
+
+        describe "when provided with both higher width and height than the width and height specified in the model validations" do
+          subject do
+            matcher.public_send(:"width_#{bound}", 9999)
+            matcher.public_send(:"height_#{bound}", 9999)
+          end
+
+          it { is_expected_not_to_match_for(klass) }
+        end
+      end
+
+      describe "#width_#{bound} + #height_#{bound} + #with_message" do
         let(:model_attribute) { :"#{bound}_with_message" }
 
         describe "when provided with the exact width and height specified in the model validations" do
