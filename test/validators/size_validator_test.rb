@@ -247,7 +247,7 @@ class ActiveStorageValidations::SizeValidator::Test < ActiveSupport::TestCase
       pt.size_with_context.attach(file_10ko)
 
       refute pt.invalid?
-      pt.valid?(:custom_context)
+      refute pt.valid?(:custom_context)
 
       assert_equal(
         ['Size with context file size must be less than 2 KB (current size is 10 KB)'],
