@@ -4,6 +4,32 @@ require 'test_helper'
 require 'matchers/support/matcher_helpers'
 require 'active_storage_validations/matchers'
 
+module SizeValidatorMatcherTest
+  module OnlyMatchWhenExactValue
+    extend ActiveSupport::Concern
+
+    included do
+      describe 'when provided with a lower size than the size specified in the model validations' do
+        subject { matcher.public_send(matcher_method, 0.5.kilobyte) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe 'when provided with the exact size specified in the model validations' do
+        subject { matcher.public_send(matcher_method, validator_value) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      describe 'when provided with a higher size than the size specified in the model validations' do
+        subject { matcher.public_send(matcher_method, 99.kilobytes) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
+  end
+end
+
 describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
   include MatcherHelpers
 
@@ -12,90 +38,34 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
 
   describe '#less_than' do
     let(:model_attribute) { :size_less_than }
+    let(:matcher_method) { :less_than }
+    let(:validator_value) { 2.kilobytes }
 
-    describe 'when provided with the exact size specified in the model validations' do
-      subject { matcher.less_than 2.kilobytes }
-
-      it { is_expected_to_match_for(klass) }
-    end
-
-    describe 'when provided with a higher size than the size specified in the model validations' do
-      subject { matcher.less_than 5.kilobytes }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
-
-    describe 'when provided with a lower size than the size specified in the model validations' do
-      subject { matcher.less_than 0.5.kilobyte }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
+    include SizeValidatorMatcherTest::OnlyMatchWhenExactValue
   end
 
   describe '#less_than_or_equal_to' do
     let(:model_attribute) { :size_less_than_or_equal_to }
+    let(:matcher_method) { :less_than_or_equal_to }
+    let(:validator_value) { 2.kilobytes }
 
-    describe 'when provided with the exact size specified in the model validations' do
-      subject { matcher.less_than_or_equal_to 2.kilobytes }
-
-      it { is_expected_to_match_for(klass) }
-    end
-
-    describe 'when provided with a higher size than the size specified in the model validations' do
-      subject { matcher.less_than_or_equal_to 5.kilobytes }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
-
-    describe 'when provided with a lower size than the size specified in the model validations' do
-      subject { matcher.less_than_or_equal_to 0.5.kilobyte }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
+    include SizeValidatorMatcherTest::OnlyMatchWhenExactValue
   end
 
   describe '#greater_than' do
     let(:model_attribute) { :size_greater_than }
+    let(:matcher_method) { :greater_than }
+    let(:validator_value) { 7.kilobytes }
 
-    describe 'when provided with the exact size specified in the model validations' do
-      subject { matcher.greater_than 7.kilobytes }
-
-      it { is_expected_to_match_for(klass) }
-    end
-
-    describe 'when provided with a higher size than the size specified in the model validations' do
-      subject { matcher.greater_than 10.kilobytes }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
-
-    describe 'when provided with a lower size than the size specified in the model validations' do
-      subject { matcher.greater_than 0.5.kilobyte }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
+    include SizeValidatorMatcherTest::OnlyMatchWhenExactValue
   end
 
   describe '#greater_than_or_equal_to' do
     let(:model_attribute) { :size_greater_than_or_equal_to }
+    let(:matcher_method) { :greater_than_or_equal_to }
+    let(:validator_value) { 7.kilobytes }
 
-    describe 'when provided with the exact size specified in the model validations' do
-      subject { matcher.greater_than_or_equal_to 7.kilobytes }
-
-      it { is_expected_to_match_for(klass) }
-    end
-
-    describe 'when provided with a higher size than the size specified in the model validations' do
-      subject { matcher.greater_than_or_equal_to 10.kilobytes }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
-
-    describe 'when provided with a lower size than the size specified in the model validations' do
-      subject { matcher.greater_than_or_equal_to 0.5.kilobyte }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
+    include SizeValidatorMatcherTest::OnlyMatchWhenExactValue
   end
 
   describe '#between' do
@@ -172,7 +142,7 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     subject { matcher.less_than 2.kilobytes }
 
     let(:model_attribute) { :size_less_than }
-    let(:instance) { Size::Portfolio.new }
+    let(:instance) { klass.new }
 
     it { is_expected_to_match_for(instance) }
   end
