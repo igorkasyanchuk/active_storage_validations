@@ -21,6 +21,17 @@ class Size::Matcher < ApplicationRecord
   validates :greater_than_or_equal_to, size: { greater_than_or_equal_to: 7.kilobytes }
   validates :between, size: { between: 2.kilobytes..7.kilobytes }
 
+  has_one_attached :proc_less_than
+  has_one_attached :proc_less_than_or_equal_to
+  has_one_attached :proc_greater_than
+  has_one_attached :proc_greater_than_or_equal_to
+  has_one_attached :proc_between
+  validates :proc_less_than, size: { less_than: -> (record) { 2.kilobytes } }
+  validates :proc_less_than_or_equal_to, size: { less_than_or_equal_to: -> (record) { 2.kilobytes } }
+  validates :proc_greater_than, size: { greater_than: -> (record) { 7.kilobytes } }
+  validates :proc_greater_than_or_equal_to, size: { greater_than_or_equal_to: -> (record) { 7.kilobytes } }
+  validates :proc_between, size: { between: -> { 2.kilobytes..7.kilobytes } }
+
   has_one_attached :with_message
   validates :with_message, size: { less_than_or_equal_to: 5.megabytes, message: 'File is too big.' }
 
