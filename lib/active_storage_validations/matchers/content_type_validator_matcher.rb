@@ -11,6 +11,7 @@ module ActiveStorageValidations
     class ContentTypeValidatorMatcher
       def initialize(attribute_name)
         @attribute_name = attribute_name
+        @allowed_types = @rejected_types = []
         @custom_message = nil
       end
 
@@ -35,20 +36,20 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods && allowed_types_allowed? && rejected_types_rejected? && validate_custom_message?
+        responds_to_methods && all_allowed_types_allowed? && all_rejected_types_rejected? && validate_custom_message?
       end
 
       def failure_message
         message = ["Expected #{@attribute_name}"]
 
-        if @allowed_types
-          message << "Accept content types: #{allowed_types.join(", ")}"
-          message << "#{@missing_allowed_types.join(", ")} were rejected"
+        if @allowed_types_not_allowed.present?
+          message << "Accept content types: #{@allowed_types.join(", ")}"
+          message << "#{@allowed_types_not_allowed.join(", ")} were rejected"
         end
 
-        if @rejected_types
-          message << "Reject content types: #{rejected_types.join(", ")}"
-          message << "#{@missing_rejected_types.join(", ")} were accepted"
+        if @rejected_types_not_rejected.present?
+          message << "Reject content types: #{@rejected_types.join(", ")}"
+          message << "#{@rejected_types_not_rejected.join(", ")} were accepted"
         end
 
         message.join("\n")
@@ -62,22 +63,14 @@ module ActiveStorageValidations
           @subject.public_send(@attribute_name).respond_to?(:detach)
       end
 
-      def allowed_types
-        @allowed_types || []
+      def all_allowed_types_allowed?
+        @allowed_types_not_allowed ||= @allowed_types.reject { |type| type_allowed?(type) }
+        @allowed_types_not_allowed.empty?
       end
 
-      def rejected_types
-        @rejected_types || []
-      end
-
-      def allowed_types_allowed?
-        @missing_allowed_types ||= allowed_types.reject { |type| type_allowed?(type) }
-        @missing_allowed_types.none?
-      end
-
-      def rejected_types_rejected?
-        @missing_rejected_types ||= rejected_types.select { |type| type_allowed?(type) }
-        @missing_rejected_types.none?
+      def all_rejected_types_rejected?
+        @rejected_types_not_rejected ||= @rejected_types.select { |type| type_allowed?(type) }
+        @rejected_types_not_rejected.empty?
       end
 
       def type_allowed?(type)
