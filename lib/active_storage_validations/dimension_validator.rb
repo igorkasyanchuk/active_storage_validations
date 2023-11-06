@@ -1,13 +1,28 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/symbolizable.rb'
 require_relative 'metadata.rb'
 
 module ActiveStorageValidations
   class DimensionValidator < ActiveModel::EachValidator # :nodoc
     include OptionProcUnfolding
     include ErrorHandler
+    include Symbolizable
 
     AVAILABLE_CHECKS = %i[width height min max].freeze
+    ERROR_TYPES = %i[
+      image_metadata_missing
+      dimension_min_inclusion
+      dimension_max_inclusion
+      dimension_width_inclusion
+      dimension_height_inclusion
+      dimension_width_greater_than_or_equal_to
+      dimension_height_greater_than_or_equal_to
+      dimension_width_less_than_or_equal_to
+      dimension_height_less_than_or_equal_to
+      dimension_width_equal_to
+      dimension_height_equal_to
+    ].freeze
 
     def process_options(record)
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)

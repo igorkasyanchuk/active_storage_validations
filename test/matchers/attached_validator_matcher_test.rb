@@ -24,6 +24,12 @@ describe ActiveStorageValidations::Matchers::AttachedValidatorMatcher do
 
       it { is_expected_not_to_match_for(klass) }
     end
+
+    describe 'when not provided with the #with_message matcher method' do
+      subject { matcher }
+
+      it { is_expected_to_match_for(klass) }
+    end
   end
 
   describe 'when the passed model attribute' do
@@ -41,6 +47,16 @@ describe ActiveStorageValidations::Matchers::AttachedValidatorMatcher do
       let(:model_attribute) { :not_required }
 
       it { is_expected_not_to_match_for(klass) }
+    end
+
+    describe 'has a custom validation error message' do
+      describe 'but the matcher is not provided with a #with_message' do
+        subject { matcher }
+
+        let(:model_attribute) { :required_with_message }
+
+        it { is_expected_to_match_for(klass) }
+      end
     end
   end
 

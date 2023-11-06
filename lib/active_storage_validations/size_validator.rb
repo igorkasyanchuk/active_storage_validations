@@ -1,13 +1,29 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/symbolizable.rb'
+
 module ActiveStorageValidations
   class SizeValidator < ActiveModel::EachValidator # :nodoc:
     include OptionProcUnfolding
     include ErrorHandler
+    include Symbolizable
 
     delegate :number_to_human_size, to: ActiveSupport::NumberHelper
 
-    AVAILABLE_CHECKS = %i[less_than less_than_or_equal_to greater_than greater_than_or_equal_to between].freeze
+    AVAILABLE_CHECKS = %i[
+      less_than
+      less_than_or_equal_to
+      greater_than
+      greater_than_or_equal_to
+      between
+    ].freeze
+    ERROR_TYPES = %i[
+      file_size_not_less_than
+      file_size_not_less_than_or_equal_to
+      file_size_not_greater_than
+      file_size_not_greater_than_or_equal_to
+      file_size_not_between
+    ].freeze
 
     def check_validity!
       unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
@@ -39,6 +55,8 @@ module ActiveStorageValidations
     end
 
     def content_size_valid?(file_size, flat_options)
+      return false if file_size < 0
+
       if flat_options[:between].present?
         flat_options[:between].include?(file_size)
       elsif flat_options[:less_than].present?

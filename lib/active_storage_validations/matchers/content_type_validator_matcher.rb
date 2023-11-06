@@ -2,6 +2,9 @@
 
 # Big thank you to the paperclip validation matchers:
 # https://github.com/thoughtbot/paperclip/blob/v6.1.0/lib/paperclip/matchers/validate_attachment_content_type_matcher.rb
+
+require_relative 'concerns/validatable.rb'
+
 module ActiveStorageValidations
   module Matchers
     def validate_content_type_of(name)
@@ -9,6 +12,8 @@ module ActiveStorageValidations
     end
 
     class ContentTypeValidatorMatcher
+      include Validatable
+
       def initialize(attribute_name)
         @attribute_name = attribute_name
         @allowed_types = @rejected_types = []
@@ -36,7 +41,11 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods && all_allowed_types_allowed? && all_rejected_types_rejected? && validate_custom_message?
+
+        responds_to_methods &&
+          all_allowed_types_allowed? &&
+          all_rejected_types_rejected? &&
+          validate_custom_message?
       end
 
       def failure_message
@@ -74,30 +83,35 @@ module ActiveStorageValidations
       end
 
       def type_allowed?(type)
+        attach_file_of_type(type)
+        validate
+        is_valid?
+      end
+
+      def attach_file_of_type(type)
         @subject.public_send(@attribute_name).attach(attachment_for(type))
-        @subject.validate
-        @subject.errors.details[@attribute_name].none? do |error|
-          error[:error].to_s.include?(error_message)
-        end
       end
 
       def validate_custom_message?
         return true unless @custom_message
 
-        @subject.public_send(@attribute_name).attach(attachment_for('fake/fake'))
-        @subject.validate
-        @subject.errors.details[@attribute_name].select{|error| error[:content_type]}.all? do |error|
-          error[:error].to_s.include?(error_message)
-        end
+        attach_invalid_content_type_file
+        validate
+        has_an_error_message_which_is_custom_message?
       end
 
-      def error_message
-        @custom_message || :content_type_invalid.to_s
+      def attach_invalid_content_type_file
+        @subject.public_send(@attribute_name).attach(attachment_for('fake/fake'))
       end
 
       def attachment_for(type)
         suffix = type.to_s.split('/').last
-        { io: Tempfile.new('.'), filename: "test.#{suffix}", content_type: type }
+
+        {
+          io: Tempfile.new('.'),
+          filename: "test.#{suffix}",
+          content_type: type
+        }
       end
     end
   end

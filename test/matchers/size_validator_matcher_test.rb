@@ -137,20 +137,28 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
   end
 
   describe '#with_message' do
-    before { subject.less_than_or_equal_to 5.megabytes }
-
     let(:model_attribute) { :with_message }
 
-    describe 'when provided with the model validation message' do
-      subject { matcher.with_message('File is too big.') }
+    describe 'when provided with the exact size' do
+      before { matcher.less_than_or_equal_to(5.megabytes) }
 
-      it { is_expected_to_match_for(klass) }
-    end
+      describe 'and with the message specified in the model validations' do
+        subject { matcher.with_message('File is too big.') }
 
-    describe 'when provided with a different message than the model validation message' do
-      subject { matcher.with_message('<wrong message>') }
+        it { is_expected_to_match_for(klass) }
+      end
 
-      it { is_expected_not_to_match_for(klass) }
+      describe 'when provided with a different message than the one specified in the model validations' do
+        subject { matcher.with_message('<wrong message>') }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe 'but without the #with_message matcher method' do
+        subject { matcher }
+
+        it { is_expected_to_match_for(klass) }
+      end
     end
   end
 
@@ -228,6 +236,16 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
           it { is_expected_to_match_for(klass) }
         end
       end
+    end
+  end
+
+  describe 'when the passed model attribute has a custom validation error message' do
+    describe 'but the matcher is not provided with a #with_message' do
+      subject { matcher.less_than_or_equal_to 5.megabytes }
+
+      let(:model_attribute) { :with_message }
+
+      it { is_expected_to_match_for(klass) }
     end
   end
 

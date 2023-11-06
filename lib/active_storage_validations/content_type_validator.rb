@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/symbolizable.rb'
+
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
     include OptionProcUnfolding
     include ErrorHandler
+    include Symbolizable
 
     AVAILABLE_CHECKS = %i[with in].freeze
-    
+    ERROR_TYPES = %i[content_type_invalid].freeze
+
     def validate_each(record, attribute, _value)
       return true unless record.send(attribute).attached?
 
@@ -22,7 +26,7 @@ module ActiveStorageValidations
         next if is_valid?(file, types)
 
         errors_options[:content_type] = content_type(file)
-        add_error(record, attribute, :content_type_invalid, **errors_options)
+        add_error(record, attribute, ERROR_TYPES.first, **errors_options)
         break
       end
     end

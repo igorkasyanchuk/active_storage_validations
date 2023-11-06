@@ -148,16 +148,26 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
   describe '#with_message' do
     let(:model_attribute) { :with_message }
 
-    describe 'when provided with the model validation message' do
-      subject { matcher.with_message('Not authorized file type.') }
+    describe 'when provided with the allowed content type' do
+      before { matcher.allowing('image/png') }
 
-      it { is_expected_to_match_for(klass) }
-    end
+      describe 'and with the message specified in the model validations' do
+        subject { matcher.with_message('Not authorized file type.') }
 
-    describe 'when provided with a different message than the model validation message' do
-      subject { matcher.with_message('<wrong message>') }
+        it { is_expected_to_match_for(klass) }
+      end
 
-      it { is_expected_not_to_match_for(klass) }
+      describe 'and with a different message than the one specified in the model validations' do
+        subject { matcher.with_message('<wrong message>') }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe 'but without the #with_message matcher method' do
+        subject { matcher }
+
+        it { is_expected_to_match_for(klass) }
+      end
     end
   end
 
@@ -232,12 +242,24 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     end
   end
 
-  describe 'when the passed model attribute does not exist' do
-    subject { matcher }
+  describe 'when the passed model attribute' do
+    describe 'does not exist' do
+      subject { matcher }
 
-    let(:model_attribute) { :not_present_in_model }
+      let(:model_attribute) { :not_present_in_model }
 
-    it { is_expected_not_to_match_for(klass) }
+      it { is_expected_not_to_match_for(klass) }
+    end
+
+    describe 'has a custom validation error message' do
+      describe 'but the matcher is not provided with a #with_message' do
+        subject { matcher }
+
+        let(:model_attribute) { :with_message }
+
+        it { is_expected_to_match_for(klass) }
+      end
+    end
   end
 
   describe 'when the matcher is provided with an instance' do
