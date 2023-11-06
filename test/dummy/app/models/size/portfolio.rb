@@ -2,7 +2,7 @@
 
 # == Schema Information
 #
-# Table name: portfolios
+# Table name: size_portfolios
 #
 #  id         :integer          not null, primary key
 #  title      :string

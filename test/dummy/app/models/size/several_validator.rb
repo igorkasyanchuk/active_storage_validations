@@ -2,7 +2,7 @@
 
 # == Schema Information
 #
-# Table name: several_validators
+# Table name: size_several_validators
 #
 #  id         :integer          not null, primary key
 #  title      :string

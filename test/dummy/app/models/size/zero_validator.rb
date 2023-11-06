@@ -2,7 +2,7 @@
 
 # == Schema Information
 #
-# Table name: zero_validators
+# Table name: size_zero_validators
 #
 #  id         :integer          not null, primary key
 #  title      :string
