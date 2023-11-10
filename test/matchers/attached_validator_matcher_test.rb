@@ -1,70 +1,71 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'matchers/support/matcher_helpers'
 require 'active_storage_validations/matchers'
 
-class ActiveStorageValidations::Matchers::AttachedValidatorMatcher::Test < ActiveSupport::TestCase
-  test 'positive match when providing class' do
-    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:avatar)
-    matcher.with_message("must not be blank")
-    assert matcher.matches?(User)
+describe ActiveStorageValidations::Matchers::AttachedValidatorMatcher do
+  include MatcherHelpers
+
+  let(:matcher) { ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(model_attribute) }
+  let(:klass) { Attached::Matcher }
+
+  describe '#with_message' do
+    let(:model_attribute) { :required_with_message }
+
+    describe 'when provided with the model validation message' do
+      subject { matcher.with_message('Mandatory.') }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    describe 'when provided with a different message than the model validation message' do
+      subject { matcher.with_message('<wrong message>') }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+
+    describe 'when not provided with the #with_message matcher method' do
+      subject { matcher }
+
+      it { is_expected_to_match_for(klass) }
+    end
   end
 
-  test 'negative match when providing class' do
-    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:image_regex)
-    refute matcher.matches?(User)
+  describe 'when the passed model attribute' do
+    describe 'does not exist' do
+      subject { matcher }
+
+      let(:model_attribute) { :not_present_in_model }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+
+    describe 'does not have an `attached: true` constraint' do
+      subject { matcher }
+
+      let(:model_attribute) { :not_required }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+
+    describe 'has a custom validation error message' do
+      describe 'but the matcher is not provided with a #with_message' do
+        subject { matcher }
+
+        let(:model_attribute) { :required_with_message }
+
+        it { is_expected_to_match_for(klass) }
+      end
+    end
   end
 
-  test 'unknown attached when providing class' do
-    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:non_existing)
-    refute matcher.matches?(User)
-  end
+  describe 'when the matcher is provided with an instance' do
+    subject { matcher }
 
-  test 'positive match when providing instance' do
-    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:avatar)
-    matcher.with_message("must not be blank")
-    assert matcher.matches?(User.new)
-  end
+    let(:model_attribute) { :required }
+    let(:instance) { klass.new }
 
-  test 'negative match when providing instance' do
-    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:image_regex)
-    refute matcher.matches?(User.new)
-  end
-
-  test 'unknown attached when providing instance' do
-    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:non_existing)
-    refute matcher.matches?(User.new)
-  end
-
-  test 'positive match with valid conditional validation' do
-    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:conditional_image)
-    assert matcher.matches?(User.new(name: 'Foo'))
-  end
-
-  test 'negative match with invalid conditional validation' do
-    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:conditional_image)
-    refute matcher.matches?(User.new)
-  end
-
-  test 'positive match when providing instance with attachment' do
-    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:avatar)
-    matcher.with_message("must not be blank")
-    user = User.new
-    user.avatar.attach(io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png')
-    user.proc_avatar.attach(io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png')
-    assert matcher.matches?(user)
-  end
-
-  test 'positive match when providing persisted instance with attachment' do
-    matcher = ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(:avatar)
-    matcher.with_message("must not be blank")
-    user = User.create!(
-      name: 'Pietje',
-      avatar: { io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' },
-      photos: [{ io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' }],
-      proc_avatar: { io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' },
-      proc_photos: [{ io: Tempfile.new('.'), filename: 'image.png', content_type: 'image/png' }]
-    )
-    assert matcher.matches?(user)
+    it { is_expected_to_match_for(instance) }
   end
 end

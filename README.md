@@ -368,6 +368,11 @@ BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 ```
 
+Tips:
+- To focus a specific test, use the `focus` class method provided by [minitest-focus](https://github.com/minitest/minitest-focus)
+- To focus a specific file, use the TEST option provided by minitest, e.g. to only run size_validator_test.rb file you will execute the following command: `bundle exec rake test TEST=test/validators/size_validator_test.rb``
+
+
 ## Known issues
 
 - There is an issue in Rails which it possible to get if you have added a validation and generating for example an image preview of attachments. It can be fixed with this:

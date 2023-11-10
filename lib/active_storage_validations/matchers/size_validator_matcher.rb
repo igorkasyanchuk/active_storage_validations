@@ -2,6 +2,9 @@
 
 # Big thank you to the paperclip validation matchers:
 # https://github.com/thoughtbot/paperclip/blob/v6.1.0/lib/paperclip/matchers/validate_attachment_size_matcher.rb
+
+require_relative 'concerns/validatable.rb'
+
 module ActiveStorageValidations
   module Matchers
     def validate_size_of(name)
@@ -9,6 +12,8 @@ module ActiveStorageValidations
     end
 
     class SizeValidatorMatcher
+      include Validatable
+
       def initialize(attribute_name)
         @attribute_name = attribute_name
         @min = @max = nil
@@ -51,7 +56,13 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods && not_lower_than_min? && higher_than_min? && lower_than_max? && not_higher_than_max?
+
+        responds_to_methods &&
+          not_lower_than_min? &&
+          higher_than_min? &&
+          lower_than_max? &&
+          not_higher_than_max? &&
+          validate_custom_message?
       end
 
       def failure_message
@@ -86,16 +97,44 @@ module ActiveStorageValidations
         @max.nil? || @max == Float::INFINITY || !passes_validation_with_size(@max + 1)
       end
 
-      def passes_validation_with_size(new_size)
-        io = Tempfile.new('Hello world!')
-        Matchers.stub_method(io, :size, new_size) do
-          @subject.public_send(@attribute_name).attach(io: io, filename: 'test.png', content_type: 'image/pg')
-          @subject.validate
-          exclude_error_message = @custom_message || "file_size_not_"
-          @subject.errors.details[@attribute_name].none? do |error|
-            error[:error].to_s.include?(exclude_error_message)
-          end
+      def passes_validation_with_size(size)
+        mock_size_for(io, size) do
+          attach_file
+          validate
+          is_valid?
         end
+      end
+
+      def validate_custom_message?
+        return true unless @custom_message
+
+        mock_size_for(io, -1.kilobytes) do
+          attach_file
+          validate
+          has_an_error_message_which_is_custom_message?
+        end
+      end
+
+      def mock_size_for(io, size)
+        Matchers.stub_method(io, :size, size) do
+          yield
+        end
+      end
+
+      def attach_file
+        @subject.public_send(@attribute_name).attach(dummy_file)
+      end
+
+      def dummy_file
+        {
+          io: io,
+          filename: 'test.png',
+          content_type: 'image/png'
+        }
+      end
+
+      def io
+        @io ||= Tempfile.new('Hello world!')
       end
     end
   end

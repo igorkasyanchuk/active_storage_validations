@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/validatable.rb'
+
 module ActiveStorageValidations
   module Matchers
     def validate_dimensions_of(name)
@@ -7,6 +9,8 @@ module ActiveStorageValidations
     end
 
     class DimensionValidatorMatcher
+      include Validatable
+
       def initialize(attribute_name)
         @attribute_name = attribute_name
         @width_min = @width_max = @height_min = @height_max = nil
@@ -64,9 +68,19 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
+
         responds_to_methods &&
-          width_not_smaller_than_min? && width_larger_than_min? && width_smaller_than_max? && width_not_larger_than_max? && width_equals? &&
-          height_not_smaller_than_min? && height_larger_than_min? && height_smaller_than_max? && height_not_larger_than_max? && height_equals?
+          width_not_smaller_than_min? &&
+          width_larger_than_min? &&
+          width_smaller_than_max? &&
+          width_not_larger_than_max? &&
+          width_equals? &&
+          height_not_smaller_than_min? &&
+          height_larger_than_min? &&
+          height_smaller_than_max? &&
+          height_not_larger_than_max? &&
+          height_equals? &&
+          validate_custom_message?
       end
 
       def failure_message
@@ -134,22 +148,38 @@ module ActiveStorageValidations
       end
 
       def passes_validation_with_dimensions(width, height, check)
-        @subject.public_send(@attribute_name).attach attachment_for(width, height)
-
-        attachment = @subject.public_send(@attribute_name)
-        Matchers.mock_metadata(attachment, width, height) do
-          @subject.validate
-          exclude_error_message = @custom_message || "dimension_#{check}"
-          @subject.errors.details[@attribute_name].none? do |error|
-            error[:error].to_s.include?(exclude_error_message) ||
-            error[:error].to_s.include?("dimension_min") ||
-            error[:error].to_s.include?("dimension_max")
-          end
+        mock_dimensions_for(attach_file, width, height) do
+          validate
+          is_valid?
         end
       end
 
-      def attachment_for(width, height)
-        { io: Tempfile.new('Hello world!'), filename: 'test.png', content_type: 'image/png' }
+      def validate_custom_message?
+        return true unless @custom_message
+
+        mock_dimensions_for(attach_file, -1, -1) do
+          validate
+          has_an_error_message_which_is_custom_message?
+        end
+      end
+
+      def mock_dimensions_for(attachment, width, height)
+        Matchers.mock_metadata(attachment, width, height) do
+          yield
+        end
+      end
+
+      def attach_file
+        @subject.public_send(@attribute_name).attach(dummy_file)
+        @subject.public_send(@attribute_name)
+      end
+
+      def dummy_file
+        {
+          io: Tempfile.new('Hello world!'),
+          filename: 'test.png',
+          content_type: 'image/png'
+        }
       end
     end
   end

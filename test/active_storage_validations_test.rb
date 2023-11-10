@@ -52,12 +52,14 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal u.errors.details, avatar: [
       {
         error: :content_type_invalid,
+        validator_type: :content_type,
         authorized_types: 'PNG',
         content_type: 'text/plain'
       }
     ], proc_avatar: [
      {
        error: :content_type_invalid,
+       validator_type: :content_type,
        authorized_types: 'PNG',
        content_type: 'text/plain'
      }
@@ -266,7 +268,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.image.attach(html_file)
     e.proc_image.attach(html_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Image is not a valid image", "Image has an invalid content type", "Proc image is not a valid image", "Proc image has an invalid content type"]
+    assert_equal e.errors.full_messages, ["Image is not a valid image", "Image is not a valid image", "Image has an invalid content type", "Proc image is not a valid image", "Proc image is not a valid image", "Proc image has an invalid content type"]
 
     e = OnlyImage.new
     e.image.attach(image_1920x1080_file)

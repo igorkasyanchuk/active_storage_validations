@@ -34,9 +34,29 @@ ActiveRecord::Schema.define do
     end
   end
 
+  create_table :attached_matchers, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :content_type_matchers, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :dimension_matchers, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
   create_table :documents, force: :cascade do |t|
     t.datetime :created_at, precision: 6, null: false
     t.datetime :updated_at, precision: 6, null: false
+  end
+
+  create_table :integration_matchers, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
   end
 
   create_table :limit_attachments, force: :cascade do |t|
@@ -54,40 +74,45 @@ ActiveRecord::Schema.define do
     t.datetime :updated_at, null: false
   end
 
-  create_table :portfolios, force: :cascade do |t|
-    t.string :title
-    t.datetime :created_at, null: false
-    t.datetime :updated_at, null: false
-  end
-
-  create_table :zero_validators, force: :cascade do |t|
-    t.string :title
-    t.datetime :created_at, null: false
-    t.datetime :updated_at, null: false
-  end
-
-  create_table :zero_validator_procs, force: :cascade do |t|
-    t.string :title
-    t.datetime :created_at, null: false
-    t.datetime :updated_at, null: false
-  end
-
-  create_table :several_validators, force: :cascade do |t|
-    t.string :title
-    t.datetime :created_at, null: false
-    t.datetime :updated_at, null: false
-  end
-
-  create_table :several_validator_procs, force: :cascade do |t|
-    t.string :title
-    t.datetime :created_at, null: false
-    t.datetime :updated_at, null: false
-  end
-
   create_table :ratio_models, force: :cascade do |t|
     t.string :name
     t.datetime :created_at, precision: 6, null: false
     t.datetime :updated_at, precision: 6, null: false
+  end
+
+  create_table :size_matchers, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :size_portfolios, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :size_several_validator_procs, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :size_several_validators, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :size_zero_validator_procs, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :size_zero_validators, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
   end
 
   create_table :users, force: :cascade do |t|

@@ -2,7 +2,7 @@
 
 # == Schema Information
 #
-# Table name: zero_validator_procs
+# Table name: size_zero_validator_procs
 #
 #  id         :integer          not null, primary key
 #  title      :string
