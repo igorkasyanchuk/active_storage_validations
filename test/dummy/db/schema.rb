@@ -34,7 +34,17 @@ ActiveRecord::Schema.define do
     end
   end
 
+  create_table :aspect_ratio_validators, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
   create_table :attached_matchers, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :attached_validators, force: :cascade do |t|
     t.datetime :created_at, null: false
     t.datetime :updated_at, null: false
   end
@@ -44,7 +54,17 @@ ActiveRecord::Schema.define do
     t.datetime :updated_at, null: false
   end
 
+  create_table :content_type_validators, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
   create_table :dimension_matchers, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :dimension_validators, force: :cascade do |t|
     t.datetime :created_at, null: false
     t.datetime :updated_at, null: false
   end
@@ -63,9 +83,19 @@ ActiveRecord::Schema.define do
     t.string :name
   end
 
+  create_table :limit_validators, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
   create_table :only_images, force: :cascade do |t|
     t.datetime :created_at, precision: 6, null: false
     t.datetime :updated_at, precision: 6, null: false
+  end
+
+  create_table :processable_image_validators, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
   end
 
   create_table :projects, force: :cascade do |t|
@@ -99,6 +129,11 @@ ActiveRecord::Schema.define do
 
   create_table :size_several_validators, force: :cascade do |t|
     t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :size_validators, force: :cascade do |t|
     t.datetime :created_at, null: false
     t.datetime :updated_at, null: false
   end

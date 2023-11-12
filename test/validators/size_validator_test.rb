@@ -1,10 +1,21 @@
 # frozen_string_literal: true
 
-# Run tests using:
-# BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle exec rake test
-# BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test
-
 require 'test_helper'
+require 'validators/shared_examples/works_with_on_option'
+
+describe ActiveStorageValidations::SizeValidator do
+  include ValidatorHelpers
+
+  subject { Size::Validator.new(params) }
+
+  let(:params) { {} }
+
+  describe 'Rails options' do
+    describe '#on' do
+      include WorksWithOnOption
+    end
+  end
+end
 
 class ActiveStorageValidations::SizeValidator::Test < ActiveSupport::TestCase
 
@@ -239,44 +250,4 @@ class ActiveStorageValidations::SizeValidator::Test < ActiveSupport::TestCase
     end
   end
 
-end
-
-def file_1ko
-  {
-    io: File.open(Rails.root.join('public', 'file_1ko')),
-    filename: 'file_1ko',
-    content_type: 'image/png'
-  }
-end
-
-def file_2ko
-  {
-    io: File.open(Rails.root.join('public', 'file_2ko')),
-    filename: 'file_2ko',
-    content_type: 'text/html'
-  }
-end
-
-def file_5ko
-  {
-    io: File.open(Rails.root.join('public', 'file_5ko')),
-    filename: 'file_5ko',
-    content_type: 'text/html'
-  }
-end
-
-def file_7ko
-  {
-    io: File.open(Rails.root.join('public', 'file_7ko')),
-    filename: 'file_7ko',
-    content_type: 'text/html'
-  }
-end
-
-def file_10ko
-  {
-    io: File.open(Rails.root.join('public', 'file_10ko')),
-    filename: 'file_10ko',
-    content_type: 'text/html'
-  }
 end
