@@ -34,7 +34,13 @@ ActiveRecord::Schema.define do
     end
   end
 
-  create_table :aspect_ratio_validators, force: :cascade do |t|
+  create_table :aspect_ratio_validator_with_ons, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :aspect_ratio_validator_with_ifs, force: :cascade do |t|
+    t.string :title
     t.datetime :created_at, null: false
     t.datetime :updated_at, null: false
   end
@@ -44,7 +50,13 @@ ActiveRecord::Schema.define do
     t.datetime :updated_at, null: false
   end
 
-  create_table :attached_validators, force: :cascade do |t|
+  create_table :attached_validator_with_ons, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :attached_validator_with_ifs, force: :cascade do |t|
+    t.string :title
     t.datetime :created_at, null: false
     t.datetime :updated_at, null: false
   end
@@ -54,7 +66,13 @@ ActiveRecord::Schema.define do
     t.datetime :updated_at, null: false
   end
 
-  create_table :content_type_validators, force: :cascade do |t|
+  create_table :content_type_validator_with_ons, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :content_type_validator_with_ifs, force: :cascade do |t|
+    t.string :title
     t.datetime :created_at, null: false
     t.datetime :updated_at, null: false
   end
@@ -64,7 +82,13 @@ ActiveRecord::Schema.define do
     t.datetime :updated_at, null: false
   end
 
-  create_table :dimension_validators, force: :cascade do |t|
+  create_table :dimension_validator_with_ons, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :dimension_validator_with_ifs, force: :cascade do |t|
+    t.string :title
     t.datetime :created_at, null: false
     t.datetime :updated_at, null: false
   end
@@ -83,7 +107,13 @@ ActiveRecord::Schema.define do
     t.string :name
   end
 
-  create_table :limit_validators, force: :cascade do |t|
+  create_table :limit_validator_with_ons, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :limit_validator_with_ifs, force: :cascade do |t|
+    t.string :title
     t.datetime :created_at, null: false
     t.datetime :updated_at, null: false
   end
@@ -93,7 +123,13 @@ ActiveRecord::Schema.define do
     t.datetime :updated_at, precision: 6, null: false
   end
 
-  create_table :processable_image_validators, force: :cascade do |t|
+  create_table :processable_image_validator_with_ons, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :processable_image_validator_with_ifs, force: :cascade do |t|
+    t.string :title
     t.datetime :created_at, null: false
     t.datetime :updated_at, null: false
   end
@@ -133,7 +169,13 @@ ActiveRecord::Schema.define do
     t.datetime :updated_at, null: false
   end
 
-  create_table :size_validators, force: :cascade do |t|
+  create_table :size_validator_with_ons, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :size_validator_with_ifs, force: :cascade do |t|
+    t.string :title
     t.datetime :created_at, null: false
     t.datetime :updated_at, null: false
   end

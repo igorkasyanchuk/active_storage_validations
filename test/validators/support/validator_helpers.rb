@@ -7,7 +7,11 @@ module ValidatorHelpers
     subject && refute(subject.valid?(kwargs[:context]))
   end
 
+  def validator_class
+    "ActiveStorageValidations::#{subject.class.name.sub(/::/, '').sub(/::.+/, '')}".constantize
+  end
+
   def validator_sym
-    "ActiveStorageValidations::#{subject.class.name.sub(/::/, '')}".constantize.to_sym
+    validator_class.to_sym
   end
 end

@@ -1,4 +1,4 @@
-module WorksWithOnOption
+module WorksWithIfOption
   extend ActiveSupport::Concern
 
   included do
@@ -25,19 +25,19 @@ module WorksWithOnOption
       end
     end
 
-    %i(create update destroy custom).each do |context|
-      describe ":#{context}" do
-        describe 'when passed a file matching the requirements' do
-          before { subject.with_on.attach(file_matching_requirements) }
+    describe 'when the :if condition is met' do
+      let(:params) { { title: 'Right title' } }
 
-          it { is_expected_to_be_valid(context: context) }
-        end
+      describe 'and when passed a file matching the requirements' do
+        before { subject.with_if.attach(file_matching_requirements) }
 
-        describe 'when passed a file not matching the requirements' do
-          before { subject.with_on.attach(file_not_matching_requirements) }
+        it { is_expected_to_be_valid }
+      end
 
-          it { is_expected_not_to_be_valid(context: context) }
-        end
+      describe 'and when passed a file not matching the requirements' do
+        before { subject.with_if.attach(file_not_matching_requirements) }
+
+        it { is_expected_not_to_be_valid }
       end
     end
   end
