@@ -17,7 +17,7 @@ module ActiveStorageValidations
     end
 
     def validate_each(record, attribute, _)
-      files = Array.wrap(record.send(attribute)).compact.uniq
+      files = Array.wrap(record.send(attribute)).reject { |file| file.blank? }.compact.uniq
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
       errors_options = initialize_error_options(options)
       errors_options[:min] = flat_options[:min]

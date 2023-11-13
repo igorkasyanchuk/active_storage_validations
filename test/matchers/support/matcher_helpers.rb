@@ -1,4 +1,6 @@
 module MatcherHelpers
+  require 'active_storage_validations/matchers'
+
   def is_expected_to_match_for(klass)
     subject && assert(subject.matches?(klass))
   end

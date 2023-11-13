@@ -37,4 +37,9 @@ if ActiveSupport::TestCase.respond_to?(:fixture_path=)
   ActiveSupport::TestCase.fixtures :all
 end
 
+# Load test support files
+Dir[File.join('test/support/*.rb')].map { |path| path.sub('test/', '') }.each { |f| require f }
+Dir[File.join('test/matchers/support/*.rb')].map { |path| path.sub('test/', '') }.each { |f| require f }
+Dir[File.join('test/validators/support/*.rb')].map { |path| path.sub('test/', '') }.each { |f| require f }
+
 puts "Running tests with Rails v.#{Rails.version}"
