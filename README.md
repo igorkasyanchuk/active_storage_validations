@@ -451,6 +451,8 @@ You are welcome to contribute.
 - https://github.com/technicalpickles
 - https://github.com/ricsdeol
 - https://github.com/Fonsan
+- https://github.com/tagliala
+- https://github.com/ocarreterom
 
 
 ## License

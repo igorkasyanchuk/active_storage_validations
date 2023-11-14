@@ -1,6 +1,15 @@
 - master
   ....
 
+- 1.1.2
+  - https://github.com/igorkasyanchuk/active_storage_validations/issues/213
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/214
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/206
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/208
+
+- 1.1.1
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/202
+
 - 1.0.4
   - Support for StringIO attachments https://github.com/igorkasyanchuk/active_storage_validations/pull/176
   - Support libvips < 8.8 https://github.com/igorkasyanchuk/active_storage_validations/pull/185
