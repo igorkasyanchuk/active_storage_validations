@@ -1,8 +1,8 @@
-module WorksWithIfOption
+module WorksWithUnlessOption
   extend ActiveSupport::Concern
 
   included do
-    subject { validator_test_class::WithIf.new(params) }
+    subject { validator_test_class::WithUnless.new(params) }
 
     let(:file_matching_requirements) do
       case validator_sym
@@ -27,20 +27,21 @@ module WorksWithIfOption
       end
     end
 
-    describe 'when the :if condition is a method' do
-      describe 'and the condition is met' do
-        let(:params) { { title: 'image' } }
+    describe 'when the :unless condition is a method' do
+      describe 'and the condition is not met' do
+        # Here 0 is important to only trigger the #with_unless attribute
+        let(:params) { { rating: 0 } }
 
         describe 'and when passed a file matching the requirements' do
-          before { subject.with_if.attach(file_matching_requirements) }
+          before { subject.with_unless.attach(file_matching_requirements) }
 
           it { is_expected_to_be_valid }
         end
 
         describe 'and when passed a file not matching the requirements' do
-          let(:error_options) { { if: :title_is_image? } }
+          let(:error_options) { { unless: :rating_is_good? } }
 
-          before { subject.with_if.attach(file_not_matching_requirements) }
+          before { subject.with_unless.attach(file_not_matching_requirements) }
 
           it { is_expected_not_to_be_valid }
           it { is_expected_to_have_error_options(error_options) }
@@ -48,20 +49,21 @@ module WorksWithIfOption
       end
     end
 
-    describe 'when the :if condition is a Proc' do
-      describe 'and the condition is met' do
-        let(:params) { { title: 'Right title' } }
+    describe 'when the :unless condition is a Proc' do
+      describe 'and the condition is not met' do
+         # Here 4 is important to only trigger the #with_unless_proc attribute
+        let(:params) { { rating: 4 } }
 
         describe 'and when passed a file matching the requirements' do
-          before { subject.with_if_proc.attach(file_matching_requirements) }
+          before { subject.with_unless_proc.attach(file_matching_requirements) }
 
           it { is_expected_to_be_valid }
         end
 
         describe 'and when passed a file not matching the requirements' do
-          let(:error_options) { { if: -> { self.title == 'Right title' } } }
+          let(:error_options) { { unless: -> { self.rating == 0 } } }
 
-          before { subject.with_if_proc.attach(file_not_matching_requirements) }
+          before { subject.with_unless_proc.attach(file_not_matching_requirements) }
 
           it { is_expected_not_to_be_valid }
           it { is_expected_to_have_error_options(error_options) }

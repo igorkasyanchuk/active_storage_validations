@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/errorable.rb'
 require_relative 'concerns/symbolizable.rb'
 
 module ActiveStorageValidations
   class LimitValidator < ActiveModel::EachValidator # :nodoc:
     include OptionProcUnfolding
-    include ErrorHandler
+    include Errorable
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[max min].freeze

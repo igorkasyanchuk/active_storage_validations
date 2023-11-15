@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/errorable.rb'
 require_relative 'concerns/symbolizable.rb'
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
     include OptionProcUnfolding
-    include ErrorHandler
+    include Errorable
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[with in].freeze
@@ -16,7 +17,7 @@ module ActiveStorageValidations
 
       types = authorized_types(record)
       return true if types.empty?
-      
+
       files = Array.wrap(record.send(attribute))
 
       errors_options = initialize_error_options(options)

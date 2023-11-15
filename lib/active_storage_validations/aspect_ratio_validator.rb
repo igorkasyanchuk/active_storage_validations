@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/errorable.rb'
 require_relative 'concerns/symbolizable.rb'
 require_relative 'metadata.rb'
 
 module ActiveStorageValidations
   class AspectRatioValidator < ActiveModel::EachValidator # :nodoc
     include OptionProcUnfolding
-    include ErrorHandler
+    include Errorable
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[with].freeze

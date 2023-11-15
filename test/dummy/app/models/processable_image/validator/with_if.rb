@@ -12,5 +12,11 @@
 
 class ProcessableImage::Validator::WithIf < ApplicationRecord
   has_one_attached :with_if
-  validates :with_if, processable_image: true, if: -> { self.title == 'Right title' }
+  has_one_attached :with_if_proc
+  validates :with_if, processable_image: true, if: :title_is_image?
+  validates :with_if_proc, processable_image: true, if: -> { self.title == 'Right title' }
+
+  def title_is_image?
+    title == 'image'
+  end
 end

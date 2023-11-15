@@ -1,13 +1,22 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/errorable.rb'
 require_relative 'concerns/symbolizable.rb'
 
 module ActiveStorageValidations
   class AttachedValidator < ActiveModel::EachValidator # :nodoc:
-    include ErrorHandler
+    include Errorable
     include Symbolizable
 
     ERROR_TYPES = %i[blank].freeze
+
+    def check_validity!
+      %i(allow_nil allow_blank).each do |not_authoriezd_option|
+        if options.include?(not_authoriezd_option)
+          raise ArgumentError, "You cannot pass the :#{not_authoriezd_option} option to this validator"
+        end
+      end
+    end
 
     def validate_each(record, attribute, _value)
       return if record.send(attribute).attached?
