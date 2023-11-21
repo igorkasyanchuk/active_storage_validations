@@ -11,9 +11,9 @@ jobs:
           - '3.1'
           - '3.2'
         gemfile:
-          - rails_6_0
           - rails_6_1
           - rails_7_0
+          - rails_7_1
           - rails_next
         image_processor:
           - vips
@@ -21,17 +21,11 @@ jobs:
         exclude:
           # ruby 3.2 only supports rails 7.0+
           - ruby: '3.2'
-            gemfile: rails_6_0
-          - ruby: '3.2'
             gemfile: rails_6_1
           # ruby 3.1 only supports rails 7.0+
           - ruby: '3.1'
-            gemfile: rails_6_0
-          - ruby: '3.1'
             gemfile: rails_6_1
           # ruby 3.0 only supports rails 6.1+
-          - ruby: '3.0'
-            gemfile: rails_6_0
     runs-on: ubuntu-latest
     steps:
       - name: Install libvips
