@@ -12,3 +12,5 @@ test/dummy/.byebug_history
 *.gem
 coverage/
 /.idea
+
+test/dummy/db/combustion_test.sqlite3*

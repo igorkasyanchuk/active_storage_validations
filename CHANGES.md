@@ -1,6 +1,11 @@
 - master
   ....
 
+- 1.1.3
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/217/files
+  - drop Rails 6.0 from CI
+  - added Rails 7.1 to CI
+
 - 1.1.2
   - https://github.com/igorkasyanchuk/active_storage_validations/issues/213
   - https://github.com/igorkasyanchuk/active_storage_validations/pull/214
