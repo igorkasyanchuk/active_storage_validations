@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/contextable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -9,6 +10,7 @@ module ActiveStorageValidations
     end
 
     class DimensionValidatorMatcher
+      include Contextable
       include Validatable
 
       def initialize(attribute_name)
@@ -70,6 +72,7 @@ module ActiveStorageValidations
         @subject = subject.is_a?(Class) ? subject.new : subject
 
         responds_to_methods &&
+          is_context_valid? &&
           width_not_smaller_than_min? &&
           width_larger_than_min? &&
           width_smaller_than_max? &&

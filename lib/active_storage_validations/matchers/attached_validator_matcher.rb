@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/contextable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -9,6 +10,7 @@ module ActiveStorageValidations
     end
 
     class AttachedValidatorMatcher
+      include Contextable
       include Validatable
 
       def initialize(attribute_name)
@@ -27,7 +29,9 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
+
         responds_to_methods &&
+          is_context_valid? &&
           is_valid_when_file_attached? &&
           is_invalid_when_file_not_attached? &&
           validate_custom_message?

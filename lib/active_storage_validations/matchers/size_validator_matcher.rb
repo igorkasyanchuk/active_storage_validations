@@ -3,6 +3,7 @@
 # Big thank you to the paperclip validation matchers:
 # https://github.com/thoughtbot/paperclip/blob/v6.1.0/lib/paperclip/matchers/validate_attachment_size_matcher.rb
 
+require_relative 'concerns/contextable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -12,6 +13,7 @@ module ActiveStorageValidations
     end
 
     class SizeValidatorMatcher
+      include Contextable
       include Validatable
 
       def initialize(attribute_name)
@@ -58,6 +60,7 @@ module ActiveStorageValidations
         @subject = subject.is_a?(Class) ? subject.new : subject
 
         responds_to_methods &&
+          is_context_valid? &&
           not_lower_than_min? &&
           higher_than_min? &&
           lower_than_max? &&

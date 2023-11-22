@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'matchers/shared_examples/works_with_context'
 
 describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
   include MatcherHelpers
@@ -167,6 +168,10 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
         it { is_expected_to_match_for(klass) }
       end
     end
+  end
+
+  describe "#on" do
+    include WorksWithContext
   end
 
   describe 'Combinations' do

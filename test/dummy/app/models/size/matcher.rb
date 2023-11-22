@@ -35,6 +35,11 @@ class Size::Matcher < ApplicationRecord
   has_one_attached :with_message
   validates :with_message, size: { less_than_or_equal_to: 5.megabytes, message: 'File is too big.' }
 
+  has_one_attached :with_context_symbol
+  validates :with_context_symbol, size: { less_than_or_equal_to: 5.megabytes }, on: :update
+  has_one_attached :with_context_array
+  validates :with_context_array, size: { less_than_or_equal_to: 5.megabytes }, on: %i[update custom]
+
   # Combinations
   has_one_attached :less_than_with_message
   has_one_attached :less_than_or_equal_to_with_message

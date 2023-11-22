@@ -45,6 +45,11 @@ class Dimension::Matcher < ApplicationRecord
   validates :with_message, dimension: { width: 150, height: 150, message: 'Invalid dimensions.' }
   validates :without_message, dimension: { width: 150, height: 150 }
 
+  has_one_attached :with_context_symbol
+  validates :with_context_symbol, dimension: { width: 150, height: 150 }, on: :update
+  has_one_attached :with_context_array
+  validates :with_context_array, dimension: { width: 150, height: 150 }, on: %i[update custom]
+
   # Combinations
   has_one_attached :width_and_height_exact
   has_one_attached :width_and_height_exact_with_message
