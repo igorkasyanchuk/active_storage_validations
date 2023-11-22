@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
+require 'matchers/shared_examples/works_with_both_instance_and_class'
 require 'matchers/shared_examples/works_with_context'
 require 'matchers/shared_examples/works_with_custom_message'
 
@@ -139,6 +140,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
   include MatcherHelpers
 
   include ChecksIfIsAValidActiveStorageAttribute
+  include WorksWithBothInstanceAndClass
 
   let(:matcher) { ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(model_attribute) }
   let(:klass) { Dimension::Matcher }
@@ -538,14 +540,5 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
         it { is_expected_to_match_for(klass) }
       end
     end
-  end
-
-  describe 'when the matcher is provided with an instance' do
-    subject { matcher.width(150) }
-
-    let(:model_attribute) { :width_exact }
-    let(:instance) { klass.new }
-
-    it { is_expected_to_match_for(instance) }
   end
 end

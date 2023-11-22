@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
+require 'matchers/shared_examples/works_with_both_instance_and_class'
 require 'matchers/shared_examples/works_with_context'
 require 'matchers/shared_examples/works_with_custom_message'
 
@@ -9,6 +10,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
   include MatcherHelpers
 
   include ChecksIfIsAValidActiveStorageAttribute
+  include WorksWithBothInstanceAndClass
 
   let(:matcher) { ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(model_attribute) }
   let(:klass) { ContentType::Matcher }
@@ -225,14 +227,5 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
         end
       end
     end
-  end
-
-  describe 'when the matcher is provided with an instance' do
-    subject { matcher.with_message('Custom message') }
-
-    let(:model_attribute) { :with_message }
-    let(:instance) { klass.new }
-
-    it { is_expected_to_match_for(instance) }
   end
 end

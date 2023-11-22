@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
+require 'matchers/shared_examples/works_with_both_instance_and_class'
 require 'matchers/shared_examples/works_with_context'
 require 'matchers/shared_examples/works_with_custom_message'
 
@@ -59,6 +60,7 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
   include MatcherHelpers
 
   include ChecksIfIsAValidActiveStorageAttribute
+  include WorksWithBothInstanceAndClass
 
   let(:matcher) { ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(model_attribute) }
   let(:klass) { Size::Matcher }
@@ -222,14 +224,5 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
         end
       end
     end
-  end
-
-  describe 'when the matcher is provided with an instance' do
-    subject { matcher.less_than 2.kilobytes }
-
-    let(:model_attribute) { :less_than }
-    let(:instance) { klass.new }
-
-    it { is_expected_to_match_for(instance) }
   end
 end

@@ -26,6 +26,9 @@ class ContentType::Matcher < ApplicationRecord
   has_one_attached :with_context_array
   validates :with_context_array, content_type: :png, on: %i[update custom]
 
+  has_one_attached :as_instance
+  validates :as_instance, content_type: :png
+
   # Combinations
   has_one_attached :allowing_one_with_message
   validates :allowing_one_with_message, content_type: { in: ['file/pdf'], message: 'Not authorized file type.' }

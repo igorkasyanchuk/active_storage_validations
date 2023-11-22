@@ -22,5 +22,8 @@ class Attached::Matcher < ApplicationRecord
   has_one_attached :with_context_array
   validates :with_context_array, attached: true, on: %i[update custom]
 
+  has_one_attached :as_instance
+  validates :as_instance, attached: true
+
   has_one_attached :not_required
 end

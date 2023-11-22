@@ -51,6 +51,9 @@ class Dimension::Matcher < ApplicationRecord
   has_one_attached :with_context_array
   validates :with_context_array, dimension: { width: 150, height: 150 }, on: %i[update custom]
 
+  has_one_attached :as_instance
+  validates :as_instance, dimension: { width: 150, height: 150 }
+
   # Combinations
   has_one_attached :width_and_height_exact
   has_one_attached :width_and_height_exact_with_message

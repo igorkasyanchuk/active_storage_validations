@@ -41,6 +41,9 @@ class Size::Matcher < ApplicationRecord
   has_one_attached :with_context_array
   validates :with_context_array, size: { less_than_or_equal_to: 5.megabytes }, on: %i[update custom]
 
+  has_one_attached :as_instance
+  validates :as_instance, size: { less_than_or_equal_to: 5.megabytes }
+
   # Combinations
   has_one_attached :less_than_with_message
   has_one_attached :less_than_or_equal_to_with_message
