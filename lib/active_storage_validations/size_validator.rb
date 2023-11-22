@@ -56,6 +56,8 @@ module ActiveStorageValidations
       end
     end
 
+    private
+
     def content_size_valid?(file_size, flat_options)
       return false if file_size < 0
 

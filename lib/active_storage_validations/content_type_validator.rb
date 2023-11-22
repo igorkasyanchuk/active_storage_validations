@@ -12,6 +12,12 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[with in].freeze
     ERROR_TYPES = %i[content_type_invalid].freeze
 
+    def check_validity!
+      unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
+        raise ArgumentError, 'You must pass either :with or :in to the validator'
+      end
+    end
+
     def validate_each(record, attribute, _value)
       return true unless record.send(attribute).attached?
 

@@ -49,6 +49,20 @@ ActiveRecord::Schema.define do
       t.datetime :updated_at, null: false
     end
 
+    %w(invalid_check no_check).each do |invalid_case|
+      create_table :"#{validator}_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
+        t.datetime :created_at, null: false
+        t.datetime :updated_at, null: false
+      end
+    end
+
+    if %i(content_type size).include? validator
+      create_table :"#{validator}_validator_check_validity_several_checks", force: :cascade do |t|
+        t.datetime :created_at, null: false
+        t.datetime :updated_at, null: false
+      end
+    end
+
     %i(allow_nil allow_blank if on strict unless).each do |option|
       create_table :"#{validator}_validator_with_#{option.to_s.pluralize}", force: :cascade do |t|
         t.string :title if option == :if

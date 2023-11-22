@@ -14,6 +14,10 @@ describe ActiveStorageValidations::AttachedValidator do
   let(:validator_test_class) { Attached::Validator }
   let(:params) { {} }
 
+  describe '#check_validity!' do
+    # Checked by Rails options tests
+  end
+
   describe 'Rails options' do
     %i(allow_nil allow_blank).each do |unsupported_validation_option|
       describe ":#{unsupported_validation_option}" do
