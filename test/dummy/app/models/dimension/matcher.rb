@@ -4,6 +4,7 @@
 #
 # Table name: dimension_matchers
 #
+#  title      :string
 #  id         :integer          not null, primary key
 #  created_at :datetime         not null
 #  updated_at :datetime         not null

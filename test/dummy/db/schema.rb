@@ -44,6 +44,7 @@ ActiveRecord::Schema.define do
     size
   ).each do |validator|
     create_table :"#{validator}_matchers", force: :cascade do |t|
+      t.string :title
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
     end

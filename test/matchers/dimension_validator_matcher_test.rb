@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
 require 'matchers/shared_examples/works_with_context'
 require 'matchers/shared_examples/works_with_custom_message'
 
@@ -136,6 +137,8 @@ end
 
 describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
   include MatcherHelpers
+
+  include ChecksIfIsAValidActiveStorageAttribute
 
   let(:matcher) { ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(model_attribute) }
   let(:klass) { Dimension::Matcher }
@@ -534,16 +537,6 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
 
         it { is_expected_to_match_for(klass) }
       end
-    end
-  end
-
-  describe 'when the passed model attribute' do
-    describe 'does not exist' do
-      subject { matcher.width(150) }
-
-      let(:model_attribute) { :not_present_in_model }
-
-      it { is_expected_not_to_match_for(klass) }
     end
   end
 

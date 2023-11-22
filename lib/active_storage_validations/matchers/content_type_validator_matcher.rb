@@ -3,6 +3,7 @@
 # Big thank you to the paperclip validation matchers:
 # https://github.com/thoughtbot/paperclip/blob/v6.1.0/lib/paperclip/matchers/validate_attachment_content_type_matcher.rb
 
+require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
 require_relative 'concerns/validatable.rb'
@@ -14,6 +15,7 @@ module ActiveStorageValidations
     end
 
     class ContentTypeValidatorMatcher
+      include ActiveStorageable
       include Contextable
       include Messageable
       include Validatable
@@ -40,7 +42,7 @@ module ActiveStorageValidations
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
 
-        responds_to_methods &&
+        is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
           all_allowed_types_allowed? &&
           all_rejected_types_rejected? &&
@@ -64,12 +66,6 @@ module ActiveStorageValidations
       end
 
       protected
-
-      def responds_to_methods
-        @subject.respond_to?(@attribute_name) &&
-          @subject.public_send(@attribute_name).respond_to?(:attach) &&
-          @subject.public_send(@attribute_name).respond_to?(:detach)
-      end
 
       def all_allowed_types_allowed?
         @allowed_types_not_allowed ||= @allowed_types.reject { |type| type_allowed?(type) }

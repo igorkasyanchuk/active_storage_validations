@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
 require_relative 'concerns/validatable.rb'
@@ -11,6 +12,7 @@ module ActiveStorageValidations
     end
 
     class AttachedValidatorMatcher
+      include ActiveStorageable
       include Contextable
       include Messageable
       include Validatable
@@ -26,7 +28,7 @@ module ActiveStorageValidations
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
 
-        responds_to_methods &&
+        is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
           is_valid_when_file_attached? &&
           is_invalid_when_file_not_attached? &&
@@ -42,12 +44,6 @@ module ActiveStorageValidations
       end
 
       private
-
-      def responds_to_methods
-        @subject.respond_to?(@attribute_name) &&
-          @subject.public_send(@attribute_name).respond_to?(:attach) &&
-          @subject.public_send(@attribute_name).respond_to?(:detach)
-      end
 
       def is_valid_when_file_attached?
         attach_dummy_file unless file_attached?
