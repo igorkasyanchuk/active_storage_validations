@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'concerns/contextable.rb'
+require_relative 'concerns/messageable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -11,12 +12,12 @@ module ActiveStorageValidations
 
     class DimensionValidatorMatcher
       include Contextable
+      include Messageable
       include Validatable
 
       def initialize(attribute_name)
         @attribute_name = attribute_name
         @width_min = @width_max = @height_min = @height_max = nil
-        @custom_message = nil
       end
 
       def description
@@ -30,11 +31,6 @@ module ActiveStorageValidations
 
       def width_max(width)
         @width_max = width
-        self
-      end
-
-      def with_message(message)
-        @custom_message = message
         self
       end
 
@@ -83,7 +79,7 @@ module ActiveStorageValidations
           height_smaller_than_max? &&
           height_not_larger_than_max? &&
           height_equals? &&
-          validate_custom_message?
+          is_custom_message_valid?
       end
 
       def failure_message
@@ -157,7 +153,7 @@ module ActiveStorageValidations
         end
       end
 
-      def validate_custom_message?
+      def is_custom_message_valid?
         return true unless @custom_message
 
         mock_dimensions_for(attach_file, -1, -1) do

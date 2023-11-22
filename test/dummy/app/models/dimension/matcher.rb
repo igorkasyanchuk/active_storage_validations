@@ -42,7 +42,7 @@ class Dimension::Matcher < ApplicationRecord
 
   has_one_attached :with_message
   has_one_attached :without_message
-  validates :with_message, dimension: { width: 150, height: 150, message: 'Invalid dimensions.' }
+  validates :with_message, dimension: { width: 150, height: 150, message: 'Custom message' }
   validates :without_message, dimension: { width: 150, height: 150 }
 
   has_one_attached :with_context_symbol

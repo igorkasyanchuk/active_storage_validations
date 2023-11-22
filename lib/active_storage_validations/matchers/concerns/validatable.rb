@@ -43,12 +43,6 @@ module ActiveStorageValidations
       def error_from_custom_message
         attribute_validator.options[:message]
       end
-
-      def has_an_error_message_which_is_custom_message?
-        validator_errors_for_attribute.one? do |error|
-          error[:error] == @custom_message
-        end
-      end
     end
   end
 end

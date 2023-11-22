@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'matchers/shared_examples/works_with_context'
+require 'matchers/shared_examples/works_with_custom_message'
 
 describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
   include MatcherHelpers
@@ -145,29 +146,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
   end
 
   describe '#with_message' do
-    let(:model_attribute) { :with_message }
-
-    describe 'when provided with the allowed content type' do
-      before { matcher.allowing('image/png') }
-
-      describe 'and with the message specified in the model validations' do
-        subject { matcher.with_message('Not authorized file type.') }
-
-        it { is_expected_to_match_for(klass) }
-      end
-
-      describe 'and with a different message than the one specified in the model validations' do
-        subject { matcher.with_message('<wrong message>') }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-
-      describe 'but without the #with_message matcher method' do
-        subject { matcher }
-
-        it { is_expected_to_match_for(klass) }
-      end
-    end
+    include WorksWithCustomMessage
   end
 
   describe "#on" do
@@ -253,20 +232,10 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
 
       it { is_expected_not_to_match_for(klass) }
     end
-
-    describe 'has a custom validation error message' do
-      describe 'but the matcher is not provided with a #with_message' do
-        subject { matcher }
-
-        let(:model_attribute) { :with_message }
-
-        it { is_expected_to_match_for(klass) }
-      end
-    end
   end
 
   describe 'when the matcher is provided with an instance' do
-    subject { matcher.with_message('Not authorized file type.') }
+    subject { matcher.with_message('Custom message') }
 
     let(:model_attribute) { :with_message }
     let(:instance) { klass.new }

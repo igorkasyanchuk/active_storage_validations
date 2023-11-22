@@ -18,7 +18,7 @@ class ContentType::Matcher < ApplicationRecord
   validates :allowing_several_through_regex, content_type: [/\Aimage\/.*\z/]
 
   has_one_attached :with_message
-  validates :with_message, content_type: { in: ['image/png'], message: 'Not authorized file type.' }
+  validates :with_message, content_type: { in: ['image/png'], message: 'Custom message' }
 
   has_one_attached :with_context_symbol
   validates :with_context_symbol, content_type: :png, on: :update
