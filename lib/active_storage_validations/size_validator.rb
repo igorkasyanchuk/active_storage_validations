@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/errorable.rb'
 require_relative 'concerns/symbolizable.rb'
 
 module ActiveStorageValidations
   class SizeValidator < ActiveModel::EachValidator # :nodoc:
     include OptionProcUnfolding
-    include ErrorHandler
+    include Errorable
     include Symbolizable
 
     delegate :number_to_human_size, to: ActiveSupport::NumberHelper

@@ -1,25 +1,30 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'validators/shared_examples/does_not_work_with_allow_blank_option'
+require 'validators/shared_examples/does_not_work_with_allow_nil_option'
 require 'validators/shared_examples/works_with_if_option'
 require 'validators/shared_examples/works_with_on_option'
+require 'validators/shared_examples/works_with_unless_option'
+require 'validators/shared_examples/works_with_strict_option'
 
 describe ActiveStorageValidations::AttachedValidator do
   include ValidatorHelpers
 
+  let(:validator_test_class) { Attached::Validator }
   let(:params) { {} }
 
   describe 'Rails options' do
-    describe '#if' do
-      subject { Attached::Validator::WithIf.new(params) }
-
-      include WorksWithIfOption
+    %i(allow_nil allow_blank).each do |unsupported_validation_option|
+      describe ":#{unsupported_validation_option}" do
+        include "DoesNotWorkWith#{unsupported_validation_option.to_s.camelize}Option".constantize
+      end
     end
 
-    describe '#on' do
-      subject { Attached::Validator::WithOn.new(params) }
-
-      include WorksWithOnOption
+    %i(if on strict unless).each do |supported_validation_option|
+      describe ":#{supported_validation_option}" do
+        include "WorksWith#{supported_validation_option.to_s.camelize}Option".constantize
+      end
     end
   end
 end

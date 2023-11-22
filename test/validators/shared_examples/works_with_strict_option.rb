@@ -1,8 +1,8 @@
-module WorksWithOnOption
+module WorksWithStrictOption
   extend ActiveSupport::Concern
 
   included do
-    subject { validator_test_class::WithOn.new(params) }
+    subject { validator_test_class::WithStrict.new(params) }
 
     let(:file_matching_requirements) do
       case validator_sym
@@ -27,23 +27,19 @@ module WorksWithOnOption
       end
     end
 
-    %i(create update destroy custom).each do |context|
-      describe ":#{context}" do
-        describe 'when passed a file matching the requirements' do
-          before { subject.with_on.attach(file_matching_requirements) }
+    describe 'when passed a file matching the requirements' do
+      before { subject.with_strict.attach(file_matching_requirements) }
 
-          it { is_expected_to_be_valid(context: context) }
-        end
+      it { is_expected_to_be_valid }
+    end
 
-        describe 'when passed a file not matching the requirements' do
-          let(:error_options) { { on: %i[create update destroy custom] } }
+    describe 'when passed a file not matching the requirements' do
+      let(:error_class) { subject.class::StrictException }
+      let(:error_options) { { strict: error_class } }
 
-          before { subject.with_on.attach(file_not_matching_requirements) }
+      before { subject.with_strict.attach(file_not_matching_requirements) }
 
-          it { is_expected_not_to_be_valid(context: context) }
-          it { is_expected_to_have_error_options(error_options, context: context) }
-        end
-      end
+      it { is_expected_to_raise_error(error_class, "With strict") }
     end
   end
 end

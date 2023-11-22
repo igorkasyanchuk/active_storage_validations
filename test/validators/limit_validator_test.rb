@@ -1,25 +1,15 @@
 # frozen_string_literal: true
 
 require 'test_helper'
-require 'validators/shared_examples/works_with_if_option'
-require 'validators/shared_examples/works_with_on_option'
+require 'validators/shared_examples/works_with_all_rails_common_validation_options'
 
 describe ActiveStorageValidations::LimitValidator do
   include ValidatorHelpers
 
+  let(:validator_test_class) { Limit::Validator }
   let(:params) { {} }
 
   describe 'Rails options' do
-    describe '#if' do
-      subject { Limit::Validator::WithIf.new(params) }
-
-      include WorksWithIfOption
-    end
-
-    describe '#on' do
-      subject { Limit::Validator::WithOn.new(params) }
-
-      include WorksWithOnOption
-    end
+    include WorksWithAllRailsCommonValidationOptions
   end
 end
