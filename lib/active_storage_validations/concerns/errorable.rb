@@ -8,7 +8,7 @@ module ActiveStorageValidations
 
       active_storage_validations_options = {
         validator_type: self.class.to_sym,
-        custom_message: (options[:message] if options[:message].present?),
+        custom_message: (options[:message] if options[:message].present?)
       }.compact
 
       curated_options.merge(active_storage_validations_options)

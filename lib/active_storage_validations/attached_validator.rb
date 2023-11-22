@@ -11,9 +11,9 @@ module ActiveStorageValidations
     ERROR_TYPES = %i[blank].freeze
 
     def check_validity!
-      %i(allow_nil allow_blank).each do |not_authoriezd_option|
-        if options.include?(not_authoriezd_option)
-          raise ArgumentError, "You cannot pass the :#{not_authoriezd_option} option to this validator"
+      %i(allow_nil allow_blank).each do |not_authorized_option|
+        if options.include?(not_authorized_option)
+          raise ArgumentError, "You cannot pass the :#{not_authorized_option} option to this validator"
         end
       end
     end
