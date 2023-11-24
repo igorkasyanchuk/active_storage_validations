@@ -14,242 +14,233 @@ describe ActiveStorageValidations::SizeValidator do
     include ChecksValidatorValidity
   end
 
+  describe 'Validator checks' do
+    let(:model) { validator_test_class::Check.new(params) }
+
+    describe ':less_than' do
+      # validates :less_than, size: { less_than: 2.kilobytes }
+      # validates :less_than_proc, size: { less_than: -> (record) { 2.kilobytes } }
+      %w(value proc).each do |value_type|
+        describe "#{value_type} validator" do
+          describe 'when provided with a lower size than the size specified in the model validations' do
+            subject { model.less_than.attach(file_1ko) and model }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe 'when provided with the exact size specified in the model validations' do
+            subject { model.less_than.attach(file_2ko) and model }
+
+            let(:error_options) do
+              {
+                file_size: '2 KB',
+                min_size: nil,
+                max_size: '2 KB'
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message("file_size_not_less_than", error_options:) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+
+          describe 'when provided with a higher size than the size specified in the model validations' do
+            subject { model.less_than.attach(file_5ko) and model }
+
+            let(:error_options) do
+              {
+                file_size: '5 KB',
+                min_size: nil,
+                max_size: '2 KB'
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message("file_size_not_less_than", error_options:) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+        end
+      end
+    end
+
+    describe ':less_than_or_equal_to' do
+      # validates :less_than_or_equal_to, size: { less_than_or_equal_to: 2.kilobytes }
+      # validates :less_than_or_equal_to_proc, size: { less_than_or_equal_to: -> (record) { 2.kilobytes } }
+      %w(value proc).each do |value_type|
+        describe "#{value_type} validator" do
+          describe 'when provided with a lower size than the size specified in the model validations' do
+            subject { model.less_than_or_equal_to.attach(file_1ko) and model }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe 'when provided with the exact size specified in the model validations' do
+            subject { model.less_than_or_equal_to.attach(file_2ko) and model }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe 'when provided with a higher size than the size specified in the model validations' do
+            subject { model.less_than_or_equal_to.attach(file_5ko) and model }
+
+            let(:error_options) do
+              {
+                file_size: '5 KB',
+                min_size: nil,
+                max_size: '2 KB'
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message("file_size_not_less_than_or_equal_to", error_options:) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+        end
+      end
+    end
+
+    describe ':greater_than' do
+      # validates :greater_than, size: { greater_than: 7.kilobytes }
+      # validates :greater_than_proc, size: { greater_than: -> (record) { 7.kilobytes } }
+      %w(value proc).each do |value_type|
+        describe "#{value_type} validator" do
+          describe 'when provided with a lower size than the size specified in the model validations' do
+            subject { model.greater_than.attach(file_1ko) and model }
+
+            let(:error_options) do
+              {
+                file_size: '1 KB',
+                min_size: '7 KB',
+                max_size: nil
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message("file_size_not_greater_than", error_options:) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+
+          describe 'when provided with the exact size specified in the model validations' do
+            subject { model.greater_than.attach(file_7ko) and model }
+
+            let(:error_options) do
+              {
+                file_size: '7 KB',
+                min_size: '7 KB',
+                max_size: nil
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message("file_size_not_greater_than", error_options:) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+
+          describe 'when provided with a higher size than the size specified in the model validations' do
+            subject { model.greater_than.attach(file_10ko) and model }
+
+            it { is_expected_to_be_valid }
+          end
+        end
+      end
+    end
+
+    describe ':greater_than_or_equal_to' do
+      # validates :greater_than_or_equal_to, size: { greater_than_or_equal_to: 7.kilobytes }
+      # validates :greater_than_or_equal_to_proc, size: { greater_than_or_equal_to: -> (record) { 7.kilobytes } }
+      %w(value proc).each do |value_type|
+        describe "#{value_type} validator" do
+          describe 'when provided with a lower size than the size specified in the model validations' do
+            subject { model.greater_than_or_equal_to.attach(file_1ko) and model }
+
+            let(:error_options) do
+              {
+                file_size: '1 KB',
+                min_size: '7 KB',
+                max_size: nil
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message("file_size_not_greater_than_or_equal_to", error_options:) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+
+          describe 'when provided with the exact size specified in the model validations' do
+            subject { model.greater_than_or_equal_to.attach(file_7ko) and model }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe 'when provided with a higher size than the size specified in the model validations' do
+            subject { model.greater_than_or_equal_to.attach(file_10ko) and model }
+
+            it { is_expected_to_be_valid }
+          end
+        end
+      end
+    end
+
+    describe ':between' do
+      # validates :between, size: { between: 2.kilobytes..7.kilobytes }
+      # validates :between_proc, size: { between: -> (record) { 2.kilobytes..7.kilobytes } }
+      %w(value proc).each do |value_type|
+        describe "#{value_type} validator" do
+          describe 'when provided with a lower size than the size specified in the model validations' do
+            subject { model.between.attach(file_1ko) and model }
+
+            let(:error_options) do
+              {
+                file_size: '1 KB',
+                min_size: '2 KB',
+                max_size: '7 KB'
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message("file_size_not_between", error_options:) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+
+          describe 'when provided with the exact lower size specified in the model validations' do
+            subject { model.between.attach(file_2ko) and model }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe 'when provided with a size between the sizes specified in the model validations' do
+            subject { model.between.attach(file_5ko) and model }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe 'when provided with the exact higher size specified in the model validations' do
+            subject { model.between.attach(file_7ko) and model }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe 'when provided with a higher size than the size specified in the model validations' do
+            subject { model.between.attach(file_10ko) and model }
+
+            let(:error_options) do
+              {
+                file_size: '10 KB',
+                min_size: '2 KB',
+                max_size: '7 KB'
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message("file_size_not_between", error_options:) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+        end
+      end
+    end
+  end
+
   describe 'Rails options' do
     include WorksWithAllRailsCommonValidationOptions
   end
-end
-
-class ActiveStorageValidations::SizeValidator::Test < ActiveSupport::TestCase
-
-  class LessThanValidator < ActiveStorageValidations::SizeValidator::Test
-    # validates :size_less_than, size: { less_than: 2.kilobytes }
-
-    test 'validates attached file when size is stricly less than the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_less_than.attach(file_1ko)
-      pt.proc_size_less_than.attach(file_1ko)
-
-      assert pt.valid?
-    end
-
-    test 'does not validate attached file when size is equal to the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_less_than.attach(file_2ko)
-      pt.proc_size_less_than.attach(file_2ko)
-
-      refute pt.valid?
-      assert_equal pt.errors.full_messages, [
-        'Size less than file size must be less than 2 KB (current size is 2 KB)',
-        'Proc size less than file size must be less than 2 KB (current size is 2 KB)'
-      ]
-    end
-
-    test 'does not validate attached file when size is stricly higher than the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_less_than.attach(file_10ko)
-      pt.proc_size_less_than.attach(file_10ko)
-
-      refute pt.valid?
-      assert_equal pt.errors.full_messages, [
-        'Size less than file size must be less than 2 KB (current size is 10 KB)',
-        'Proc size less than file size must be less than 2 KB (current size is 10 KB)'
-      ]
-    end
-  end
-
-
-  class LessThanOrEqualToValidator < ActiveStorageValidations::SizeValidator::Test
-    # validates :size_less_than_or_equal_to, size: { less_than_or_equal_to: 2.kilobytes }
-
-    test 'validates attached file when size is stricly less than the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_less_than_or_equal_to.attach(file_1ko)
-      pt.proc_size_less_than_or_equal_to.attach(file_1ko)
-
-      assert pt.valid?
-    end
-
-    test 'validates attached file when size is equal to the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_less_than_or_equal_to.attach(file_2ko)
-      pt.proc_size_less_than_or_equal_to.attach(file_2ko)
-
-      assert pt.valid?
-    end
-
-    test 'does not validate attached file when size is stricly higher than the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_less_than_or_equal_to.attach(file_10ko)
-      pt.proc_size_less_than_or_equal_to.attach(file_10ko)
-
-      refute pt.valid?
-      assert_equal pt.errors.full_messages, [
-        'Size less than or equal to file size must be less than or equal to 2 KB (current size is 10 KB)',
-        'Proc size less than or equal to file size must be less than or equal to 2 KB (current size is 10 KB)'
-      ]
-    end
-  end
-
-
-  class GreaterThanValidator < ActiveStorageValidations::SizeValidator::Test
-    # validates :size_greater_than, size: { greater_than: 7.kilobytes }
-
-    test 'validates attached file when size is stricly greater than the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_greater_than.attach(file_10ko)
-      pt.proc_size_greater_than.attach(file_10ko)
-
-      assert pt.valid?
-    end
-
-    test 'does not validate attached file when size is equal to the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_greater_than.attach(file_7ko)
-      pt.proc_size_greater_than.attach(file_7ko)
-
-      refute pt.valid?
-      assert_equal pt.errors.full_messages, [
-        'Size greater than file size must be greater than 7 KB (current size is 7 KB)',
-        'Proc size greater than file size must be greater than 7 KB (current size is 7 KB)'
-      ]
-    end
-
-    test 'does not validate attached file when size is stricly less than the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_greater_than.attach(file_2ko)
-      pt.proc_size_greater_than.attach(file_2ko)
-
-      refute pt.valid?
-      assert_equal pt.errors.full_messages, [
-        'Size greater than file size must be greater than 7 KB (current size is 2 KB)',
-        'Proc size greater than file size must be greater than 7 KB (current size is 2 KB)'
-      ]
-    end
-  end
-
-
-  class GreaterThanOrEqualToValidator < ActiveStorageValidations::SizeValidator::Test
-    # validates :size_greater_than_or_equal_to, size: { greater_than_or_equal_to: 7.kilobytes }
-
-    test 'validates attached file when size is stricly greater than the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_greater_than_or_equal_to.attach(file_10ko)
-      pt.proc_size_greater_than_or_equal_to.attach(file_10ko)
-
-      assert pt.valid?
-    end
-
-    test 'validates attached file when size is equal to the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_greater_than_or_equal_to.attach(file_7ko)
-      pt.proc_size_greater_than_or_equal_to.attach(file_7ko)
-
-      assert pt.valid?
-    end
-
-    test 'does not validate attached file when size is stricly less than the model validation value' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_greater_than_or_equal_to.attach(file_2ko)
-      pt.proc_size_greater_than_or_equal_to.attach(file_2ko)
-
-      refute pt.valid?
-      assert_equal pt.errors.full_messages, [
-        'Size greater than or equal to file size must be greater than or equal to 7 KB (current size is 2 KB)',
-        'Proc size greater than or equal to file size must be greater than or equal to 7 KB (current size is 2 KB)'
-      ]
-    end
-  end
-
-
-  class BetweenValidator < ActiveStorageValidations::SizeValidator::Test
-    # validates :size_between, size: { between: 2..7.kilobytes }
-
-    test 'validates attached file when size is in the model validation value range' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_between.attach(file_5ko)
-      pt.proc_size_between.attach(file_5ko)
-
-      assert pt.valid?
-    end
-
-    test 'validates attached file when size is equal to the lowest possible value of the model validation value range' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_between.attach(file_2ko)
-      pt.proc_size_between.attach(file_2ko)
-
-      assert pt.valid?
-    end
-
-    test 'validates attached file when size is equal to the highest possible value of the model validation value range' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_between.attach(file_7ko)
-      pt.proc_size_between.attach(file_7ko)
-
-      assert pt.valid?
-    end
-
-    test 'does not validate attached file when size is stricly less than the model validation value range' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_between.attach(file_1ko)
-      pt.proc_size_between.attach(file_1ko)
-
-      refute pt.valid?
-      assert_equal pt.errors.full_messages, [
-        'Size between file size must be between 2 KB and 7 KB (current size is 1 KB)',
-        'Proc size between file size must be between 2 KB and 7 KB (current size is 1 KB)'
-      ]
-    end
-
-    test 'does not validate attached file when size is stricly higher than the model validation value range' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_between.attach(file_10ko)
-      pt.proc_size_between.attach(file_10ko)
-
-      refute pt.valid?
-      assert_equal pt.errors.full_messages, [
-        'Size between file size must be between 2 KB and 7 KB (current size is 10 KB)',
-        'Proc size between file size must be between 2 KB and 7 KB (current size is 10 KB)'
-      ]
-    end
-  end
-
-
-  class WithMessage < ActiveStorageValidations::SizeValidator::Test
-    # validates :size_with_message, size: { between: 2.kilobytes..7.kilobytes, message: 'is not in required file size range' }
-
-    test 'generates the custom error message when the attached file is not valid' do
-      pt = Size::Portfolio.new(title: 'Matisse')
-      pt.size_with_message.attach(file_10ko)
-      pt.proc_size_with_message.attach(file_10ko)
-
-      refute pt.valid?
-      assert_equal pt.errors.full_messages, [
-        'Size with message is not in required file size range',
-        'Proc size with message file size must be between 2 KB and 7 KB (current size is 10 KB)'
-      ]
-    end
-  end
-
-  class ValidatorValidity < ActiveStorageValidations::SizeValidator::Test
-    def error_message
-      'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
-    end
-
-    test 'ensures that at least 1 size validator has been used' do
-      assert_raises(ArgumentError, error_message) { Size::ZeroValidator.new(title: 'Raises error') }
-    end
-
-    test 'ensures that at least 1 size validator has been used when using a Proc' do
-      assert_raises(ArgumentError, error_message) { Size::ZeroValidatorProc.new(title: 'Raises error') }
-    end
-
-    test 'ensures that no more than 1 size validator has been used' do
-      assert_raises(ArgumentError, error_message) { Size::SeveralValidator.new(title: 'Raises error') }
-    end
-
-    test 'ensures that no more than 1 size validator has been used when using a Proc' do
-      assert_raises(ArgumentError, error_message) { Size::SeveralValidatorProc.new(title: 'Raises error') }
-    end
-  end
-
 end
