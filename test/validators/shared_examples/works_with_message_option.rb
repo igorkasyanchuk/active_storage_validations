@@ -39,7 +39,7 @@ module WorksWithMessageOption
       before { subject.with_message.attach(file_not_matching_requirements) }
 
       it { is_expected_not_to_be_valid }
-      it { is_expected_to_have_error_message("Custom message", error_options:) }
+      it { is_expected_to_have_error_message("Custom message", error_options: error_options) }
       it { is_expected_to_have_error_options(error_options) }
     end
   end
