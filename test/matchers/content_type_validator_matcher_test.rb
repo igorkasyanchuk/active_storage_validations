@@ -1,9 +1,16 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
+require 'matchers/shared_examples/works_with_both_instance_and_class'
+require 'matchers/shared_examples/works_with_context'
+require 'matchers/shared_examples/works_with_custom_message'
 
 describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
   include MatcherHelpers
+
+  include ChecksIfIsAValidActiveStorageAttribute
+  include WorksWithBothInstanceAndClass
 
   let(:matcher) { ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(model_attribute) }
   let(:klass) { ContentType::Matcher }
@@ -144,29 +151,11 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
   end
 
   describe '#with_message' do
-    let(:model_attribute) { :with_message }
+    include WorksWithCustomMessage
+  end
 
-    describe 'when provided with the allowed content type' do
-      before { matcher.allowing('image/png') }
-
-      describe 'and with the message specified in the model validations' do
-        subject { matcher.with_message('Not authorized file type.') }
-
-        it { is_expected_to_match_for(klass) }
-      end
-
-      describe 'and with a different message than the one specified in the model validations' do
-        subject { matcher.with_message('<wrong message>') }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-
-      describe 'but without the #with_message matcher method' do
-        subject { matcher }
-
-        it { is_expected_to_match_for(klass) }
-      end
-    end
+  describe "#on" do
+    include WorksWithContext
   end
 
   describe 'Combinations' do
@@ -238,34 +227,5 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
         end
       end
     end
-  end
-
-  describe 'when the passed model attribute' do
-    describe 'does not exist' do
-      subject { matcher }
-
-      let(:model_attribute) { :not_present_in_model }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
-
-    describe 'has a custom validation error message' do
-      describe 'but the matcher is not provided with a #with_message' do
-        subject { matcher }
-
-        let(:model_attribute) { :with_message }
-
-        it { is_expected_to_match_for(klass) }
-      end
-    end
-  end
-
-  describe 'when the matcher is provided with an instance' do
-    subject { matcher.with_message('Not authorized file type.') }
-
-    let(:model_attribute) { :with_message }
-    let(:instance) { klass.new }
-
-    it { is_expected_to_match_for(instance) }
   end
 end

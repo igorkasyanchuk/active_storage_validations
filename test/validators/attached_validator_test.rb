@@ -14,6 +14,10 @@ describe ActiveStorageValidations::AttachedValidator do
   let(:validator_test_class) { Attached::Validator }
   let(:params) { {} }
 
+  describe '#check_validity!' do
+    # Checked by Rails options tests
+  end
+
   describe 'Rails options' do
     %i(allow_nil allow_blank).each do |unsupported_validation_option|
       describe ":#{unsupported_validation_option}" do
@@ -21,7 +25,7 @@ describe ActiveStorageValidations::AttachedValidator do
       end
     end
 
-    %i(if on strict unless).each do |supported_validation_option|
+    %i(if on strict unless message).each do |supported_validation_option|
       describe ":#{supported_validation_option}" do
         include "WorksWith#{supported_validation_option.to_s.camelize}Option".constantize
       end

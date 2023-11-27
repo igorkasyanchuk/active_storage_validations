@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
+require 'matchers/shared_examples/works_with_both_instance_and_class'
+require 'matchers/shared_examples/works_with_context'
+require 'matchers/shared_examples/works_with_custom_message'
 
 module DimensionValidatorMatcherTest
   module DoesNotMatchWithAnyValues
@@ -134,6 +138,9 @@ end
 
 describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
   include MatcherHelpers
+
+  include ChecksIfIsAValidActiveStorageAttribute
+  include WorksWithBothInstanceAndClass
 
   let(:matcher) { ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(model_attribute) }
   let(:klass) { Dimension::Matcher }
@@ -315,38 +322,11 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
   end
 
   describe '#with_message' do
-    let(:model_attribute) { :with_message }
+    include WorksWithCustomMessage
+  end
 
-    describe 'when provided with the exact dimension value(s) specified in the model validations' do
-      describe 'and with the message specified in the model validations' do
-        subject do
-          matcher.width(150)
-          matcher.height(150)
-          matcher.with_message('Invalid dimensions.')
-        end
-
-        it { is_expected_to_match_for(klass) }
-      end
-
-      describe 'and with a message not matching the message specified in the model validations' do
-        subject do
-          matcher.width(150)
-          matcher.height(150)
-          matcher.with_message('Invalid message.')
-        end
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-
-      describe 'but without the #with_message matcher method' do
-        subject do
-          matcher.width(150)
-          matcher.height(150)
-        end
-
-        it { is_expected_to_match_for(klass) }
-      end
-    end
+  describe "#on" do
+    include WorksWithContext
   end
 
   describe "Combinations" do
@@ -560,34 +540,5 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
         it { is_expected_to_match_for(klass) }
       end
     end
-  end
-
-  describe 'when the passed model attribute' do
-    describe 'does not exist' do
-      subject { matcher.width(150) }
-
-      let(:model_attribute) { :not_present_in_model }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
-
-    describe 'has a custom validation error message' do
-      describe 'but the matcher is not provided with a #with_message' do
-        subject { matcher.width(150) }
-
-        let(:model_attribute) { :width_exact_with_message }
-
-        it { is_expected_to_match_for(klass) }
-      end
-    end
-  end
-
-  describe 'when the matcher is provided with an instance' do
-    subject { matcher.width(150) }
-
-    let(:model_attribute) { :width_exact }
-    let(:instance) { klass.new }
-
-    it { is_expected_to_match_for(instance) }
   end
 end

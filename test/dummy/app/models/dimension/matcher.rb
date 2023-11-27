@@ -4,6 +4,7 @@
 #
 # Table name: dimension_matchers
 #
+#  title      :string
 #  id         :integer          not null, primary key
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
@@ -42,8 +43,16 @@ class Dimension::Matcher < ApplicationRecord
 
   has_one_attached :with_message
   has_one_attached :without_message
-  validates :with_message, dimension: { width: 150, height: 150, message: 'Invalid dimensions.' }
+  validates :with_message, dimension: { width: 150, height: 150, message: 'Custom message' }
   validates :without_message, dimension: { width: 150, height: 150 }
+
+  has_one_attached :with_context_symbol
+  validates :with_context_symbol, dimension: { width: 150, height: 150 }, on: :update
+  has_one_attached :with_context_array
+  validates :with_context_array, dimension: { width: 150, height: 150 }, on: %i[update custom]
+
+  has_one_attached :as_instance
+  validates :as_instance, dimension: { width: 150, height: 150 }
 
   # Combinations
   has_one_attached :width_and_height_exact

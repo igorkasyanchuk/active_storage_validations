@@ -4,6 +4,7 @@
 #
 # Table name: size_matchers
 #
+#  title      :string
 #  id         :integer          not null, primary key
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
@@ -33,7 +34,15 @@ class Size::Matcher < ApplicationRecord
   validates :proc_between, size: { between: -> { 2.kilobytes..7.kilobytes } }
 
   has_one_attached :with_message
-  validates :with_message, size: { less_than_or_equal_to: 5.megabytes, message: 'File is too big.' }
+  validates :with_message, size: { less_than_or_equal_to: 5.megabytes, message: 'Custom message' }
+
+  has_one_attached :with_context_symbol
+  validates :with_context_symbol, size: { less_than_or_equal_to: 5.megabytes }, on: :update
+  has_one_attached :with_context_array
+  validates :with_context_array, size: { less_than_or_equal_to: 5.megabytes }, on: %i[update custom]
+
+  has_one_attached :as_instance
+  validates :as_instance, size: { less_than_or_equal_to: 5.megabytes }
 
   # Combinations
   has_one_attached :less_than_with_message

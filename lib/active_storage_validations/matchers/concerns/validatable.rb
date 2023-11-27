@@ -1,4 +1,3 @@
-
 require "active_support/concern"
 
 module ActiveStorageValidations
@@ -9,7 +8,7 @@ module ActiveStorageValidations
       private
 
       def validate
-        @subject.validate
+        @subject.validate(@context)
       end
 
       def validator_errors_for_attribute
@@ -35,18 +34,14 @@ module ActiveStorageValidations
         self.class.name.gsub(/::Matchers|Matcher/, '').constantize
       end
 
-      def error_from_custom_message
+      def attribute_validator
         associated_validation = @subject.class.validators_on(@attribute_name).find do |validator|
           validator.class == validator_class
         end
-
-        associated_validation.options[:message]
       end
 
-      def has_an_error_message_which_is_custom_message?
-        validator_errors_for_attribute.one? do |error|
-          error[:error] == @custom_message
-        end
+      def error_from_custom_message
+        attribute_validator.options[:message]
       end
     end
   end

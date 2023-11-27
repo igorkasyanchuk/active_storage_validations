@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/contextable.rb'
+require_relative 'concerns/messageable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -9,12 +12,14 @@ module ActiveStorageValidations
     end
 
     class DimensionValidatorMatcher
+      include ActiveStorageable
+      include Contextable
+      include Messageable
       include Validatable
 
       def initialize(attribute_name)
         @attribute_name = attribute_name
         @width_min = @width_max = @height_min = @height_max = nil
-        @custom_message = nil
       end
 
       def description
@@ -28,11 +33,6 @@ module ActiveStorageValidations
 
       def width_max(width)
         @width_max = width
-        self
-      end
-
-      def with_message(message)
-        @custom_message = message
         self
       end
 
@@ -69,7 +69,8 @@ module ActiveStorageValidations
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
 
-        responds_to_methods &&
+        is_a_valid_active_storage_attribute? &&
+          is_context_valid? &&
           width_not_smaller_than_min? &&
           width_larger_than_min? &&
           width_smaller_than_max? &&
@@ -80,7 +81,7 @@ module ActiveStorageValidations
           height_smaller_than_max? &&
           height_not_larger_than_max? &&
           height_equals? &&
-          validate_custom_message?
+          is_custom_message_valid?
       end
 
       def failure_message
@@ -92,12 +93,6 @@ module ActiveStorageValidations
       end
 
       protected
-
-      def responds_to_methods
-        @subject.respond_to?(@attribute_name) &&
-          @subject.public_send(@attribute_name).respond_to?(:attach) &&
-          @subject.public_send(@attribute_name).respond_to?(:detach)
-      end
 
       def valid_width
         ((@width_min || 0) + (@width_max || 2000)) / 2
@@ -154,7 +149,7 @@ module ActiveStorageValidations
         end
       end
 
-      def validate_custom_message?
+      def is_custom_message_valid?
         return true unless @custom_message
 
         mock_dimensions_for(attach_file, -1, -1) do

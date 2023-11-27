@@ -44,11 +44,31 @@ ActiveRecord::Schema.define do
     size
   ).each do |validator|
     create_table :"#{validator}_matchers", force: :cascade do |t|
+      t.string :title
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
     end
 
-    %i(allow_nil allow_blank if on strict unless).each do |option|
+    %w(invalid_check no_check).each do |invalid_case|
+      create_table :"#{validator}_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
+        t.datetime :created_at, null: false
+        t.datetime :updated_at, null: false
+      end
+    end
+
+    if %i(content_type size).include? validator
+      create_table :"#{validator}_validator_check_validity_several_checks", force: :cascade do |t|
+        t.datetime :created_at, null: false
+        t.datetime :updated_at, null: false
+      end
+    end
+
+    create_table :"#{validator}_validator_checks", force: :cascade do |t|
+      t.datetime :created_at, null: false
+      t.datetime :updated_at, null: false
+    end
+
+    %i(allow_nil allow_blank if on strict unless message).each do |option|
       create_table :"#{validator}_validator_with_#{option.to_s.pluralize}", force: :cascade do |t|
         t.string :title if option == :if
         t.integer :rating if option == :unless
@@ -87,36 +107,6 @@ ActiveRecord::Schema.define do
     t.string :name
     t.datetime :created_at, precision: 6, null: false
     t.datetime :updated_at, precision: 6, null: false
-  end
-
-  create_table :size_portfolios, force: :cascade do |t|
-    t.string :title
-    t.datetime :created_at, null: false
-    t.datetime :updated_at, null: false
-  end
-
-  create_table :size_several_validator_procs, force: :cascade do |t|
-    t.string :title
-    t.datetime :created_at, null: false
-    t.datetime :updated_at, null: false
-  end
-
-  create_table :size_several_validators, force: :cascade do |t|
-    t.string :title
-    t.datetime :created_at, null: false
-    t.datetime :updated_at, null: false
-  end
-
-  create_table :size_zero_validator_procs, force: :cascade do |t|
-    t.string :title
-    t.datetime :created_at, null: false
-    t.datetime :updated_at, null: false
-  end
-
-  create_table :size_zero_validators, force: :cascade do |t|
-    t.string :title
-    t.datetime :created_at, null: false
-    t.datetime :updated_at, null: false
   end
 
   create_table :users, force: :cascade do |t|

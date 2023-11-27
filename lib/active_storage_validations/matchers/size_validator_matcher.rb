@@ -3,6 +3,9 @@
 # Big thank you to the paperclip validation matchers:
 # https://github.com/thoughtbot/paperclip/blob/v6.1.0/lib/paperclip/matchers/validate_attachment_size_matcher.rb
 
+require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/contextable.rb'
+require_relative 'concerns/messageable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -12,12 +15,14 @@ module ActiveStorageValidations
     end
 
     class SizeValidatorMatcher
+      include ActiveStorageable
+      include Contextable
+      include Messageable
       include Validatable
 
       def initialize(attribute_name)
         @attribute_name = attribute_name
         @min = @max = nil
-        @custom_message = nil
       end
 
       def description
@@ -49,20 +54,16 @@ module ActiveStorageValidations
         self
       end
 
-      def with_message(message)
-        @custom_message = message
-        self
-      end
-
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
 
-        responds_to_methods &&
+        is_a_valid_active_storage_attribute? &&
+          is_context_valid? &&
           not_lower_than_min? &&
           higher_than_min? &&
           lower_than_max? &&
           not_higher_than_max? &&
-          validate_custom_message?
+          is_custom_message_valid?
       end
 
       def failure_message
@@ -74,12 +75,6 @@ module ActiveStorageValidations
       end
 
       protected
-
-      def responds_to_methods
-        @subject.respond_to?(@attribute_name) &&
-          @subject.public_send(@attribute_name).respond_to?(:attach) &&
-          @subject.public_send(@attribute_name).respond_to?(:detach)
-      end
 
       def not_lower_than_min?
         @min.nil? || !passes_validation_with_size(@min - 1)
@@ -105,7 +100,7 @@ module ActiveStorageValidations
         end
       end
 
-      def validate_custom_message?
+      def is_custom_message_valid?
         return true unless @custom_message
 
         mock_size_for(io, -1.kilobytes) do

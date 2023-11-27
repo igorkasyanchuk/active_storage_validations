@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/contextable.rb'
+require_relative 'concerns/messageable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -9,28 +12,27 @@ module ActiveStorageValidations
     end
 
     class AttachedValidatorMatcher
+      include ActiveStorageable
+      include Contextable
+      include Messageable
       include Validatable
 
       def initialize(attribute_name)
         @attribute_name = attribute_name
-        @custom_message = nil
       end
 
       def description
         "validate #{@attribute_name} must be attached"
       end
 
-      def with_message(message)
-        @custom_message = message
-        self
-      end
-
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods &&
+
+        is_a_valid_active_storage_attribute? &&
+          is_context_valid? &&
           is_valid_when_file_attached? &&
           is_invalid_when_file_not_attached? &&
-          validate_custom_message?
+          is_custom_message_valid?
       end
 
       def failure_message
@@ -42,12 +44,6 @@ module ActiveStorageValidations
       end
 
       private
-
-      def responds_to_methods
-        @subject.respond_to?(@attribute_name) &&
-          @subject.public_send(@attribute_name).respond_to?(:attach) &&
-          @subject.public_send(@attribute_name).respond_to?(:detach)
-      end
 
       def is_valid_when_file_attached?
         attach_dummy_file unless file_attached?
@@ -61,7 +57,7 @@ module ActiveStorageValidations
         !is_valid?
       end
 
-      def validate_custom_message?
+      def is_custom_message_valid?
         return true unless @custom_message
 
         detach_file if file_attached?
