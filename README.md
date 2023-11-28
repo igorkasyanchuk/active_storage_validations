@@ -68,15 +68,14 @@ end
 
 ### More examples
 
-- Content type validation using symbols. In order to infer the correct mime type from the symbol, the types must be registered with `Marcel::EXTENSIONS` (`MimeMagic::EXTENSIONS` for Rails <= 6.1.3).
+- Content type validation using symbols or regex. The symbol types must be registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb) that's used by this gem to infer the full content type.
 
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
   has_many_attached :photos
 
-  validates :avatar, attached: true, content_type: :png # Marcel::Magic.by_extension(:png).to_s => 'image/png'
-                                                        # Rails <= 6.1.3; MimeMagic.by_extension(:png).to_s => 'image/png'
+  validates :avatar, attached: true, content_type: :png
   # or
   validates :photos, attached: true, content_type: [:png, :jpg, :jpeg]
   # or
@@ -350,7 +349,7 @@ end
 
 To run tests in root folder of gem:
 
-* `BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test` to run for Rails 6.1
+* `BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle exec rake test` to run for Rails 6.1
 * `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
 * `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.0
 * `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main branch
@@ -358,11 +357,11 @@ To run tests in root folder of gem:
 Snippet to run in console:
 
 ```bash
-BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
