@@ -68,15 +68,14 @@ end
 
 ### More examples
 
-- Content type validation using symbols. In order to infer the correct mime type from the symbol, the types must be registered with `Marcel::EXTENSIONS` (`MimeMagic::EXTENSIONS` for Rails <= 6.1.3).
+- Content type validation using symbols or regex. The symbol types must be registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb) that's used by this gem to infer the full content type.
 
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
   has_many_attached :photos
 
-  validates :avatar, attached: true, content_type: :png # Marcel::Magic.by_extension(:png).to_s => 'image/png'
-                                                        # Rails <= 6.1.3; MimeMagic.by_extension(:png).to_s => 'image/png'
+  validates :avatar, attached: true, content_type: :png
   # or
   validates :photos, attached: true, content_type: [:png, :jpg, :jpeg]
   # or
@@ -247,7 +246,7 @@ Very simple example of validation with file attached, content type check and cus
 [![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
 
 ## Test matchers
-Provides RSpec-compatible and Minitest-compatible matchers for testing the validators.
+Provides RSpec-compatible and Minitest-compatible matchers for testing the validators. Only `attached`, `content_type`, `dimension` and `size` validators currently have their matcher developped.
 
 ### RSpec
 
@@ -265,38 +264,56 @@ RSpec.configure do |config|
 end
 ```
 
-Example (Note that the options are chainable):
+Matcher methods available:
 
 ```ruby
 describe User do
+  # attached
   it { is_expected.to validate_attached_of(:avatar) }
-  it { is_expected.to validate_attached_of(:avatar).with_message('must not be blank') }
 
+  # content_type:
+  # #allowing, #rejecting
   it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') }
   it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') }
-  it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml').with_message("must be an authorized type") }
 
+  # dimension:
+  # #width, #height, #width_min, #height_min, #width_max, #height_max, #width_between, #height_between
   it { is_expected.to validate_dimensions_of(:avatar).width(250) }
   it { is_expected.to validate_dimensions_of(:avatar).height(200) }
-  it { is_expected.to validate_dimensions_of(:avatar).width(250).height(200).with_message('Invalid dimensions.') }
   it { is_expected.to validate_dimensions_of(:avatar).width_min(200) }
-  it { is_expected.to validate_dimensions_of(:avatar).width_max(500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_min(100) }
+  it { is_expected.to validate_dimensions_of(:avatar).width_max(500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_max(300) }
   it { is_expected.to validate_dimensions_of(:avatar).width_between(200..500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_between(100..300) }
 
+  # size:
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between
   it { is_expected.to validate_size_of(:avatar).less_than(50.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).less_than_or_equal_to(50.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).greater_than(1.kilobyte) }
-  it { is_expected.to validate_size_of(:avatar).greater_than(1.kilobyte).with_message('is not in required file size range') }
   it { is_expected.to validate_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
   it { is_expected.to validate_size_of(:avatar).between(100..500.kilobytes) }
 end
 ```
+(Note that matcher methods are chainable)
+
+All matchers can currently be customized with 2 Rails validation options:
+
+```ruby
+describe User do
+  # :on
+  it { is_expected.to validate_attached_of(:avatar).on(:update) }
+  it { is_expected.to validate_attached_of(:avatar).on(%i[update custom]) }
+  # :message
+  it { is_expected.to validate_dimensions_of(:avatar).width(250).with_message('Invalid dimensions.') }
+end
+```
 
 ### Minitest
-To use the following syntax, make sure you have the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem up and running. To make use of the matchers you need to require the matchers:
+To use the matchers, make sure you have the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem up and running.
+
+You need to require the matchers:
 
 ```ruby
 require 'active_storage_validations/matchers'
@@ -310,35 +327,7 @@ class ActiveSupport::TestCase
 end
 ```
 
-Example (Note that the options are chainable):
-
-```ruby
-class UserTest < ActiveSupport::TestCase
-  should validate_attached_of(:avatar)
-  should validate_attached_of(:avatar).with_message('must not be blank')
-
-  should validate_content_type_of(:avatar).allowing('image/png', 'image/gif')
-  should validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml')
-  should validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml').with_message("must be an authorized type")
-
-  should validate_dimensions_of(:avatar).width(250)
-  should validate_dimensions_of(:avatar).height(200)
-  should validate_dimensions_of(:avatar).width(250).height(200).with_message('Invalid dimensions.')
-  should validate_dimensions_of(:avatar).width_min(200)
-  should validate_dimensions_of(:avatar).width_max(500)
-  should validate_dimensions_of(:avatar).height_min(100)
-  should validate_dimensions_of(:avatar).height_max(300)
-  should validate_dimensions_of(:avatar).width_between(200..500)
-  should validate_dimensions_of(:avatar).height_between(100..300)
-
-  should validate_size_of(:avatar).less_than(50.kilobytes)
-  should validate_size_of(:avatar).less_than_or_equal_to(50.kilobytes)
-  should validate_size_of(:avatar).greater_than(1.kilobyte)
-  should validate_size_of(:avatar).greater_than(1.kilobyte).with_message('is not in required file size range')
-  should validate_size_of(:avatar).greater_than_or_equal_to(1.kilobyte)
-  should validate_size_of(:avatar).between(100..500.kilobytes)
-end
-```
+Then you can use the matchers with the syntax specified in the RSpec section, just use `should validate_method` instead of `it { is_expected_to validate_method }` as specified in the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem.
 
 ## Todo
 
@@ -350,7 +339,7 @@ end
 
 To run tests in root folder of gem:
 
-* `BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test` to run for Rails 6.1
+* `BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle exec rake test` to run for Rails 6.1
 * `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
 * `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.0
 * `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main branch
@@ -358,11 +347,11 @@ To run tests in root folder of gem:
 Snippet to run in console:
 
 ```bash
-BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test

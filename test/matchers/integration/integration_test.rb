@@ -11,7 +11,7 @@ describe 'Integration tests' do
 
   describe 'example_1' do
     # validates :example_1, size: { less_than: 10.megabytes, message: 'must be less than 10 MB' },
-    #                       content_type: ['image/png', 'image/jpg', 'image/jpeg']
+    #                       content_type: ['image/png', 'image/jpeg', 'image/jpeg']
     let(:model_attribute) { :example_1 }
 
     describe 'size matcher' do
@@ -32,7 +32,7 @@ describe 'Integration tests' do
 
       describe 'when provided with the content_type value specified in the model validations' do
         subject do
-          matcher.allowing('image/png', 'image/jpg', 'image/jpeg')
+          matcher.allowing('image/png', 'image/jpeg', 'image/jpeg')
         end
 
         it { is_expected_to_match_for(klass) }
