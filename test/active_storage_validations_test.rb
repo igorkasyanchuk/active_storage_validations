@@ -54,14 +54,16 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
         error: :content_type_invalid,
         validator_type: :content_type,
         authorized_types: 'PNG',
-        content_type: 'text/plain'
+        content_type: 'text/plain',
+        filename: 'bad_dummy_file.png'
       }
     ], proc_avatar: [
      {
        error: :content_type_invalid,
        validator_type: :content_type,
        authorized_types: 'PNG',
-       content_type: 'text/plain'
+       content_type: 'text/plain',
+       filename: 'bad_dummy_file.png'
      }
     ]
 

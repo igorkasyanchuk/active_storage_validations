@@ -173,17 +173,57 @@ en:
       image_not_processable: "is not a valid image"
 ```
 
-In some cases, Active Storage Validations provides variables to help you customize messages:
+In several cases, Active Storage Validations provides variables to help you customize messages:
+
+### Aspect ratio
+The keys starting with `aspect_ratio_` support two variables that you can use:
+- `aspect_ratio` containing the expected aspect ratio, especially usefull for custom aspect ratio
+- `filename` containing the current file name
+
+For example :
+
+```yml
+aspect_ratio_is_not: "must be a %{aspect_ratio} image"
+```
 
 ### Content type
-The `content_type_invalid` key has two variables that you can use:
+The `content_type_invalid` key has three variables that you can use:
 - `content_type` containing the content type of the sent file
 - `authorized_types` containing the list of authorized content types
+- `filename` containing the current file name
 
 For example :
 
 ```yml
 content_type_invalid: "has an invalid content type : %{content_type}, authorized types are %{authorized_types}"
+```
+
+### Dimension
+The keys starting with `dimension_` support six variables that you can use:
+- `min` containing the minimum width or height allowed
+- `max` containing the maximum width or height allowed
+- `width` containing the minimum or maximum width allowed
+- `height` containing the minimum or maximum width allowed
+- `lenght` containing the exact width or height allowed
+- `filename` containing the current file name
+
+For example :
+
+```yml
+dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel."
+```
+
+### File size
+The keys starting with `file_size_not_` support four variables that you can use:
+- `file_size` containing the current file size
+- `min` containing the minimum file size
+- `max` containing the maxmimum file size
+- `filename` containing the current file name
+
+For example :
+
+```yml
+file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
 ```
 
 ### Number of files
@@ -197,26 +237,14 @@ For example :
 limit_out_of_range: "total number is out of range. range: [%{min}, %{max}]"
 ```
 
-### File size
-The keys starting with `file_size_not_` support three variables that you can use:
-- `file_size` containing the current file size
-- `min` containing the minimum file size
-- `max` containing the maxmimum file size
+### Processable image
+The `image_not_processable` key supports one variable that you can use:
+- `filename` containing the current file name
 
 For example :
 
 ```yml
-file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
-```
-
-### Aspect ratio
-The keys starting with `aspect_ratio_` support one variable that you can use:
-- `aspect_ratio` containing the expected aspect ratio, especially usefull for custom aspect ratio
-
-For example :
-
-```yml
-aspect_ratio_is_not: "must be a %{aspect_ratio} image"
+image_not_processable: "is not a valid image (file: %{filename})"
 ```
 
 ## Installation

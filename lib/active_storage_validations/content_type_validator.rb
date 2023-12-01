@@ -26,12 +26,11 @@ module ActiveStorageValidations
 
       files = Array.wrap(record.send(attribute))
 
-      errors_options = initialize_error_options(options)
-      errors_options[:authorized_types] = types_to_human_format(types)
-
       files.each do |file|
         next if is_valid?(file, types)
 
+        errors_options = initialize_error_options(options, file)
+        errors_options[:authorized_types] = types_to_human_format(types)
         errors_options[:content_type] = content_type(file)
         add_error(record, attribute, ERROR_TYPES.first, **errors_options)
         break

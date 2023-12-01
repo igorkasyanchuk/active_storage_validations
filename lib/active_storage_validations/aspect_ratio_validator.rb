@@ -30,7 +30,7 @@ module ActiveStorageValidations
 
         files.each do |file|
           metadata = Metadata.new(file).metadata
-          next if is_valid?(record, attribute, metadata)
+          next if is_valid?(record, attribute, file, metadata)
           break
         end
       end
@@ -46,7 +46,7 @@ module ActiveStorageValidations
           file.analyze; file.reload unless file.analyzed?
           metadata = file.metadata
 
-          next if is_valid?(record, attribute, metadata)
+          next if is_valid?(record, attribute, file, metadata)
           break
         end
       end
@@ -56,9 +56,9 @@ module ActiveStorageValidations
     private
 
 
-    def is_valid?(record, attribute, metadata)
+    def is_valid?(record, attribute, file, metadata)
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
-      errors_options = initialize_error_options(options)
+      errors_options = initialize_error_options(options, file)
 
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
         errors_options[:aspect_ratio] = flat_options[:with]
