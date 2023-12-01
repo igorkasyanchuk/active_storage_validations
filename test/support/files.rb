@@ -150,6 +150,18 @@ def tar_file_with_image_content_type
   }
 end
 
+def image_string_io
+  string_io = StringIO.new().tap {|io| io.binmode }
+  IO.copy_stream(File.open(Rails.root.join('public', 'image_1920x1080.png')), string_io)
+  string_io.rewind
+
+  {
+    io: string_io,
+    filename: 'image_1920x1080.png',
+    content_type: 'image/png'
+  }
+end
+
 def file_1ko
   {
     io: File.open(Rails.root.join('public', 'file_1ko')),
