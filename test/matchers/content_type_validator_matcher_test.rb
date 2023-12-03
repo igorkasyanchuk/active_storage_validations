@@ -1,76 +1,231 @@
 # frozen_string_literal: true
 
 require 'test_helper'
-require 'active_storage_validations/matchers'
+require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
+require 'matchers/shared_examples/works_with_both_instance_and_class'
+require 'matchers/shared_examples/works_with_context'
+require 'matchers/shared_examples/works_with_custom_message'
 
-class ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher::Test < ActiveSupport::TestCase
-  test 'positive match on both allowing and rejecting' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
-    matcher.allowing('image/png')
-    matcher.rejecting('image/jpg')
+describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
+  include MatcherHelpers
 
-    assert matcher.matches?(User)
+  include ChecksIfIsAValidActiveStorageAttribute
+  include WorksWithBothInstanceAndClass
+
+  let(:matcher) { ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(model_attribute) }
+  let(:klass) { ContentType::Matcher }
+
+  describe '#allowing' do
+    describe 'one' do
+      let(:model_attribute) { :allowing_one }
+      let(:allowed_type) { 'image/png' }
+
+      describe 'when provided with the exact allowed type' do
+        subject { matcher.allowing(allowed_type) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      describe 'when provided with something that is not a valid type' do
+        subject { matcher.allowing(not_valid_type) }
+
+        let(:not_valid_type) { 'not_valid' }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
+
+    describe 'several' do
+      let(:model_attribute) { :allowing_several }
+      let(:allowed_types) { ['image/png', 'image/gif'] }
+      let(:not_allowed_types) { ['video/mkv', 'file/pdf'] }
+
+      describe 'when provided with the exact allowed types' do
+        subject { matcher.allowing(*allowed_types) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      describe 'when provided with only allowed types but not all types' do
+        subject { matcher.allowing(allowed_types.sample) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      describe 'when provided with allowed and not allowed types' do
+        subject { matcher.allowing(allowed_types.sample, not_allowed_types.sample) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe 'when provided with only not allowed types' do
+        subject { matcher.allowing(*not_allowed_types) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe 'when provided with something that is not a valid type' do
+        subject { matcher.allowing(not_valid_type) }
+
+        let(:not_valid_type) { 'not_valid' }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
+
+    describe 'several through regex' do
+      let(:model_attribute) { :allowing_several_through_regex }
+      let(:some_allowed_types) { ['image/png', 'image/gif'] }
+      let(:not_allowed_types) { ['video/mkv', 'file/pdf'] }
+
+      describe 'when provided with only allowed types but not all types' do
+        subject { matcher.allowing(*some_allowed_types) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      describe 'when provided with allowed and not allowed types' do
+        subject { matcher.allowing(some_allowed_types.sample, not_allowed_types.sample) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe 'when provided with only not allowed types' do
+        subject { matcher.allowing(*not_allowed_types) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe 'when provided with something that is not a valid type' do
+        subject { matcher.allowing(not_valid_type) }
+
+        let(:not_valid_type) { 'not_valid' }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
   end
 
-  test 'negative match on both allowing and rejecting' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
-    matcher.rejecting('image/png')
-    matcher.allowing('image/jpg')
+  describe '#rejecting' do
+    let(:model_attribute) { :allowing_one }
+    let(:allowed_type) { 'image/png' }
 
-    refute matcher.matches?(User)
+    describe 'when provided with the exact allowed type' do
+      subject { matcher.rejecting(allowed_type) }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+
+    describe 'when provided with any type but the allowed type' do
+      subject { matcher.rejecting(any_type) }
+
+      let(:any_type) { 'video/mkv' }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    describe 'when provided with any types but the allowed type' do
+      subject { matcher.rejecting(*any_types) }
+
+      let(:any_types) { ['video/mkv', 'image/gif'] }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    describe 'when provided with any types and the allowed type' do
+      subject { matcher.rejecting(*types) }
+
+      let(:any_types) { ['video/mkv', 'image/gif'] }
+      let(:types) { any_types + [allowed_type] }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+
+    describe 'when provided with something that is not a valid type' do
+      subject { matcher.rejecting(not_valid_type) }
+
+      let(:not_valid_type) { 'not_valid' }
+
+      it { is_expected_to_match_for(klass) }
+    end
   end
 
-  test 'positive match when providing class' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
-    matcher.allowing('image/png')
-    assert matcher.matches?(User)
+  describe '#with_message' do
+    include WorksWithCustomMessage
   end
 
-  test 'negative match when providing class' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
-    matcher.allowing('image/jpeg')
-    refute matcher.matches?(User)
+  describe "#on" do
+    include WorksWithContext
   end
 
-  test 'unknown attached when providing class' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:non_existing)
-    matcher.allowing('image/png')
-    refute matcher.matches?(User)
-  end
+  describe 'Combinations' do
+    describe '#allowing + #with_message' do
+      let(:model_attribute) { :allowing_one_with_message }
+      let(:allowed_type) { 'file/pdf' }
 
-  test 'positive match when providing instance' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
-    matcher.allowing('image/png')
-    assert matcher.matches?(User.new)
-  end
+      describe 'when provided with the exact allowed type' do
+        describe 'and when provided with the message specified in the model validations' do
+          subject do
+            matcher.allowing(allowed_type)
+            matcher.with_message('Not authorized file type.')
+          end
 
-  test 'negative match when providing instance' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
-    matcher.allowing('image/jpeg')
-    refute matcher.matches?(User.new)
-  end
+          it { is_expected_to_match_for(klass) }
+        end
+      end
+    end
 
-  test 'unknown attached when providing instance' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:non_existing)
-    matcher.allowing('image/png')
-    refute matcher.matches?(User.new)
-  end
+    describe '#rejecting + #with_message' do
+      let(:model_attribute) { :allowing_one_with_message }
+      let(:not_allowed_type) { 'video/mkv' }
 
-  test 'positive match for rejecting' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
-    matcher.rejecting('image/jpeg')
-    assert matcher.matches?(User)
-  end
+      describe 'when provided with a not allowed type' do
+        describe 'and when provided with the message specified in the model validations' do
+          subject do
+            matcher.rejecting(not_allowed_type)
+            matcher.with_message('Not authorized file type.')
+          end
 
-  test 'negative match for rejecting' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:avatar)
-    matcher.rejecting('image/png')
-    refute matcher.matches?(User)
-  end
+          it { is_expected_to_match_for(klass) }
+        end
+      end
+    end
 
-  test 'positive match on subset of accepted content types' do
-    matcher = ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(:photos)
-    matcher.allowing('image/png')
-    assert matcher.matches?(User)
+    describe '#allowing + #rejecting' do
+      let(:model_attribute) { :allowing_one }
+      let(:allowed_type) { 'image/png' }
+      let(:not_allowed_type) { 'video/mkv' }
+
+      describe 'when provided with the exact allowed type' do
+        describe 'and when provided with a not allowed type specified in the model validations' do
+          subject do
+            matcher.allowing(allowed_type)
+            matcher.rejecting(not_allowed_type)
+          end
+
+          it { is_expected_to_match_for(klass) }
+        end
+      end
+    end
+
+    describe '#allowing + #rejecting + #with_message' do
+      let(:model_attribute) { :allowing_one_with_message }
+      let(:allowed_type) { 'file/pdf' }
+      let(:not_allowed_type) { 'video/mkv' }
+
+      describe 'when provided with the exact allowed type' do
+        describe 'and when provided with a not allowed type' do
+          describe 'and when provided with the message specified in the model validations' do
+            subject do
+              matcher.allowing(allowed_type)
+              matcher.rejecting(not_allowed_type)
+              matcher.with_message('Not authorized file type.')
+            end
+
+            it { is_expected_to_match_for(klass) }
+          end
+        end
+      end
+    end
   end
 end

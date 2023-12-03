@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'active_model'
+require 'active_support/concern'
+
 require 'active_storage_validations/railtie'
 require 'active_storage_validations/engine'
 require 'active_storage_validations/option_proc_unfolding'

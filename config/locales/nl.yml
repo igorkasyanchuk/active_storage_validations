@@ -2,7 +2,11 @@ nl:
   errors:
     messages:
       content_type_invalid: "heeft een ongeldig inhoudstype"
-      file_size_out_of_range: "bestandsgrootte %{file_size} valt niet tussen het vereiste bereik"
+      file_size_not_less_than: "bestandsgrootte moet kleiner zijn dan %{max_size} (huidige grootte is %{file_size})"
+      file_size_not_less_than_or_equal_to: "bestandsgrootte moet kleiner zijn dan of gelijk zijn aan %{max_size} (huidige grootte is %{file_size})"
+      file_size_not_greater_than: "bestandsgrootte moet groter zijn dan %{min_size} (huidige grootte is %{file_size})"
+      file_size_not_greater_than_or_equal_to: "bestandsgrootte moet groter zijn dan of gelijk zijn aan %{min_size} (huidige grootte is %{file_size})"
+      file_size_not_between: "bestandsgrootte moet tussen %{min_size} en %{max_size} liggen (huidige grootte is %{file_size})"
       limit_out_of_range: "totaal aantal valt buiten het vereiste bereik"
       image_metadata_missing: "is geen geldige afbeelding"
       dimension_min_inclusion: "moet groter of gelijk zijn aan %{width} x %{height} pixels"
@@ -20,3 +24,4 @@ nl:
       aspect_ratio_not_landscape: "moet een liggende afbeelding zijn"
       aspect_ratio_is_not: "moet een beeldverhouding hebben van %{aspect_ratio}"
       aspect_ratio_unknown: "heeft een onbekende beeldverhouding"
+      image_not_processable: "is geen geldige afbeelding"

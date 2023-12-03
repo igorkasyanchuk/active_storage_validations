@@ -6,6 +6,7 @@
 [![MiniTest](https://github.com/igorkasyanchuk/active_storage_validations/workflows/MiniTest/badge.svg)](https://github.com/igorkasyanchuk/active_storage_validations/actions)
 [![RailsJazz](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/my_other.svg?raw=true)](https://www.railsjazz.com)
 [![https://www.patreon.com/igorkasyanchuk](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/patron.svg?raw=true)](https://www.patreon.com/igorkasyanchuk)
+[![Listed on OpenSource-Heroes.com](https://opensource-heroes.com/badge-v1.svg)](https://opensource-heroes.com/r/igorkasyanchuk/active_storage_validations)
 
 If you are using `active_storage` gem and you want to add simple validations for it, like presence or content_type you need to write a custom validation method.
 
@@ -67,15 +68,14 @@ end
 
 ### More examples
 
-- Content type validation using symbols. In order to infer the correct mime type from the symbol, the types must be registered with `Marcel::EXTENSIONS` (`MimeMagic::EXTENSIONS` for Rails <= 6.1.3).
+- Content type validation using symbols or regex. The symbol types must be registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb) that's used by this gem to infer the full content type.
 
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
   has_many_attached :photos
 
-  validates :avatar, attached: true, content_type: :png # Marcel::Magic.by_extension(:png).to_s => 'image/png'
-                                                        # Rails <= 6.1.3; MimeMagic.by_extension(:png).to_s => 'image/png'
+  validates :avatar, attached: true, content_type: :png
   # or
   validates :photos, attached: true, content_type: [:png, :jpg, :jpeg]
   # or
@@ -148,7 +148,11 @@ en:
   errors:
     messages:
       content_type_invalid: "has an invalid content type"
-      file_size_out_of_range: "size %{file_size} is not between required range"
+      file_size_not_less_than: "file size must be less than %{max_size} (current size is %{file_size})"
+      file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max_size} (current size is %{file_size})"
+      file_size_not_greater_than: "file size must be greater than %{min_size} (current size is %{file_size})"
+      file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min_size} (current size is %{file_size})"
+      file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
       limit_out_of_range: "total number is out of range"
       image_metadata_missing: "is not a valid image"
       dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel."
@@ -171,22 +175,48 @@ en:
 
 In some cases, Active Storage Validations provides variables to help you customize messages:
 
-The "content_type_invalid" key has two variables that you can use, a variable named "content_type" containing the content type of the send file and a variable named "authorized_types" containing the list of authorized content types.
-
-The variables are not used by default to leave the choice to the user.
+### Content type
+The `content_type_invalid` key has two variables that you can use:
+- `content_type` containing the content type of the sent file
+- `authorized_types` containing the list of authorized content types
 
 For example :
 
 ```yml
-content_type_invalid: "has an invalid content type : %{content_type}"
+content_type_invalid: "has an invalid content type : %{content_type}, authorized types are %{authorized_types}"
 ```
 
-Also the "limit_out_of_range" key supports two variables the "min" and "max".
+### Number of files
+The `limit_out_of_range` key supports two variables that you can use:
+- `min` containing the minimum number of files
+- `max` containing the maximum number of files
 
 For example :
 
 ```yml
 limit_out_of_range: "total number is out of range. range: [%{min}, %{max}]"
+```
+
+### File size
+The keys starting with `file_size_not_` support three variables that you can use:
+- `file_size` containing the current file size
+- `min` containing the minimum file size
+- `max` containing the maxmimum file size
+
+For example :
+
+```yml
+file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
+```
+
+### Aspect ratio
+The keys starting with `aspect_ratio_` support one variable that you can use:
+- `aspect_ratio` containing the expected aspect ratio, especially usefull for custom aspect ratio
+
+For example :
+
+```yml
+aspect_ratio_is_not: "must be a %{aspect_ratio} image"
 ```
 
 ## Installation
@@ -216,7 +246,7 @@ Very simple example of validation with file attached, content type check and cus
 [![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
 
 ## Test matchers
-Provides RSpec-compatible and Minitest-compatible matchers for testing the validators.
+Provides RSpec-compatible and Minitest-compatible matchers for testing the validators. Only `attached`, `content_type`, `dimension` and `size` validators currently have their matcher developped.
 
 ### RSpec
 
@@ -234,25 +264,31 @@ RSpec.configure do |config|
 end
 ```
 
-Example (Note that the options are chainable):
+Matcher methods available:
 
 ```ruby
 describe User do
+  # attached
   it { is_expected.to validate_attached_of(:avatar) }
 
+  # content_type:
+  # #allowing, #rejecting
   it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') }
   it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') }
 
+  # dimension:
+  # #width, #height, #width_min, #height_min, #width_max, #height_max, #width_between, #height_between
   it { is_expected.to validate_dimensions_of(:avatar).width(250) }
   it { is_expected.to validate_dimensions_of(:avatar).height(200) }
-  it { is_expected.to validate_dimensions_of(:avatar).width(250).height(200).with_message('Invalid dimensions.') }
   it { is_expected.to validate_dimensions_of(:avatar).width_min(200) }
-  it { is_expected.to validate_dimensions_of(:avatar).width_max(500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_min(100) }
+  it { is_expected.to validate_dimensions_of(:avatar).width_max(500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_max(300) }
   it { is_expected.to validate_dimensions_of(:avatar).width_between(200..500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_between(100..300) }
 
+  # size:
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between
   it { is_expected.to validate_size_of(:avatar).less_than(50.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).less_than_or_equal_to(50.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).greater_than(1.kilobyte) }
@@ -260,9 +296,24 @@ describe User do
   it { is_expected.to validate_size_of(:avatar).between(100..500.kilobytes) }
 end
 ```
+(Note that matcher methods are chainable)
+
+All matchers can currently be customized with 2 Rails validation options:
+
+```ruby
+describe User do
+  # :on
+  it { is_expected.to validate_attached_of(:avatar).on(:update) }
+  it { is_expected.to validate_attached_of(:avatar).on(%i[update custom]) }
+  # :message
+  it { is_expected.to validate_dimensions_of(:avatar).width(250).with_message('Invalid dimensions.') }
+end
+```
 
 ### Minitest
-To use the following syntax, make sure you have the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem up and running. To make use of the matchers you need to require the matchers:
+To use the matchers, make sure you have the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem up and running.
+
+You need to require the matchers:
 
 ```ruby
 require 'active_storage_validations/matchers'
@@ -276,61 +327,40 @@ class ActiveSupport::TestCase
 end
 ```
 
-Example (Note that the options are chainable):
-
-```ruby
-class UserTest < ActiveSupport::TestCase
-  should validate_attached_of(:avatar)
-
-  should validate_content_type_of(:avatar).allowing('image/png', 'image/gif')
-  should validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml')
-
-  should validate_dimensions_of(:avatar).width(250)
-  should validate_dimensions_of(:avatar).height(200)
-  should validate_dimensions_of(:avatar).width(250).height(200).with_message('Invalid dimensions.')
-  should validate_dimensions_of(:avatar).width_min(200)
-  should validate_dimensions_of(:avatar).width_max(500)
-  should validate_dimensions_of(:avatar).height_min(100)
-  should validate_dimensions_of(:avatar).height_max(300)
-  should validate_dimensions_of(:avatar).width_between(200..500)
-  should validate_dimensions_of(:avatar).height_between(100..300)
-
-  should validate_size_of(:avatar).less_than(50.kilobytes)
-  should validate_size_of(:avatar).less_than_or_equal_to(50.kilobytes)
-  should validate_size_of(:avatar).greater_than(1.kilobyte)
-  should validate_size_of(:avatar).greater_than_or_equal_to(1.kilobyte)
-  should validate_size_of(:avatar).between(100..500.kilobytes)
-end
-```
+Then you can use the matchers with the syntax specified in the RSpec section, just use `should validate_method` instead of `it { is_expected_to validate_method }` as specified in the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem.
 
 ## Todo
 
 * verify with remote storages (s3, etc)
 * verify how it works with direct upload
-* better error message when content_size is invalid
 * add more translations
 
 ## Tests & Contributing
 
 To run tests in root folder of gem:
 
-* `BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test` to run for Rails 6.0
-* `BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test` to run for Rails 6.1
+* `BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle exec rake test` to run for Rails 6.1
 * `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
+* `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.0
 * `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main branch
 
 Snippet to run in console:
 
-```
-BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle
+```bash
+BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 ```
+
+Tips:
+- To focus a specific test, use the `focus` class method provided by [minitest-focus](https://github.com/minitest/minitest-focus)
+- To focus a specific file, use the TEST option provided by minitest, e.g. to only run size_validator_test.rb file you will execute the following command: `bundle exec rake test TEST=test/validators/size_validator_test.rb`
+
 
 ## Known issues
 
@@ -345,7 +375,11 @@ BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 This is a Rails issue, and is fixed in Rails 6.
 
 ## Contributing
+
 You are welcome to contribute.
+
+[<img src="https://opensource-heroes.com/svg/embed/igorkasyanchuk/active_storage_validations"
+/>](https://opensource-heroes.com/r/igorkasyanchuk/active_storage_validations)
 
 ## Contributors (BIG THANK YOU)
 - https://github.com/schweigert
@@ -394,12 +428,22 @@ You are welcome to contribute.
 - https://github.com/NARKOZ
 - https://github.com/stephensolis
 - https://github.com/kwent
-= https://github.com/Animesh-Ghosh
-= https://github.com/gr8bit
-= https://github.com/codegeek319
-= https://github.com/clwy-cn
-= https://github.com/kukicola
-= https://github.com/sobrinho
+- https://github.com/Animesh-Ghosh
+- https://github.com/gr8bit
+- https://github.com/codegeek319
+- https://github.com/clwy-cn
+- https://github.com/kukicola
+- https://github.com/sobrinho
+- https://github.com/iainbeeston
+- https://github.com/marckohlbrugge
+- https://github.com/Mth0158
+- https://github.com/technicalpickles
+- https://github.com/ricsdeol
+- https://github.com/Fonsan
+- https://github.com/tagliala
+- https://github.com/ocarreterom
+- https://github.com/aditya-cherukuri
+
 
 ## License
 

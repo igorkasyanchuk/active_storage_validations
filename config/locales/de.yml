@@ -2,7 +2,11 @@ de:
   errors:
     messages:
       content_type_invalid: "hat einen ungültigen Dateityp"
-      file_size_out_of_range: "Dateigröße %{file_size} liegt nicht im erlaubten Bereich"
+      file_size_not_less_than: "Dateigröße muss kleiner als %{max_size} sein (aktuelle Dateigröße ist %{file_size})"
+      file_size_not_less_than_or_equal_to: "Dateigröße muss kleiner oder gleich %{max_size} sein (aktuelle Dateigröße ist %{file_size})"
+      file_size_not_greater_than: "Dateigröße muss größer als %{min_size} sein (aktuelle Dateigröße ist %{file_size})"
+      file_size_not_greater_than_or_equal_to: "Dateigröße muss größer oder gleich %{min_size} sein (aktuelle Dateigröße ist %{file_size})"
+      file_size_not_between: "Dateigröße muss zwischen %{min_size} und %{max_size} liegen (aktuelle Dateigröße ist %{file_size})"
       limit_out_of_range: "Anzahl ist außerhalb des gültigen Bereichs"
       image_metadata_missing: "ist kein gültiges Bild"
       dimension_min_inclusion: "muss größer oder gleich %{width} x %{height} Pixel sein"
@@ -20,3 +24,4 @@ de:
       aspect_ratio_not_landscape: "muss Querformat sein"
       aspect_ratio_is_not: "muss ein Bildseitenverhältnis von %{aspect_ratio} haben"
       aspect_ratio_unknown: "hat ein unbekanntes Bildseitenverhältnis"
+      image_not_processable: "ist kein gültiges Bild"

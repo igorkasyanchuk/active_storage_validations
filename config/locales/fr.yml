@@ -2,7 +2,11 @@ fr:
   errors:
     messages:
       content_type_invalid: "a un type de contenu non valide"
-      file_size_out_of_range: "la taille %{file_size} n'est pas comprise dans la plage permise"
+      file_size_not_less_than: "la taille du fichier doit être inférieure à %{max_size} (la taille actuelle est %{file_size})"
+      file_size_not_less_than_or_equal_to: "la taille du fichier doit être inférieure ou égale à %{max_size} (la taille actuelle est %{file_size})"
+      file_size_not_greater_than: "la taille du fichier doit être supérieure à %{min_size} (la taille actuelle est %{file_size})"
+      file_size_not_greater_than_or_equal_to: "la taille du fichier doit être supérieure ou égale à %{min_size} (la taille actuelle est %{file_size})"
+      file_size_not_between: "la taille du fichier doit être comprise entre %{min_size} et %{max_size} (la taille actuelle est %{file_size})"
       limit_out_of_range: "le nombre total est hors limites"
       image_metadata_missing: "n'est pas une image valide"
       dimension_min_inclusion: "doit être supérieur ou égal à %{width} x %{height} pixels"
@@ -20,3 +24,4 @@ fr:
       aspect_ratio_not_landscape: "doit être une image en format paysage"
       aspect_ratio_is_not: "doit avoir un rapport hauteur / largeur de %{aspect_ratio}"
       aspect_ratio_unknown: "a un rapport d'aspect inconnu"
+      image_not_processable: "n'est pas une image valide"

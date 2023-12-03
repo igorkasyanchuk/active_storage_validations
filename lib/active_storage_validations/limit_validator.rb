@@ -1,25 +1,31 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/errorable.rb'
+require_relative 'concerns/symbolizable.rb'
+
 module ActiveStorageValidations
   class LimitValidator < ActiveModel::EachValidator # :nodoc:
     include OptionProcUnfolding
+    include Errorable
+    include Symbolizable
 
     AVAILABLE_CHECKS = %i[max min].freeze
 
     def check_validity!
-      return true if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-      raise ArgumentError, 'You must pass either :max or :min to the validator'
+      unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
+        raise ArgumentError, 'You must pass either :max or :min to the validator'
+      end
     end
 
     def validate_each(record, attribute, _)
-      return true unless record.send(attribute).attached?
-
-      files = Array.wrap(record.send(attribute)).compact.uniq
+      files = Array.wrap(record.send(attribute)).reject { |file| file.blank? }.compact.uniq
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
-      errors_options = { min: flat_options[:min], max: flat_options[:max] }
+      errors_options = initialize_error_options(options)
+      errors_options[:min] = flat_options[:min]
+      errors_options[:max] = flat_options[:max]
 
       return true if files_count_valid?(files.count, flat_options)
-      record.errors.add(attribute, options[:message].presence || :limit_out_of_range, **errors_options)
+      add_error(record, attribute, :limit_out_of_range, **errors_options)
     end
 
     def files_count_valid?(count, flat_options)

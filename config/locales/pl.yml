@@ -2,7 +2,11 @@ pl:
   errors:
     messages:
       content_type_invalid: "jest nieprawidłowego typu"
-      file_size_out_of_range: "rozmiar %{file_size} nie zawiera się w dopuszczalnym zakresie"
+      file_size_not_less_than: "rozmiar pliku musi być mniejszy niż %{max_size} (obecny rozmiar to %{file_size})"
+      file_size_not_less_than_or_equal_to: "rozmiar pliku musi być mniejszy lub równy %{max_size} (obecny rozmiar to %{file_size})"
+      file_size_not_greater_than: "rozmiar pliku musi być większy niż %{min_size} (obecny rozmiar to %{file_size})"
+      file_size_not_greater_than_or_equal_to: "rozmiar pliku musi być większy lub równy %{min_size} (obecny rozmiar to %{file_size})"
+      file_size_not_between: "rozmiar pliku musi mieścić się w przedziale od %{min_size} do %{max_size} (obecny rozmiar to %{file_size})"
       limit_out_of_range: "ilość przekracza dopuszczalny zakres"
       image_metadata_missing: "nie jest prawidłowym obrazem"
       dimension_min_inclusion: "musi być równe lub większe od %{width} x %{height} pixeli"
@@ -20,3 +24,4 @@ pl:
       aspect_ratio_not_landscape: "musi mieć proporcje pejzażu"
       aspect_ratio_is_not: "musi mieć proporcje %{aspect_ratio}"
       aspect_ratio_unknown: "ma nieokreślone proporcje"
+      image_not_processable: "nie jest prawidłowym obrazem"

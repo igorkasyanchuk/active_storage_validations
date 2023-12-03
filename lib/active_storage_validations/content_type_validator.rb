@@ -1,27 +1,39 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/errorable.rb'
+require_relative 'concerns/symbolizable.rb'
+
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
     include OptionProcUnfolding
+    include Errorable
+    include Symbolizable
 
     AVAILABLE_CHECKS = %i[with in].freeze
-    
+    ERROR_TYPES = %i[content_type_invalid].freeze
+
+    def check_validity!
+      unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
+        raise ArgumentError, 'You must pass either :with or :in to the validator'
+      end
+    end
+
     def validate_each(record, attribute, _value)
       return true unless record.send(attribute).attached?
 
       types = authorized_types(record)
       return true if types.empty?
-      
+
       files = Array.wrap(record.send(attribute))
 
-      errors_options = { authorized_types: types_to_human_format(types) }
-      errors_options[:message] = options[:message] if options[:message].present?
+      errors_options = initialize_error_options(options)
+      errors_options[:authorized_types] = types_to_human_format(types)
 
       files.each do |file|
         next if is_valid?(file, types)
 
         errors_options[:content_type] = content_type(file)
-        record.errors.add(attribute, :content_type_invalid, **errors_options)
+        add_error(record, attribute, ERROR_TYPES.first, **errors_options)
         break
       end
     end

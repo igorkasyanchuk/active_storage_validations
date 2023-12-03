@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_storage_validations (1.0.2)
+    active_storage_validations (1.1.3)
       activejob (>= 5.2.0)
       activemodel (>= 5.2.0)
       activestorage (>= 5.2.0)
@@ -53,6 +53,7 @@ GEM
       thor (>= 0.14.6)
     concurrent-ruby (1.1.7)
     crass (1.0.6)
+    docile (1.4.0)
     erubi (1.10.0)
     ffi (1.15.5)
     globalid (1.0.0)
@@ -71,6 +72,8 @@ GEM
     mini_magick (4.11.0)
     mini_portile2 (2.5.1)
     minitest (5.14.3)
+    minitest-focus (1.4.0)
+      minitest (>= 4, < 6)
     nokogiri (1.11.3)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
@@ -113,6 +116,12 @@ GEM
     ruby-progressbar (1.11.0)
     ruby-vips (2.1.4)
       ffi (~> 1.12)
+    simplecov (0.22.0)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.12.3)
+    simplecov_json_formatter (0.1.4)
     sqlite3 (1.4.2)
     thor (1.0.1)
     tzinfo (2.0.4)
@@ -131,9 +140,11 @@ DEPENDENCIES
   globalid
   marcel
   mini_magick (>= 4.9.5)
+  minitest-focus (~> 1.4)
   pry
   rubocop
   ruby-vips (>= 2.1.0)
+  simplecov
   sqlite3
 
 BUNDLED WITH

@@ -75,17 +75,10 @@ module ActiveStorageValidations
         tempfile.flush
         tempfile.rewind
 
-        image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(tempfile.path).downcase)
-                  Vips::Image.new_from_file(tempfile.path)
-                elsif defined?(MiniMagick)
-                  MiniMagick::Image.new(tempfile.path)
-                end
+        image = new_image_from_path(tempfile.path)
       else
-        image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(read_file_path).downcase)
-                  Vips::Image.new_from_file(read_file_path)
-                elsif defined?(MiniMagick)
-                  MiniMagick::Image.new(read_file_path)
-                end
+        file_path = read_file_path
+        image = new_image_from_path(file_path)
       end
 
 
@@ -99,6 +92,14 @@ module ActiveStorageValidations
       {}
     ensure
       image = nil
+    end
+
+    def new_image_from_path(path)
+      if image_processor == :vips && defined?(Vips) && (Vips::get_suffixes.include?(File.extname(path).downcase) || !Vips::respond_to?(:vips_foreign_get_suffixes))
+        Vips::Image.new_from_file(path)
+      elsif defined?(MiniMagick)
+        MiniMagick::Image.new(path)
+      end
     end
 
     def valid_image?(image)
@@ -125,7 +126,18 @@ module ActiveStorageValidations
       when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
         file.path
       when Hash
-        File.open(file.fetch(:io)).path
+        io = file.fetch(:io)
+        if io.is_a?(StringIO)
+          tempfile = Tempfile.new([File.basename(file[:filename], '.*'), File.extname(file[:filename])])
+          tempfile.binmode
+          IO.copy_stream(io, tempfile)
+          io.rewind
+          tempfile.flush
+          tempfile.rewind
+          tempfile.path
+        else
+          File.open(io).path
+        end
       else
         raise "Something wrong with params."
       end
