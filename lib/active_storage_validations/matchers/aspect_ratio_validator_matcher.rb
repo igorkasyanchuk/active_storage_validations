@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-ASPECT_RATIO_REGEX = /is_(\d*)_(\d*)/.freeze
-VALID_ASPECT_RATIOS = %i(square portrait landscape).freeze
+require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/contextable.rb'
+require_relative 'concerns/messageable.rb'
+require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
   module Matchers
@@ -10,156 +12,107 @@ module ActiveStorageValidations
     end
 
     class AspectRatioValidatorMatcher
-      def initialize(attribute_name, expected_aspect_ratio)
+      include ActiveStorageable
+      include Contextable
+      include Messageable
+      include Validatable
+
+      def initialize(attribute_name)
         @attribute_name = attribute_name
-        @expected_aspect_ratio = expected_aspect_ratio
+        @allowed_aspect_ratios = @rejected_aspect_ratios = []
       end
 
       def description
-        "validate if #{attribute_name} have aspect ratio of #{expected_aspect_ratio}."
+        "validate the aspect ratios allowed on attachment #{@attribute_name}."
       end
 
-      def allowing(*types)
-        @allowed_types = types.flatten
+      def allowing(*aspect_ratios)
+        @allowed_aspect_ratios = aspect_ratios.flatten
         self
       end
 
-      def rejecting(*types)
-        @rejected_types = types.flatten
+      def rejecting(*aspect_ratios)
+        @rejected_aspect_ratios = aspect_ratios.flatten
         self
       end
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods &&
-          valid_expected_aspect_ratio &&
-          valid_when_correct_aspect_ratio &&
-          invalid_when_incorrect_aspect_ratio
+
+        is_a_valid_active_storage_attribute? &&
+          is_context_valid? &&
+          all_allowed_aspect_ratios_allowed? &&
+          all_rejected_aspect_ratios_rejected? &&
+          is_custom_message_valid?
       end
 
       def failure_message
-        @failure_message
+        "is expected to validate aspect ratio of #{@attribute_name}"
       end
 
       protected
 
-      def responds_to_methods
-        if @subject.respond_to?(attribute_name) &&
-            @subject.public_send(attribute_name).respond_to?(:attach) &&
-            @subject.public_send(attribute_name).respond_to?(:detach)
+      def all_allowed_aspect_ratios_allowed?
+        @allowed_aspect_ratios_not_allowed ||= @allowed_aspect_ratios.reject { |aspect_ratio| aspect_ratio_allowed?(aspect_ratio) }
+        @allowed_aspect_ratios_not_allowed.empty?
+      end
 
-          true
-        else
-          @failure_message = 'Invalid attribute for aspect ratio validation.'
-          false
+      def all_rejected_aspect_ratios_rejected?
+        @rejected_aspect_ratios_not_rejected ||= @rejected_aspect_ratios.select { |aspect_ratio| aspect_ratio_allowed?(aspect_ratio) }
+        @rejected_aspect_ratios_not_rejected.empty?
+      end
+
+      def aspect_ratio_allowed?(aspect_ratio)
+        width, height = valid_width_and_height_for(aspect_ratio)
+
+        mock_dimensions_for(attach_file, width, height) do
+          validate
+          is_valid?
         end
       end
 
-      def valid_expected_aspect_ratio
-        if VALID_ASPECT_RATIOS.include?(expected_aspect_ratio) ||
-           expected_aspect_ratio.match?(ASPECT_RATIO_REGEX)
+      def is_custom_message_valid?
+        return true unless @custom_message
 
-          true
-        else
-          @failure_message = <<~FAILURE_MESSAGE
-            Invalid expected aspect ratio. It is #{expected_aspect_ratio}.
-            It should be #{VALID_ASPECT_RATIOS.join(' or ')} or something like is_4_3.
-          FAILURE_MESSAGE
-
-          false
+        mock_dimensions_for(attach_file, -1, -1) do
+          validate
+          has_an_error_message_which_is_custom_message?
         end
       end
 
-      def valid_width_and_height
-        case expected_aspect_ratio
-        when :square
-          [100, 100]
-        when :portrait
-          [100, 200]
-        when :landscape
-          [200, 100]
-        else
-          expected_aspect_ratio =~ /is_(\d*)_(\d*)/
+      def attach_file
+        @subject.public_send(@attribute_name).attach(dummy_file)
+        @subject.public_send(@attribute_name)
+      end
+
+      def dummy_file
+        {
+          io: Tempfile.new('Hello world!'),
+          filename: 'test.png',
+          content_type: 'image/png'
+        }
+      end
+
+      def mock_dimensions_for(attachment, width, height)
+        Matchers.mock_metadata(attachment, width, height) do
+          yield
+        end
+      end
+
+      def valid_width_and_height_for(aspect_ratio)
+        case aspect_ratio
+        when :square then [100, 100]
+        when :portrait then [100, 200]
+        when :landscape then [200, 100]
+        when validator_class::ASPECT_RATIO_REGEX
+          aspect_ratio =~ validator_class::ASPECT_RATIO_REGEX
           x = Regexp.last_match(1).to_i
           y = Regexp.last_match(2).to_i
 
           [100 * x, 100 * y]
-        end
-      end
-
-      def invalid_width_and_height
-        width, height = valid_width_and_height
-
-        height = expected_aspect_ratio == :portrait ? 50 : (height * width) + 1
-
-        [width, height]
-      end
-
-      def expected_error_message
-        case expected_aspect_ratio
-        when :square
-          'aspect_ratio_not_square'
-        when :portrait
-          'aspect_ratio_not_portrait'
-        when :landscape
-          'aspect_ratio_not_landscape'
         else
-          'aspect_ratio_is_not'
+          [-1, -1]
         end
-      end
-
-      def valid_when_correct_aspect_ratio
-        width, height = valid_width_and_height
-
-        @subject.public_send(attribute_name).attach attachment_for(width, height)
-
-        attachment = @subject.public_send(attribute_name)
-
-        ActiveStorageValidations::Matchers.mock_metadata(attachment, width, height) do
-          @subject.validate
-
-          if @subject.errors.details[attribute_name].all? do |error|
-              error[:error].to_s.exclude?(expected_error_message)
-            end
-
-            true
-          else
-            @failure_message = <<~FAILURE_MESSAGE
-              Should be valid attaching an image with aspect \
-              ratio of #{expected_aspect_ratio}. But it is not.
-            FAILURE_MESSAGE
-            false
-          end
-        end
-      end
-
-      def invalid_when_incorrect_aspect_ratio
-        width, height = invalid_width_and_height
-
-        @subject.public_send(attribute_name).attach attachment_for(width, height)
-
-        attachment = @subject.public_send(attribute_name)
-
-        ActiveStorageValidations::Matchers.mock_metadata(attachment, width, height) do
-          @subject.validate
-
-          if @subject.errors.details[attribute_name].any? do |error|
-              error[:error].to_s.include?(expected_error_message)
-            end
-
-            true
-          else
-            @failure_message = <<~FAILURE_MESSAGE
-              Should be invalid attaching an image with aspect \
-              ratio different from #{expected_aspect_ratio}. But it is not.
-            FAILURE_MESSAGE
-            false
-          end
-        end
-      end
-
-      def attachment_for(_width, _height)
-        { io: Tempfile.new('Hello world!'), filename: 'test.png', content_type: 'image/png' }
       end
     end
   end

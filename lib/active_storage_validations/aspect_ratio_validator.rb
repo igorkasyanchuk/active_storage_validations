@@ -11,7 +11,17 @@ module ActiveStorageValidations
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[with].freeze
-    PRECISION = 3
+    NAMED_ASPECT_RATIOS = %i[square portrait landscape].freeze
+    ASPECT_RATIO_REGEX = /is_(\d*)_(\d*)/.freeze
+    ERROR_TYPES = %i[
+      image_metadata_missing
+      aspect_ratio_not_square
+      aspect_ratio_not_portrait
+      aspect_ratio_not_landscape
+      aspect_ratio_is_not
+      aspect_ratio_unknown
+    ].freeze
+    PRECISION = 3.freeze
 
     def check_validity!
       unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
@@ -83,21 +93,20 @@ module ActiveStorageValidations
         errors_options[:aspect_ratio] = flat_options[:with]
         add_error(record, attribute, :aspect_ratio_not_landscape, **errors_options)
 
+      when ASPECT_RATIO_REGEX
+        flat_options[:with] =~ ASPECT_RATIO_REGEX
+        x = $1.to_i
+        y = $2.to_i
+
+        return true if (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
+
+        errors_options[:aspect_ratio] = "#{x}x#{y}"
+        add_error(record, attribute, :aspect_ratio_is_not, **errors_options)
       else
-        if flat_options[:with] =~ /is_(\d*)_(\d*)/
-          x = $1.to_i
-          y = $2.to_i
-
-          return true if (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
-
-          errors_options[:aspect_ratio] = "#{x}x#{y}"
-          add_error(record, attribute, :aspect_ratio_is_not, **errors_options)
-        else
-          errors_options[:aspect_ratio] = flat_options[:with]
-          add_error(record, attribute, :aspect_ratio_unknown, **errors_options)
-        end
+        errors_options[:aspect_ratio] = flat_options[:with]
+        add_error(record, attribute, :aspect_ratio_unknown, **errors_options)
+        return false
       end
-      false
     end
   end
 end

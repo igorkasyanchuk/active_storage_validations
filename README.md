@@ -246,7 +246,7 @@ Very simple example of validation with file attached, content type check and cus
 [![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
 
 ## Test matchers
-Provides RSpec-compatible and Minitest-compatible matchers for testing the validators. Only `attached`, `content_type`, `dimension` and `size` validators currently have their matcher developped.
+Provides RSpec-compatible and Minitest-compatible matchers for testing the validators. Only `aspect_ratio`, `attached`, `content_type`, `dimension` and `size` validators currently have their matcher developped.
 
 ### RSpec
 
@@ -268,6 +268,11 @@ Matcher methods available:
 
 ```ruby
 describe User do
+  # aspect_ratio:
+  # #allowing, #rejecting
+  it { is_expected.to validate_aspect_ratio_of(:avatar).allowing(:square) }
+  it { is_expected.to validate_aspect_ratio_of(:avatar).rejecting(:portrait) }
+
   # attached
   it { is_expected.to validate_attached_of(:avatar) }
 

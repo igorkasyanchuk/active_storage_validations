@@ -35,7 +35,7 @@ module ActiveStorageValidations
       end
 
       def attribute_validator
-        associated_validation = @subject.class.validators_on(@attribute_name).find do |validator|
+        @subject.class.validators_on(@attribute_name).find do |validator|
           validator.class == validator_class
         end
       end
