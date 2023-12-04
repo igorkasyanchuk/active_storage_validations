@@ -34,6 +34,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '2 KB',
+                filename: 'file_2ko',
                 min_size: nil,
                 max_size: '2 KB'
               }
@@ -50,6 +51,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '5 KB',
+                filename: 'file_5ko',
                 min_size: nil,
                 max_size: '2 KB'
               }
@@ -86,6 +88,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '5 KB',
+                filename: 'file_5ko',
                 min_size: nil,
                 max_size: '2 KB'
               }
@@ -110,6 +113,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '1 KB',
+                filename: 'file_1ko',
                 min_size: '7 KB',
                 max_size: nil
               }
@@ -126,6 +130,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '7 KB',
+                filename: 'file_7ko',
                 min_size: '7 KB',
                 max_size: nil
               }
@@ -156,6 +161,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '1 KB',
+                filename: 'file_1ko',
                 min_size: '7 KB',
                 max_size: nil
               }
@@ -192,6 +198,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '1 KB',
+                filename: 'file_1ko',
                 min_size: '2 KB',
                 max_size: '7 KB'
               }
@@ -226,6 +233,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '10 KB',
+                filename: 'file_10ko',
                 min_size: '2 KB',
                 max_size: '7 KB'
               }

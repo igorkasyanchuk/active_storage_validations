@@ -20,7 +20,7 @@ class Size::Validator::Check < ApplicationRecord
   validates :greater_than, size: { greater_than: 7.kilobytes }
   validates :greater_than_or_equal_to, size: { greater_than_or_equal_to: 7.kilobytes }
   validates :between, size: { between: 2.kilobytes..7.kilobytes }
-  
+
   has_one_attached :less_than_proc
   has_one_attached :less_than_or_equal_to_proc
   has_one_attached :greater_than_proc
@@ -31,7 +31,4 @@ class Size::Validator::Check < ApplicationRecord
   validates :greater_than_proc, size: { greater_than: -> (record) { 7.kilobytes } }
   validates :greater_than_or_equal_to_proc, size: { greater_than_or_equal_to: -> (record) { 7.kilobytes } }
   validates :between_proc, size: { between: -> { 2.kilobytes..7.kilobytes } }
-
-  has_one_attached :with_message
-  validates :with_message, size: { less_than_or_equal_to: 5.megabytes, message: 'Custom message' }
 end

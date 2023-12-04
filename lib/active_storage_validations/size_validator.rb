@@ -37,14 +37,12 @@ module ActiveStorageValidations
       return true unless record.send(attribute).attached?
 
       files = Array.wrap(record.send(attribute))
-
-      errors_options = initialize_error_options(options)
-
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
 
       files.each do |file|
-        next if content_size_valid?(file.blob.byte_size, flat_options)
+        next if is_valid?(file.blob.byte_size, flat_options)
 
+        errors_options = initialize_error_options(options, file)
         errors_options[:file_size] = number_to_human_size(file.blob.byte_size)
         errors_options[:min_size] = number_to_human_size(min_size(flat_options))
         errors_options[:max_size] = number_to_human_size(max_size(flat_options))
@@ -58,7 +56,7 @@ module ActiveStorageValidations
 
     private
 
-    def content_size_valid?(file_size, flat_options)
+    def is_valid?(file_size, flat_options)
       return false if file_size < 0
 
       if flat_options[:between].present?

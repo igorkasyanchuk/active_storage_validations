@@ -54,14 +54,16 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
         error: :content_type_invalid,
         validator_type: :content_type,
         authorized_types: 'PNG',
-        content_type: 'text/plain'
+        content_type: 'text/plain',
+        filename: 'bad_dummy_file.png'
       }
     ], proc_avatar: [
      {
        error: :content_type_invalid,
        validator_type: :content_type,
        authorized_types: 'PNG',
-       content_type: 'text/plain'
+       content_type: 'text/plain',
+       filename: 'bad_dummy_file.png'
      }
     ]
 
@@ -473,11 +475,4 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert !e.valid?
     assert_equal e.errors.full_messages, ["Ratio one is not a valid image", 'Proc ratio one is not a valid image']
   end
-end
-
-def image_string_io
-  string_io = StringIO.new().tap {|io| io.binmode }
-  IO.copy_stream(File.open(Rails.root.join('public', 'image_1920x1080.png')), string_io)
-  string_io.rewind
-  { io: string_io, filename: 'image_1920x1080.png', content_type: 'image/png' }
 end
