@@ -24,7 +24,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
         end
 
         describe 'named aspect ratio' do
-          subject { validator_test_class::CheckValidityInvalidNamedAspectRatio.new(params) }
+          subject { validator_test_class::CheckValidityInvalidNamedArgument.new(params) }
 
           it 'raises an error at model initialization' do
             assert_raises(ArgumentError, error_message) { subject }
@@ -32,7 +32,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
         end
 
         describe 'is_x_y aspect ratio' do
-          subject { validator_test_class::CheckValidityInvalidIsXyAspectRatio.new(params) }
+          subject { validator_test_class::CheckValidityInvalidIsXyArgument.new(params) }
 
           it 'raises an error at model initialization' do
             assert_raises(ArgumentError, error_message) { subject }
@@ -52,7 +52,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
 
   describe 'ASPECT_RATIO_REGEX' do
     let(:aspect_ratio_regex) { ActiveStorageValidations::AspectRatioValidator::ASPECT_RATIO_REGEX }
-    let(:accepted_strings) do
+    let(:accepted_is_x_y_strings) do
       %w[
         is_16_9
         is_4_5
@@ -60,7 +60,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
         is_143_100
       ]
     end
-    let(:not_accepted_strings) do
+    let(:not_accepted_is_x_y_strings) do
       %w[
         is__1
         is_5_
@@ -73,12 +73,12 @@ describe ActiveStorageValidations::AspectRatioValidator do
     end
 
     it "accepts ratios like 'is_16_9'" do
-      accepted_strings.each do |accepted_string|
-        _(accepted_string).must_match(aspect_ratio_regex)
+      accepted_is_x_y_strings.each do |accepted_is_x_y_string|
+        _(accepted_is_x_y_string).must_match(aspect_ratio_regex)
       end
 
-      not_accepted_strings.each do |not_accepted_string|
-        _(not_accepted_string).wont_match(aspect_ratio_regex)
+      not_accepted_is_x_y_strings.each do |not_accepted_is_x_y_string|
+        _(not_accepted_is_x_y_string).wont_match(aspect_ratio_regex)
       end
     end
   end

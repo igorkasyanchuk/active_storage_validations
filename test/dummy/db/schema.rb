@@ -78,7 +78,7 @@ ActiveRecord::Schema.define do
     end
   end
 
-  %w(proc_option invalid_named_aspect_ratio invalid_is_xy_aspect_ratio).each do |invalid_case|
+  %w(proc_option invalid_named_argument invalid_is_xy_argument).each do |invalid_case|
     create_table :"aspect_ratio_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
