@@ -2,7 +2,11 @@ tr:
   errors:
     messages:
       content_type_invalid: "geçersiz dosya tipine sahip"
-      file_size_out_of_range: "dosya boyutu %{file_size} gerekli aralık dışında"
+      file_size_not_less_than: "dosya boyutu %{max_size} boyutundan küçük olmalıdır (geçerli boyut %{file_size}'dir)"
+      file_size_not_less_than_or_equal_to: "dosya boyutu %{max_size} değerinden küçük veya ona eşit olmalıdır (geçerli boyut %{file_size}'dir)"
+      file_size_not_greater_than: "dosya boyutu %{min_size} boyutundan büyük olmalıdır (geçerli boyut %{file_size}'dir)"
+      file_size_not_greater_than_or_equal_to: "dosya boyutu %{min_size} değerinden büyük veya eşit olmalıdır (geçerli boyut %{file_size}'dir)"
+      file_size_not_between: "dosya boyutu %{min_size} ile %{max_size} arasında olmalıdır (geçerli boyut %{file_size}'dir)"
       limit_out_of_range: "toplam miktar aralık dışında"
       image_metadata_missing: "geçerli bir imaj değil"
       dimension_min_inclusion: "%{width} x %{height} piksele eşit ya da büyük olmalı"
@@ -20,3 +24,4 @@ tr:
       aspect_ratio_not_landscape: "yatay bir imaj olmalı"
       aspect_ratio_is_not: "%{aspect_ratio} en boy oranına sahip olmalı"
       aspect_ratio_unknown: "bilinmeyen en boy oranı"
+      image_not_processable: "geçerli bir imaj değil"

@@ -2,7 +2,11 @@ it:
   errors:
     messages:
       content_type_invalid: "ha un tipo di contenuto non valido"
-      file_size_out_of_range: "la dimensione del file %{file_size} non è compresa nell’intervallo consentito"
+      file_size_not_less_than: "la dimensione del file deve essere inferiore a %{max_size} (la dimensione attuale è %{file_size})"
+      file_size_not_less_than_or_equal_to: "la dimensione del file deve essere minore o uguale a %{max_size} (la dimensione attuale è %{file_size})"
+      file_size_not_greater_than: "la dimensione del file deve essere maggiore di %{min_size} (la dimensione attuale è %{file_size})"
+      file_size_not_greater_than_or_equal_to: "la dimensione del file deve essere maggiore o uguale a %{min_size} (la dimensione attuale è %{file_size})"
+      file_size_not_between: "la dimensione del file deve essere compresa tra %{min_size} e %{max_size} (la dimensione attuale è %{file_size})"
       limit_out_of_range: "il valore è al di fuori dell’intervallo consentito"
       image_metadata_missing: "non è un'immagine valida"
       dimension_min_inclusion: "deve essere maggiore o uguale a %{width} x %{height} pixel"
@@ -20,3 +24,4 @@ it:
       aspect_ratio_not_landscape: "l’orientamento dell’immagine deve essere orizzontale"
       aspect_ratio_is_not: "deve avere un rapporto altezza / larghezza di %{aspect_ratio}"
       aspect_ratio_unknown: "ha un rapporto altezza / larghezza sconosciuto"
+      image_not_processable: "non è un'immagine valida"

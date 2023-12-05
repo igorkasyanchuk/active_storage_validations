@@ -1,28 +1,45 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/errorable.rb'
+require_relative 'concerns/symbolizable.rb'
+
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
+    include OptionProcUnfolding
+    include Errorable
+    include Symbolizable
+
+    AVAILABLE_CHECKS = %i[with in].freeze
+    ERROR_TYPES = %i[content_type_invalid].freeze
+
+    def check_validity!
+      unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
+        raise ArgumentError, 'You must pass either :with or :in to the validator'
+      end
+    end
+
     def validate_each(record, attribute, _value)
-      return true if !record.send(attribute).attached? || types.empty?
+      return true unless record.send(attribute).attached?
+
+      types = authorized_types(record)
+      return true if types.empty?
 
       files = Array.wrap(record.send(attribute))
 
-      errors_options = { authorized_types: types_to_human_format }
-      errors_options[:message] = options[:message] if options[:message].present?
-
       files.each do |file|
-        next if is_valid?(file)
+        next if is_valid?(file, types)
 
+        errors_options = initialize_error_options(options, file)
+        errors_options[:authorized_types] = types_to_human_format(types)
         errors_options[:content_type] = content_type(file)
-        record.errors.add(attribute, :content_type_invalid, **errors_options)
+        add_error(record, attribute, ERROR_TYPES.first, **errors_options)
         break
       end
     end
 
-    def types
-      return @types if defined? @types
-
-      @types = (Array.wrap(options[:with]) + Array.wrap(options[:in])).compact.map do |type|
+    def authorized_types(record)
+      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+      (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).compact.map do |type|
         if type.is_a?(Regexp)
           type
         else
@@ -31,7 +48,7 @@ module ActiveStorageValidations
       end
     end
 
-    def types_to_human_format
+    def types_to_human_format(types)
       types
         .map { |type| type.to_s.split('/').last.upcase }
         .join(', ')
@@ -41,7 +58,7 @@ module ActiveStorageValidations
       file.blob.present? && file.blob.content_type
     end
 
-    def is_valid?(file)
+    def is_valid?(file, types)
       file_type = content_type(file)
       types.any? do |type|
         type == file_type || (type.is_a?(Regexp) && type.match?(file_type.to_s))

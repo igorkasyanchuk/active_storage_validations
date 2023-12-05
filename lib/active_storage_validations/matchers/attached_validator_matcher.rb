@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/contextable.rb'
+require_relative 'concerns/messageable.rb'
+require_relative 'concerns/validatable.rb'
+
 module ActiveStorageValidations
   module Matchers
     def validate_attached_of(name)
@@ -7,6 +12,11 @@ module ActiveStorageValidations
     end
 
     class AttachedValidatorMatcher
+      include ActiveStorageable
+      include Contextable
+      include Messageable
+      include Validatable
+
       def initialize(attribute_name)
         @attribute_name = attribute_name
       end
@@ -17,7 +27,12 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods && valid_when_attached && invalid_when_not_attached
+
+        is_a_valid_active_storage_attribute? &&
+          is_context_valid? &&
+          is_valid_when_file_attached? &&
+          is_invalid_when_file_not_attached? &&
+          is_custom_message_valid?
       end
 
       def failure_message
@@ -30,29 +45,44 @@ module ActiveStorageValidations
 
       private
 
-      def responds_to_methods
-        @subject.respond_to?(@attribute_name) &&
-          @subject.public_send(@attribute_name).respond_to?(:attach) &&
-          @subject.public_send(@attribute_name).respond_to?(:detach)
+      def is_valid_when_file_attached?
+        attach_dummy_file unless file_attached?
+        validate
+        is_valid?
       end
 
-      def valid_when_attached
-        @subject.public_send(@attribute_name).attach(attachable) unless @subject.public_send(@attribute_name).attached?
-        @subject.validate
-        @subject.errors.details[@attribute_name].exclude?(error: :blank)
+      def is_invalid_when_file_not_attached?
+        detach_file if file_attached?
+        validate
+        !is_valid?
       end
 
-      def invalid_when_not_attached
+      def is_custom_message_valid?
+        return true unless @custom_message
+
+        detach_file if file_attached?
+        validate
+        has_an_error_message_which_is_custom_message?
+      end
+
+      def attach_dummy_file
+        dummy_file = {
+          io: Tempfile.new('.'),
+          filename: 'dummy.txt',
+          content_type: 'text/plain'
+        }
+
+        @subject.public_send(@attribute_name).attach(dummy_file)
+      end
+
+      def file_attached?
+        @subject.public_send(@attribute_name).attached?
+      end
+
+      def detach_file
         @subject.public_send(@attribute_name).detach
         # Unset the direct relation since `detach` on an unpersisted record does not set `attached?` to false.
         @subject.public_send("#{@attribute_name}=", nil)
-
-        @subject.validate
-        @subject.errors.details[@attribute_name].include?(error: :blank)
-      end
-
-      def attachable
-        { io: Tempfile.new('.'), filename: 'dummy.txt', content_type: 'text/plain' }
       end
     end
   end

@@ -2,7 +2,11 @@ ja:
   errors:
     messages:
       content_type_invalid: "のContent Typeが不正です"
-      file_size_out_of_range: "の容量 %{file_size} が許容範囲外です"
+      file_size_not_less_than: "ファイル サイズは %{max_size} 未満にする必要があります (現在のサイズは %{file_size})"
+      file_size_not_less_than_or_equal_to: "ファイル サイズは %{max_size} 以下である必要があります (現在のサイズは %{file_size})"
+      file_size_not_greater_than: "ファイル サイズは %{min_size} より大きい必要があります (現在のサイズは %{file_size} です)"
+      file_size_not_greater_than_or_equal_to: "ファイル サイズは %{min_size} 以上である必要があります (現在のサイズは %{file_size})"
+      file_size_not_between: "ファイル サイズは %{min_size} から %{max_size} の間でなければなりません (現在のサイズは %{file_size} です)"
       limit_out_of_range: "の数が許容範囲外です"
       image_metadata_missing: "は不正な画像です"
       dimension_min_inclusion: "は %{width} x %{height} ピクセル以上の大きさにしてください"
@@ -20,3 +24,4 @@ ja:
       aspect_ratio_not_landscape: "は横長にしてください"
       aspect_ratio_is_not: "のアスペクト比は %{aspect_ratio} にしてください"
       aspect_ratio_unknown: "のアスペクト比を取得できませんでした"
+      image_not_processable: "は不正な画像です"

@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module ActiveStorageValidations
-  VERSION = '0.9.8'
+  VERSION = '1.1.3'
 end

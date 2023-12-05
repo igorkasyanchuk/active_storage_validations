@@ -2,7 +2,11 @@ pt-BR:
   errors:
     messages:
       content_type_invalid: "tem um tipo de arquivo inválido"
-      file_size_out_of_range: "tem tamanho %{file_size} e está fora da faixa de tamanho válida"
+      file_size_not_less_than: "o tamanho do arquivo deve ser menor que %{max_size} (o tamanho atual é %{file_size})"
+      file_size_not_less_than_or_equal_to: "o tamanho do arquivo deve ser menor ou igual a %{max_size} (o tamanho atual é %{file_size})"
+      file_size_not_greater_than: "o tamanho do arquivo deve ser maior que %{min_size} (o tamanho atual é %{file_size})"
+      file_size_not_greater_than_or_equal_to: "o tamanho do arquivo deve ser maior ou igual a %{min_size} (o tamanho atual é %{file_size})"
+      file_size_not_between: "o tamanho do arquivo deve estar entre %{min_size} e %{max_size} (o tamanho atual é %{file_size})"
       limit_out_of_range: "o número total está fora do limite"
       image_metadata_missing: "não é uma imagem válida"
       dimension_min_inclusion: "deve ser maior ou igual a %{width} x %{height} pixels"
@@ -20,3 +24,4 @@ pt-BR:
       aspect_ratio_not_landscape: "não está no formato paisagem"
       aspect_ratio_is_not: "não contém uma proporção de %{aspect_ratio}"
       aspect_ratio_unknown: "não tem uma proporção definida"
+      image_not_processable: "não é uma imagem válida"

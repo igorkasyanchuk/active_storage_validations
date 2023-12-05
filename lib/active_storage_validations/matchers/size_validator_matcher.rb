@@ -2,6 +2,12 @@
 
 # Big thank you to the paperclip validation matchers:
 # https://github.com/thoughtbot/paperclip/blob/v6.1.0/lib/paperclip/matchers/validate_attachment_size_matcher.rb
+
+require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/contextable.rb'
+require_relative 'concerns/messageable.rb'
+require_relative 'concerns/validatable.rb'
+
 module ActiveStorageValidations
   module Matchers
     def validate_size_of(name)
@@ -9,9 +15,14 @@ module ActiveStorageValidations
     end
 
     class SizeValidatorMatcher
+      include ActiveStorageable
+      include Contextable
+      include Messageable
+      include Validatable
+
       def initialize(attribute_name)
         @attribute_name = attribute_name
-        @low = @high = nil
+        @min = @max = nil
       end
 
       def description
@@ -19,74 +30,106 @@ module ActiveStorageValidations
       end
 
       def less_than(size)
-        @high = size - 1.byte
+        @max = size - 1.byte
         self
       end
 
       def less_than_or_equal_to(size)
-        @high = size
+        @max = size
         self
       end
 
       def greater_than(size)
-        @low = size + 1.byte
+        @min = size + 1.byte
         self
       end
 
       def greater_than_or_equal_to(size)
-        @low = size
+        @min = size
         self
       end
 
       def between(range)
-        @low, @high = range.first, range.last
+        @min, @max = range.first, range.last
         self
       end
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods && lower_than_low? && higher_than_low? && lower_than_high? && higher_than_high?
+
+        is_a_valid_active_storage_attribute? &&
+          is_context_valid? &&
+          not_lower_than_min? &&
+          higher_than_min? &&
+          lower_than_max? &&
+          not_higher_than_max? &&
+          is_custom_message_valid?
       end
 
       def failure_message
-        "is expected to validate file size of #{@attribute_name} to be between #{@low} and #{@high} bytes"
+        "is expected to validate file size of #{@attribute_name} to be between #{@min} and #{@max} bytes"
       end
 
       def failure_message_when_negated
-        "is expected to not validate file size of #{@attribute_name} to be between #{@low} and #{@high} bytes"
+        "is expected to not validate file size of #{@attribute_name} to be between #{@min} and #{@max} bytes"
       end
 
       protected
 
-      def responds_to_methods
-        @subject.respond_to?(@attribute_name) &&
-          @subject.public_send(@attribute_name).respond_to?(:attach) &&
-          @subject.public_send(@attribute_name).respond_to?(:detach)
+      def not_lower_than_min?
+        @min.nil? || !passes_validation_with_size(@min - 1)
       end
 
-      def lower_than_low?
-        @low.nil? || !passes_validation_with_size(@low - 1)
+      def higher_than_min?
+        @min.nil? || passes_validation_with_size(@min + 1)
       end
 
-      def higher_than_low?
-        @low.nil? || passes_validation_with_size(@low + 1)
+      def lower_than_max?
+        @max.nil? || @max == Float::INFINITY || passes_validation_with_size(@max - 1)
       end
 
-      def lower_than_high?
-        @high.nil? || @high == Float::INFINITY || passes_validation_with_size(@high - 1)
+      def not_higher_than_max?
+        @max.nil? || @max == Float::INFINITY || !passes_validation_with_size(@max + 1)
       end
 
-      def higher_than_high?
-        @high.nil? || @high == Float::INFINITY || !passes_validation_with_size(@high + 1)
-      end
-
-      def passes_validation_with_size(new_size)
-        io = Tempfile.new('Hello world!')
-        Matchers.stub_method(io, :size, new_size) do
-          @subject.public_send(@attribute_name).attach(io: io, filename: 'test.png', content_type: 'image/pg')
-          @subject.validate
-          @subject.errors.details[@attribute_name].all? { |error| error[:error] != :file_size_out_of_range }
+      def passes_validation_with_size(size)
+        mock_size_for(io, size) do
+          attach_file
+          validate
+          is_valid?
         end
+      end
+
+      def is_custom_message_valid?
+        return true unless @custom_message
+
+        mock_size_for(io, -1.kilobytes) do
+          attach_file
+          validate
+          has_an_error_message_which_is_custom_message?
+        end
+      end
+
+      def mock_size_for(io, size)
+        Matchers.stub_method(io, :size, size) do
+          yield
+        end
+      end
+
+      def attach_file
+        @subject.public_send(@attribute_name).attach(dummy_file)
+      end
+
+      def dummy_file
+        {
+          io: io,
+          filename: 'test.png',
+          content_type: 'image/png'
+        }
+      end
+
+      def io
+        @io ||= Tempfile.new('Hello world!')
       end
     end
   end

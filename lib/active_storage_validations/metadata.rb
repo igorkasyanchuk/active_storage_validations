@@ -1,5 +1,7 @@
 module ActiveStorageValidations
   class Metadata
+    class InvalidImageError < StandardError; end
+
     attr_reader :file
 
     def initialize(file)
@@ -10,7 +12,7 @@ module ActiveStorageValidations
     def image_processor
       Rails.application.config.active_storage.variant_processor
     end
-    
+
     def exception_class
       if image_processor == :vips && defined?(Vips)
         Vips::Error
@@ -35,6 +37,16 @@ module ActiveStorageValidations
           { width: image.width, height: image.height }
         end
       end
+    rescue InvalidImageError
+      logger.info "Skipping image analysis because ImageMagick or Vips doesn't support the file"
+      {}
+    end
+
+    def valid?
+      read_image
+      true
+    rescue InvalidImageError
+      false
     end
 
     private
@@ -63,25 +75,15 @@ module ActiveStorageValidations
         tempfile.flush
         tempfile.rewind
 
-        image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(tempfile.path).downcase)
-                  Vips::Image.new_from_file(tempfile.path)
-                elsif defined?(MiniMagick)
-                  MiniMagick::Image.new(tempfile.path)
-                end
+        image = new_image_from_path(tempfile.path)
       else
-        image = if image_processor == :vips && defined?(Vips) && Vips::get_suffixes.include?(File.extname(read_file_path).downcase)
-                  Vips::Image.new_from_file(read_file_path)
-                elsif defined?(MiniMagick)
-                  MiniMagick::Image.new(read_file_path)
-                end
+        file_path = read_file_path
+        image = new_image_from_path(file_path)
       end
 
-      if image && valid_image?(image)
-        yield image
-      else
-        logger.info "Skipping image analysis because ImageMagick or Vips doesn't support the file"
-        {}
-      end
+
+      raise InvalidImageError unless valid_image?(image)
+      yield image if block_given?
     rescue LoadError, NameError
       logger.info "Skipping image analysis because the mini_magick or ruby-vips gem isn't installed"
       {}
@@ -92,7 +94,17 @@ module ActiveStorageValidations
       image = nil
     end
 
+    def new_image_from_path(path)
+      if image_processor == :vips && defined?(Vips) && (Vips::get_suffixes.include?(File.extname(path).downcase) || !Vips::respond_to?(:vips_foreign_get_suffixes))
+        Vips::Image.new_from_file(path)
+      elsif defined?(MiniMagick)
+        MiniMagick::Image.new(path)
+      end
+    end
+
     def valid_image?(image)
+      return false unless image
+
       image_processor == :vips && image.is_a?(Vips::Image) ? image.avg : image.valid?
     rescue exception_class
       false
@@ -114,7 +126,18 @@ module ActiveStorageValidations
       when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
         file.path
       when Hash
-        File.open(file.fetch(:io)).path
+        io = file.fetch(:io)
+        if io.is_a?(StringIO)
+          tempfile = Tempfile.new([File.basename(file[:filename], '.*'), File.extname(file[:filename])])
+          tempfile.binmode
+          IO.copy_stream(io, tempfile)
+          io.rewind
+          tempfile.flush
+          tempfile.rewind
+          tempfile.path
+        else
+          File.open(io).path
+        end
       else
         raise "Something wrong with params."
       end

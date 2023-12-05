@@ -2,7 +2,11 @@ ru:
   errors:
     messages:
       content_type_invalid: "имеет недопустимый тип содержимого"
-      file_size_out_of_range: "размер %{file_size} больше требуемого"
+      file_size_not_less_than: "размер файла должен быть меньше %{max_size} (текущий размер %{file_size})"
+      file_size_not_less_than_or_equal_to: "размер файла должен быть меньше или равен %{max_size} (текущий размер %{file_size})"
+      file_size_not_greater_than: "размер файла должен быть больше %{min_size} (текущий размер %{file_size})"
+      file_size_not_greater_than_or_equal_to: "размер файла должен быть больше или равен %{min_size} (текущий размер %{file_size})"
+      file_size_not_between: "размер файла должен быть между %{min_size} и %{max_size} (текущий размер %{file_size})"
       limit_out_of_range: "количество файлов больше требуемого"
       image_metadata_missing: "не является допустимым изображением"
       dimension_min_inclusion: "должен быть больше или равно %{width} x %{height} пикселям"
@@ -20,3 +24,4 @@ ru:
       aspect_ratio_not_landscape: "должно быть пейзажное изображение"
       aspect_ratio_is_not: "должен иметь соотношение сторон %{aspect_ratio}"
       aspect_ratio_unknown: "имеет неизвестное соотношение сторон"
+      image_not_processable: "не является допустимым изображением"

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'active_storage_validations/matchers/aspect_ratio_validator_matcher'
 require 'active_storage_validations/matchers/attached_validator_matcher'
 require 'active_storage_validations/matchers/content_type_validator_matcher'
 require 'active_storage_validations/matchers/dimension_validator_matcher'

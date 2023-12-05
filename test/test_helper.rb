@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+require 'simplecov'
+SimpleCov.start
+
+# Previous content of test helper now starts here
+
 # Configure Rails Environment
 ENV['RAILS_ENV'] = 'test'
 
@@ -14,6 +19,8 @@ end
 # Load other test helpers
 require 'rails/test_help'
 require 'minitest/mock'
+require 'minitest/spec'
+require 'minitest/focus'
 
 # Filter out Minitest backtrace while allowing backtrace from other libraries
 # to be shown.
@@ -29,5 +36,10 @@ if ActiveSupport::TestCase.respond_to?(:fixture_path=)
   ActiveSupport::TestCase.file_fixture_path = ActiveSupport::TestCase.fixture_path + '/files'
   ActiveSupport::TestCase.fixtures :all
 end
+
+# Load test support files
+Dir[File.join('test/support/*.rb')].map { |path| path.sub('test/', '') }.each { |f| require f }
+Dir[File.join('test/matchers/support/*.rb')].map { |path| path.sub('test/', '') }.each { |f| require f }
+Dir[File.join('test/validators/support/*.rb')].map { |path| path.sub('test/', '') }.each { |f| require f }
 
 puts "Running tests with Rails v.#{Rails.version}"

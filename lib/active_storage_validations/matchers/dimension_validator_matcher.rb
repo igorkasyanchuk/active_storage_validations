@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/contextable.rb'
+require_relative 'concerns/messageable.rb'
+require_relative 'concerns/validatable.rb'
+
 module ActiveStorageValidations
   module Matchers
     def validate_dimensions_of(name)
@@ -7,10 +12,14 @@ module ActiveStorageValidations
     end
 
     class DimensionValidatorMatcher
+      include ActiveStorageable
+      include Contextable
+      include Messageable
+      include Validatable
+
       def initialize(attribute_name)
         @attribute_name = attribute_name
         @width_min = @width_max = @height_min = @height_max = nil
-        @custom_message = nil
       end
 
       def description
@@ -24,11 +33,6 @@ module ActiveStorageValidations
 
       def width_max(width)
         @width_max = width
-        self
-      end
-
-      def with_message(message)
-        @custom_message = message
         self
       end
 
@@ -64,9 +68,20 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        responds_to_methods &&
-          width_smaller_than_min? && width_larger_than_min? && width_smaller_than_max? && width_larger_than_max? && width_equals? &&
-          height_smaller_than_min? && height_larger_than_min? && height_smaller_than_max? && height_larger_than_max? && height_equals?
+
+        is_a_valid_active_storage_attribute? &&
+          is_context_valid? &&
+          width_not_smaller_than_min? &&
+          width_larger_than_min? &&
+          width_smaller_than_max? &&
+          width_not_larger_than_max? &&
+          width_equals? &&
+          height_not_smaller_than_min? &&
+          height_larger_than_min? &&
+          height_smaller_than_max? &&
+          height_not_larger_than_max? &&
+          height_equals? &&
+          is_custom_message_valid?
       end
 
       def failure_message
@@ -79,12 +94,6 @@ module ActiveStorageValidations
 
       protected
 
-      def responds_to_methods
-        @subject.respond_to?(@attribute_name) &&
-          @subject.public_send(@attribute_name).respond_to?(:attach) &&
-          @subject.public_send(@attribute_name).respond_to?(:detach)
-      end
-
       def valid_width
         ((@width_min || 0) + (@width_max || 2000)) / 2
       end
@@ -93,7 +102,7 @@ module ActiveStorageValidations
         ((@height_min || 0) + (@height_max || 2000)) / 2
       end
 
-      def width_smaller_than_min?
+      def width_not_smaller_than_min?
         @width_min.nil? || !passes_validation_with_dimensions(@width_min - 1, valid_height, 'width')
       end
 
@@ -105,7 +114,7 @@ module ActiveStorageValidations
         @width_max.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_max - 1, valid_height, 'width')
       end
 
-      def width_larger_than_max?
+      def width_not_larger_than_max?
         @width_max.nil? || !passes_validation_with_dimensions(@width_max + 1, valid_height, 'width')
       end
 
@@ -113,7 +122,7 @@ module ActiveStorageValidations
         @width_min.nil? || @width_min != @width_max || passes_validation_with_dimensions(@width_min, valid_height, 'width')
       end
 
-      def height_smaller_than_min?
+      def height_not_smaller_than_min?
         @height_min.nil? || !passes_validation_with_dimensions(valid_width, @height_min - 1, 'height')
       end
 
@@ -125,7 +134,7 @@ module ActiveStorageValidations
         @height_max.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_max - 1, 'height')
       end
 
-      def height_larger_than_max?
+      def height_not_larger_than_max?
         @height_max.nil? || !passes_validation_with_dimensions(valid_width, @height_max + 1, 'height')
       end
 
@@ -134,18 +143,38 @@ module ActiveStorageValidations
       end
 
       def passes_validation_with_dimensions(width, height, check)
-        @subject.public_send(@attribute_name).attach attachment_for(width, height)
-
-        attachment = @subject.public_send(@attribute_name)
-        Matchers.mock_metadata(attachment, width, height) do
-          @subject.validate
-          exclude_error_message = @custom_message || "dimension_#{check}"
-          @subject.errors.details[@attribute_name].all? { |error| error[:error].to_s.exclude?(exclude_error_message) }
+        mock_dimensions_for(attach_file, width, height) do
+          validate
+          is_valid?
         end
       end
 
-      def attachment_for(width, height)
-        { io: Tempfile.new('Hello world!'), filename: 'test.png', content_type: 'image/png' }
+      def is_custom_message_valid?
+        return true unless @custom_message
+
+        mock_dimensions_for(attach_file, -1, -1) do
+          validate
+          has_an_error_message_which_is_custom_message?
+        end
+      end
+
+      def mock_dimensions_for(attachment, width, height)
+        Matchers.mock_metadata(attachment, width, height) do
+          yield
+        end
+      end
+
+      def attach_file
+        @subject.public_send(@attribute_name).attach(dummy_file)
+        @subject.public_send(@attribute_name)
+      end
+
+      def dummy_file
+        {
+          io: Tempfile.new('Hello world!'),
+          filename: 'test.png',
+          content_type: 'image/png'
+        }
       end
     end
   end

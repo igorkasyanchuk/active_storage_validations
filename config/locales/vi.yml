@@ -2,7 +2,11 @@ vi:
   errors:
     messages:
       content_type_invalid: "tệp không hợp lệ"
-      file_size_out_of_range: "kích thước %{file_size} vượt giới hạn"
+      file_size_not_less_than: "kích thước tệp phải nhỏ hơn %{max_size} (kích thước hiện tại là %{file_size})"
+      file_size_not_less_than_or_equal_to: "kích thước tệp phải nhỏ hơn hoặc bằng %{max_size} (kích thước hiện tại là %{file_size})"
+      file_size_not_greater_than: "kích thước tệp phải lớn hơn %{min_size} (kích thước hiện tại là %{file_size})"
+      file_size_not_greater_than_or_equal_to: "kích thước tệp phải lớn hơn hoặc bằng %{min_size} (kích thước hiện tại là %{file_size})"
+      file_size_not_between: "kích thước tệp phải nằm trong khoảng từ %{min_size} đến %{max_size} (kích thước hiện tại là %{file_size})"
       limit_out_of_range: "tổng số tệp vượt giới hạn"
       image_metadata_missing: "không phải là ảnh"
       dimension_min_inclusion: "phải lớn hơn hoặc bằng %{width} x %{height} pixel"
@@ -20,3 +24,4 @@ vi:
       aspect_ratio_not_landscape: "phải là ảnh ngang"
       aspect_ratio_is_not: "phải có tỉ lệ ảnh %{aspect_ratio}"
       aspect_ratio_unknown: "tỉ lệ ảnh không xác định"
+      image_not_processable: "không phải là ảnh"
