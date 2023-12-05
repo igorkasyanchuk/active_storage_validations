@@ -22,7 +22,7 @@ module ChecksValidatorValidity
     describe 'when the validator has an invalid check' do
       subject { validator_test_class::CheckValidityInvalidCheck.new(params) }
 
-      it 'raises an error at model iniliaziation' do
+      it 'raises an error at model initialization' do
         assert_raises(ArgumentError, error_message) { subject }
       end
     end
@@ -30,7 +30,7 @@ module ChecksValidatorValidity
     describe 'when the validator does not have checks' do
       subject { validator_test_class::CheckValidityNoCheck.new(params) }
 
-      it 'raises an error at model iniliaziation' do
+      it 'raises an error at model initialization' do
         assert_raises(ArgumentError, error_message) { subject }
       end
     end
@@ -39,7 +39,7 @@ module ChecksValidatorValidity
       describe 'when the validator has several checks' do
         subject { validator_test_class::CheckValiditySeveralChecks.new(params) }
 
-        it 'raises an error at model iniliaziation' do
+        it 'raises an error at model initialization' do
           assert_raises(ArgumentError, error_message) { subject }
         end
       end
