@@ -88,6 +88,8 @@ GEM
     minitest-focus (1.4.0)
       minitest (>= 4, < 6)
     mutex_m (0.2.0)
+    nokogiri (1.15.5-arm64-darwin)
+      racc (~> 1.4)
     nokogiri (1.15.5-x86_64-darwin)
       racc (~> 1.4)
     nokogiri (1.15.5-x86_64-linux)
@@ -156,6 +158,7 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
+    sqlite3 (1.6.8-arm64-darwin)
     sqlite3 (1.6.8-x86_64-darwin)
     sqlite3 (1.6.8-x86_64-linux)
     stringio (3.0.9)
@@ -168,6 +171,7 @@ GEM
     zeitwerk (2.6.12)
 
 PLATFORMS
+  arm64-darwin-22
   x86_64-darwin-21
   x86_64-linux
 

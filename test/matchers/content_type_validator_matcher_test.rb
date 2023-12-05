@@ -110,43 +110,47 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     let(:model_attribute) { :allowing_one }
     let(:allowed_type) { 'image/png' }
 
-    describe 'when provided with the exact allowed type' do
-      subject { matcher.rejecting(allowed_type) }
+    describe 'one' do
+      describe 'when provided with the exact allowed type' do
+        subject { matcher.rejecting(allowed_type) }
 
-      it { is_expected_not_to_match_for(klass) }
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe 'when provided with any type but the allowed type' do
+        subject { matcher.rejecting(any_type) }
+
+        let(:any_type) { 'video/mkv' }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      describe 'when provided with something that is not a valid type' do
+        subject { matcher.rejecting(not_valid_type) }
+
+        let(:not_valid_type) { 'not_valid' }
+
+        it { is_expected_to_match_for(klass) }
+      end
     end
 
-    describe 'when provided with any type but the allowed type' do
-      subject { matcher.rejecting(any_type) }
+    describe 'several' do
+      describe 'when provided with any types but the allowed type' do
+        subject { matcher.rejecting(*any_types) }
 
-      let(:any_type) { 'video/mkv' }
+        let(:any_types) { ['video/mkv', 'image/gif'] }
 
-      it { is_expected_to_match_for(klass) }
-    end
+        it { is_expected_to_match_for(klass) }
+      end
 
-    describe 'when provided with any types but the allowed type' do
-      subject { matcher.rejecting(*any_types) }
+      describe 'when provided with any types and the allowed type' do
+        subject { matcher.rejecting(*types) }
 
-      let(:any_types) { ['video/mkv', 'image/gif'] }
+        let(:any_types) { ['video/mkv', 'image/gif'] }
+        let(:types) { any_types + [allowed_type] }
 
-      it { is_expected_to_match_for(klass) }
-    end
-
-    describe 'when provided with any types and the allowed type' do
-      subject { matcher.rejecting(*types) }
-
-      let(:any_types) { ['video/mkv', 'image/gif'] }
-      let(:types) { any_types + [allowed_type] }
-
-      it { is_expected_not_to_match_for(klass) }
-    end
-
-    describe 'when provided with something that is not a valid type' do
-      subject { matcher.rejecting(not_valid_type) }
-
-      let(:not_valid_type) { 'not_valid' }
-
-      it { is_expected_to_match_for(klass) }
+        it { is_expected_not_to_match_for(klass) }
+      end
     end
   end
 

@@ -7,6 +7,7 @@ module WorksWithCustomMessage
     describe 'when provided with the other validator requirements' do
       before do
         case validator_sym
+        when :aspect_ratio then matcher.allowing(:square)
         when :attached then nil
         when :content_type then matcher.allowing('image/png')
         when :dimension then matcher.width(150).height(150)
