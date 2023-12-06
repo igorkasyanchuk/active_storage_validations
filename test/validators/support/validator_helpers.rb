@@ -52,6 +52,11 @@ module ValidatorHelpers
     end
   end
 
+  def assert_nothing_raised
+    # Just a placeholder to make reading easier
+    yield
+  end
+
   def validator_class
     "ActiveStorageValidations::#{subject.class.name.sub(/::/, '').sub(/::.+/, '')}".constantize
   end

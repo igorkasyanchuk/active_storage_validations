@@ -463,7 +463,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.image1.attach(image_150x150_file)
     e.proc_image1.attach(image_150x150_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Image1 must have an aspect ratio of 16x9", 'Proc image1 must have an aspect ratio of 16x9']
+    assert_equal e.errors.full_messages, ["Image1 must have an aspect ratio of 16:9", 'Proc image1 must have an aspect ratio of 16:9']
 
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(html_file)
