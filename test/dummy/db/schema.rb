@@ -85,6 +85,13 @@ ActiveRecord::Schema.define do
     end
   end
 
+  %w(proc_option invalid_content_type).each do |invalid_case|
+    create_table :"content_type_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
+      t.datetime :created_at, null: false
+      t.datetime :updated_at, null: false
+    end
+  end
+
   create_table :documents, force: :cascade do |t|
     t.datetime :created_at, precision: 6, null: false
     t.datetime :updated_at, precision: 6, null: false

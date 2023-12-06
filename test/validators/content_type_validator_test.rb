@@ -12,6 +12,32 @@ describe ActiveStorageValidations::ContentTypeValidator do
 
   describe '#check_validity!' do
     include ChecksValidatorValidity
+
+    describe 'content type validity' do
+      describe 'when the passed option is an invalid content type' do
+        subject { validator_test_class::CheckValidityInvalidContentType.new(params) }
+
+        let(:error_message) do
+          <<~ERROR_MESSAGE
+            You must pass valid content types to the validator
+            '#{invalid_content_type.to_s}' is not find in Marcel::EXTENSIONS mimes
+          ERROR_MESSAGE
+        end
+        let(:invalid_content_type) { :invalid }
+
+        it 'raises an error at model initialization' do
+          assert_raises(ArgumentError, error_message) { subject }
+        end
+      end
+
+      describe 'when the passed option is a Proc' do
+        subject { validator_test_class::CheckValidityProcOption.new(params) }
+
+        it 'does not perform a check, and therefore is valid' do
+          assert_nothing_raised { subject }
+        end
+      end
+    end
   end
 
   describe 'Validator checks' do
@@ -25,9 +51,9 @@ describe ActiveStorageValidations::ContentTypeValidator do
       # validates :with_symbol_proc, content_type: -> (record) { :png }
       # validates :with_regex_proc, content_type: -> (record) { /\Aimage\/.*\z/ }
       %w(value proc).each do |value_type|
-        describe "#{value_type}" do
+        describe value_type do
           %w(string symbol regex).each do |type|
-            describe "#{type}" do
+            describe type do
               let(:attribute) { :"with_#{type}#{'_proc' if value_type == 'proc'}" }
 
               describe 'when provided with an allowed type file' do
