@@ -126,6 +126,22 @@ def pages_file
   }
 end
 
+def png_file
+  {
+    io: File.open(Rails.root.join('public', 'example.png')),
+    filename: 'example.png',
+    content_type: 'image/png'
+  }
+end
+
+def gif_file
+  {
+    io: File.open(Rails.root.join('public', 'example.gif')),
+    filename: 'example.gif',
+    content_type: 'image/gif'
+  }
+end
+
 def numbers_file
   {
     io: File.open(Rails.root.join('public', 'example.numbers')),

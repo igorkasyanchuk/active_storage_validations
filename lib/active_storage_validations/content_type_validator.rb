@@ -50,7 +50,7 @@ module ActiveStorageValidations
 
     def types_to_human_format(types)
       types
-        .map { |type| type.to_s.split('/').last.upcase }
+        .map { |type| type.is_a?(Regexp) ? type.source : type.to_s.split('/').last.upcase }
         .join(', ')
     end
 
