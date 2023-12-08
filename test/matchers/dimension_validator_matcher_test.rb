@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
+require 'matchers/shared_examples/works_with_allow_blank'
 require 'matchers/shared_examples/works_with_both_instance_and_class'
 require 'matchers/shared_examples/works_with_context'
 require 'matchers/shared_examples/works_with_custom_message'
@@ -319,6 +320,10 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
         include DimensionValidatorMatcherTest::OnlyMatchWhenExactValue
       end
     end
+  end
+
+  describe "#allow_blank" do
+    include WorksWithAllowBlank
   end
 
   describe '#with_message' do

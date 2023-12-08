@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
+require 'matchers/shared_examples/works_with_allow_blank'
 require 'matchers/shared_examples/works_with_both_instance_and_class'
 require 'matchers/shared_examples/works_with_context'
 require 'matchers/shared_examples/works_with_custom_message'
@@ -14,19 +15,19 @@ module SizeValidatorMatcherTest
       describe 'standard validator' do
         describe 'when provided with a lower size than the size specified in the model validations' do
           subject { matcher.public_send(matcher_method, 0.5.kilobyte) }
-  
+
           it { is_expected_not_to_match_for(klass) }
         end
-  
+
         describe 'when provided with the exact size specified in the model validations' do
           subject { matcher.public_send(matcher_method, validator_value) }
-  
+
           it { is_expected_to_match_for(klass) }
         end
-  
+
         describe 'when provided with a higher size than the size specified in the model validations' do
           subject { matcher.public_send(matcher_method, 99.kilobytes) }
-  
+
           it { is_expected_not_to_match_for(klass) }
         end
       end
@@ -139,6 +140,10 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
 
       it { is_expected_not_to_match_for(klass) }
     end
+  end
+
+  describe "#allow_blank" do
+    include WorksWithAllowBlank
   end
 
   describe '#with_message' do
