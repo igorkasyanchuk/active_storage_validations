@@ -12,8 +12,10 @@ module ValidatorHelpers
 
     # Rails 6.1.0 changes the form of ActiveModel’s errors collection
     # https://github.com/rails/rails/blob/6-1-stable/activemodel/CHANGELOG.md#rails-610-december-09-2020
-    validator_errors = if Rails.gem_version >= Gem::Version.new('6.1.0')
-      subject.errors.find { |error| error.options[:validator_type] == validator_sym }.options
+    validator_error_options = if Rails.gem_version >= Gem::Version.new('6.1.0')
+      subject.errors.find do |error|
+        error.options[:validator_type] == kwargs[:validator] || validator_sym
+      end.options
     else
       # For errors before Rails 6.1.0 we do not have error options
       return true
@@ -21,8 +23,8 @@ module ValidatorHelpers
 
     assert(
       error_options.all? do |key, _value|
-        validator_errors.has_key?(key) &&
-          value_is_equal_or_both_are_procs?(error_options[key], validator_errors[key])
+        validator_error_options.has_key?(key) &&
+          value_is_equal_or_both_are_procs?(error_options[key], validator_error_options[key])
       end
     )
   end
@@ -33,7 +35,9 @@ module ValidatorHelpers
     # Rails 6.1.0 changes the form of ActiveModel’s errors collection
     # https://github.com/rails/rails/blob/6-1-stable/activemodel/CHANGELOG.md#rails-610-december-09-2020
     validator_error_message = if Rails.gem_version >= Gem::Version.new('6.1.0')
-      subject.errors.find { |error| error.options[:validator_type] == validator_sym }.message
+      subject.errors.find do |error|
+        error.options[:validator_type] == kwargs[:validator] || validator_sym
+      end.message
     else
       # For errors before Rails 6.1.0 we do not have error options
       return true
@@ -62,7 +66,11 @@ module ValidatorHelpers
   end
 
   def validator_sym
-    validator_class.to_sym
+    begin
+      validator_class.to_sym
+    rescue NameError, "uninitialized constant ActiveStorageValidations::IntegrationValidator"
+      raise ArgumentError, "Use the :validator kwarg for this expect method since it could be any validator (integration test file)"
+    end
   end
 
   private

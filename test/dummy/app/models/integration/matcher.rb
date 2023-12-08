@@ -2,7 +2,7 @@
 
 # == Schema Information
 #
-# Table name: dimension_matchers
+# Table name: integration_matchers
 #
 #  id         :integer          not null, primary key
 #  created_at :datetime         not null
