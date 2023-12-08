@@ -33,6 +33,9 @@ class Size::Matcher < ApplicationRecord
   validates :proc_greater_than_or_equal_to, size: { greater_than_or_equal_to: -> (record) { 7.kilobytes } }
   validates :proc_between, size: { between: -> { 2.kilobytes..7.kilobytes } }
 
+  has_one_attached :allow_blank
+  validates :allow_blank, size: { less_than_or_equal_to: 5.megabytes }, allow_blank: true
+
   has_one_attached :with_message
   validates :with_message, size: { less_than_or_equal_to: 5.megabytes, message: 'Custom message' }
 

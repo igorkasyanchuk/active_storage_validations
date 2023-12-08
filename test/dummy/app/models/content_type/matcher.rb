@@ -18,6 +18,9 @@ class ContentType::Matcher < ApplicationRecord
   has_one_attached :allowing_several_through_regex
   validates :allowing_several_through_regex, content_type: [/\Aimage\/.*\z/]
 
+  has_one_attached :allow_blank
+  validates :allow_blank, content_type: ['image/png'], allow_blank: true
+
   has_one_attached :with_message
   validates :with_message, content_type: { in: ['image/png'], message: 'Custom message' }
 

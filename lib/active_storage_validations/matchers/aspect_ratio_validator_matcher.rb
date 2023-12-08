@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/allow_blankable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
 require_relative 'concerns/validatable.rb'
@@ -13,6 +14,7 @@ module ActiveStorageValidations
 
     class AspectRatioValidatorMatcher
       include ActiveStorageable
+      include AllowBlankable
       include Contextable
       include Messageable
       include Validatable
@@ -41,9 +43,10 @@ module ActiveStorageValidations
 
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
+          is_allowing_blank? &&
+          is_custom_message_valid? &&
           all_allowed_aspect_ratios_allowed? &&
-          all_rejected_aspect_ratios_rejected? &&
-          is_custom_message_valid?
+          all_rejected_aspect_ratios_rejected?
       end
 
       def failure_message

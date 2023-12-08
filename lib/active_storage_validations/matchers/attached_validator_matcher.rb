@@ -30,9 +30,9 @@ module ActiveStorageValidations
 
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
+          is_custom_message_valid? &&
           is_valid_when_file_attached? &&
-          is_invalid_when_file_not_attached? &&
-          is_custom_message_valid?
+          is_invalid_when_file_not_attached?
       end
 
       def failure_message

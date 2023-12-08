@@ -331,13 +331,17 @@ end
 ```
 (Note that matcher methods are chainable)
 
-All matchers can currently be customized with 2 Rails validation options:
+All matchers can currently be customized with Rails validation options:
 
 ```ruby
 describe User do
+  # allow_blank
+  it { is_expected.to validate_attached_of(:avatar).allow_blank }
+
   # :on
   it { is_expected.to validate_attached_of(:avatar).on(:update) }
   it { is_expected.to validate_attached_of(:avatar).on(%i[update custom]) }
+
   # :message
   it { is_expected.to validate_dimensions_of(:avatar).width(250).with_message('Invalid dimensions.') }
 end

@@ -41,6 +41,9 @@ class Dimension::Matcher < ApplicationRecord
     validates :"#{bound}_with_message", dimension: { "#{bound}": 800..600, message: 'Invalid dimensions.' }
   end
 
+  has_one_attached :allow_blank
+  validates :allow_blank, dimension: { width: 150, height: 150 }, allow_blank: true
+
   has_one_attached :with_message
   has_one_attached :without_message
   validates :with_message, dimension: { width: 150, height: 150, message: 'Custom message' }

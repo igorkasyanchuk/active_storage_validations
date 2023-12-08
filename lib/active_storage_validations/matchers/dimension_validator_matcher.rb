@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/allow_blankable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
 require_relative 'concerns/validatable.rb'
@@ -13,6 +14,7 @@ module ActiveStorageValidations
 
     class DimensionValidatorMatcher
       include ActiveStorageable
+      include AllowBlankable
       include Contextable
       include Messageable
       include Validatable
@@ -71,6 +73,8 @@ module ActiveStorageValidations
 
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
+          is_allowing_blank? &&
+          is_custom_message_valid? &&
           width_not_smaller_than_min? &&
           width_larger_than_min? &&
           width_smaller_than_max? &&
@@ -80,8 +84,7 @@ module ActiveStorageValidations
           height_larger_than_min? &&
           height_smaller_than_max? &&
           height_not_larger_than_max? &&
-          height_equals? &&
-          is_custom_message_valid?
+          height_equals?
       end
 
       def failure_message

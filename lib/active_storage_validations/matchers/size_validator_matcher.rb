@@ -4,6 +4,7 @@
 # https://github.com/thoughtbot/paperclip/blob/v6.1.0/lib/paperclip/matchers/validate_attachment_size_matcher.rb
 
 require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/allow_blankable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
 require_relative 'concerns/validatable.rb'
@@ -16,6 +17,7 @@ module ActiveStorageValidations
 
     class SizeValidatorMatcher
       include ActiveStorageable
+      include AllowBlankable
       include Contextable
       include Messageable
       include Validatable
@@ -59,11 +61,12 @@ module ActiveStorageValidations
 
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
+          is_allowing_blank? &&
+          is_custom_message_valid? &&
           not_lower_than_min? &&
           higher_than_min? &&
           lower_than_max? &&
-          not_higher_than_max? &&
-          is_custom_message_valid?
+          not_higher_than_max?
       end
 
       def failure_message
