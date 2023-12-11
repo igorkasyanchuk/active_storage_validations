@@ -10,6 +10,10 @@ module ActiveStorageValidations
     include Errorable
     include Symbolizable
 
+    ERROR_TYPES = %i[
+      image_not_processable
+    ].freeze
+
     if Rails.gem_version >= Gem::Version.new('6.0.0')
       def validate_each(record, attribute, _value)
         return true unless record.send(attribute).attached?
@@ -22,7 +26,7 @@ module ActiveStorageValidations
         files.each do |file|
           if !Metadata.new(file).valid?
             errors_options = initialize_error_options(options, file)
-            add_error(record, attribute, :image_not_processable, **errors_options) unless Metadata.new(file).valid?
+            add_error(record, attribute, ERROR_TYPES.first , **errors_options) unless Metadata.new(file).valid?
           end
         end
       end
@@ -36,7 +40,7 @@ module ActiveStorageValidations
         files.each do |file|
           if !Metadata.new(file).valid?
             errors_options = initialize_error_options(options, file)
-            add_error(record, attribute, :image_not_processable, **errors_options) unless Metadata.new(file).valid?
+            add_error(record, attribute, ERROR_TYPES.first , **errors_options) unless Metadata.new(file).valid?
           end
         end
       end

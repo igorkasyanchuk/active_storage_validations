@@ -4,29 +4,18 @@ module ActiveStorageValidations
 
     attr_reader :file
 
+    DEFAULT_IMAGE_PROCESSOR = :mini_magick.freeze
+
     def initialize(file)
       require_image_processor
       @file = file
     end
 
-    def image_processor
-      Rails.application.config.active_storage.variant_processor
-    end
-
-    def exception_class
-      if image_processor == :vips && defined?(Vips)
-        Vips::Error
-      elsif defined?(MiniMagick)
-        MiniMagick::Error
-      end
-    end
-
-    def require_image_processor
-      if image_processor == :vips
-        require 'vips' unless defined?(Vips)
-      else
-        require 'mini_magick' unless defined?(MiniMagick)
-      end
+    def valid?
+      read_image
+      true
+    rescue InvalidImageError
+      false
     end
 
     def metadata
@@ -42,14 +31,31 @@ module ActiveStorageValidations
       {}
     end
 
-    def valid?
-      read_image
-      true
-    rescue InvalidImageError
-      false
+    private
+
+    def image_processor
+      # Rails returns nil for default image processor, because it is set in an after initiliaze callback
+      # https://github.com/rails/rails/blob/89d8569abe2564c8187debf32dd3b4e33d6ad983/activestorage/lib/active_storage/engine.rb
+      Rails.application.config.active_storage.variant_processor || DEFAULT_IMAGE_PROCESSOR
     end
 
-    private
+    def require_image_processor
+      case image_processor
+      when :vips then require 'vips' unless defined?(Vips)
+      when :mini_magick then require 'mini_magick' unless defined?(MiniMagick)
+      end
+    end
+
+    def exception_class
+      case image_processor
+      when :vips then Vips::Error
+      when :mini_magick then MiniMagick::Error
+      end
+    end
+
+    def vips_image_processor?
+      image_processor == :vips
+    end
 
     def read_image
       is_string = file.is_a?(String)
@@ -95,8 +101,16 @@ module ActiveStorageValidations
     end
 
     def new_image_from_path(path)
-      if image_processor == :vips && defined?(Vips) && (Vips::get_suffixes.include?(File.extname(path).downcase) || !Vips::respond_to?(:vips_foreign_get_suffixes))
-        Vips::Image.new_from_file(path)
+      if vips_image_processor? && (Vips::get_suffixes.include?(File.extname(path).downcase) || !Vips::respond_to?(:vips_foreign_get_suffixes))
+        begin
+          Vips::Image.new_from_file(path)
+        rescue exception_class
+          # We handle cases where an error is raised when reading the file
+          # because Vips can throw errors rather than returning false
+          # We stumble upon this issue while reading 0 byte size file
+          # https://github.com/janko/image_processing/issues/97
+          false
+        end
       elsif defined?(MiniMagick)
         MiniMagick::Image.new(path)
       end
@@ -105,13 +119,13 @@ module ActiveStorageValidations
     def valid_image?(image)
       return false unless image
 
-      image_processor == :vips && image.is_a?(Vips::Image) ? image.avg : image.valid?
+      vips_image_processor? && image.is_a?(Vips::Image) ? image.avg : image.valid?
     rescue exception_class
       false
     end
 
     def rotated_image?(image)
-      if image_processor == :vips && image.is_a?(Vips::Image)
+      if vips_image_processor? && image.is_a?(Vips::Image)
         image.get('exif-ifd0-Orientation').include?('Right-top') ||
           image.get('exif-ifd0-Orientation').include?('Left-bottom')
       else
