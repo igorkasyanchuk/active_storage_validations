@@ -335,7 +335,7 @@ All matchers can currently be customized with Rails validation options:
 
 ```ruby
 describe User do
-  # allow_blank
+  # :allow_blank
   it { is_expected.to validate_attached_of(:avatar).allow_blank }
 
   # :on

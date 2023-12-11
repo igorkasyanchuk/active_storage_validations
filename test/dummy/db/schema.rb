@@ -116,6 +116,15 @@ ActiveRecord::Schema.define do
     t.datetime :updated_at, null: false
   end
 
+  %w(
+    zero_byte_image
+  ).each do |integration_test|
+    create_table :"integration_validator_#{integration_test.pluralize}", force: :cascade do |t|
+      t.datetime :created_at, null: false
+      t.datetime :updated_at, null: false
+    end
+  end
+
   create_table :limit_attachments, force: :cascade do |t|
     t.string :name
   end

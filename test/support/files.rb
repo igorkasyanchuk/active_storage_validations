@@ -178,6 +178,14 @@ def image_string_io
   }
 end
 
+def image_file_0ko
+  {
+    io: File.open(Rails.root.join('public', 'image_file_0ko.png')),
+    filename: 'image_file_0ko.png',
+    content_type: 'image/png'
+  }
+end
+
 def file_1ko
   {
     io: File.open(Rails.root.join('public', 'file_1ko')),
