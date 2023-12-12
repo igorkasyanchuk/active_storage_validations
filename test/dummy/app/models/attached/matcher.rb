@@ -25,5 +25,10 @@ class Attached::Matcher < ApplicationRecord
   has_one_attached :as_instance
   validates :as_instance, attached: true
 
+  has_one_attached :failure_message
+  validates :failure_message, attached: true
+  has_one_attached :failure_message_when_negated
+  validates :failure_message_when_negated, attached: true
+
   has_one_attached :not_required
 end

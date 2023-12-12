@@ -57,6 +57,11 @@ class Dimension::Matcher < ApplicationRecord
   has_one_attached :as_instance
   validates :as_instance, dimension: { width: 150, height: 150 }
 
+  has_one_attached :failure_message
+  validates :failure_message, dimension: { width: 150, height: 150 }
+  has_one_attached :failure_message_when_negated
+  validates :failure_message_when_negated, dimension: { width: 150, height: 150 }
+
   # Combinations
   has_one_attached :width_and_height_exact
   has_one_attached :width_and_height_exact_with_message

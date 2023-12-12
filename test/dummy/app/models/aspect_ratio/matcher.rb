@@ -32,6 +32,11 @@ class AspectRatio::Matcher < ApplicationRecord
   has_one_attached :as_instance
   validates :as_instance, aspect_ratio: :square
 
+  has_one_attached :failure_message
+  validates :failure_message, aspect_ratio: :square
+  has_one_attached :failure_message_when_negated
+  validates :failure_message_when_negated, aspect_ratio: :square
+
   # Combinations
   has_one_attached :allowing_one_with_message
   validates :allowing_one_with_message, aspect_ratio: { with: :portrait, message: 'Not authorized aspect ratio.' }

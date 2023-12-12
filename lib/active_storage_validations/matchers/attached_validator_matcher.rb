@@ -3,6 +3,7 @@
 require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
+require_relative 'concerns/rspecable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -15,6 +16,7 @@ module ActiveStorageValidations
       include ActiveStorageable
       include Contextable
       include Messageable
+      include Rspecable
       include Validatable
 
       def initialize(attribute_name)
@@ -22,7 +24,11 @@ module ActiveStorageValidations
       end
 
       def description
-        "validate #{@attribute_name} must be attached"
+        "validate that :#{@attribute_name} must be attached"
+      end
+
+      def failure_message
+        "is expected to validate attachment of :#{@attribute_name}"
       end
 
       def matches?(subject)
@@ -33,14 +39,6 @@ module ActiveStorageValidations
           is_custom_message_valid? &&
           is_valid_when_file_attached? &&
           is_invalid_when_file_not_attached?
-      end
-
-      def failure_message
-        "is expected to validate attached of #{@attribute_name}"
-      end
-
-      def failure_message_when_negated
-        "is expected to not validate attached of #{@attribute_name}"
       end
 
       private

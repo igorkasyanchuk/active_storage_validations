@@ -17,6 +17,16 @@ module MatcherHelpers
     end
   end
 
+  def is_expected_to_have_failure_message(expected_failure_message)
+    subject.matches?(klass)
+    assert_equal(subject.failure_message, expected_failure_message)
+  end
+
+  def is_expected_to_have_failure_message_when_negated(expected_failure_message)
+    subject.matches?(klass)
+    assert_equal(subject.failure_message_when_negated, expected_failure_message)
+  end
+
   def validator_class
     subject.class.name.sub(/::Matchers/, '').sub(/Matcher/, '').constantize
   end

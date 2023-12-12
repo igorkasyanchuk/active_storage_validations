@@ -7,6 +7,7 @@ require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/allow_blankable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
+require_relative 'concerns/rspecable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -20,6 +21,7 @@ module ActiveStorageValidations
       include AllowBlankable
       include Contextable
       include Messageable
+      include Rspecable
       include Validatable
 
       def initialize(attribute_name)
@@ -28,7 +30,23 @@ module ActiveStorageValidations
       end
 
       def description
-        "validate file size of #{@attribute_name}"
+        "validate file size of :#{@attribute_name}"
+      end
+
+      def failure_message
+        message = ["is expected to validate file size of :#{@attribute_name}"]
+        build_failure_message(message)
+        message.join("\n")
+      end
+
+      def build_failure_message(message)
+        return unless @failure_message_artefacts.present?
+
+        message << "  but there seem to have issues with the matcher methods you used, since:"
+        @failure_message_artefacts.each do |error_case|
+          message << "  validation failed when provided with a #{error_case[:size]} bytes test file"
+        end
+        message << "  whereas it should have passed"
       end
 
       def less_than(size)
@@ -69,14 +87,6 @@ module ActiveStorageValidations
           not_higher_than_max?
       end
 
-      def failure_message
-        "is expected to validate file size of #{@attribute_name} to be between #{@min} and #{@max} bytes"
-      end
-
-      def failure_message_when_negated
-        "is expected to not validate file size of #{@attribute_name} to be between #{@min} and #{@max} bytes"
-      end
-
       protected
 
       def not_lower_than_min?
@@ -99,8 +109,13 @@ module ActiveStorageValidations
         mock_size_for(io, size) do
           attach_file
           validate
-          is_valid?
+          is_valid? || add_failure_message_artefact(size)
         end
+      end
+
+      def add_failure_message_artefact(size)
+        @failure_message_artefacts << { size: size }
+        false
       end
 
       def is_custom_message_valid?
