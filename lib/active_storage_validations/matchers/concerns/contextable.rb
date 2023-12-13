@@ -5,8 +5,7 @@ module ActiveStorageValidations
     module Contextable
       extend ActiveSupport::Concern
 
-      def initialize(attribute_name)
-        super
+      def initialize_contextable
         @context = nil
       end
 

@@ -4,6 +4,7 @@ require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/allow_blankable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
+require_relative 'concerns/rspecable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -17,15 +18,24 @@ module ActiveStorageValidations
       include AllowBlankable
       include Contextable
       include Messageable
+      include Rspecable
       include Validatable
 
       def initialize(attribute_name)
+        initialize_allow_blankable
+        initialize_contextable
+        initialize_messageable
+        initialize_rspecable
         @attribute_name = attribute_name
         @allowed_aspect_ratios = @rejected_aspect_ratios = []
       end
 
       def description
-        "validate the aspect ratios allowed on attachment #{@attribute_name}."
+        "validate the aspect ratios allowed on :#{@attribute_name}."
+      end
+
+      def failure_message
+        "is expected to validate aspect ratio of :#{@attribute_name}"
       end
 
       def allowing(*aspect_ratios)
@@ -47,10 +57,6 @@ module ActiveStorageValidations
           is_custom_message_valid? &&
           all_allowed_aspect_ratios_allowed? &&
           all_rejected_aspect_ratios_rejected?
-      end
-
-      def failure_message
-        "is expected to validate aspect ratio of #{@attribute_name}"
       end
 
       protected

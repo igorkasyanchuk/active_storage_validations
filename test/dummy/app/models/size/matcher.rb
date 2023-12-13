@@ -47,6 +47,11 @@ class Size::Matcher < ApplicationRecord
   has_one_attached :as_instance
   validates :as_instance, size: { less_than_or_equal_to: 5.megabytes }
 
+  has_one_attached :failure_message
+  validates :failure_message, size: { less_than_or_equal_to: 5.megabytes }
+  has_one_attached :failure_message_when_negated
+  validates :failure_message_when_negated, size: { less_than_or_equal_to: 5.megabytes }
+
   # Combinations
   has_one_attached :less_than_with_message
   has_one_attached :less_than_or_equal_to_with_message

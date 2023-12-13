@@ -32,6 +32,11 @@ class ContentType::Matcher < ApplicationRecord
   has_one_attached :as_instance
   validates :as_instance, content_type: :png
 
+  has_one_attached :failure_message
+  validates :failure_message, content_type: :png
+  has_one_attached :failure_message_when_negated
+  validates :failure_message_when_negated, content_type: :png
+
   # Combinations
   has_one_attached :allowing_one_with_message
   validates :allowing_one_with_message, content_type: { in: ['file/pdf'], message: 'Not authorized file type.' }

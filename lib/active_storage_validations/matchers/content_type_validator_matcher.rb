@@ -7,6 +7,7 @@ require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/allow_blankable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
+require_relative 'concerns/rspecable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -20,15 +21,26 @@ module ActiveStorageValidations
       include AllowBlankable
       include Contextable
       include Messageable
+      include Rspecable
       include Validatable
 
       def initialize(attribute_name)
+        initialize_allow_blankable
+        initialize_contextable
+        initialize_messageable
+        initialize_rspecable
         @attribute_name = attribute_name
         @allowed_types = @rejected_types = []
       end
 
       def description
-        "validate the content types allowed on attachment #{@attribute_name}"
+        "validate the content types allowed on :#{@attribute_name}"
+      end
+
+      def failure_message
+        message = ["is expected to validate the content types of :#{@attribute_name}"]
+        build_failure_message(message)
+        message.join("\n")
       end
 
       def allowing(*types)
@@ -52,23 +64,27 @@ module ActiveStorageValidations
           all_rejected_types_rejected?
       end
 
-      def failure_message
-        message = ["Expected #{@attribute_name}"]
+      protected
 
+      def build_failure_message(message)
         if @allowed_types_not_allowed.present?
-          message << "Accept content types: #{@allowed_types.join(", ")}"
-          message << "#{@allowed_types_not_allowed.join(", ")} were rejected"
+          message << "  the following content type#{'s' if @allowed_types.count > 1} should be allowed: :#{@allowed_types.join(", :")}"
+          message << "  but #{pluralize(@allowed_types_not_allowed)} rejected"
         end
 
         if @rejected_types_not_rejected.present?
-          message << "Reject content types: #{@rejected_types.join(", ")}"
-          message << "#{@rejected_types_not_rejected.join(", ")} were accepted"
+          message << "  the following content type#{'s' if @rejected_types.count > 1} should be rejected: :#{@rejected_types.join(", :")}"
+          message << "  but #{pluralize(@rejected_types_not_rejected)} accepted"
         end
-
-        message.join("\n")
       end
 
-      protected
+      def pluralize(types)
+        if types.count == 1
+          ":#{types[0]} was"
+        else
+          ":#{types.join(", :")} were"
+        end
+      end
 
       def all_allowed_types_allowed?
         @allowed_types_not_allowed ||= @allowed_types.reject { |type| type_allowed?(type) }

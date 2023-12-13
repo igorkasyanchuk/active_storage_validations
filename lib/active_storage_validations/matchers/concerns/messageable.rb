@@ -5,8 +5,7 @@ module ActiveStorageValidations
     module Messageable
       extend ActiveSupport::Concern
 
-      def initialize(attribute_name)
-        super
+      def initialize_messageable
         @custom_message = nil
       end
 

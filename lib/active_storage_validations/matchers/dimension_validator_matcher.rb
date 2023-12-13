@@ -4,6 +4,7 @@ require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/allow_blankable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
+require_relative 'concerns/rspecable.rb'
 require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
@@ -17,15 +18,31 @@ module ActiveStorageValidations
       include AllowBlankable
       include Contextable
       include Messageable
+      include Rspecable
       include Validatable
 
       def initialize(attribute_name)
+        initialize_allow_blankable
+        initialize_contextable
+        initialize_messageable
+        initialize_rspecable
         @attribute_name = attribute_name
         @width_min = @width_max = @height_min = @height_max = nil
       end
 
       def description
-        "validate image dimensions of #{@attribute_name}"
+        "validate the image dimensions of :#{@attribute_name}"
+      end
+
+      def failure_message
+        message = ["is expected to validate dimensions of :#{@attribute_name}"]
+        build_failure_message(message)
+        message.join("\n")
+      end
+
+      def width(width)
+        @width_min = @width_max = width
+        self
       end
 
       def width_min(width)
@@ -38,8 +55,13 @@ module ActiveStorageValidations
         self
       end
 
-      def width(width)
-        @width_min = @width_max = width
+      def width_between(range)
+        @width_min, @width_max = range.first, range.last
+        self
+      end
+
+      def height(height)
+        @height_min = @height_max = height
         self
       end
 
@@ -53,18 +75,8 @@ module ActiveStorageValidations
         self
       end
 
-      def width_between(range)
-        @width_min, @width_max = range.first, range.last
-        self
-      end
-
       def height_between(range)
         @height_min, @height_max = range.first, range.last
-        self
-      end
-
-      def height(height)
-        @height_min = @height_max = height
         self
       end
 
@@ -87,15 +99,17 @@ module ActiveStorageValidations
           height_equals?
       end
 
-      def failure_message
-        <<~MESSAGE
-          is expected to validate dimensions of #{@attribute_name}
-            width between #{@width_min} and #{@width_max}
-            height between #{@height_min} and #{@height_max}
-        MESSAGE
-      end
-
       protected
+
+      def build_failure_message(message)
+        return unless @failure_message_artefacts.present?
+
+        message << "  but there seem to have issues with the matcher methods you used, since:"
+        @failure_message_artefacts.each do |error_case|
+          message << "  validation failed when provided with a #{error_case[:width]}x#{error_case[:height]}px test image"
+        end
+        message << "  whereas it should have passed"
+      end
 
       def valid_width
         ((@width_min || 0) + (@width_max || 2000)) / 2
@@ -106,50 +120,55 @@ module ActiveStorageValidations
       end
 
       def width_not_smaller_than_min?
-        @width_min.nil? || !passes_validation_with_dimensions(@width_min - 1, valid_height, 'width')
+        @width_min.nil? || !passes_validation_with_dimensions(@width_min - 1, valid_height)
       end
 
       def width_larger_than_min?
-        @width_min.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_min + 1, valid_height, 'width')
+        @width_min.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_min + 1, valid_height)
       end
 
       def width_smaller_than_max?
-        @width_max.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_max - 1, valid_height, 'width')
+        @width_max.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_max - 1, valid_height)
       end
 
       def width_not_larger_than_max?
-        @width_max.nil? || !passes_validation_with_dimensions(@width_max + 1, valid_height, 'width')
+        @width_max.nil? || !passes_validation_with_dimensions(@width_max + 1, valid_height)
       end
 
       def width_equals?
-        @width_min.nil? || @width_min != @width_max || passes_validation_with_dimensions(@width_min, valid_height, 'width')
+        @width_min.nil? || @width_min != @width_max || passes_validation_with_dimensions(@width_min, valid_height)
       end
 
       def height_not_smaller_than_min?
-        @height_min.nil? || !passes_validation_with_dimensions(valid_width, @height_min - 1, 'height')
+        @height_min.nil? || !passes_validation_with_dimensions(valid_width, @height_min - 1)
       end
 
       def height_larger_than_min?
-        @height_min.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_min + 1, 'height')
+        @height_min.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_min + 1)
       end
 
       def height_smaller_than_max?
-        @height_max.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_max - 1, 'height')
+        @height_max.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_max - 1)
       end
 
       def height_not_larger_than_max?
-        @height_max.nil? || !passes_validation_with_dimensions(valid_width, @height_max + 1, 'height')
+        @height_max.nil? || !passes_validation_with_dimensions(valid_width, @height_max + 1)
       end
 
       def height_equals?
-        @height_min.nil? || @height_min != @height_max || passes_validation_with_dimensions(valid_width, @height_min, 'height')
+        @height_min.nil? || @height_min != @height_max || passes_validation_with_dimensions(valid_width, @height_min)
       end
 
-      def passes_validation_with_dimensions(width, height, check)
+      def passes_validation_with_dimensions(width, height)
         mock_dimensions_for(attach_file, width, height) do
           validate
-          is_valid?
+          is_valid? || add_failure_message_artefact(width, height)
         end
+      end
+
+      def add_failure_message_artefact(width, height)
+        @failure_message_artefacts << { width: width, height: height }
+        false
       end
 
       def is_custom_message_valid?

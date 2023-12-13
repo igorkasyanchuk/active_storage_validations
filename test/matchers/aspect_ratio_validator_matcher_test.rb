@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
+require 'matchers/shared_examples/has_valid_rspec_message_methods'
 require 'matchers/shared_examples/works_with_allow_blank'
 require 'matchers/shared_examples/works_with_both_instance_and_class'
 require 'matchers/shared_examples/works_with_context'
@@ -10,6 +11,7 @@ require 'matchers/shared_examples/works_with_custom_message'
 describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher do
   include MatcherHelpers
 
+  include HasValidRspecMessageMethods
   include ChecksIfIsAValidActiveStorageAttribute
   include WorksWithBothInstanceAndClass
 

@@ -5,8 +5,7 @@ module ActiveStorageValidations
     module AllowBlankable
       extend ActiveSupport::Concern
 
-      def initialize(attribute_name)
-        super
+      def initialize_allow_blankable
         @allow_blank = nil
       end
 
