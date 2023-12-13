@@ -5,8 +5,7 @@ module ActiveStorageValidations
     module Rspecable
       extend ActiveSupport::Concern
 
-      def initialize(attribute_name)
-        super
+      def initialize_rspecable
         @failure_message_artefacts = []
       end
 

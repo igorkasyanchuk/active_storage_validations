@@ -22,6 +22,10 @@ module ActiveStorageValidations
       include Validatable
 
       def initialize(attribute_name)
+        initialize_allow_blankable
+        initialize_contextable
+        initialize_messageable
+        initialize_rspecable
         @attribute_name = attribute_name
         @width_min = @width_max = @height_min = @height_max = nil
       end

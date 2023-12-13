@@ -20,6 +20,9 @@ module ActiveStorageValidations
       include Validatable
 
       def initialize(attribute_name)
+        initialize_contextable
+        initialize_messageable
+        initialize_rspecable
         @attribute_name = attribute_name
       end
 
