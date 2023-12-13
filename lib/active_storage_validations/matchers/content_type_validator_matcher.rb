@@ -43,26 +43,6 @@ module ActiveStorageValidations
         message.join("\n")
       end
 
-      def build_failure_message(message)
-        if @allowed_types_not_allowed.present?
-          message << "  the following content type#{'s' if @allowed_types.count > 1} should be allowed: :#{@allowed_types.join(", :")}"
-          message << "  but #{pluralize(@allowed_types_not_allowed)} rejected"
-        end
-
-        if @rejected_types_not_rejected.present?
-          message << "  the following content type#{'s' if @rejected_types.count > 1} should be rejected: :#{@rejected_types.join(", :")}"
-          message << "  but #{pluralize(@rejected_types_not_rejected)} accepted"
-        end
-      end
-
-      def pluralize(types)
-        if types.count == 1
-          ":#{types[0]} was"
-        else
-          ":#{types.join(", :")} were"
-        end
-      end
-
       def allowing(*types)
         @allowed_types = types.flatten
         self
@@ -85,6 +65,26 @@ module ActiveStorageValidations
       end
 
       protected
+
+      def build_failure_message(message)
+        if @allowed_types_not_allowed.present?
+          message << "  the following content type#{'s' if @allowed_types.count > 1} should be allowed: :#{@allowed_types.join(", :")}"
+          message << "  but #{pluralize(@allowed_types_not_allowed)} rejected"
+        end
+
+        if @rejected_types_not_rejected.present?
+          message << "  the following content type#{'s' if @rejected_types.count > 1} should be rejected: :#{@rejected_types.join(", :")}"
+          message << "  but #{pluralize(@rejected_types_not_rejected)} accepted"
+        end
+      end
+
+      def pluralize(types)
+        if types.count == 1
+          ":#{types[0]} was"
+        else
+          ":#{types.join(", :")} were"
+        end
+      end
 
       def all_allowed_types_allowed?
         @allowed_types_not_allowed ||= @allowed_types.reject { |type| type_allowed?(type) }

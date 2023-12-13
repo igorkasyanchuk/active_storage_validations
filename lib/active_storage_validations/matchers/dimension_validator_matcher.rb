@@ -40,16 +40,6 @@ module ActiveStorageValidations
         message.join("\n")
       end
 
-      def build_failure_message(message)
-        return unless @failure_message_artefacts.present?
-
-        message << "  but there seem to have issues with the matcher methods you used, since:"
-        @failure_message_artefacts.each do |error_case|
-          message << "  validation failed when provided with a #{error_case[:width]}x#{error_case[:height]}px test image"
-        end
-        message << "  whereas it should have passed"
-      end
-
       def width(width)
         @width_min = @width_max = width
         self
@@ -110,6 +100,16 @@ module ActiveStorageValidations
       end
 
       protected
+
+      def build_failure_message(message)
+        return unless @failure_message_artefacts.present?
+
+        message << "  but there seem to have issues with the matcher methods you used, since:"
+        @failure_message_artefacts.each do |error_case|
+          message << "  validation failed when provided with a #{error_case[:width]}x#{error_case[:height]}px test image"
+        end
+        message << "  whereas it should have passed"
+      end
 
       def valid_width
         ((@width_min || 0) + (@width_max || 2000)) / 2

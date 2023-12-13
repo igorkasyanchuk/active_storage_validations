@@ -43,16 +43,6 @@ module ActiveStorageValidations
         message.join("\n")
       end
 
-      def build_failure_message(message)
-        return unless @failure_message_artefacts.present?
-
-        message << "  but there seem to have issues with the matcher methods you used, since:"
-        @failure_message_artefacts.each do |error_case|
-          message << "  validation failed when provided with a #{error_case[:size]} bytes test file"
-        end
-        message << "  whereas it should have passed"
-      end
-
       def less_than(size)
         @max = size - 1.byte
         self
@@ -92,6 +82,16 @@ module ActiveStorageValidations
       end
 
       protected
+
+      def build_failure_message(message)
+        return unless @failure_message_artefacts.present?
+
+        message << "  but there seem to have issues with the matcher methods you used, since:"
+        @failure_message_artefacts.each do |error_case|
+          message << "  validation failed when provided with a #{error_case[:size]} bytes test file"
+        end
+        message << "  whereas it should have passed"
+      end
 
       def not_lower_than_min?
         @min.nil? || !passes_validation_with_size(@min - 1)
