@@ -19,6 +19,34 @@ describe ActiveStorageValidations::AttachedValidator do
     # Checked by Rails options tests
   end
 
+  describe 'Validator checks' do
+    let(:model) { validator_test_class::Check.new(params) }
+
+    describe 'when provided with a file' do
+      # validates :has_to_be_attached, attached: true
+      subject { model.has_to_be_attached.attach(image_1920x1080_file) and model }
+
+      it { is_expected_to_be_valid }
+    end
+
+    describe 'when not provided with a file' do
+      # validates :has_to_be_attached, attached: true
+      subject { model }
+
+      it { is_expected_not_to_be_valid }
+      it { is_expected_to_have_error_message("blank", error_options: {}) }
+    end
+
+    describe 'when provided with a file that is marked for destruction' do
+      # validates :has_to_be_attached, attached: true
+      subject { model.has_to_be_attached.attach(image_1920x1080_file) and model.has_to_be_attached.mark_for_destruction and model }
+
+      focus
+      it { is_expected_not_to_be_valid }
+      it { is_expected_to_have_error_message("blank", error_options: {}) }
+    end
+  end
+
   describe 'Rails options' do
     %i(allow_nil allow_blank).each do |unsupported_validation_option|
       describe ":#{unsupported_validation_option}" do
