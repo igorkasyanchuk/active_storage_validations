@@ -19,10 +19,10 @@ module ActiveStorageValidations
     end
 
     def validate_each(record, attribute, _value)
-      return if record.send(attribute).attached?
+      return if record.send(attribute).attached? &&
+                !Array.wrap(record.send(attribute)).all? { |file| file.marked_for_destruction? }
 
       errors_options = initialize_error_options(options)
-
       add_error(record, attribute, ERROR_TYPES.first, **errors_options)
     end
   end
