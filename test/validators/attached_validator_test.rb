@@ -41,7 +41,6 @@ describe ActiveStorageValidations::AttachedValidator do
       # validates :has_to_be_attached, attached: true
       subject { model.has_to_be_attached.attach(image_1920x1080_file) and model.has_to_be_attached.mark_for_destruction and model }
 
-      focus
       it { is_expected_not_to_be_valid }
       it { is_expected_to_have_error_message("blank", error_options: {}) }
     end
