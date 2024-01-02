@@ -11,6 +11,8 @@
 #
 
 class Dimension::Matcher < ApplicationRecord
+  include Validatable
+
   %i(width height).each do |dimension|
     has_one_attached :"#{dimension}_exact"
     has_one_attached :"#{dimension}_in"
@@ -56,6 +58,10 @@ class Dimension::Matcher < ApplicationRecord
 
   has_one_attached :as_instance
   validates :as_instance, dimension: { width: 150, height: 150 }
+
+  has_one_attached :validatable_different_error_messages
+  validates :validatable_different_error_messages, dimension: { width: 150, message: 'Custom message 1' }, if: :title_is_quo_vadis?
+  validates :validatable_different_error_messages, dimension: { width: 150, message: 'Custom message 2' }, if: :title_is_american_psycho?
 
   has_one_attached :failure_message
   validates :failure_message, dimension: { width: 150, height: 150 }

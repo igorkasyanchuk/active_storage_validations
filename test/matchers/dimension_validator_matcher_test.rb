@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
+require 'matchers/shared_examples/checks_if_is_valid'
 require 'matchers/shared_examples/has_valid_rspec_message_methods'
 require 'matchers/shared_examples/works_with_allow_blank'
 require 'matchers/shared_examples/works_with_both_instance_and_class'
@@ -141,8 +142,9 @@ end
 describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
   include MatcherHelpers
 
-  include HasValidRspecMessageMethods
   include ChecksIfIsAValidActiveStorageAttribute
+  include ChecksIfIsValid
+  include HasValidRspecMessageMethods
   include WorksWithBothInstanceAndClass
 
   let(:matcher) { ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(model_attribute) }

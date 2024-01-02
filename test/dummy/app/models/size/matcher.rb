@@ -11,6 +11,8 @@
 #
 
 class Size::Matcher < ApplicationRecord
+  include Validatable
+
   has_one_attached :less_than
   has_one_attached :less_than_or_equal_to
   has_one_attached :greater_than
@@ -46,6 +48,10 @@ class Size::Matcher < ApplicationRecord
 
   has_one_attached :as_instance
   validates :as_instance, size: { less_than_or_equal_to: 5.megabytes }
+
+  has_one_attached :validatable_different_error_messages
+  validates :validatable_different_error_messages, size: { less_than: 20.megabytes, message: 'Custom message 1' }, if: :title_is_quo_vadis?
+  validates :validatable_different_error_messages, size: { less_than: 10.megabytes, message: 'Custom message 2' }, if: :title_is_american_psycho?
 
   has_one_attached :failure_message
   validates :failure_message, size: { less_than_or_equal_to: 5.megabytes }
