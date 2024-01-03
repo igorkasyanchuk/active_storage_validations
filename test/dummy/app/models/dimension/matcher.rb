@@ -55,6 +55,9 @@ class Dimension::Matcher < ApplicationRecord
   validates :with_context_symbol, dimension: { width: 150, height: 150 }, on: :update
   has_one_attached :with_context_array
   validates :with_context_array, dimension: { width: 150, height: 150 }, on: %i[update custom]
+  has_one_attached :with_several_validators_and_contexts
+  validates :with_several_validators_and_contexts, dimension: { width: 150, height: 150 }, on: :update
+  validates :with_several_validators_and_contexts, dimension: { width: 150, height: 150 }, on: :custom
 
   has_one_attached :as_instance
   validates :as_instance, dimension: { width: 150, height: 150 }

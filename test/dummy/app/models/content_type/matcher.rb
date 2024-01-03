@@ -30,6 +30,9 @@ class ContentType::Matcher < ApplicationRecord
   validates :with_context_symbol, content_type: :png, on: :update
   has_one_attached :with_context_array
   validates :with_context_array, content_type: :png, on: %i[update custom]
+  has_one_attached :with_several_validators_and_contexts
+  validates :with_several_validators_and_contexts, content_type: :png, on: :update
+  validates :with_several_validators_and_contexts, content_type: :png, on: :custom
 
   has_one_attached :as_instance
   validates :as_instance, content_type: :png

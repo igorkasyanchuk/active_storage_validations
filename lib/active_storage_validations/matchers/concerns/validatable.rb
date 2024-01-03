@@ -40,12 +40,14 @@ module ActiveStorageValidations
         end
       end
 
-      def errors_from_custom_messages
-        # TODO: Refacto attribute_validator with this logic and make sure it
-        # works for contextable
-        @subject.class.validators_on(@attribute_name).filter_map do |validator|
-          validator.options[:message] if validator.class == validator_class
+      def attribute_validators
+        @subject.class.validators_on(@attribute_name).select do |validator|
+          validator.class == validator_class
         end
+      end
+
+      def errors_from_custom_messages
+        attribute_validators.map { |validator| validator.options[:message] }
       end
     end
   end

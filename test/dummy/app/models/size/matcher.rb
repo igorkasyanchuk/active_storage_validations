@@ -45,6 +45,9 @@ class Size::Matcher < ApplicationRecord
   validates :with_context_symbol, size: { less_than_or_equal_to: 5.megabytes }, on: :update
   has_one_attached :with_context_array
   validates :with_context_array, size: { less_than_or_equal_to: 5.megabytes }, on: %i[update custom]
+  has_one_attached :with_several_validators_and_contexts
+  validates :with_several_validators_and_contexts, size: { less_than_or_equal_to: 5.megabytes }, on: :update
+  validates :with_several_validators_and_contexts, size: { less_than_or_equal_to: 5.megabytes }, on: :custom
 
   has_one_attached :as_instance
   validates :as_instance, size: { less_than_or_equal_to: 5.megabytes }
