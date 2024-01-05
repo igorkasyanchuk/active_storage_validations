@@ -10,10 +10,13 @@ module MatcherHelpers
   end
 
   def is_expected_to_raise_error(error_class, message)
-    begin subject.matches?(klass)
+    begin
+      subject.matches?(klass)
     rescue => e
       assert_equal(e.class, error_class)
       assert(e.message.include?(message))
+    else
+      raise StandardError, "It should raise an error but it does not raise any"
     end
   end
 

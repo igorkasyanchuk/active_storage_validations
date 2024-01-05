@@ -26,7 +26,7 @@ module ActiveStorageValidations
       def available_errors
         [
           *validator_class::ERROR_TYPES,
-          *error_from_custom_message
+          *errors_from_custom_messages
         ].compact
       end
 
@@ -40,8 +40,14 @@ module ActiveStorageValidations
         end
       end
 
-      def error_from_custom_message
-        attribute_validator.options[:message]
+      def attribute_validators
+        @subject.class.validators_on(@attribute_name).select do |validator|
+          validator.class == validator_class
+        end
+      end
+
+      def errors_from_custom_messages
+        attribute_validators.map { |validator| validator.options[:message] }
       end
     end
   end

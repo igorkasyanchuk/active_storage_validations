@@ -11,6 +11,8 @@
 #
 
 class ContentType::Matcher < ApplicationRecord
+  include Validatable
+
   has_one_attached :allowing_one
   validates :allowing_one, content_type: :png
   has_one_attached :allowing_several
@@ -28,9 +30,16 @@ class ContentType::Matcher < ApplicationRecord
   validates :with_context_symbol, content_type: :png, on: :update
   has_one_attached :with_context_array
   validates :with_context_array, content_type: :png, on: %i[update custom]
+  has_one_attached :with_several_validators_and_contexts
+  validates :with_several_validators_and_contexts, content_type: :png, on: :update
+  validates :with_several_validators_and_contexts, content_type: :png, on: :custom
 
   has_one_attached :as_instance
   validates :as_instance, content_type: :png
+
+  has_one_attached :validatable_different_error_messages
+  validates :validatable_different_error_messages, content_type: { with: :pdf, message: 'Custom message 1' }, if: :title_is_quo_vadis?
+  validates :validatable_different_error_messages, content_type: { with: :png, message: 'Custom message 2' }, if: :title_is_american_psycho?
 
   has_one_attached :failure_message
   validates :failure_message, content_type: :png
