@@ -117,6 +117,7 @@ ActiveRecord::Schema.define do
   end
 
   %w(
+    based_on_a_file_property
     zero_byte_image
   ).each do |integration_test|
     create_table :"integration_validator_#{integration_test.pluralize}", force: :cascade do |t|

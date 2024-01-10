@@ -193,6 +193,7 @@ def file_1ko
     content_type: 'image/png'
   }
 end
+alias :file_1ko_and_png :file_1ko
 
 def file_2ko
   {
@@ -218,10 +219,26 @@ def file_7ko
   }
 end
 
+def file_7ko_and_jpg
+  {
+    io: File.open(Rails.root.join('public', 'file_7ko_and_jpg.jpg')),
+    filename: 'file_7ko_and_jpg',
+    content_type: 'image/jpg'
+  }
+end
+
 def file_10ko
   {
     io: File.open(Rails.root.join('public', 'file_10ko')),
     filename: 'file_10ko',
     content_type: 'text/html'
+  }
+end
+
+def file_17ko_and_png
+  {
+    io: File.open(Rails.root.join('public', 'file_17ko_and_png.png')),
+    filename: 'file_17ko_and_png',
+    content_type: 'image/png'
   }
 end
