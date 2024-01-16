@@ -204,7 +204,7 @@ The keys starting with `dimension_` support six variables that you can use:
 - `max` containing the maximum width or height allowed
 - `width` containing the minimum or maximum width allowed
 - `height` containing the minimum or maximum width allowed
-- `lenght` containing the exact width or height allowed
+- `length` containing the exact width or height allowed
 - `filename` containing the current file name
 
 For example :
