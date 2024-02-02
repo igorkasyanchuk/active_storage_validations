@@ -68,7 +68,7 @@ end
 
 ### More examples
 
-- Content type validation using symbols or regex. The symbol types must be registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb) that's used by this gem to infer the full content type.
+- Content type validation using symbols or regex.
 
 ```ruby
 class User < ApplicationRecord
@@ -81,6 +81,12 @@ class User < ApplicationRecord
   # or
   validates :avatar, content_type: /\Aimage\/.*\z/
 end
+```
+Please note that the symbol types must be registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb) that's used by this gem to infer the full content type.
+Example code for adding a new content type to Marcel:
+```ruby
+# config/initializers/mime_types.rb
+Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files
 ```
 
 - Dimension validation with `width`, `height` and `in`.
