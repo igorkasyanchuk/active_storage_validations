@@ -24,6 +24,14 @@ This gems doing it for you. Just use `attached: true` or `content_type: 'image/p
 * custom error messages
 * allow procs for dynamic determination of values
 
+## Installation
+
+Add to your Gemfile:
+
+```ruby
+gem "active_storage_validations"
+```
+
 ## Usage
 
 For example you have a model like this and you want to add validation.
