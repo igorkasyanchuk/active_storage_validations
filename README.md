@@ -32,6 +32,18 @@ Add to your Gemfile:
 gem "active_storage_validations"
 ```
 
+Then execute:
+
+```sh
+bundle
+```
+
+Alternatively, install yourself with:
+
+```sh
+gem install active_storage_validations
+```
+
 ## Usage
 
 For example you have a model like this and you want to add validation.
