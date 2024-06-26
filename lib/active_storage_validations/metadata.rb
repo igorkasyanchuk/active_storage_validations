@@ -34,7 +34,7 @@ module ActiveStorageValidations
     private
 
     def image_processor
-      # Rails returns nil for default image processor, because it is set in an after initiliaze callback
+      # Rails returns nil for default image processor, because it is set in an after initialize callback
       # https://github.com/rails/rails/blob/89d8569abe2564c8187debf32dd3b4e33d6ad983/activestorage/lib/active_storage/engine.rb
       Rails.application.config.active_storage.variant_processor || DEFAULT_IMAGE_PROCESSOR
     end

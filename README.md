@@ -183,7 +183,7 @@ In several cases, Active Storage Validations provides variables to help you cust
 
 ### Aspect ratio
 The keys starting with `aspect_ratio_` support two variables that you can use:
-- `aspect_ratio` containing the expected aspect ratio, especially usefull for custom aspect ratio
+- `aspect_ratio` containing the expected aspect ratio, especially useful for custom aspect ratio
 - `filename` containing the current file name
 
 For example :
@@ -223,7 +223,7 @@ dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} 
 The keys starting with `file_size_not_` support four variables that you can use:
 - `file_size` containing the current file size
 - `min` containing the minimum file size
-- `max` containing the maxmimum file size
+- `max` containing the maximum file size
 - `filename` containing the current file name
 
 For example :
@@ -280,7 +280,7 @@ Very simple example of validation with file attached, content type check and cus
 [![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
 
 ## Test matchers
-Provides RSpec-compatible and Minitest-compatible matchers for testing the validators. Only `aspect_ratio`, `attached`, `content_type`, `dimension` and `size` validators currently have their matcher developped.
+Provides RSpec-compatible and Minitest-compatible matchers for testing the validators. Only `aspect_ratio`, `attached`, `content_type`, `dimension` and `size` validators currently have their matcher developed.
 
 ### RSpec
 
