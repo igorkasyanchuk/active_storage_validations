@@ -258,7 +258,6 @@ image_not_processable: "is not a valid image (file: %{filename})"
 Add this line to your application's Gemfile:
 
 ```ruby
-# Rails 5.2 and Rails 6
 gem 'active_storage_validations'
 
 # Optional, to use :dimension validator or :aspect_ratio validator
