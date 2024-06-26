@@ -80,7 +80,7 @@
 
 
 - 0.9.3
-  - Addded Vietnamese translation https://github.com/igorkasyanchuk/active_storage_validations/pull/108
+  - Added Vietnamese translation https://github.com/igorkasyanchuk/active_storage_validations/pull/108
   - Allow regex in content_type arrays https://github.com/igorkasyanchuk/active_storage_validations/pull/104
   - fixes for spanish translation https://github.com/igorkasyanchuk/active_storage_validations/pull/114, https://github.com/igorkasyanchuk/active_storage_validations/pull/115/
 
@@ -117,7 +117,7 @@
   - small tweaks
 
 - 0.8.4
-  - fixed error messages for aspect ratio valiation PR #44
+  - fixed error messages for aspect ratio validation PR #44
   - better limit validation for rails 6 PR #45
 
 - 0.8.3
