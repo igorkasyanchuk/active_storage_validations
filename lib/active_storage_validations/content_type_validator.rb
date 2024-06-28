@@ -60,7 +60,9 @@ module ActiveStorageValidations
     def is_valid?(file, types)
       file_type = content_type(file)
       types.any? do |type|
-        type == file_type || (type.is_a?(Regexp) && type.match?(file_type.to_s))
+        type == file_type ||
+          (type.is_a?(Regexp) && type.match?(file_type.to_s)) ||
+          (type.is_a?(String) && type.end_with?("/*") && file_type.start_with?(type[0..-2]))
       end
     end
 
