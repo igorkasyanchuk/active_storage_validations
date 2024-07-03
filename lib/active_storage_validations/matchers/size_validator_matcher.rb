@@ -139,7 +139,11 @@ module ActiveStorageValidations
       end
 
       def attach_file
-        @subject.public_send(@attribute_name).attach(dummy_file)
+        @subject.public_send("#{@attribute_name}=", attachable)
+      end
+
+      def attachable
+        @subject.public_send(@attribute_name).class == ActiveStorage::Attached::Many ? [dummy_file] : dummy_file
       end
 
       def dummy_file
