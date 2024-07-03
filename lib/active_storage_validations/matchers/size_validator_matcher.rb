@@ -111,8 +111,9 @@ module ActiveStorageValidations
 
       def passes_validation_with_size(size)
         mock_size_for(io, size) do
-          attach_file
-          validate
+          attach_file do
+            validate
+          end
           is_valid? || add_failure_message_artefact(size)
         end
       end
@@ -126,8 +127,9 @@ module ActiveStorageValidations
         return true unless @custom_message
 
         mock_size_for(io, -1.kilobytes) do
-          attach_file
-          validate
+          attach_file do
+            validate
+          end
           has_an_error_message_which_is_custom_message?
         end
       end
@@ -139,11 +141,11 @@ module ActiveStorageValidations
       end
 
       def attach_file
-        @subject.public_send("#{@attribute_name}=", attachable)
-      end
+        @subject.public_send(@attribute_name).attach(dummy_file)
 
-      def attachable
-        @subject.public_send(@attribute_name).class == ActiveStorage::Attached::Many ? [dummy_file] : dummy_file
+        yield
+
+        @subject.attachment_changes.delete(@attribute_name.to_s)
       end
 
       def dummy_file
