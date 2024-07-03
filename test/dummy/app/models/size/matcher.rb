@@ -66,7 +66,7 @@ class Size::Matcher < ApplicationRecord
   has_one_attached :less_than_or_equal_to_with_message
   has_one_attached :greater_than_with_message
   has_one_attached :greater_than_or_equal_to_with_message
-  has_many_attached :between_with_message
+  has_one_attached :between_with_message
   validates :less_than_with_message, size: { less_than: 2.kilobytes, message: 'File is too big.' }
   validates :less_than_or_equal_to_with_message, size: { less_than_or_equal_to: 2.kilobytes, message: 'File is too big.' }
   validates :greater_than_with_message, size: { greater_than: 7.kilobytes, message: 'File is too small.' }
