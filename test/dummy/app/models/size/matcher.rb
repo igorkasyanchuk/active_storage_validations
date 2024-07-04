@@ -13,6 +13,9 @@
 class Size::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :custom_matcher
+  validates :custom_matcher, size: { less_than_or_equal_to: 5.megabytes }
+
   has_one_attached :less_than
   has_one_attached :less_than_or_equal_to
   has_one_attached :greater_than

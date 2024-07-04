@@ -13,6 +13,9 @@
 class AspectRatio::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :custom_matcher
+  validates :custom_matcher, aspect_ratio: :square
+
   ActiveStorageValidations::AspectRatioValidator::NAMED_ASPECT_RATIOS.each do |aspect_ratio|
     has_one_attached :"allowing_one_#{aspect_ratio}"
     validates :"allowing_one_#{aspect_ratio}", aspect_ratio: aspect_ratio

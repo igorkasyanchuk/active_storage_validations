@@ -3,6 +3,7 @@
 require 'test_helper'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
 require 'matchers/shared_examples/checks_if_is_valid'
+require 'matchers/shared_examples/has_custom_matcher'
 require 'matchers/shared_examples/has_valid_rspec_message_methods'
 require 'matchers/shared_examples/works_with_allow_blank'
 require 'matchers/shared_examples/works_with_both_instance_and_class'
@@ -14,11 +15,16 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
 
   include ChecksIfIsAValidActiveStorageAttribute
   include ChecksIfIsValid
+  include HasCustomMatcher
   include HasValidRspecMessageMethods
   include WorksWithBothInstanceAndClass
 
   let(:matcher) { ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(model_attribute) }
   let(:klass) { ContentType::Matcher }
+
+  describe "#validate_content_type_of" do
+    include HasCustomMatcher
+  end
 
   describe '#allowing' do
     describe 'one' do
