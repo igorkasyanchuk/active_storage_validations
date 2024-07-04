@@ -13,6 +13,9 @@
 class Dimension::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :custom_matcher
+  validates :custom_matcher, dimension: { width: 150, height: 150 }
+
   %i(width height).each do |dimension|
     has_one_attached :"#{dimension}_exact"
     has_one_attached :"#{dimension}_in"

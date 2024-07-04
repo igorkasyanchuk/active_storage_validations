@@ -13,6 +13,9 @@
 class ContentType::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :custom_matcher
+  validates :custom_matcher, content_type: ['image/png']
+
   has_one_attached :allowing_one
   validates :allowing_one, content_type: :png
   has_one_attached :allowing_several

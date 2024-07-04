@@ -13,6 +13,9 @@
 class Attached::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :custom_matcher
+  validates :custom_matcher, attached: true
+
   has_one_attached :required
   validates :required, attached: true
 

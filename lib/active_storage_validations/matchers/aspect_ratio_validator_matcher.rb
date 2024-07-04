@@ -9,8 +9,8 @@ require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
   module Matchers
-    def validate_aspect_ratio_of(name, expected_aspect_ratio)
-      AspectRatioValidatorMatcher.new(name, expected_aspect_ratio)
+    def validate_aspect_ratio_of(name)
+      AspectRatioValidatorMatcher.new(name)
     end
 
     class AspectRatioValidatorMatcher

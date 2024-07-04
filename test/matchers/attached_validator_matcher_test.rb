@@ -3,6 +3,7 @@
 require 'test_helper'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
 require 'matchers/shared_examples/checks_if_is_valid'
+require 'matchers/shared_examples/has_custom_matcher'
 require 'matchers/shared_examples/has_valid_rspec_message_methods'
 require 'matchers/shared_examples/works_with_both_instance_and_class'
 require 'matchers/shared_examples/works_with_context'
@@ -13,11 +14,16 @@ describe ActiveStorageValidations::Matchers::AttachedValidatorMatcher do
 
   include ChecksIfIsAValidActiveStorageAttribute
   include ChecksIfIsValid
+  include HasCustomMatcher
   include HasValidRspecMessageMethods
   include WorksWithBothInstanceAndClass
 
   let(:matcher) { ActiveStorageValidations::Matchers::AttachedValidatorMatcher.new(model_attribute) }
   let(:klass) { Attached::Matcher }
+
+  describe "#validate_attached_of" do
+    include HasCustomMatcher
+  end
 
   describe 'when the passed model attribute does not have an `attached: true` constraint' do
     subject { matcher }
