@@ -91,7 +91,7 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     let(:validator_value) { 7.kilobytes }
 
     describe 'with has_one_attached' do
-      let(:model_attribute) { matcher_method }
+      let(:model_attribute) { :greater_than }
 
       include SizeValidatorMatcherTest::OnlyMatchWhenExactValue
     end
