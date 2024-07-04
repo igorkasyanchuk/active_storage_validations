@@ -13,6 +13,7 @@ module WorksWithAllowNilOption
       when :limit then nil
       when :processable_image then image_150x150_file
       when :size then file_1ko
+      when :total_size then [blob_file_0_5ko, blob_file_0_5ko]
       end
     end
     let(:file_not_matching_requirements) do
@@ -24,6 +25,7 @@ module WorksWithAllowNilOption
       when :limit then file_5ko
       when :processable_image then tar_file_with_image_content_type
       when :size then file_5ko
+      when :total_size then [blob_file_5ko, blob_file_5ko]
       end
     end
 
