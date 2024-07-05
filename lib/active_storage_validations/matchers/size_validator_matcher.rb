@@ -60,8 +60,6 @@ module ActiveStorageValidations
         self
       end
 
-      alias many_greater_than greater_than
-
       def greater_than_or_equal_to(size)
         @min = size
         self
