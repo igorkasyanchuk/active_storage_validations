@@ -5,6 +5,7 @@
 
 require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/allow_blankable.rb'
+require_relative 'concerns/attachable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
 require_relative 'concerns/rspecable.rb'
@@ -19,6 +20,7 @@ module ActiveStorageValidations
     class ContentTypeValidatorMatcher
       include ActiveStorageable
       include AllowBlankable
+      include Attachable
       include Contextable
       include Messageable
       include Rspecable
@@ -99,6 +101,7 @@ module ActiveStorageValidations
       def type_allowed?(type)
         attach_file_of_type(type)
         validate
+        detach_file
         is_valid?
       end
 

@@ -2,6 +2,7 @@
 
 require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/allow_blankable.rb'
+require_relative 'concerns/attachable'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
 require_relative 'concerns/rspecable.rb'
@@ -16,6 +17,7 @@ module ActiveStorageValidations
     class DimensionValidatorMatcher
       include ActiveStorageable
       include AllowBlankable
+      include Attachable
       include Contextable
       include Messageable
       include Rspecable
@@ -162,6 +164,7 @@ module ActiveStorageValidations
       def passes_validation_with_dimensions(width, height)
         mock_dimensions_for(attach_file, width, height) do
           validate
+          detach_file
           is_valid? || add_failure_message_artefact(width, height)
         end
       end
@@ -176,6 +179,7 @@ module ActiveStorageValidations
 
         mock_dimensions_for(attach_file, -1, -1) do
           validate
+          detach_file
           has_an_error_message_which_is_custom_message?
         end
       end
@@ -184,19 +188,6 @@ module ActiveStorageValidations
         Matchers.mock_metadata(attachment, width, height) do
           yield
         end
-      end
-
-      def attach_file
-        @subject.public_send(@attribute_name).attach(dummy_file)
-        @subject.public_send(@attribute_name)
-      end
-
-      def dummy_file
-        {
-          io: Tempfile.new('Hello world!'),
-          filename: 'test.png',
-          content_type: 'image/png'
-        }
       end
     end
   end

@@ -5,6 +5,7 @@
 
 require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/allow_blankable.rb'
+require_relative 'concerns/attachable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
 require_relative 'concerns/rspecable.rb'
@@ -19,6 +20,7 @@ module ActiveStorageValidations
     class SizeValidatorMatcher
       include ActiveStorageable
       include AllowBlankable
+      include Attachable
       include Contextable
       include Messageable
       include Rspecable
@@ -113,6 +115,7 @@ module ActiveStorageValidations
         mock_size_for(io, size) do
           attach_file
           validate
+          detach_file
           is_valid? || add_failure_message_artefact(size)
         end
       end
@@ -128,6 +131,7 @@ module ActiveStorageValidations
         mock_size_for(io, -1.kilobytes) do
           attach_file
           validate
+          detach_file
           has_an_error_message_which_is_custom_message?
         end
       end
@@ -136,22 +140,6 @@ module ActiveStorageValidations
         Matchers.stub_method(io, :size, size) do
           yield
         end
-      end
-
-      def attach_file
-        @subject.public_send(@attribute_name).attach(dummy_file)
-      end
-
-      def dummy_file
-        {
-          io: io,
-          filename: 'test.png',
-          content_type: 'image/png'
-        }
-      end
-
-      def io
-        @io ||= Tempfile.new('Hello world!')
       end
     end
   end
