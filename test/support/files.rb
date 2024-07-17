@@ -229,9 +229,9 @@ end
 
 def file_10ko
   {
-    io: File.open(Rails.root.join('public', 'file_10ko')),
+    io: File.open(Rails.root.join('public', 'file_10ko.png')),
     filename: 'file_10ko',
-    content_type: 'text/html'
+    content_type: 'image/png'
   }
 end
 

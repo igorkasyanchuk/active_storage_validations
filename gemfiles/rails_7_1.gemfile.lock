@@ -51,6 +51,8 @@ GEM
       minitest (>= 5.1)
       mutex_m
       tzinfo (~> 2.0)
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.2)
     base64 (0.2.0)
     bigdecimal (3.1.4)
@@ -62,6 +64,9 @@ GEM
       thor (>= 0.14.6)
     concurrent-ruby (1.2.2)
     connection_pool (2.4.1)
+    crack (1.0.0)
+      bigdecimal
+      rexml
     crass (1.0.6)
     docile (1.4.0)
     drb (2.2.0)
@@ -70,6 +75,7 @@ GEM
     ffi (1.16.3)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    hashdiff (1.1.0)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
     io-console (0.6.0)
@@ -103,6 +109,7 @@ GEM
       method_source (~> 1.0)
     psych (5.1.1.1)
       stringio
+    public_suffix (6.0.0)
     racc (1.7.3)
     rack (3.0.8)
     rack-session (2.0.0)
@@ -167,6 +174,10 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
+    webmock (3.23.1)
+      addressable (>= 2.8.0)
+      crack (>= 0.3.2)
+      hashdiff (>= 0.4.0, < 2.0.0)
     webrick (1.8.1)
     zeitwerk (2.6.12)
 
@@ -191,6 +202,7 @@ DEPENDENCIES
   ruby-vips (>= 2.1.0)
   simplecov
   sqlite3
+  webmock (~> 3.23)
 
 BUNDLED WITH
    2.4.22
