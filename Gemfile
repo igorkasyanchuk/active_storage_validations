@@ -16,4 +16,6 @@ gemspec
 # To use a debugger
 # gem 'byebug', group: [:development, :test]
 
-#gem 'rails', path: '../rails'
+# gem 'rails', path: '../rails'
+# gem 'rails', '~> 6.1.4'
+# gem 'sqlite3', '~> 1.4'

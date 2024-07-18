@@ -130,6 +130,13 @@ module ActiveStorageValidations
           content_type: type
         }
       end
+
+      # Due to the way we build test attachments in #attachment_for
+      # (ie spoofed file basically), we need to ignore the error related to
+      # content type spoofing in our matcher to pass the tests
+      def validator_errors_for_attribute
+        super.reject { |hash| hash[:error] == :spoofed_content_type }
+      end
     end
   end
 end

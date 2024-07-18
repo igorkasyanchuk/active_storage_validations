@@ -135,6 +135,11 @@ ActiveRecord::Schema.define do
     t.datetime :updated_at, precision: 6, null: false
   end
 
+  create_table :content_type_spoof_detectors, force: :cascade do |t|
+    t.datetime :created_at, precision: 6, null: false
+    t.datetime :updated_at, precision: 6, null: false
+  end
+
   create_table :projects, force: :cascade do |t|
     t.string :title
     t.datetime :created_at, null: false

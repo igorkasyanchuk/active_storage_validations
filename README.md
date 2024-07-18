@@ -89,6 +89,27 @@ Example code for adding a new content type to Marcel:
 Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files
 ```
 
+**Content type spoofing protection**
+File content type spoofing happens when an ill-intentioned user uploads a file which hide its true content type by faking its extension and its declared content type value. For example, a user may try to upload a `.exe` file (application/x-msdownload content type) dissimulated as a `.jpg` file (image/jpg content type).
+
+By default, the gem prevents content type spoofing. This protection relies on both the linux `file` command and `Marcel` gem.
+
+Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (its content type detection relies on a different logic using content+filename+extension). To handle this issue, we consider a close parent content type to be a match. For example, for a ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content type are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS`.
+
+The difficulty to accurately predict a mime type may generate false positives, if so there are two solutions available:
+- If the ActiveStorage blob content type is closely related to the detected content type using the `file` analyzer, you can enhance `Marcel::TYPE_PARENTS` mapping using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `mime_types.rb` initializer. (Please drop an issue so we can add it to the gem for everyone!)
+- If the ActiveStorage blob content type is not closely related, you can disable the content type spoofing protection using `spoofing_protection: :none` parameter in the validator. (Please drop an issue so we can fix it for everyone!)
+
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+
+  validates :avatar, attached: true, content_type: :png # spoofing_protection enabled
+  validates :avatar, attached: true, content_type: { with: :png, spoofing_protection: :none } # no protection, at your own risks!
+end
+```
+
+
 - Dimension validation with `width`, `height` and `in`.
 
 ```ruby
@@ -382,7 +403,7 @@ Then you can use the matchers with the syntax specified in the RSpec section, ju
 
 To run tests in root folder of gem:
 
-* `BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle exec rake test` to run for Rails 6.1
+* `BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test` to run for Rails 6.1.4
 * `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
 * `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.0
 * `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main branch
@@ -390,11 +411,11 @@ To run tests in root folder of gem:
 Snippet to run in console:
 
 ```bash
-BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_6_1_3_1.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test

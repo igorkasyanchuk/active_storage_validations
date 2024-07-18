@@ -1,5 +1,11 @@
+# frozen_string_literal: true
+
+require_relative 'concerns/loggable'
+
 module ActiveStorageValidations
   class Metadata
+    include Loggable
+
     class InvalidImageError < StandardError; end
 
     attr_reader :file
@@ -156,10 +162,5 @@ module ActiveStorageValidations
         raise "Something wrong with params."
       end
     end
-
-    def logger
-      Rails.logger
-    end
-
   end
 end

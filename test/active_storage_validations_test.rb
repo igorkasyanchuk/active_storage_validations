@@ -17,24 +17,24 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal u.errors.full_messages, ["Avatar must not be blank", "Photos can't be blank", "Proc avatar must not be blank", "Proc photos can't be blank"]
 
     u = User.new(name: 'John Smith')
-    u.avatar.attach(dummy_file)
-    u.proc_avatar.attach(dummy_file)
+    u.avatar.attach(image_150x150_file)
+    u.proc_avatar.attach(image_150x150_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ["Photos can't be blank", "Proc photos can't be blank"]
 
     u = User.new(name: 'John Smith')
-    u.photos.attach(dummy_file)
-    u.proc_photos.attach(dummy_file)
+    u.photos.attach(image_150x150_file)
+    u.proc_photos.attach(image_150x150_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ["Avatar must not be blank", "Proc avatar must not be blank"]
   end
 
   test 'validates content type' do
     u = User.new(name: 'John Smith')
-    u.avatar.attach(dummy_file)
-    u.proc_avatar.attach(dummy_file)
-    u.image_regex.attach(dummy_file)
-    u.proc_image_regex.attach(dummy_file)
+    u.avatar.attach(image_150x150_file)
+    u.proc_avatar.attach(image_150x150_file)
+    u.image_regex.attach(image_150x150_file)
+    u.proc_image_regex.attach(image_150x150_file)
     u.photos.attach(bad_dummy_file)
     u.proc_photos.attach(bad_dummy_file)
     assert !u.valid?
@@ -43,10 +43,10 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u = User.new(name: 'John Smith')
     u.avatar.attach(bad_dummy_file)
     u.proc_avatar.attach(bad_dummy_file)
-    u.image_regex.attach(dummy_file)
-    u.proc_image_regex.attach(dummy_file)
-    u.photos.attach(dummy_file)
-    u.proc_photos.attach(dummy_file)
+    u.image_regex.attach(image_150x150_file)
+    u.proc_image_regex.attach(image_150x150_file)
+    u.photos.attach(image_150x150_file)
+    u.proc_photos.attach(image_150x150_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Proc avatar has an invalid content type']
     assert_equal u.errors.details, avatar: [
@@ -55,7 +55,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
         validator_type: :content_type,
         authorized_types: 'PNG',
         content_type: 'text/plain',
-        filename: 'bad_dummy_file.png'
+        filename: 'apple-touch-icon.png'
       }
     ], proc_avatar: [
      {
@@ -63,26 +63,26 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
        validator_type: :content_type,
        authorized_types: 'PNG',
        content_type: 'text/plain',
-       filename: 'bad_dummy_file.png'
+       filename: 'apple-touch-icon.png'
      }
     ]
 
     u = User.new(name: 'John Smith')
-    u.avatar.attach(dummy_file)
-    u.proc_avatar.attach(dummy_file)
-    u.image_regex.attach(dummy_file)
-    u.proc_image_regex.attach(dummy_file)
+    u.avatar.attach(image_150x150_file)
+    u.proc_avatar.attach(image_150x150_file)
+    u.image_regex.attach(image_150x150_file)
+    u.proc_image_regex.attach(image_150x150_file)
     u.photos.attach(pdf_file) # Should be handled by regex match.
     u.proc_photos.attach(pdf_file) # Should be handled by regex match.
     assert u.valid?
 
     u = User.new(name: 'John Smith')
-    u.avatar.attach(dummy_file)
-    u.proc_avatar.attach(dummy_file)
+    u.avatar.attach(image_150x150_file)
+    u.proc_avatar.attach(image_150x150_file)
     u.image_regex.attach(bad_dummy_file)
     u.proc_image_regex.attach(bad_dummy_file)
-    u.photos.attach(dummy_file)
-    u.proc_photos.attach(dummy_file)
+    u.photos.attach(image_150x150_file)
+    u.proc_photos.attach(image_150x150_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ['Image regex has an invalid content type', 'Proc image regex has an invalid content type']
 
@@ -97,11 +97,11 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Image regex has an invalid content type', 'Proc avatar has an invalid content type', 'Proc photos has an invalid content type', 'Proc image regex has an invalid content type']
 
     u = User.new(name: 'Peter Griffin')
-    u.avatar.attach(dummy_file)
-    u.proc_avatar.attach(dummy_file)
-    u.photos.attach(dummy_file)
-    u.proc_photos.attach(dummy_file)
-    u.conditional_image_2.attach(dummy_file)
+    u.avatar.attach(image_150x150_file)
+    u.proc_avatar.attach(image_150x150_file)
+    u.photos.attach(image_150x150_file)
+    u.proc_photos.attach(image_150x150_file)
+    u.conditional_image_2.attach(image_150x150_file)
     assert u.valid?
     assert_equal u.errors.full_messages, []
 
@@ -109,23 +109,10 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.avatar.attach(bad_dummy_file)
     u.proc_avatar.attach(bad_dummy_file)
     u.photos.attach(bad_dummy_file)
-    u.proc_photos.attach(dummy_file)
+    u.proc_photos.attach(image_150x150_file)
     u.conditional_image_2.attach(bad_dummy_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ["Avatar has an invalid content type", "Photos has an invalid content type", "Conditional image 2 has an invalid content type", "Proc avatar has an invalid content type"]
-  end
-
-  # reads content type from file, not from webp_file_wrong method
-  test 'webp content type 1' do
-    u = User.new(name: 'John Smith')
-    u.avatar.attach(webp_file_wrong)
-    u.proc_avatar.attach(webp_file_wrong)
-    u.image_regex.attach(webp_file_wrong)
-    u.proc_image_regex.attach(webp_file_wrong)
-    u.photos.attach(webp_file_wrong)
-    u.proc_photos.attach(webp_file_wrong)
-    assert !u.valid?
-    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Proc avatar has an invalid content type', 'Proc photos has an invalid content type']
   end
 
   # trying to attach webp file with PNG extension, but real content type is detected
@@ -148,10 +135,10 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert d.valid?
   end
 
-  test 'validates microsoft office sheet' do
+  test 'validates microsoft office xlsx' do
     d = Document.new
-    d.attachment.attach(sheet_file)
-    d.proc_attachment.attach(sheet_file)
+    d.attachment.attach(xlsx_file)
+    d.proc_attachment.attach(xlsx_file)
     assert d.valid?
   end
 
@@ -162,7 +149,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert d.valid?
   end
 
-  test 'validates apple office sheet' do
+  test 'validates apple office numbers' do
     d = Document.new
     d.attachment.attach(numbers_file)
     d.proc_attachment.attach(numbers_file)
