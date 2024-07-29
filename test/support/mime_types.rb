@@ -11,6 +11,7 @@ def most_common_mime_types
     { mime_type: "image/webp", extension: "webp" },
     { mime_type: "image/svg+xml", extension: "svg" },
     { mime_type: "image/bmp", extension: "bmp" },
+    { mime_type: "image/vnd.adobe.photoshop", extension: "psd" },
     { mime_type: "image/tiff", extension: "tiff" },
     { mime_type: "image/heic", extension: "heic" },
 
@@ -20,13 +21,16 @@ def most_common_mime_types
     { mime_type: "video/x-ms-wmv", extension: "wmv" },
     { mime_type: "video/quicktime", extension: "mov" },
     { mime_type: "video/x-matroska", extension: "mkv" },
+    { mime_type: "video/ogg", extension: "ogv" },
     { mime_type: "video/webm", extension: "webm" },
 
     # Audio
     { mime_type: "audio/mpeg", extension: "mp3" },
+    { mime_type: "audio/mp4", extension: "m4a" },
     { mime_type: "audio/wav", extension: "wav" },
     { mime_type: "audio/ogg", extension: "ogg" },
     { mime_type: "audio/aac", extension: "aac" },
+    { mime_type: "audio/flac", extension: "flac" },
 
     # Text
     { mime_type: "text/plain", extension: "txt" },
@@ -45,6 +49,7 @@ def most_common_mime_types
     { mime_type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", extension: "xlsx" },
     { mime_type: "application/vnd.ms-powerpoint", extension: "ppt" },
     { mime_type: "application/vnd.openxmlformats-officedocument.presentationml.presentation", extension: "pptx" },
+    { mime_type: "application/vnd.openxmlformats-officedocument.presentationml.slideshow", extension: "ppsx" },
     ## Open Office documents
     { mime_type: "application/vnd.oasis.opendocument.text", extension: "odt" },
     { mime_type: "application/vnd.oasis.opendocument.spreadsheet", extension: "ods" },
@@ -70,6 +75,7 @@ end
 # webp_file
 # svg_file
 # bmp_file
+# psd_file
 # tiff_file
 # heic_file
 # mp4_file
@@ -77,11 +83,14 @@ end
 # wmv_file
 # mov_file
 # mkv_file
+# ogv_file
 # webm_file
 # mp3_file
+# m4a_file
 # wav_file
 # ogg_file
 # aac_file
+# flac_file
 # txt_file
 # csv_file
 # html_file
@@ -95,6 +104,7 @@ end
 # xlsx_file
 # ppt_file
 # pptx_file
+# ppsx_file
 # odt_file
 # ods_file
 # odp_file

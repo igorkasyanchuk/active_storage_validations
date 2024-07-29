@@ -5,6 +5,8 @@ require 'open3'
 
 module ActiveStorageValidations
   class ContentTypeSpoofDetector
+    class FileCommandLineToolNotInstalledError < StandardError; end
+
     include Loggable
 
     def initialize(record, attribute, file)
@@ -31,10 +33,6 @@ module ActiveStorageValidations
     def supplied_content_type
       # We remove potential mime type parameters
       @supplied_content_type ||= @file.blob.present? && @file.blob.content_type.downcase.split(/[;,\s]/, 2).first
-    end
-
-    def extension
-      @extension ||= File.extname(filename)
     end
 
     def io
@@ -113,7 +111,7 @@ module ActiveStorageValidations
         end
 
       rescue Errno::ENOENT
-        raise StandardError, 'file command-line tool is not installed'
+        raise FileCommandLineToolNotInstalledError, 'file command-line tool is not installed'
       end
     end
 

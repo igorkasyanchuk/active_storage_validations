@@ -75,6 +75,21 @@ describe ActiveStorageValidations::ContentTypeSpoofDetector do
     end
   end
 
+  describe "when the file command-line tool is not found" do
+    subject { model.public_send(attribute).attach(okay_file) and model }
+
+    let(:okay_file) { jpeg_file }
+
+    let(:attribute) { :spoofing_protection }
+
+    it "raises an explicit error" do
+      Open3.stub(:capture2, proc { raise Errno::ENOENT }) do
+        error = assert_raises(ActiveStorageValidations::ContentTypeSpoofDetector::FileCommandLineToolNotInstalledError) { subject.valid? }
+        assert_equal('file command-line tool is not installed', error.message)
+      end
+    end
+  end
+
   # validates :many_spoofing_protection, content_type: :jpg
   describe 'with has_many_attached relationship' do
     let(:attribute) { :many_spoofing_protection }

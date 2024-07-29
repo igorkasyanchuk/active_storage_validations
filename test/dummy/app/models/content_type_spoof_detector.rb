@@ -21,6 +21,7 @@ class ContentTypeSpoofDetector < ApplicationRecord
     { media: 'image', type: :webp },
     { media: 'image', type: :svg },
     { media: 'image', type: :bmp },
+    { media: 'image', type: :psd },
     { media: 'image', type: :tiff },
     { media: 'image', type: :heic },
     # Video
@@ -29,12 +30,15 @@ class ContentTypeSpoofDetector < ApplicationRecord
     { media: 'video', type: :wmv },
     { media: 'video', type: :mov },
     { media: 'video', type: :mkv },
+    # { media: 'video', type: :ogv }, => issue with content_type validator
     { media: 'video', type: :webm },
     # Audio
     { media: 'audio', type: :mp3 },
+    { media: 'audio', type: :m4a },
     { media: 'audio', type: :wav },
     { media: 'audio', type: :ogg },
     { media: 'audio', type: :aac },
+    { media: 'audio', type: :flac },
     # Text
     { media: 'text', type: :txt },
     { media: 'text', type: :csv },
@@ -50,6 +54,7 @@ class ContentTypeSpoofDetector < ApplicationRecord
     { media: 'application', type: :xlsx },
     { media: 'application', type: :ppt },
     { media: 'application', type: :pptx },
+    { media: 'application', type: :ppsx },
     { media: 'application', type: :odt },
     { media: 'application', type: :ods },
     { media: 'application', type: :odp },
@@ -60,10 +65,13 @@ class ContentTypeSpoofDetector < ApplicationRecord
     { media: 'application', type: :'7z' },
     { media: 'application', type: :rar },
     { media: 'application', type: :gz },
+    # { media: 'application', type: :tar }, => issue with content_type validator
   ].each do |content_type|
     has_one_attached :"#{content_type[:media]}_#{content_type[:type]}"
     validates :"#{content_type[:media]}_#{content_type[:type]}", content_type: content_type[:type]
   end
+  has_one_attached :video_ogv
+  validates :video_ogv, content_type: "video/theora"
   has_one_attached :application_tar
   validates :application_tar, content_type: ["application/x-tar", "application/x-gtar"]
 end
