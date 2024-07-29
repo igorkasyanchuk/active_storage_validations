@@ -2,6 +2,7 @@ nl:
   errors:
     messages:
       content_type_invalid: "heeft een ongeldig inhoudstype"
+      spoofed_content_type: "heeft een inhoudstype dat niet is wat het wordt aangegeven via de inhoud, bestandsnaam en extensie"
       file_size_not_less_than: "bestandsgrootte moet kleiner zijn dan %{max_size} (huidige grootte is %{file_size})"
       file_size_not_less_than_or_equal_to: "bestandsgrootte moet kleiner zijn dan of gelijk zijn aan %{max_size} (huidige grootte is %{file_size})"
       file_size_not_greater_than: "bestandsgrootte moet groter zijn dan %{min_size} (huidige grootte is %{file_size})"
