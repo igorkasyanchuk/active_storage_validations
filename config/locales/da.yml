@@ -1,5 +1,5 @@
 # Danish
-dn:
+da:
   errors:
     messages:
       content_type_invalid: "har en ugyldig indholdstype"
