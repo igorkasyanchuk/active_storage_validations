@@ -21,6 +21,7 @@ require 'rails/test_help'
 require 'minitest/mock'
 require 'minitest/spec'
 require 'minitest/focus'
+require 'webmock/minitest'
 
 # Filter out Minitest backtrace while allowing backtrace from other libraries
 # to be shown.

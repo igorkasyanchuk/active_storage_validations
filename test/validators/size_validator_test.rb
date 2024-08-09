@@ -232,7 +232,7 @@ describe ActiveStorageValidations::SizeValidator do
 
             let(:error_options) do
               {
-                file_size: '10 KB',
+                file_size: '10.2 KB',
                 filename: 'file_10ko',
                 min_size: '2 KB',
                 max_size: '7 KB'
