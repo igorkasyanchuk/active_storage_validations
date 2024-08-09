@@ -2,6 +2,7 @@ ru:
   errors:
     messages:
       content_type_invalid: "имеет недопустимый тип содержимого"
+      spoofed_content_type: "имеет тип контента, который не соответствует тому, который объявлен в его содержимом, имени файла и расширении"
       file_size_not_less_than: "размер файла должен быть меньше %{max_size} (текущий размер %{file_size})"
       file_size_not_less_than_or_equal_to: "размер файла должен быть меньше или равен %{max_size} (текущий размер %{file_size})"
       file_size_not_greater_than: "размер файла должен быть больше %{min_size} (текущий размер %{file_size})"

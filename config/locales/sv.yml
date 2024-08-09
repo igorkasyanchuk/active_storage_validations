@@ -2,6 +2,7 @@ sv:
   errors:
     messages:
       content_type_invalid: "Har en ogiltig filtyp"
+      spoofed_content_type: "har en innehållstyp som inte är vad den deklareras genom sitt innehåll, filnamn och tillägg"
       file_size_out_of_range: "storleken %{file_size} är utanför det krävda intervallet"
       limit_out_of_range: "antalet filer är utanför det godkända intervallet"
       image_metadata_missing: "bilden sankar metadata"

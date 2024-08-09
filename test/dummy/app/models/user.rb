@@ -36,5 +36,4 @@ class User < ApplicationRecord
   validates :proc_photos, attached: true, content_type: -> (record) {['image/png', 'image/jpeg', /\A.*\/pdf\z/]}
   validates :proc_photo_with_messages, content_type: { in: -> (record) {['image/png', 'image/jpeg', /\A.*\/pdf\z/]}, message: "must be an authorized type" }
   validates :proc_image_regex, content_type: -> (record) {/\Aimage\/.*\z/}
-  validates :proc_image_regex, content_type: -> (record) {/\Aimage\/.*\z/}
 end

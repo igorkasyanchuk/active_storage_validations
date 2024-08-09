@@ -2,6 +2,7 @@
 
 require_relative 'concerns/errorable.rb'
 require_relative 'concerns/symbolizable.rb'
+require_relative 'content_type_spoof_detector.rb'
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
@@ -10,7 +11,10 @@ module ActiveStorageValidations
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[with in].freeze
-    ERROR_TYPES = %i[content_type_invalid].freeze
+    ERROR_TYPES = %i[
+      content_type_invalid
+      spoofed_content_type
+    ].freeze
 
     def check_validity!
       ensure_exactly_one_validator_option
@@ -26,23 +30,19 @@ module ActiveStorageValidations
       files = Array.wrap(record.send(attribute))
 
       files.each do |file|
-        next if is_valid?(file, types)
-
-        errors_options = initialize_error_options(options, file)
-        errors_options[:authorized_types] = types_to_human_format(types)
-        errors_options[:content_type] = content_type(file)
-        add_error(record, attribute, ERROR_TYPES.first, **errors_options)
+        next if is_valid?(record, attribute, file, types)
         break
       end
     end
 
+    private
+
     def authorized_types(record)
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
       (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).compact.map do |type|
-        if type.is_a?(Regexp)
-          type
-        else
-          Marcel::MimeType.for(declared_type: type.to_s, extension: type.to_s)
+        case type
+        when String, Symbol then Marcel::MimeType.for(declared_type: type.to_s, extension: type.to_s)
+        when Regexp then type
         end
       end
     end
@@ -54,13 +54,44 @@ module ActiveStorageValidations
     end
 
     def content_type(file)
-      file.blob.present? && file.blob.content_type
+      # We remove potential mime type parameters
+      file.blob.present? && file.blob.content_type.downcase.split(/[;,\s]/, 2).first
     end
 
-    def is_valid?(file, types)
+    def is_valid?(record, attribute, file, types)
+      file_type_in_authorized_types?(record, attribute, file, types) &&
+        not_spoofing_content_type?(record, attribute, file)
+    end
+
+    def file_type_in_authorized_types?(record, attribute, file, types)
       file_type = content_type(file)
-      types.any? do |type|
-        type == file_type || (type.is_a?(Regexp) && type.match?(file_type.to_s))
+      file_type_is_authorized = types.any? do |type|
+        case type
+        when String then type == file_type
+        when Regexp then type.match?(file_type.to_s)
+        end
+      end
+
+      if file_type_is_authorized
+        true
+      else
+        errors_options = initialize_error_options(options, file)
+        errors_options[:authorized_types] = types_to_human_format(types)
+        errors_options[:content_type] = content_type(file)
+        add_error(record, attribute, ERROR_TYPES.first, **errors_options)
+        false
+      end
+    end
+
+    def not_spoofing_content_type?(record, attribute, file)
+      return true if disable_spoofing_protection?
+
+      if ContentTypeSpoofDetector.new(record, attribute, file).spoofed?
+        errors_options = initialize_error_options(options, file)
+        add_error(record, attribute, ERROR_TYPES.second, **errors_options)
+        false
+      else
+        true
       end
     end
 
@@ -92,6 +123,10 @@ module ActiveStorageValidations
       when Regexp
         false # We always validate regexes
       end
+    end
+
+    def disable_spoofing_protection?
+      options[:spoofing_protection] == :none
     end
   end
 end

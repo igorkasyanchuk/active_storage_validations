@@ -113,7 +113,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '1 KB',
-                filename: 'file_1ko',
+                filename: 'file_1ko.png',
                 min_size: '7 KB',
                 max_size: nil
               }
@@ -161,7 +161,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '1 KB',
-                filename: 'file_1ko',
+                filename: 'file_1ko.png',
                 min_size: '7 KB',
                 max_size: nil
               }
@@ -198,7 +198,7 @@ describe ActiveStorageValidations::SizeValidator do
             let(:error_options) do
               {
                 file_size: '1 KB',
-                filename: 'file_1ko',
+                filename: 'file_1ko.png',
                 min_size: '2 KB',
                 max_size: '7 KB'
               }
