@@ -10,8 +10,8 @@ require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
   module Matchers
-    def validate_dimensions_of(name)
-      DimensionValidatorMatcher.new(name)
+    def validate_dimensions_of(attribute_name)
+      DimensionValidatorMatcher.new(attribute_name)
     end
 
     class DimensionValidatorMatcher

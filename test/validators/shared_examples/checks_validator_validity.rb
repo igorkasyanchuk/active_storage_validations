@@ -16,6 +16,7 @@ module ChecksValidatorValidity
       when :limit then 'You must pass either :max or :min to the validator'
       when :processable_image then not_applicable
       when :size then 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
+      when :total_size then 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
       end
     end
 
@@ -35,7 +36,7 @@ module ChecksValidatorValidity
       end
     end
 
-    if %i(content_type size).include? module_parent.to_sym
+    if %i(content_type size total_size).include? module_parent.to_sym
       describe 'when the validator has several checks' do
         subject { validator_test_class::CheckValiditySeveralChecks.new(params) }
 

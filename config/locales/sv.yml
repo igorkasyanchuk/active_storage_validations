@@ -2,7 +2,16 @@ sv:
   errors:
     messages:
       content_type_invalid: "Har en ogiltig filtyp"
-      file_size_out_of_range: "storleken %{file_size} är utanför det krävda intervallet"
+      file_size_not_less_than: "filstorleken måste vara mindre än %{max_size} (nuvarande storlek är %{file_size})"
+      file_size_not_less_than_or_equal_to: "filstorleken måste vara mindre än eller lika med %{max_size} (nuvarande storlek är %{file_size})"
+      file_size_not_greater_than: "filstorleken måste vara större än %{min_size} (nuvarande storlek är %{file_size})"
+      file_size_not_greater_than_or_equal_to: "filstorleken måste vara större än eller lika med %{min_size} (nuvarande storlek är %{file_size})"
+      file_size_not_between: "filstorleken måste vara mellan %{min_size} och %{max_size} (nuvarande storlek är %{file_size})"
+      total_file_size_not_less_than: "total filstorlek måste vara mindre än %{max_size} (nuvarande storlek är %{total_file_size})"
+      total_file_size_not_less_than_or_equal_to: "total filstorlek måste vara mindre än eller lika med %{max_size} (nuvarande storlek är %{total_file_size})"
+      total_file_size_not_greater_than: "total filstorlek måste vara större än %{min_size} (nuvarande storlek är %{total_file_size})"
+      total_file_size_not_greater_than_or_equal_to: "total filstorlek måste vara större än eller lika med %{min_size} (nuvarande storlek är %{total_file_size})"
+      total_file_size_not_between: "total filstorlek måste vara mellan %{min_size} och %{max_size} (nuvarande storlek är %{total_file_size})"
       limit_out_of_range: "antalet filer är utanför det godkända intervallet"
       image_metadata_missing: "bilden sankar metadata"
       dimension_min_inclusion: "måste minst vara %{width} x %{height} pixlar"

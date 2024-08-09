@@ -13,8 +13,8 @@ require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
   module Matchers
-    def validate_content_type_of(name)
-      ContentTypeValidatorMatcher.new(name)
+    def validate_content_type_of(attribute_name)
+      ContentTypeValidatorMatcher.new(attribute_name)
     end
 
     class ContentTypeValidatorMatcher
