@@ -142,10 +142,10 @@ describe ActiveStorageValidations::ContentTypeValidator do
       end
     end
 
-    describe ':mode' do
+    describe ':spoofing_protection' do
       # Further testing performed by content_type_spoof_detector_test.rb
 
-      describe "spoofing_protection (default)" do
+      describe "when the protection is enabled (spoofing_protection: true option)" do
         let(:attribute) { :spoofing_protection }
 
         describe "when the file is spoofed" do
@@ -157,7 +157,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
         end
       end
 
-      describe "spoofing_protection: :none" do
+      describe "when the protection is disabled (default / spoofing_protection: false option)" do
         let(:attribute) { :no_spoofing_protection }
 
         describe "when the file is spoofed" do
@@ -165,7 +165,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
 
           let(:spoofed_file) { spoofed_jpg }
 
-          it { is_expected_to_be_valid } # You could regret it later!
+          it { is_expected_to_be_valid }
         end
       end
     end

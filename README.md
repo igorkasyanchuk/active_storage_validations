@@ -92,7 +92,7 @@ Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/p
 **Content type spoofing protection**
 File content type spoofing happens when an ill-intentioned user uploads a file which hides its true content type by faking its extension and its declared content type value. For example, a user may try to upload a `.exe` file (application/x-msdownload content type) dissimulated as a `.jpg` file (image/jpg content type).
 
-By default, the gem prevents content type spoofing. This protection relies on both the linux `file` command and `Marcel` gem.
+By default, the gem does not prevent content type spoofing (prevent it by default is a breaking change that will be implemented in v2). The spoofing protection relies on both the linux `file` command and `Marcel` gem.
 
 Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (its content type detection relies on a different logic using content+filename+extension). To handle this issue, we consider a close parent content type to be a match. For example, for an ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content types are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS`.
 
@@ -104,8 +104,8 @@ The difficulty to accurately predict a mime type may generate false positives, i
 class User < ApplicationRecord
   has_one_attached :avatar
 
-  validates :avatar, attached: true, content_type: :png # spoofing_protection enabled
-  validates :avatar, attached: true, content_type: { with: :png, spoofing_protection: :none } # no protection, at your own risks!
+  validates :avatar, attached: true, content_type: :png # spoofing_protection not enabled, at your own risks!
+  validates :avatar, attached: true, content_type: { with: :png, spoofing_protection: true } # spoofing_protection enabled
 end
 ```
 

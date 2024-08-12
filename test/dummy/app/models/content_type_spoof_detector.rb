@@ -3,13 +3,13 @@ class ContentTypeSpoofDetector < ApplicationRecord
   has_one_attached :spoofing_protection_proc
   has_one_attached :no_spoofing_protection
   has_one_attached :no_spoofing_protection_proc
-  validates :spoofing_protection, content_type: :jpg
-  validates :spoofing_protection_proc, content_type: -> (record) { :jpg }
-  validates :no_spoofing_protection, content_type: { with: :jpg, spoofing_protection: :none}
-  validates :no_spoofing_protection_proc, content_type: -> (record) { { with: :jpg, spoofing_protection: :none} }
+  validates :spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
+  validates :spoofing_protection_proc, content_type: { with: ->(record) { :jpg }, spoofing_protection: true }
+  validates :no_spoofing_protection, content_type: :jpg
+  validates :no_spoofing_protection_proc, content_type: { with: ->(record) { :jpg } }
 
   has_many_attached :many_spoofing_protection
-  validates :many_spoofing_protection, content_type: :jpg
+  validates :many_spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
 
   # Most common mime types
   [
@@ -68,10 +68,11 @@ class ContentTypeSpoofDetector < ApplicationRecord
     # { media: 'application', type: :tar }, => issue with content_type validator
   ].each do |content_type|
     has_one_attached :"#{content_type[:media]}_#{content_type[:type]}"
-    validates :"#{content_type[:media]}_#{content_type[:type]}", content_type: content_type[:type]
+    validates :"#{content_type[:media]}_#{content_type[:type]}",
+              content_type: { with: content_type[:type], spoofing_protection: true }
   end
   has_one_attached :video_ogv
-  validates :video_ogv, content_type: "video/theora"
+  validates :video_ogv, content_type: { with: 'video/theora', spoofing_protection: true }
   has_one_attached :application_tar
-  validates :application_tar, content_type: ["application/x-tar", "application/x-gtar"]
+  validates :application_tar, content_type: { in: ['application/x-tar', 'application/x-gtar'], spoofing_protection: true }
 end

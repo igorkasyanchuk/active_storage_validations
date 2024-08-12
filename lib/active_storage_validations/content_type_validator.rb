@@ -84,7 +84,7 @@ module ActiveStorageValidations
     end
 
     def not_spoofing_content_type?(record, attribute, file)
-      return true if disable_spoofing_protection?
+      return true unless enable_spoofing_protection?
 
       if ContentTypeSpoofDetector.new(record, attribute, file).spoofed?
         errors_options = initialize_error_options(options, file)
@@ -125,8 +125,8 @@ module ActiveStorageValidations
       end
     end
 
-    def disable_spoofing_protection?
-      options[:spoofing_protection] == :none
+    def enable_spoofing_protection?
+      options[:spoofing_protection] == true
     end
   end
 end

@@ -37,6 +37,6 @@ class ContentType::Validator::Check < ApplicationRecord
 
   has_one_attached :spoofing_protection
   has_one_attached :no_spoofing_protection
-  validates :spoofing_protection, content_type: :jpg
-  validates :no_spoofing_protection, content_type: { with: :jpg, spoofing_protection: :none}
+  validates :spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
+  validates :no_spoofing_protection, content_type: :jpg
 end
