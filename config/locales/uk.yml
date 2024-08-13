@@ -2,6 +2,7 @@ uk:
   errors:
     messages:
       content_type_invalid: "має неприпустимий тип вмісту"
+      spoofed_content_type: "має тип вмісту, який не відповідає тому, що він оголошений через його вміст, назву файлу та розширення"
       file_size_not_less_than: "розмір файлу має бути менше %{max_size} (поточний розмір %{file_size})"
       file_size_not_less_than_or_equal_to: "розмір файлу має бути меншим або дорівнювати %{max_size} (поточний розмір %{file_size})"
       file_size_not_greater_than: "розмір файлу має бути більшим ніж %{min_size} (поточний розмір %{file_size})"

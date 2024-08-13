@@ -2,6 +2,7 @@ vi:
   errors:
     messages:
       content_type_invalid: "tệp không hợp lệ"
+      spoofed_content_type: "có loại nội dung không phải là loại nội dung được khai báo thông qua nội dung, tên tệp và phần mở rộng của nó"
       file_size_not_less_than: "kích thước tệp phải nhỏ hơn %{max_size} (kích thước hiện tại là %{file_size})"
       file_size_not_less_than_or_equal_to: "kích thước tệp phải nhỏ hơn hoặc bằng %{max_size} (kích thước hiện tại là %{file_size})"
       file_size_not_greater_than: "kích thước tệp phải lớn hơn %{min_size} (kích thước hiện tại là %{file_size})"

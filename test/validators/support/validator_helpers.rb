@@ -72,7 +72,7 @@ module ValidatorHelpers
     begin
       validator_class.to_sym
     rescue NameError, "uninitialized constant ActiveStorageValidations::IntegrationValidator"
-      raise ArgumentError, "Use the :validator kwarg for this expect method since it could be any validator (integration test file)"
+      nil # Use the :validator kwarg for this expect method since it could be any validator (e.g. integration test file)
     end
   end
 

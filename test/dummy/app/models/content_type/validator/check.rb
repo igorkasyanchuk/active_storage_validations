@@ -26,9 +26,17 @@ class ContentType::Validator::Check < ApplicationRecord
     has_one_attached :"with_#{type}_proc"
     validates :"with_#{type}", content_type: self.example_for(type)
     validates :"with_#{type}_proc", content_type: -> (record) { self.example_for(type) }
+
     has_one_attached :"in_#{type.pluralize}"
     has_one_attached :"in_#{type.pluralize}_proc"
     validates :"in_#{type.pluralize}", content_type: example_for(type, several: true)
     validates :"in_#{type.pluralize}_proc", content_type: -> (record) { example_for(type, several: true) }
   end
+  has_one_attached :content_type_with_parameter
+  validates :content_type_with_parameter, content_type: :rar
+
+  has_one_attached :spoofing_protection
+  has_one_attached :no_spoofing_protection
+  validates :spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
+  validates :no_spoofing_protection, content_type: :jpg
 end

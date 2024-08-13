@@ -1,23 +1,7 @@
-def dummy_file
-  {
-    io: File.open(Rails.root.join('public', 'apple-touch-icon.png')),
-    filename: 'dummy_file.png',
-    content_type: 'image/png'
-  }
-end
-
-def pdf_file
-  {
-    io: File.open(Rails.root.join('public', 'pdf.pdf')),
-    filename: 'pdf_file.pdf',
-    content_type: 'application/pdf'
-  }
-end
-
 def bad_dummy_file
   {
     io: File.open(Rails.root.join('public', 'apple-touch-icon.png')),
-    filename: 'bad_dummy_file.png',
+    filename: 'apple-touch-icon.png',
     content_type: 'text/plain'
   }
 end
@@ -78,86 +62,6 @@ def image_1920x1080_file
   }
 end
 
-def html_file
-  {
-    io: File.open(Rails.root.join('public', '500.html')),
-    filename: 'html_file.html',
-    content_type: 'text/html'
-  }
-end
-
-def webp_file
-  {
-    io: File.open(Rails.root.join('public', '1_sm_webp.png')),
-    filename: '1_sm_webp.png',
-    content_type: 'image/webp'
-  }
-end
-
-def webp_file_wrong
-  {
-    io: File.open(Rails.root.join('public', '1_sm_webp.png')),
-    filename: '1_sm_webp.png',
-    content_type: 'image/png'
-  }
-end
-
-def docx_file
-  {
-    io: File.open(Rails.root.join('public', 'example.docx')),
-    filename: 'example.docx',
-    content_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-  }
-end
-
-def sheet_file
-  {
-    io: File.open(Rails.root.join('public', 'example.xlsx')),
-    filename: 'example.xlsx',
-    content_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  }
-end
-
-def pages_file
-  {
-    io: File.open(Rails.root.join('public', 'example.pages')),
-    filename: 'example.pages',
-    content_type: 'application/vnd.apple.pages'
-  }
-end
-
-def png_file
-  {
-    io: File.open(Rails.root.join('public', 'example.png')),
-    filename: 'example.png',
-    content_type: 'image/png'
-  }
-end
-
-def gif_file
-  {
-    io: File.open(Rails.root.join('public', 'example.gif')),
-    filename: 'example.gif',
-    content_type: 'image/gif'
-  }
-end
-
-def numbers_file
-  {
-    io: File.open(Rails.root.join('public', 'example.numbers')),
-    filename: 'example.numbers',
-    content_type: 'application/vnd.apple.numbers'
-  }
-end
-
-def tar_file
-  {
-    io: File.open(Rails.root.join('public', '404.html.tar')),
-    filename: '404.html.tar',
-    content_type: 'application/x-tar'
-  }
-end
-
 def tar_file_with_image_content_type
   {
     io: File.open(Rails.root.join('public', '404.html.tar')),
@@ -188,8 +92,8 @@ end
 
 def file_1ko
   {
-    io: File.open(Rails.root.join('public', 'file_1ko')),
-    filename: 'file_1ko',
+    io: File.open(Rails.root.join('public', 'file_1ko.png')),
+    filename: 'file_1ko.png',
     content_type: 'image/png'
   }
 end
@@ -241,4 +145,45 @@ def file_17ko_and_png
     filename: 'file_17ko_and_png',
     content_type: 'image/png'
   }
+end
+
+def spoofed_jpg
+  {
+    io: File.open(Rails.root.join('public', 'spoofed.jpg')),
+    filename: 'spoofed.jpg',
+    content_type: 'spoofed.jpg'
+  }
+end
+
+def spoofed_extension_jpeg
+  {
+    io: File.open(Rails.root.join('public', 'most_common_mime_types', 'example.jpeg')),
+    filename: 'example.png',
+    content_type: 'image/jpeg'
+  }
+end
+
+def empty_io_file
+  {
+    io: StringIO.new(''),
+    filename: 'example.jpeg',
+    content_type: 'image/jpeg'
+  }
+end
+
+def not_identifiable_io_file
+  {
+    io: StringIO.new('💎'),
+    filename: 'example.jpeg',
+    content_type: 'image/jpeg'
+  }
+end
+
+def create_blob_from_file(file)
+  ActiveStorage::Blob.create_and_upload!(
+    io: file[:io],
+    filename: file[:filename],
+    content_type: file[:content_type],
+    service_name: 'test'
+  )
 end

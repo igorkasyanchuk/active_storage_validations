@@ -130,6 +130,45 @@ describe ActiveStorageValidations::ContentTypeValidator do
         end
       end
     end
+
+    describe "Edge cases" do
+      describe "when using a file that has a content_type with a parameter (e.g. 'application/x-rar-compressed;version=5')" do
+        subject { model.public_send(attribute).attach(file_having_content_type_with_parameter) and model }
+
+        let(:attribute) { :content_type_with_parameter }
+        let(:file_having_content_type_with_parameter) { rar_file } # 'application/x-rar-compressed;version=5'
+
+        it { is_expected_to_be_valid }
+      end
+    end
+
+    describe ':spoofing_protection' do
+      # Further testing performed by content_type_spoof_detector_test.rb
+
+      describe "when the protection is enabled (spoofing_protection: true option)" do
+        let(:attribute) { :spoofing_protection }
+
+        describe "when the file is spoofed" do
+          subject { model.public_send(attribute).attach(spoofed_file) and model }
+
+          let(:spoofed_file) { spoofed_jpg }
+
+          it { is_expected_not_to_be_valid }
+        end
+      end
+
+      describe "when the protection is disabled (default / spoofing_protection: false option)" do
+        let(:attribute) { :no_spoofing_protection }
+
+        describe "when the file is spoofed" do
+          subject { model.public_send(attribute).attach(spoofed_file) and model }
+
+          let(:spoofed_file) { spoofed_jpg }
+
+          it { is_expected_to_be_valid }
+        end
+      end
+    end
   end
 
   describe 'Rails options' do
