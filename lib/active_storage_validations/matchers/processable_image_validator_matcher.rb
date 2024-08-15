@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require "pry"
+
 require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/allow_blankable.rb'
 require_relative 'concerns/attachable.rb'
@@ -52,15 +52,14 @@ module ActiveStorageValidations
       private
 
       def is_valid_when_image_processable?
-        binding.pry
-        attach_dummy_image unless image_attached?
+        attach_processable_image unless file_attached?
         validate
         is_valid?
       end
 
       def is_invalid_when_image_not_processable?
-        detach_image if image_attached?
-        attach_no_dummy_image
+        detach_file if file_attached?
+        attach_not_processable_image
         validate
         !is_valid?
       end
@@ -68,41 +67,32 @@ module ActiveStorageValidations
       def is_custom_message_valid?
         return true unless @custom_message
 
-        detach_image if image_attached?
-        attach_no_dummy_image
+        detach_file if file_attached?
+        attach_not_processable_image
         validate
         has_an_error_message_which_is_custom_message?
       end
 
-      def attach_dummy_image
-        dummy_image = {
-          io: Tempfile.new('.'),
-          filename: 'dummy.jpg',
-          content_type: 'image/jpg'
+      def attach_processable_image
+        processable_image = {
+          io: File.open(Rails.root.join('public', 'image_1920x1080.png')),
+          filename: 'image_1920x1080_file.png',
+          content_type: 'image/png'
         }
 
-        @subject.public_send(@attribute_name).attach(dummy_image)
+        @subject.public_send(@attribute_name).attach(processable_image)
       end
 
-      def attach_no_dummy_image
-        dummy_image = {
+      def attach_not_processable_image
+        no_processable_image = {
           io: Tempfile.new('.'),
-          filename: 'dummy.txt',
+          filename: 'processable.txt',
           content_type: 'text/plain'
         }
 
-        @subject.public_send(@attribute_name).attach(dummy_image)
+        @subject.public_send(@attribute_name).attach(no_processable_image)
       end
 
-      def image_attached?
-        @subject.public_send(@attribute_name).attached?
-      end
-
-      def detach_image
-        @subject.public_send(@attribute_name).detach
-        # Unset the direct relation since `detach` on an unpersisted record does not set `attached?` to false.
-        @subject.public_send("#{@attribute_name}=", nil)
-      end
     end
   end
 end

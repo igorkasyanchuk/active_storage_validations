@@ -23,6 +23,10 @@ module ActiveStorageValidations
       def detach_file
         @subject.attachment_changes.delete(@attribute_name.to_s)
       end
+
+      def file_attached?
+        @subject.public_send(@attribute_name).attached?
+      end
     end
   end
 end

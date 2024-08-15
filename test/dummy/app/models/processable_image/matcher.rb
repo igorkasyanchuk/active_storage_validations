@@ -16,8 +16,8 @@ class ProcessableImage::Matcher < ApplicationRecord
   has_one_attached :custom_matcher
   validates :custom_matcher, processable_image: true
 
-  has_one_attached :required
-  validates :required, processable_image: true
+  has_one_attached :processable
+  validates :processable, processable_image: true
 
   has_one_attached :with_message
   validates :with_message, processable_image: { message: 'Custom message' }
@@ -42,5 +42,5 @@ class ProcessableImage::Matcher < ApplicationRecord
   has_one_attached :failure_message_when_negated
   validates :failure_message_when_negated, processable_image: true
 
-  has_one_attached :not_required
+  has_one_attached :not_processable
 end
