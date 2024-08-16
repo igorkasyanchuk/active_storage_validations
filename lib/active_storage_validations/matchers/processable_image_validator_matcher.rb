@@ -54,22 +54,23 @@ module ActiveStorageValidations
       def is_valid_when_image_processable?
         attach_processable_image unless file_attached?
         validate
+        detach_file
         is_valid?
       end
 
       def is_invalid_when_image_not_processable?
-        detach_file if file_attached?
-        attach_not_processable_image
+        attach_not_processable_image unless file_attached?
         validate
+        detach_file
         !is_valid?
       end
 
       def is_custom_message_valid?
         return true unless @custom_message
 
-        detach_file if file_attached?
         attach_not_processable_image
         validate
+        detach_file
         has_an_error_message_which_is_custom_message?
       end
 
