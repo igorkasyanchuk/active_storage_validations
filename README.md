@@ -318,8 +318,7 @@ Very simple example of validation with file attached, content type check and cus
 [![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
 
 ## Test matchers
-
-Provides RSpec-compatible and Minitest-compatible matchers for testing the validators. Only `aspect_ratio`, `attached`, `content_type`, `processable_image`, `dimension`, `size` and `total_size` validators currently have their matcher developed.
+Provides RSpec-compatible and Minitest-compatible matchers for testing the validators. Only `aspect_ratio`, `attached`, `content_type`, `limit`, `dimension` and `size` validators currently have their matcher developed.
 
 ### RSpec
 
@@ -351,6 +350,11 @@ describe User do
 
   # processable_image
   it { is_expected.to validate_processable_image_of(:avatar) }
+
+  # limit
+  # #min, #max
+  it { is_expected.to validate_limit_of(:avatar).min(1) }
+  it { is_expected.to validate_limit_of(:avatar).max(5) }
 
   # content_type:
   # #allowing, #rejecting
