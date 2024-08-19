@@ -29,7 +29,7 @@ module ActiveStorageValidations
         initialize_messageable
         initialize_rspecable
         @attribute_name = attribute_name
-        @number_file_min = @number_file_max = nil
+        @file_number_min = @file_number_max = nil
       end
 
       def description
@@ -40,18 +40,18 @@ module ActiveStorageValidations
         "is expected to validate limit file of :#{@attribute_name}"
       end
 
-      def number_file(number)
-        @number_file_min = @number_file_max = number
+      def file_number(number)
+        @file_number_min = @file_number_max = number
         self
       end
 
-      def number_file_min(number)
-        @number_file_min = number
+      def file_number_min(number)
+        @file_number_min = number
         self
       end
 
-      def number_file_max(number)
-        @number_file_max = number
+      def file_number_max(number)
+        @file_number_max = number
         self
       end
 
@@ -61,10 +61,12 @@ module ActiveStorageValidations
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
           is_custom_message_valid? &&
-          number_file_not_smaller_than_min? &&
-          number_file_larger_than_min? &&
-          number_file_smaller_than_max? &&
-          number_file_not_larger_than_max?
+          file_number_not_smaller_than_min? &&
+          file_number_larger_than_min? &&
+          file_number_equal_min? &&
+          file_number_equal_max? &&
+          file_number_smaller_than_max? &&
+          file_number_not_larger_than_max?
       end
 
       private
@@ -74,47 +76,62 @@ module ActiveStorageValidations
 
         message << "  but there seem to have issues with the matcher methods you used, since:"
         @failure_message_artefacts.each do |error_case|
-          message << "  validation failed when provided with a #{error_case[:width]}x#{error_case[:height]}px test image"
+          message << "  validation failed when provided with a #{error_case[:limit]} files"
         end
         message << "  whereas it should have passed"
       end
 
-      def number_file_not_smaller_than_min?
-        @number_file_min.nil? || !passes_validation_with_dimensions(@number_file_min - 1, valid_height)
+      def file_number_not_smaller_than_min?
+        @file_number_min.nil? || !passes_validation_with_limits(@file_number_min - 1)
       end
 
-      def number_file_larger_than_min?
-        @number_file_min.nil? || @number_file_min == @number_file_max || passes_validation_with_dimensions(@number_file_min + 1, valid_height)
+      def file_number_larger_than_min?
+        @file_number_min.nil? || @file_number_min == @file_number_max || passes_validation_with_limits(@file_number_min + 1)
       end
 
-      def number_file_smaller_than_max?
-        @number_file_max.nil? || @number_file_min == @number_file_max || passes_validation_with_dimensions(@number_file_max - 1, valid_height)
+      def file_number_equal_min?
+        @file_number_min.nil? || !passes_validation_with_limits(@file_number_min)
       end
 
-      def number_file_not_larger_than_max?
-        @number_file_max.nil? || !passes_validation_with_dimensions(@number_file_max + 1, valid_height)
+      def file_number_equal_max?
+        @file_number_max.nil? || !passes_validation_with_limits(@file_number_min)
       end
 
-      def passes_validation_with_dimensions(width, height)
-        mock_dimensions_for(attach_file, width, height) do
+      def file_number_smaller_than_max?
+        @file_number_max.nil? || @file_number_min == @file_number_max || passes_validation_with_limits(@file_number_max - 1)
+      end
+
+      def file_number_not_larger_than_max?
+        @file_number_max.nil? || !passes_validation_with_limits(@file_number_max + 1)
+      end
+
+      def passes_validation_with_limits(bound)
+        mock_limits_for(bound) do
           validate
           detach_file
-          is_valid? || add_failure_message_artefact(width, height)
+          is_valid?
         end
-      end
-
-      def add_failure_message_artefact(width, height)
-        @failure_message_artefacts << { width: width, height: height }
-        false
       end
 
       def is_custom_message_valid?
         return true unless @custom_message
 
-        mock_dimensions_for(attach_file, -1, -1) do
+        mock_limits_for(-1) do
           validate
           detach_file
           has_an_error_message_which_is_custom_message?
+        end
+      end
+
+      def mock_limits_for(bound)
+        dummy_file = {
+          io: Tempfile.new('.'),
+          filename: 'dummy.txt',
+          content_type: 'text/plain'
+        }
+
+        bound.times do
+          @subject.public_send(@attribute_name).attach(dummy_file)
         end
       end
     end

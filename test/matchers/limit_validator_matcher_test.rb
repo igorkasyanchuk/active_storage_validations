@@ -26,9 +26,9 @@ module LimitValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      let(:lower_than_lower_range_bound_value) { matcher_method.match?(/_between/) ? 150..200 : 150 }
+      let(:lower_than_lower_range_bound_value) { matcher_method.match?(/_between/) ? 1..5 : 1 }
 
-      describe 'when provided with a lower width than the lower range bound width specified in the model validations' do
+      describe 'when provided with a lower file number than the lower range bound file number specified in the model validations' do
         subject { matcher.public_send(matcher_method, lower_than_lower_range_bound_value) }
 
         it { is_expected_not_to_match_for(klass) }
@@ -40,9 +40,9 @@ module LimitValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      let(:lower_range_bound_value) { matcher_method.match?(/_between/) ? 800..1000 : 800 }
+      let(:lower_range_bound_value) { matcher_method.match?(/_between/) ? 1..5 : 1 }
 
-      describe 'when provided with the exact lower range bound width specified in the model validations' do
+      describe 'when provided with the exact lower range bound file number specified in the model validations' do
         subject { matcher.public_send(matcher_method, lower_range_bound_value) }
 
         it { is_expected_not_to_match_for(klass) }
@@ -54,9 +54,9 @@ module LimitValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      let(:higher_range_bound_value) { matcher_method.match?(/_between/) ? 1200..1500 : 1200 }
+      let(:higher_range_bound_value) { matcher_method.match?(/_between/) ? 1..5 : 1 }
 
-      describe 'when provided with the exact higher range bound width specified in the model validations' do
+      describe 'when provided with the exact higher range bound file number specified in the model validations' do
         subject { matcher.public_send(matcher_method, higher_range_bound_value) }
 
         it { is_expected_not_to_match_for(klass) }
@@ -68,9 +68,9 @@ module LimitValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      let(:higher_than_higher_range_bound_value) { matcher_method.match?(/_between/) ? 9999..10000 : 9999 }
+      let(:higher_than_higher_range_bound_value) { matcher_method.match?(/_between/) ? 1..5 : 1 }
 
-      describe 'when provided with a higher width than the higher range bound width specified in the model validations' do
+      describe 'when provided with a higher file number than the higher range bound file number specified in the model validations' do
         subject { matcher.public_send(matcher_method, higher_than_higher_range_bound_value) }
 
         it { is_expected_not_to_match_for(klass) }
@@ -82,63 +82,25 @@ module LimitValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      describe 'when provided with a lower width than the width specified in the model validations' do
+      describe 'when provided with a lower file number than the file number specified in the model validations' do
         subject { matcher.public_send(matcher_method, 1) }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
-      describe 'when provided with the exact width specified in the model validations' do
+      describe 'when provided with the exact file number specified in the model validations' do
         subject { matcher.public_send(matcher_method, validator_value) }
 
         it { is_expected_to_match_for(klass) }
       end
 
-      describe 'when provided with a higher width than the width specified in the model validations' do
-        subject { matcher.public_send(matcher_method, 9999) }
+      describe 'when provided with a higher file number than the file number specified in the model validations' do
+        subject { matcher.public_send(matcher_method, 5) }
 
         it { is_expected_not_to_match_for(klass) }
       end
     end
   end
-
-  module OnlyMatchWhenExactValues
-    extend ActiveSupport::Concern
-
-    included do
-      %i(width height).each do |dimension|
-        describe "when provided with a lower #{dimension} than the #{dimension} specified in the model validations" do
-          subject do
-            matcher.width(dimension == :width ? 1 : 150)
-            matcher.height(dimension == :height ? 1 : 150)
-          end
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-      end
-
-      describe 'when provided with the exact width and height specified in the model validations' do
-        subject do
-          matcher.width(150)
-          matcher.height(150)
-        end
-
-        it { is_expected_to_match_for(klass) }
-      end
-
-      %i(width height).each do |dimension|
-        describe "when provided with a higher #{dimension} than the #{dimension} specified in the model validations" do
-          subject do
-            matcher.width(dimension == :width ? 9999 : 150)
-            matcher.height(dimension == :height ? 9999 : 150)
-          end
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-      end
-    end
-  end
-end
 
 describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
   include MatcherHelpers
@@ -152,123 +114,123 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
   let(:matcher) { ActiveStorageValidations::Matchers::LimitValidatorMatcher.new(model_attribute) }
   let(:klass) { Limit::Matcher }
 
-  describe "#validate_dimensions_of" do
+  describe "#validate_limits_of" do
     include HasCustomMatcher
   end
 
-  %i(width height).each do |dimension|
-    describe "##{dimension}" do
-      let(:matcher_method) { dimension }
+  %i(file_number).each do |number|
+    describe "##{number}" do
+      let(:matcher_method) { number }
 
-      describe "when used on a #{dimension} exact validator (e.g. dimension: { #{dimension}: 150 })" do
-        let(:model_attribute) { :"#{dimension}_exact" }
-        let(:validator_value) { 150 }
+      describe "when used on a #{number} exact validator (e.g. number of file attached: { #{number}: 1 })" do
+        let(:model_attribute) { :"#{number}_exact" }
+        let(:validator_value) { 1 }
 
         include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
       end
 
-      describe "when used on a #{dimension} in validator (e.g. dimension: { #{dimension}: { in: 800..1200 } })" do
-        let(:model_attribute) { :"#{dimension}_in" }
+      describe "when used on a #{number} in validator (e.g. numberof file attached: { #{number}: { in: 1..5 } })" do
+        let(:model_attribute) { :"#{number}_in" }
 
         include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
       end
 
-      describe "when used on a #{dimension} min validator (e.g. dimension: { #{dimension}: { min: 800 } })" do
-        let(:model_attribute) { :"#{dimension}_min" }
+      describe "when used on a #{number} min validator (e.g. number of file attached: { #{number}: { min: 1 } })" do
+        let(:model_attribute) { :"#{number}_min" }
 
         include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
       end
 
-      describe "when used on a #{dimension} max validator (e.g. dimension: { #{dimension}: { max: 1200 } })" do
-        let(:model_attribute) { :"#{dimension}_max" }
-
-        include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
-      end
-    end
-
-    describe "##{dimension}_between" do
-      let(:matcher_method) { :"#{dimension}_between" }
-
-      describe "when used on a #{dimension} exact validator (e.g. dimension: { #{dimension}: 150 })" do
-        let(:model_attribute) { :width_exact }
-        let(:validator_value) { 150 }
-
-        include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
-      end
-
-      describe "when used on a #{dimension} in validator (e.g. dimension: { #{dimension}: { in: 800..1200 } })" do
-        let(:model_attribute) { :"#{dimension}_in" }
-
-        describe "when provided with the exact lower #{dimension} specified in the model validations" do
-          describe "and the exact higher #{dimension} specified in the model validations" do
-            subject { matcher.public_send(:"#{dimension}_between", 800..1200) }
-
-            it { is_expected_to_match_for(klass) }
-          end
-
-          describe "and a lower #{dimension} than the higher #{dimension} specified in the model validations" do
-            subject { matcher.public_send(:"#{dimension}_between", 800..1000) }
-
-            it { is_expected_not_to_match_for(klass) }
-          end
-
-          describe "and a higher #{dimension} than the higher #{dimension} specified in the model validations" do
-            subject { matcher.public_send(:"#{dimension}_between", 800..9999) }
-
-            it { is_expected_not_to_match_for(klass) }
-          end
-        end
-
-        describe "when provided with the exact higher #{dimension} specified in the model validations" do
-          describe "and the exact lowder #{dimension} specified in the model validations" do
-            subject { matcher.public_send(:"#{dimension}_between", 800..1200) }
-
-            it { is_expected_to_match_for(klass) }
-          end
-
-          describe "and a lower #{dimension} than the lower #{dimension} specified in the model validations" do
-            subject { matcher.public_send(:"#{dimension}_between", 1..1200) }
-
-            it { is_expected_not_to_match_for(klass) }
-          end
-
-          describe "and a higher #{dimension} than the lower #{dimension} specified in the model validations" do
-            subject { matcher.public_send(:"#{dimension}_between", 1000..1200) }
-
-            it { is_expected_not_to_match_for(klass) }
-          end
-        end
-      end
-
-      describe "when used on a #{dimension} min validator (e.g. dimension: { #{dimension}: { min: 1200 } })" do
-        let(:model_attribute) { :"#{dimension}_min" }
-
-        include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
-      end
-
-      describe "when used on a #{dimension} max validator (e.g. dimension: { #{dimension}: { max: 1200 } })" do
-        let(:model_attribute) { :"#{dimension}_max" }
+      describe "when used on a #{number} max validator (e.g. number of file attached: { #{number}: { max: 5 } })" do
+        let(:model_attribute) { :"#{number}_max" }
 
         include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
       end
     end
 
-    describe "##{dimension}_min" do
-      let(:matcher_method) { :"#{dimension}_min" }
+    describe "##{number}_between" do
+      let(:matcher_method) { :"#{number}_between" }
 
-      describe "when used on a #{dimension} exact validator (e.g. dimension: { #{dimension}: 150 })" do
-        let(:model_attribute) { :"#{dimension}_exact" }
+      describe "when used on a #{number} exact validator (e.g. number of file attached: { #{number}: 1 })" do
+        let(:model_attribute) { :file_number_exact }
+        let(:validator_value) { 1 }
 
         include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
       end
 
-      describe "when used on a #{dimension} in validator (e.g. dimension: { #{dimension}: { in: 800..1200 } })" do
-        let(:model_attribute) { :"#{dimension}_in" }
-        let(:validator_lower_range_bound_value) { 800 }
+      describe "when used on a #{number} in validator (e.g. number of file attached: { #{number}: { in: 1..5 } })" do
+        let(:model_attribute) { :"#{number}_in" }
+
+        describe "when provided with the exact lower #{number} specified in the model validations" do
+          describe "and the exact higher #{number} specified in the model validations" do
+            subject { matcher.public_send(:"#{number}_between", 1..5) }
+
+            it { is_expected_to_match_for(klass) }
+          end
+
+          describe "and a lower #{number} than the higher #{number} specified in the model validations" do
+            subject { matcher.public_send(:"#{number}_between", 1..4) }
+
+            it { is_expected_not_to_match_for(klass) }
+          end
+
+          describe "and a higher #{number} than the higher #{number} specified in the model validations" do
+            subject { matcher.public_send(:"#{number}_between", 1..6) }
+
+            it { is_expected_not_to_match_for(klass) }
+          end
+        end
+
+        describe "when provided with the exact higher #{number} specified in the model validations" do
+          describe "and the exact lowder #{number} specified in the model validations" do
+            subject { matcher.public_send(:"#{number}_between", 1..5) }
+
+            it { is_expected_to_match_for(klass) }
+          end
+
+          describe "and a lower #{number} than the lower #{number} specified in the model validations" do
+            subject { matcher.public_send(:"#{number}_between", 0..5) }
+
+            it { is_expected_not_to_match_for(klass) }
+          end
+
+          describe "and a higher #{number} than the lower #{number} specified in the model validations" do
+            subject { matcher.public_send(:"#{number}_between", 2..5) }
+
+            it { is_expected_not_to_match_for(klass) }
+          end
+        end
+      end
+
+      describe "when used on a #{number} min validator (e.g. number of file attached: { #{number}: { min: 1 } })" do
+        let(:model_attribute) { :"#{number}_min" }
+
+        include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
+      end
+
+      describe "when used on a #{number} max validator (e.g. number of file attached: { #{number}: { max: 5 } })" do
+        let(:model_attribute) { :"#{number}_max" }
+
+        include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
+      end
+    end
+
+    describe "##{number}_min" do
+      let(:matcher_method) { :"#{number}_min" }
+
+      describe "when used on a #{number} exact validator (e.g. number of file attached: { #{number}: 1 })" do
+        let(:model_attribute) { :"#{number}_exact" }
+
+        include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
+      end
+
+      describe "when used on a #{number} in validator (e.g. number of file attached: { #{number}: { in: 1..5 } })" do
+        let(:model_attribute) { :"#{number}_in" }
+        let(:validator_lower_range_bound_value) { 1 }
 
         include LimitValidatorMatcherTest::DoesNotMatchWhenLowerValueThanLowerRangeBoundValue
 
-        describe "when provided with the exact lower range bound #{dimension} specified in the model validations" do
+        describe "when provided with the exact lower range bound #{number} specified in the model validations" do
           subject { matcher.public_send(matcher_method, validator_lower_range_bound_value) }
 
           it { is_expected_to_match_for(klass) }
@@ -278,37 +240,37 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
         include LimitValidatorMatcherTest::DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
       end
 
-      describe "when used on a #{dimension} min validator (e.g. dimension: { #{dimension}: { min: 800 } })" do
-        let(:model_attribute) { :"#{dimension}_min" }
-        let(:validator_value) { 800 }
+      describe "when used on a #{number} min validator (e.g. number of file attached: { #{number}: { min: 1 } })" do
+        let(:model_attribute) { :"#{number}_min" }
+        let(:validator_value) { 1 }
 
         include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
       end
 
-      describe "when used on a #{dimension} max validator (e.g. dimension: { #{dimension}: { max: 1200 } })" do
-        let(:model_attribute) { :"#{dimension}_max" }
+      describe "when used on a #{number} max validator (e.g. number of file attached: { #{number}: { max: 5 } })" do
+        let(:model_attribute) { :"#{number}_max" }
 
         include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
       end
     end
 
-    describe "##{dimension}_max" do
-      let(:matcher_method) { :"#{dimension}_max" }
+    describe "##{number}_max" do
+      let(:matcher_method) { :"#{number}_max" }
 
-      describe "when used on a #{dimension} exact validator (e.g. dimension: { #{dimension}: 150 })" do
-        let(:model_attribute) { :"#{dimension}_exact" }
+      describe "when used on a #{number} exact validator (e.g. number of file attached: { #{number}: 150 })" do
+        let(:model_attribute) { :"#{number}_exact" }
 
         include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
       end
 
-      describe "when used on a #{dimension} in validator (e.g. dimension: { #{dimension}: { in: 800..1200 } })" do
-        let(:model_attribute) { :"#{dimension}_in" }
-        let(:validator_higher_range_bound_value) { 1200 }
+      describe "when used on a #{number} in validator (e.g. number of file attached: { #{number}: { in: 1..5 } })" do
+        let(:model_attribute) { :"#{number}_in" }
+        let(:validator_higher_range_bound_value) { 5 }
 
         include LimitValidatorMatcherTest::DoesNotMatchWhenLowerValueThanLowerRangeBoundValue
         include LimitValidatorMatcherTest::DoesNotMatchWhenValueEqualToLowerRangeBoundValue
 
-        describe "when provided with the exact higher range bound #{dimension} specified in the model validations" do
+        describe "when provided with the exact higher range bound #{number} specified in the model validations" do
           subject { matcher.public_send(matcher_method, validator_higher_range_bound_value) }
 
           it { is_expected_to_match_for(klass) }
@@ -317,15 +279,15 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
         include LimitValidatorMatcherTest::DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
       end
 
-      describe "when used on a #{dimension} min validator (e.g. dimension: { #{dimension}: { min: 800 } })" do
-        let(:model_attribute) { :"#{dimension}_min" }
+      describe "when used on a #{number} min validator (e.g. number of file attached: { #{number}: { min: 1 } })" do
+        let(:model_attribute) { :"#{number}_min" }
 
         include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
       end
 
-      describe "when used on a #{dimension} max validator (e.g. dimension: { #{dimension}: { max: 1200 } })" do
-        let(:model_attribute) { :"#{dimension}_max" }
-        let(:validator_value) { 1200 }
+      describe "when used on a #{number} max validator (e.g. number of file attached: { #{number}: { max: 5 } })" do
+        let(:model_attribute) { :"#{number}_max" }
+        let(:validator_value) { 5 }
 
         include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
       end
@@ -345,16 +307,16 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
   end
 
   describe "Combinations" do
-    %i(width height).each do |dimension|
-      describe "##{dimension} + #with_message" do
-        let(:dimension_matcher_method) { dimension }
-        let(:model_attribute) { :"#{dimension}_exact_with_message" }
+    %i(file_number).each do |number|
+      describe "##{number} + #with_message" do
+        let(:number_matcher_method) { number }
+        let(:model_attribute) { :"#{number}_exact_with_message" }
 
-        describe "when used on a #{dimension} exact with message validator (e.g. dimension: { #{dimension}: 150, message: 'Invalid dimensions.' })" do
-          describe "and when provided with the exact #{dimension} and message specified in the model validations" do
+        describe "when used on a #{number} exact with message validator (e.g. limit: { #{number}: 1, message: 'Invalid limits.' })" do
+          describe "and when provided with the exact #{number} and message specified in the model validations" do
             subject do
-              matcher.public_send(dimension_matcher_method, 150)
-              matcher.with_message('Invalid dimensions.')
+              matcher.public_send(number_matcher_method, 1)
+              matcher.with_message('Invalid limits.')
             end
 
             it { is_expected_to_match_for(klass) }
@@ -362,15 +324,15 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
         end
       end
 
-      describe "##{dimension}_between + #with_message" do
-        let(:dimension_matcher_method) { :"#{dimension}_between" }
-        let(:model_attribute) { :"#{dimension}_in_with_message" }
+      describe "##{number}_between + #with_message" do
+        let(:number_matcher_method) { :"#{number}_between" }
+        let(:model_attribute) { :"#{number}_in_with_message" }
 
-        describe "when used on a #{dimension} in with message validator (e.g. dimension: { #{dimension}: { in: 800..1200 }, message: 'Invalid dimensions.' })" do
-          describe "and when provided with the exact #{dimension} range and message specified in the model validations" do
+        describe "when used on a #{number} in with message validator (e.g. limit: { #{number}: { in: 1..5 }, message: 'Invalid limits.' })" do
+          describe "and when provided with the exact #{number} range and message specified in the model validations" do
             subject do
-              matcher.public_send(dimension_matcher_method, 800..1200)
-              matcher.with_message('Invalid dimensions.')
+              matcher.public_send(number_matcher_method, 1..5)
+              matcher.with_message('Invalid limits.')
             end
 
             it { is_expected_to_match_for(klass) }
@@ -378,15 +340,15 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
         end
       end
 
-      describe "##{dimension}_min + #with_message" do
-        let(:dimension_matcher_method) { :"#{dimension}_min" }
-        let(:model_attribute) { :"#{dimension}_min_with_message" }
+      describe "##{number}_min + #with_message" do
+        let(:number_matcher_method) { :"#{number}_min" }
+        let(:model_attribute) { :"#{number}_min_with_message" }
 
-        describe "when used on a #{dimension} min with message validator (e.g. dimension: { #{dimension}: { min: 800 }, message: 'Invalid dimensions.' })" do
-          describe "and when provided with the min #{dimension} and message specified in the model validations" do
+        describe "when used on a #{number} min with message validator (e.g. limit: { #{number}: { min: 1 }, message: 'Invalid limits.' })" do
+          describe "and when provided with the min #{number} and message specified in the model validations" do
             subject do
-              matcher.public_send(dimension_matcher_method, 800)
-              matcher.with_message('Invalid dimensions.')
+              matcher.public_send(number_matcher_method, 1)
+              matcher.with_message('Invalid limits.')
             end
 
             it { is_expected_to_match_for(klass) }
@@ -394,15 +356,15 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
         end
       end
 
-      describe "##{dimension}_max + #with_message" do
-        let(:dimension_matcher_method) { :"#{dimension}_max" }
-        let(:model_attribute) { :"#{dimension}_max_with_message" }
+      describe "##{number}_max + #with_message" do
+        let(:number_matcher_method) { :"#{number}_max" }
+        let(:model_attribute) { :"#{number}_max_with_message" }
 
-        describe "when used on a #{dimension} max with message validator (e.g. dimension: { #{dimension}: { max: 1200 }, message: 'Invalid dimensions.' })" do
-          describe "and when provided with the max #{dimension} and message specified in the model validations" do
+        describe "when used on a #{number} max with message validator (e.g. limit: { #{number}: { max: 5 }, message: 'Invalid limits.' })" do
+          describe "and when provided with the max #{number} and message specified in the model validations" do
             subject do
-              matcher.public_send(dimension_matcher_method, 1200)
-              matcher.with_message('Invalid dimensions.')
+              matcher.public_send(number_matcher_method, 5)
+              matcher.with_message('Invalid limits.')
             end
 
             it { is_expected_to_match_for(klass) }
@@ -412,67 +374,61 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
     end
 
     %i(min max).each do |bound|
-      describe "#width_#{bound} + #height_#{bound}" do
+      describe "#file_number_#{bound}" do
         let(:model_attribute) { :"#{bound}" }
 
-        describe "when provided with both lower width and height than the width and height specified in the model validations" do
+        describe "when provided with lower number of file attached than the number of file attached specified in the model validations" do
           subject do
-            matcher.public_send(:"width_#{bound}", 1)
-            matcher.public_send(:"height_#{bound}", 1)
+            matcher.public_send(:"file_number_#{bound}", 1)
           end
 
           it { is_expected_not_to_match_for(klass) }
         end
 
-        %i(width height).each do |dimension|
-          describe "when provided with a lower #{dimension} than the #{dimension} specified in the model validations" do
+        %i(file_number).each do |number|
+          describe "when provided with a lower #{number} than the #{number} specified in the model validations" do
             subject do
-              matcher.public_send(:"width_#{bound}", dimension == :width ? 1 : 800)
-              matcher.public_send(:"height_#{bound}", dimension == :height ? 1 : 600)
+              matcher.public_send(:"file_number_#{bound}", number == :file_number ? 1 : 5)
             end
 
             it { is_expected_not_to_match_for(klass) }
           end
         end
 
-        describe "when provided with the exact width and height specified in the model validations" do
+        describe "when provided with the exact number of file attached specified in the model validations" do
           subject do
-            matcher.public_send(:"width_#{bound}", 800)
-            matcher.public_send(:"height_#{bound}", 600)
+            matcher.public_send(:"file_number_#{bound}", 1)
           end
 
           it { is_expected_to_match_for(klass) }
         end
 
-        %i(width height).each do |dimension|
-          describe "when provided with a higher #{dimension} than the #{dimension} specified in the model validations" do
+        %i(file_number).each do |number|
+          describe "when provided with a higher #{number} than the #{number} specified in the model validations" do
             subject do
-              matcher.public_send(:"width_#{bound}", dimension == :width ? 9999 : 800)
-              matcher.public_send(:"height_#{bound}", dimension == :height ? 9999 : 600)
+              matcher.public_send(:"file_number_#{bound}", number == :file_number ? 9 : 5)
             end
 
             it { is_expected_not_to_match_for(klass) }
           end
         end
 
-        describe "when provided with both higher width and height than the width and height specified in the model validations" do
+        describe "when provided with higher number of file attached than the number of file attached specified in the model validations" do
           subject do
-            matcher.public_send(:"width_#{bound}", 9999)
-            matcher.public_send(:"height_#{bound}", 9999)
+            matcher.public_send(:"file_number_#{bound}", 9)
           end
 
           it { is_expected_not_to_match_for(klass) }
         end
       end
 
-      describe "#width_#{bound} + #height_#{bound} + #with_message" do
+      describe "#file_number_#{bound} + #with_message" do
         let(:model_attribute) { :"#{bound}_with_message" }
 
-        describe "when provided with the exact width and height specified in the model validations" do
+        describe "when provided with the exact number of file attached specified in the model validations" do
           describe "and when provided with the message specified in the model validations" do
             subject do
-              matcher.public_send(:"width_#{bound}", 800)
-              matcher.public_send(:"height_#{bound}", 600)
+              matcher.public_send(:"file_number_#{bound}", 1)
               matcher.with_message('Invalid dimensions.')
             end
 
@@ -482,22 +438,21 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
       end
     end
 
-    describe '#width + #height' do
-      describe 'when used on a width exact and height exact validator (e.g. dimension: { width: 150, height: 150 })' do
-        let(:model_attribute) { :width_and_height_exact }
+    describe '#file_number' do
+      describe 'when used on a number of file attached exact validator (e.g. number of file attached: { number : 1 })' do
+        let(:model_attribute) { :file_number_exact }
 
         include LimitValidatorMatcherTest::OnlyMatchWhenExactValues
       end
     end
 
-    describe '#width + #height + #with_message' do
-      let(:model_attribute) { :width_and_height_exact_with_message }
+    describe '#file_number + #with_message' do
+      let(:model_attribute) { :file_number_exact_with_message }
 
-      describe "when used on a width exact and height exact with message validator (e.g. dimension: { width: 150, height: 150, message: 'Invalid dimensions.' })" do
-        describe 'and when provided with the exact width, height and message specified in the model validations' do
+      describe "when used on a number of file attached exact with message validator (e.g. number of file attached: { number: 1, message: 'Invalid dimensions.' })" do
+        describe 'and when provided with the exact number of file attached and message specified in the model validations' do
           subject do
-            matcher.width(150)
-            matcher.height(150)
+            matcher.file_number(1)
             matcher.with_message('Invalid dimensions.')
           end
 
@@ -506,13 +461,12 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
       end
     end
 
-    describe "#width_between + #height_between" do
-      let(:model_attribute) { :width_and_height_in }
+    describe "#file_number_between" do
+      let(:model_attribute) { :file_number_in }
 
-      describe "when provided with the width and height ranges specified in the model validations" do
+      describe "when provided with the number of file attached ranges specified in the model validations" do
         subject do
-          matcher.width_between(800..1200)
-          matcher.height_between(600..900)
+          matcher.file_number_between(1..5)
         end
 
         it { is_expected_to_match_for(klass) }
@@ -525,15 +479,14 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
       end
     end
 
-    describe "#width_between + #height_between + #with_message" do
-      let(:model_attribute) { :width_and_height_in_with_message }
+    describe "#file_number_between + #with_message" do
+      let(:model_attribute) { :file_number_in_with_message }
 
-      describe "when provided with the exact width and height ranges specified in the model validations" do
+      describe "when provided with the exact number of file attached ranges specified in the model validations" do
         describe "and when provided with the message specified in the model validations" do
           subject do
-            matcher.width_between(800..1200)
-            matcher.height_between(600..900)
-            matcher.with_message('Invalid dimensions.')
+            matcher.file_number_between(1..5)
+            matcher.with_message('Invalid limits.')
           end
 
           it { is_expected_to_match_for(klass) }
@@ -541,15 +494,13 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
       end
     end
 
-    describe "#width_min + #width_max + #height_min + #height_max" do
-      let(:model_attribute) { :width_and_height_min_max }
+    describe "#file_number_min + #file_number_max" do
+      let(:model_attribute) { :file_number_min_max }
 
       describe "when provided with the width and height min max specified in the model validations" do
         subject do
-          matcher.width_min(800)
-          matcher.width_max(1200)
-          matcher.height_min(600)
-          matcher.height_max(900)
+          matcher.file_number_min(1)
+          matcher.file_number_max(5)
         end
 
         it { is_expected_to_match_for(klass) }
