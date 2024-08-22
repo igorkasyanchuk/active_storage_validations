@@ -7,7 +7,7 @@ module HasValidRspecMessageMethods
         case validator_sym
         when :aspect_ratio then matcher.rejecting(:square)
         when :attached then matcher
-        when :limit then matcher.min(1).max(5)
+        when :limit then matcher.min(0).max(6)
         when :content_type then matcher.rejecting('image/png')
         when :dimension then matcher.width(75).height(75)
         when :size then matcher.less_than_or_equal_to(7.megabytes)

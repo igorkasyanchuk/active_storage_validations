@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'pry'
+
 require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/allow_blankable.rb'
 require_relative 'concerns/attachable'
@@ -46,24 +46,14 @@ module ActiveStorageValidations
         self
       end
 
-      def min_between(range)
-        @min, @max = range.first, range.last
-        self
-      end
-
       def max(number)
         @max = number
         self
       end
 
-      def max_between(range)
-        @min, @max = range.first, range.last
-        self
-      end
-
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
-        # binding.pry
+
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
           is_custom_message_valid? &&
@@ -82,7 +72,7 @@ module ActiveStorageValidations
 
         message << "  but there seem to have issues with the matcher methods you used, since:"
         @failure_message_artefacts.each do |error_case|
-          message << "  validation failed when provided with a #{error_case[:count]} limit file"
+          message << "  validation failed when provided with a #{error_case[:count]} file(s)"
         end
         message << "  whereas it should have passed"
       end
