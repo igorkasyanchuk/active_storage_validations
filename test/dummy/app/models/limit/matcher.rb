@@ -45,8 +45,8 @@ class Limit::Matcher < ApplicationRecord
   validates :failure_message_when_negated, limit: { min: 1, max: 5 }
 
   # Combinations
-  has_many_attached :limit_min_and_limit_max_exact
-  has_many_attached :limit_min_and_limit_max_exact_with_message
-  validates :limit_min_and_limit_max_exact, limit: { min: 1, max: 5 }
-  validates :limit_min_and_limit_max_exact_with_message, limit: { min: 1, max: 5, message: 'Invalid limits.' }
+  has_many_attached :min_with_message
+  validates :min_with_message, limit: { min: 1, message: 'Invalid limits.' }
+  has_many_attached :max_with_message
+  validates :max_with_message, limit: { max: 5, message: 'Invalid limits.' }
 end
