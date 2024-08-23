@@ -1,12 +1,12 @@
 # frozen_string_literal: true
-
-require_relative 'concerns/active_storageable.rb'
-require_relative 'concerns/allow_blankable.rb'
+require 'pry'
+require_relative 'concerns/active_storageable'
+require_relative 'concerns/allow_blankable'
 require_relative 'concerns/attachable'
-require_relative 'concerns/contextable.rb'
-require_relative 'concerns/messageable.rb'
-require_relative 'concerns/rspecable.rb'
-require_relative 'concerns/validatable.rb'
+require_relative 'concerns/contextable'
+require_relative 'concerns/messageable'
+require_relative 'concerns/rspecable'
+require_relative 'concerns/validatable'
 
 module ActiveStorageValidations
   module Matchers
@@ -29,6 +29,7 @@ module ActiveStorageValidations
         initialize_messageable
         initialize_rspecable
         @attribute_name = attribute_name
+        @min = @max = nil
       end
 
       def description
@@ -38,6 +39,7 @@ module ActiveStorageValidations
       def failure_message
         message = ["is expected to validate limit file of :#{@attribute_name}"]
         build_failure_message(message)
+        # binding.pry
         message.join("\n")
       end
 
@@ -125,12 +127,15 @@ module ActiveStorageValidations
       def attach_files(count)
         return if count.negative? || count.zero?
 
-        dummy_file = {
-          io: Tempfile.new('.'),
-          filename: 'dummy.txt',
-          content_type: 'text/plain'
-        }
-        file_array = Array.new(count, dummy_file)
+        file_array = []
+        (1..count).each do |i|
+          dummy_file = {
+            io: Tempfile.new('.'),
+            filename: "dummy_#{i}.txt",
+            content_type: 'text/plain'
+          }
+          file_array << dummy_file
+        end
 
         @subject.public_send(@attribute_name).attach(file_array)
       end

@@ -289,7 +289,7 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
         end
       end
     end
-    
+
     %i(min max).each do |number|
       describe "#file_number_#{number}" do
         let(:model_attribute) { :"#{number}" }
