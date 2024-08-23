@@ -39,7 +39,6 @@ module ActiveStorageValidations
       def failure_message
         message = ["is expected to validate limit file of :#{@attribute_name}"]
         build_failure_message(message)
-        # binding.pry
         message.join("\n")
       end
 
@@ -65,9 +64,9 @@ module ActiveStorageValidations
           file_number_smaller_than_max? &&
           file_number_equal_max? &&
           file_number_not_larger_than_max?
-      end
+        end
 
-      private
+        private
 
       def build_failure_message(message)
         return unless @failure_message_artefacts.present?
@@ -113,7 +112,7 @@ module ActiveStorageValidations
       def is_custom_message_valid?
         return true unless @custom_message
 
-        attach_files(-1)
+        @min.nil? ? attach_files(6) : attach_files(-1)
         validate
         detach_files
         has_an_error_message_which_is_custom_message?
