@@ -112,7 +112,7 @@ module ActiveStorageValidations
       def is_custom_message_valid?
         return true unless @custom_message
 
-        @min.nil? ? attach_files(6) : attach_files(-1)
+        @min.nil? ? attach_files(@max + 1) : attach_files(@min - 1)
         validate
         detach_files
         has_an_error_message_which_is_custom_message?
