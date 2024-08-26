@@ -21,11 +21,11 @@ describe ActiveStorageValidations::Matchers::ProcessableImageValidatorMatcher do
   let(:matcher) { ActiveStorageValidations::Matchers::ProcessableImageValidatorMatcher.new(model_attribute) }
   let(:klass) { ProcessableImage::Matcher }
 
-  describe "#validate_content_type_of" do
+  describe "#validate_processable_image_of" do
     include HasCustomMatcher
   end
 
-  describe 'when the passed model attribute does not have an `processable: true` constraint' do
+  describe 'when the passed model attribute does not have a `processable: true` constraint' do
     subject { matcher }
 
     let(:model_attribute) { :not_required }

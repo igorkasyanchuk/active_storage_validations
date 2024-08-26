@@ -52,14 +52,14 @@ module ActiveStorageValidations
       private
 
       def is_valid_when_image_processable?
-        attach_processable_image unless file_attached?
+        attach_processable_image
         validate
         detach_file
         is_valid?
       end
 
       def is_invalid_when_image_not_processable?
-        attach_not_processable_image unless file_attached?
+        attach_not_processable_image
         validate
         detach_file
         !is_valid?
@@ -85,7 +85,7 @@ module ActiveStorageValidations
       end
 
       def attach_not_processable_image
-        no_processable_image = {
+        not_processable_image = {
           io: Tempfile.new('.'),
           filename: 'processable.txt',
           content_type: 'text/plain'
