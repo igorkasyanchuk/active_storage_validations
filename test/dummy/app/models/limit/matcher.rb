@@ -39,6 +39,10 @@ class Limit::Matcher < ApplicationRecord
   validates :validatable_different_error_messages, limit: { min: 1, message: 'Custom message 1' }, if: :title_is_quo_vadis?
   validates :validatable_different_error_messages, limit: { min: 1, message: 'Custom message 2' }, if: :title_is_american_psycho?
 
+  has_many_attached :validatable_different_error_messages
+  validates :validatable_different_error_messages, limit: { min: 0, message: 'Custom message 1' }, if: :title_is_quo_vadis?
+  validates :validatable_different_error_messages, limit: { min: 0, message: 'Custom message 2' }, if: :title_is_american_psycho?
+
   has_many_attached :failure_message
   validates :failure_message, limit: { min: 1, max: 5 }
   has_many_attached :failure_message_when_negated
