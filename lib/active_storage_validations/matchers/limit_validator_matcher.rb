@@ -64,7 +64,7 @@ module ActiveStorageValidations
           file_number_smaller_than_max? &&
           file_number_equal_max? &&
           file_number_not_larger_than_max?
-        end
+      end
 
         private
 
