@@ -91,7 +91,7 @@ module ActiveStorageValidations
           content_type: 'text/plain'
         }
 
-        @subject.public_send(@attribute_name).attach(no_processable_image)
+        @subject.public_send(@attribute_name).attach(not_processable_image)
       end
 
     end
