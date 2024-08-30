@@ -9,6 +9,7 @@ module ChecksIfIsValid
             case validator_sym
             when :aspect_ratio then matcher.allowing(:square)
             when :attached then matcher
+            when :limit then matcher.min(1)
             when :content_type then matcher.rejecting('image/jpg')
             when :dimension then matcher.width(150)
             when :size then matcher.less_than(10.megabytes)

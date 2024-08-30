@@ -7,6 +7,7 @@ module HasValidRspecMessageMethods
         case validator_sym
         when :aspect_ratio then matcher.rejecting(:square)
         when :attached then matcher
+        when :limit then matcher.min(0).max(6)
         when :content_type then matcher.rejecting('image/png')
         when :dimension then matcher.width(75).height(75)
         when :size then matcher.less_than_or_equal_to(7.megabytes)
@@ -25,6 +26,13 @@ module HasValidRspecMessageMethods
         when :attached
           <<~FAILURE_MESSAGE
             is expected to validate attachment of :#{model_attribute}
+          FAILURE_MESSAGE
+        when :limit
+          <<~FAILURE_MESSAGE
+            is expected to validate limit file of :#{model_attribute}
+              but there seem to have issues with the matcher methods you used, since:
+              validation failed when provided with a 6 file(s)
+              whereas it should have passed
           FAILURE_MESSAGE
         when :content_type
           <<~FAILURE_MESSAGE
@@ -59,6 +67,7 @@ module HasValidRspecMessageMethods
         case validator_sym
         when :aspect_ratio then matcher.allowing(:square)
         when :attached then matcher
+        when :limit then matcher.min(1).max(5)
         when :content_type then matcher.allowing('image/png')
         when :dimension then matcher.width(150).height(150)
         when :size then matcher.less_than_or_equal_to(5.megabytes)
@@ -77,6 +86,14 @@ module HasValidRspecMessageMethods
         when :attached
           <<~FAILURE_MESSAGE
             is expected not to validate attachment of :#{model_attribute}
+          FAILURE_MESSAGE
+        when :limit
+          <<~FAILURE_MESSAGE
+            is expected not to validate limit file of :#{model_attribute}
+              but there seem to have issues with the matcher methods you used, since:
+              validation failed when provided with a 0 file(s)
+              validation failed when provided with a 6 file(s)
+              whereas it should have passed
           FAILURE_MESSAGE
         when :content_type
           <<~FAILURE_MESSAGE
