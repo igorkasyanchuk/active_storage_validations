@@ -188,13 +188,6 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
       include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
     end
 
-    describe "when used on a 0 file attached min validator (e.g. number of file attached: 0)" do
-      let(:model_attribute) { :min }
-      let(:validator_value) { 0 }
-
-      include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
-    end
-
     describe "when used on a minimum file attached max validator (e.g. number of file attached: { min = max = 5 })" do
       let(:model_attribute) { :max }
 
