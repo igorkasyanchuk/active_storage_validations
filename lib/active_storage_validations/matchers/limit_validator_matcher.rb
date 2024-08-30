@@ -79,15 +79,15 @@ module ActiveStorageValidations
       end
 
       def file_number_not_smaller_than_min?
-        @min.nil? || !passes_validation_with_limits(@min - 1)
+        @min.nil? || @min.zero? || !passes_validation_with_limits(@min - 1)
       end
 
       def file_number_equal_min?
-        @min.nil? || passes_validation_with_limits(@min)
+        @min.nil? || @min.zero? || passes_validation_with_limits(@min)
       end
 
       def file_number_larger_than_min?
-        @min.nil? || @min == @max || passes_validation_with_limits(@min + 1)
+        @min.nil? || @min.zero? || @min == @max || passes_validation_with_limits(@min + 1)
       end
 
       def file_number_smaller_than_max?
@@ -110,6 +110,10 @@ module ActiveStorageValidations
       end
 
       def is_custom_message_valid?
+        unless @min.nil?
+          return true if @min.zero? && @max.nil?
+        end
+
         return true unless @custom_message
 
         @min.nil? ? attach_files(@max + 1) : attach_files(@min - 1)

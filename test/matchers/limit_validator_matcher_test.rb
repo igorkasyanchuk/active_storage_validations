@@ -26,7 +26,7 @@ module LimitValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      let(:lower_than_lower_range_bound_value) { matcher_method.match?(/_between/) ? 1..5 : 1 }
+      let(:lower_than_lower_range_bound_value) { 0 }
 
       describe 'when provided with a lower file number than the lower range bound file number specified in the model validations' do
         subject { matcher.public_send(matcher_method, lower_than_lower_range_bound_value) }
@@ -40,7 +40,7 @@ module LimitValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      let(:lower_range_bound_value) { matcher_method.match?(/_between/) ? 1..5 : 1 }
+      let(:lower_range_bound_value) { 1 }
 
       describe 'when provided with the exact lower range bound file number specified in the model validations' do
         subject { matcher.public_send(matcher_method, lower_range_bound_value) }
@@ -54,7 +54,7 @@ module LimitValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      let(:higher_range_bound_value) { matcher_method.match?(/_between/) ? 1..5 : 1 }
+      let(:higher_range_bound_value) { 5 }
 
       describe 'when provided with the exact higher range bound file number specified in the model validations' do
         subject { matcher.public_send(matcher_method, higher_range_bound_value) }
@@ -68,7 +68,7 @@ module LimitValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      let(:higher_than_higher_range_bound_value) { matcher_method.match?(/_between/) ? 1..5 : 1 }
+      let(:higher_than_higher_range_bound_value) { 6 }
 
       describe 'when provided with a higher file number than the higher range bound file number specified in the model validations' do
         subject { matcher.public_send(matcher_method, higher_than_higher_range_bound_value) }
@@ -162,37 +162,6 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
     include WorksWithContext
   end
 
-  %i(min max).each do |number|
-    describe "##{number}" do
-      let(:matcher_method) { number }
-
-      describe "when used on a #{number} exact validator (e.g. number of file attached: { #{number}: 1 })" do
-        let(:model_attribute) { :"#{number}_exact" }
-        let(:validator_value) { 1 }
-
-        include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
-      end
-
-      describe "when used on a #{number} in validator (e.g. numberof file attached: { #{number}: { in: 1..5 } })" do
-        let(:model_attribute) { :"#{number}_in" }
-
-        include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
-      end
-
-      describe "when used on a #{number} min validator (e.g. number of file attached: { #{number}: { min: 1 } })" do
-        let(:model_attribute) { :"#{number}_min" }
-
-        include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
-      end
-
-      describe "when used on a #{number} max validator (e.g. number of file attached: { #{number}: { max: 5 } })" do
-        let(:model_attribute) { :"#{number}_max" }
-
-        include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
-      end
-    end
-  end
-
   describe "#min" do
     let(:matcher_method) { :min }
 
@@ -212,14 +181,21 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
       include LimitValidatorMatcherTest::DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
     end
 
-    describe "when used on a minimum file attached min validator (e.g. number of file attached: { min: { min: 1 } })" do
+    describe "when used on a minimum file attached min validator (e.g. number of file attached: { min: 1 })" do
       let(:model_attribute) { :min }
       let(:validator_value) { 1 }
 
       include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
     end
 
-    describe "when used on a minimum file attached max validator (e.g. number of file attached: { min: { max: 5 } })" do
+    describe "when used on a 0 file attached min validator (e.g. number of file attached: 0)" do
+      let(:model_attribute) { :min }
+      let(:validator_value) { 0 }
+
+      include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
+    end
+
+    describe "when used on a minimum file attached max validator (e.g. number of file attached: { min = max = 5 })" do
       let(:model_attribute) { :max }
 
       include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
@@ -245,13 +221,13 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
       include LimitValidatorMatcherTest::DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
     end
 
-    describe "when used on a maximum file attached min validator (e.g. number of file attached: { max: { min: 1 } })" do
+    describe "when used on a maximum file attached min validator (e.g. number of file attached: { max = min = 1 })" do
       let(:model_attribute) { :min }
 
       include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
     end
 
-    describe "when used on a maximum file attached max validator (e.g. number of file attached: { max: { max: 5 } })" do
+    describe "when used on a maximum file attached max validator (e.g. number of file attached: { max: 5 })" do
       let(:model_attribute) { :max }
       let(:validator_value) { 5 }
 
@@ -263,8 +239,8 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
     describe "#min + #with_message" do
       let(:model_attribute) { :min_with_message }
 
-      describe "when used on a file number attached minimum with message validator (e.g. limit: { file number attached: { min: 1 }, message: 'Invalid limits.' })" do
-        describe "and when provided with the minimum file number attached and message specified in the model validations" do
+      describe "when used on a number of file attached minimum with message validator (e.g. { number of file attached: { min: 1 }, message: 'Invalid limits.' })" do
+        describe "and when provided with the minimum number of file attached and message specified in the model validations" do
           subject do
             matcher.public_send(:min, 1)
             matcher.with_message('Invalid limits.')
@@ -278,8 +254,8 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
     describe "#max + #with_message" do
       let(:model_attribute) { :max_with_message }
 
-      describe "when used on a file number attached maximum max with message validator (e.g. limit: { file number attached: { max: 5 }, message: 'Invalid limits.' })" do
-        describe "and when provided with the maximum file number attached and message specified in the model validations" do
+      describe "when used on a number of file attached maximum max with message validator (e.g. { number of file attached: { max: 5 }, message: 'Invalid limits.' })" do
+        describe "and when provided with the maximum number of file attached and message specified in the model validations" do
           subject do
             matcher.public_send(:max, 5)
             matcher.with_message('Invalid limits.')
