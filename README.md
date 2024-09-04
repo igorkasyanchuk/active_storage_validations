@@ -17,6 +17,7 @@ This gems doing it for you. Just use `attached: true` or `content_type: 'image/p
 * validates if file(s) attached
 * validates content type
 * validates size of files
+* validates total size of files
 * validates dimension of images/videos
 * validates number of uploaded files (min/max required)
 * validates aspect ratio (if square, portrait, landscape, is_16_9, ...)
@@ -62,7 +63,7 @@ class Project < ApplicationRecord
   validates :logo, attached: true, size: { less_than: 100.megabytes , message: 'is too large' }
   validates :preview, attached: true, size: { between: 1.kilobyte..100.megabytes , message: 'is not given between size' }
   validates :attachment, attached: true, content_type: { in: 'application/pdf', message: 'is not a PDF' }
-  validates :documents, limit: { min: 1, max: 3 }
+  validates :documents, limit: { min: 1, max: 3 }, total_size: { less_than: 5.megabytes }
 end
 ```
 
@@ -159,18 +160,23 @@ en:
       file_size_not_greater_than: "file size must be greater than %{min_size} (current size is %{file_size})"
       file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min_size} (current size is %{file_size})"
       file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
+      total_file_size_not_less_than: "total file size must be less than %{max_size} (current size is %{total_file_size})"
+      total_file_size_not_less_than_or_equal_to: "total file size must be less than or equal to %{max_size} (current size is %{total_file_size})"
+      total_file_size_not_greater_than: "total file size must be greater than %{min_size} (current size is %{total_file_size})"
+      total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min_size} (current size is %{total_file_size})"
+      total_file_size_not_between: "total file size must be between %{min_size} and %{max_size} (current size is %{total_file_size})"
       limit_out_of_range: "total number is out of range"
       image_metadata_missing: "is not a valid image"
-      dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel."
-      dimension_max_inclusion: "must be less than or equal to %{width} x %{height} pixel."
-      dimension_width_inclusion: "width is not included between %{min} and %{max} pixel."
-      dimension_height_inclusion: "height is not included between %{min} and %{max} pixel."
-      dimension_width_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel."
-      dimension_height_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel."
-      dimension_width_less_than_or_equal_to: "width must be less than or equal to %{length} pixel."
-      dimension_height_less_than_or_equal_to: "height must be less than or equal to %{length} pixel."
-      dimension_width_equal_to: "width must be equal to %{length} pixel."
-      dimension_height_equal_to: "height must be equal to %{length} pixel."
+      dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel"
+      dimension_max_inclusion: "must be less than or equal to %{width} x %{height} pixel"
+      dimension_width_inclusion: "width is not included between %{min} and %{max} pixel"
+      dimension_height_inclusion: "height is not included between %{min} and %{max} pixel"
+      dimension_width_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
+      dimension_height_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
+      dimension_width_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
+      dimension_height_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
+      dimension_width_equal_to: "width must be equal to %{length} pixel"
+      dimension_height_equal_to: "height must be equal to %{length} pixel"
       aspect_ratio_not_square: "must be a square image"
       aspect_ratio_not_portrait: "must be a portrait image"
       aspect_ratio_not_landscape: "must be a landscape image"
@@ -232,6 +238,18 @@ For example :
 file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
 ```
 
+### Total file size
+The keys starting with `total_file_size_not_` support three variables that you can use:
+- `total_file_size` containing the current total file size
+- `min` containing the minimum file size
+- `max` containing the maximum file size
+
+For example :
+
+```yml
+total_file_size_not_between: "total file size must be between %{min_size} and %{max_size} (current size is %{total_file_size})"
+```
+
 ### Number of files
 The `limit_out_of_range` key supports two variables that you can use:
 - `min` containing the minimum number of files
@@ -279,7 +297,7 @@ Very simple example of validation with file attached, content type check and cus
 [![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
 
 ## Test matchers
-Provides RSpec-compatible and Minitest-compatible matchers for testing the validators. Only `aspect_ratio`, `attached`, `content_type`, `dimension` and `size` validators currently have their matcher developed.
+Provides RSpec-compatible and Minitest-compatible matchers for testing the validators. Only `aspect_ratio`, `attached`, `content_type`, `dimension`, `size` and `total_size` validators currently have their matcher developed.
 
 ### RSpec
 
@@ -332,6 +350,14 @@ describe User do
   it { is_expected.to validate_size_of(:avatar).greater_than(1.kilobyte) }
   it { is_expected.to validate_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
   it { is_expected.to validate_size_of(:avatar).between(100..500.kilobytes) }
+
+  # total_size:
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between
+  it { is_expected.to validate_total_size_of(:avatar).less_than(50.kilobytes) }
+  it { is_expected.to validate_total_size_of(:avatar).less_than_or_equal_to(50.kilobytes) }
+  it { is_expected.to validate_total_size_of(:avatar).greater_than(1.kilobyte) }
+  it { is_expected.to validate_total_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
+  it { is_expected.to validate_total_size_of(:avatar).between(100..500.kilobytes) }
 end
 ```
 (Note that matcher methods are chainable)

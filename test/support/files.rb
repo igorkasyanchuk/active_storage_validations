@@ -242,3 +242,28 @@ def file_17ko_and_png
     content_type: 'image/png'
   }
 end
+
+def create_blob(size: 1)
+  ActiveStorage::Blob.create_and_upload!(
+    io: StringIO.new('a' * size.kilobytes),
+    filename: "file_#{size}ko",
+    content_type: 'text/plain',
+    service_name: 'test'
+  )
+end
+
+def blob_file_0_5ko
+  create_blob(size: 0.5)
+end
+
+def blob_file_1ko
+  create_blob(size: 1)
+end
+
+def blob_file_2ko
+  create_blob(size: 2)
+end
+
+def blob_file_5ko
+  create_blob(size: 5)
+end
