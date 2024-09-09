@@ -13,7 +13,12 @@ gemspec
 # Git. Remember to move these dependencies to your gemspec before releasing
 # your gem to rubygems.org.
 
-# To use a debugger
-# gem 'byebug', group: [:development, :test]
+# This Rails version will be the one used when running `bundle exec rake test` locally
+# Uncomment the line then run `bundle install`
+# gem 'rails', '6.1.3.1'
+# gem 'sqlite3', '~> 1.7'
 
-#gem 'rails', path: '../rails'
+group :development, :test do
+  # To use a debugger:
+  # gem 'byebug', group: [:development, :test]
+end

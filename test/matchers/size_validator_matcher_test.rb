@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'matchers/shared_examples/base_size_validator_matcher'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
 require 'matchers/shared_examples/checks_if_is_valid'
 require 'matchers/shared_examples/has_custom_matcher'
@@ -9,56 +10,6 @@ require 'matchers/shared_examples/works_with_allow_blank'
 require 'matchers/shared_examples/works_with_both_instance_and_class'
 require 'matchers/shared_examples/works_with_context'
 require 'matchers/shared_examples/works_with_custom_message'
-
-module SizeValidatorMatcherTest
-  module OnlyMatchWhenExactValue
-    extend ActiveSupport::Concern
-
-    included do
-      describe 'standard validator' do
-        describe 'when provided with a lower size than the size specified in the model validations' do
-          subject { matcher.public_send(matcher_method, 0.5.kilobyte) }
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-
-        describe 'when provided with the exact size specified in the model validations' do
-          subject { matcher.public_send(matcher_method, validator_value) }
-
-          it { is_expected_to_match_for(klass) }
-        end
-
-        describe 'when provided with a higher size than the size specified in the model validations' do
-          subject { matcher.public_send(matcher_method, 99.kilobytes) }
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-      end
-
-      describe 'proc validator' do
-        let(:matcher) { ActiveStorageValidations::Matchers::SizeValidatorMatcher.new(:"proc_#{model_attribute}") }
-
-        describe 'when provided with a lower size than the size specified in the model validations' do
-          subject { matcher.public_send(matcher_method, 0.5.kilobyte) }
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-
-        describe 'when provided with the exact size specified in the model validations' do
-          subject { matcher.public_send(matcher_method, validator_value) }
-
-          it { is_expected_to_match_for(klass) }
-        end
-
-        describe 'when provided with a higher size than the size specified in the model validations' do
-          subject { matcher.public_send(matcher_method, 99.kilobytes) }
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-      end
-    end
-  end
-end
 
 describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
   include MatcherHelpers
@@ -81,7 +32,7 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     let(:model_attribute) { matcher_method }
     let(:validator_value) { 2.kilobytes }
 
-    include SizeValidatorMatcherTest::OnlyMatchWhenExactValue
+    include BaseSizeValidatorMatcher::OnlyMatchWhenExactValue
   end
 
   describe '#less_than_or_equal_to' do
@@ -89,7 +40,7 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     let(:model_attribute) { matcher_method }
     let(:validator_value) { 2.kilobytes }
 
-    include SizeValidatorMatcherTest::OnlyMatchWhenExactValue
+    include BaseSizeValidatorMatcher::OnlyMatchWhenExactValue
   end
 
   describe '#greater_than' do
@@ -99,13 +50,13 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     describe 'with has_one_attached' do
       let(:model_attribute) { matcher_method }
 
-      include SizeValidatorMatcherTest::OnlyMatchWhenExactValue
+      include BaseSizeValidatorMatcher::OnlyMatchWhenExactValue
     end
 
     describe 'with has_many_attached' do
       let(:model_attribute) { :many_greater_than }
 
-      include SizeValidatorMatcherTest::OnlyMatchWhenExactValue
+      include BaseSizeValidatorMatcher::OnlyMatchWhenExactValue
     end
   end
 
@@ -114,7 +65,7 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     let(:model_attribute) { matcher_method }
     let(:validator_value) { 7.kilobytes }
 
-    include SizeValidatorMatcherTest::OnlyMatchWhenExactValue
+    include BaseSizeValidatorMatcher::OnlyMatchWhenExactValue
   end
 
   describe '#between' do

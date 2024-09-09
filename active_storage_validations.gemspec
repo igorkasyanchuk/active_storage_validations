@@ -20,16 +20,16 @@ Gem::Specification.new do |s|
 
   s.metadata['rubygems_mfa_required'] = 'true'
 
-  %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 5.2.0' }
-  s.add_development_dependency 'minitest-focus', "~> 1.4"
-  s.add_development_dependency 'webmock', "~> 3.23"
+  s.required_ruby_version = '>= 2.5.0' # We support Rails >= 6.1.3
+
+  %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 5.2.0' } # Rails >= 5.2.0 should word, but we do not maintain it anymore
   s.add_development_dependency 'combustion', "~> 1.3"
-  s.add_development_dependency 'mini_magick', ">= 4.9.5"
-  s.add_development_dependency 'ruby-vips', ">= 2.1.0"
-  s.add_development_dependency 'pry'
-  s.add_development_dependency 'rubocop'
-  s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'marcel'
+  s.add_development_dependency 'mini_magick', ">= 4.9.5"
+  s.add_development_dependency 'minitest-focus', '~> 1.4'
+  s.add_development_dependency 'pry'
+  s.add_development_dependency 'ruby-vips', ">= 2.1.0"
   s.add_development_dependency 'simplecov'
-  s.add_development_dependency 'globalid'
+  s.add_development_dependency 'sqlite3'
+  s.add_development_dependency 'webmock', ">= 3"
 end
