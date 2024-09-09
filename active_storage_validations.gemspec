@@ -31,4 +31,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'ruby-vips', ">= 2.1.0"
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'sqlite3'
+  s.add_development_dependency 'webmock', ">= 3"
 end
