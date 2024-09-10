@@ -9,8 +9,8 @@ require_relative 'concerns/validatable.rb'
 
 module ActiveStorageValidations
   module Matchers
-    def validate_attached_of(name)
-      AttachedValidatorMatcher.new(name)
+    def validate_attached_of(attribute_name)
+      AttachedValidatorMatcher.new(attribute_name)
     end
 
     class AttachedValidatorMatcher

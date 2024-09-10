@@ -13,6 +13,7 @@ module ChecksIfIsValid
             when :content_type then matcher.rejecting('image/jpg')
             when :dimension then matcher.width(150)
             when :size then matcher.less_than(10.megabytes)
+            when :total_size then matcher.less_than(10.megabytes)
             end
           end
 
