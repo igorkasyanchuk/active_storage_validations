@@ -52,14 +52,14 @@ module ActiveStorageValidations
       private
 
       def is_valid_when_image_processable?
-        attach_processable_image
+        attach_file(processable_image)
         validate
         detach_file
         is_valid?
       end
 
       def is_invalid_when_image_not_processable?
-        attach_not_processable_image
+        attach_file(not_processable_image)
         validate
         detach_file
         !is_valid?
@@ -68,32 +68,11 @@ module ActiveStorageValidations
       def is_custom_message_valid?
         return true unless @custom_message
 
-        attach_not_processable_image
+        attach_file(not_processable_image)
         validate
         detach_file
         has_an_error_message_which_is_custom_message?
       end
-
-      def attach_processable_image
-        processable_image = {
-          io: File.open(Rails.root.join('public', 'image_1920x1080.png')),
-          filename: 'image_1920x1080_file.png',
-          content_type: 'image/png'
-        }
-
-        @subject.public_send(@attribute_name).attach(processable_image)
-      end
-
-      def attach_not_processable_image
-        not_processable_image = {
-          io: Tempfile.new('.'),
-          filename: 'processable.txt',
-          content_type: 'text/plain'
-        }
-
-        @subject.public_send(@attribute_name).attach(not_processable_image)
-      end
-
     end
   end
 end

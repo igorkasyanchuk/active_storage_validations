@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/allow_blankable.rb'
+require_relative 'concerns/attachable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
 require_relative 'concerns/rspecable.rb'
@@ -14,6 +16,8 @@ module ActiveStorageValidations
 
     class AttachedValidatorMatcher
       include ActiveStorageable
+      include AllowBlankable
+      include Attachable
       include Contextable
       include Messageable
       include Rspecable
@@ -47,7 +51,7 @@ module ActiveStorageValidations
       private
 
       def is_valid_when_file_attached?
-        attach_dummy_file unless file_attached?
+        attach_file(dummy_file) unless file_attached?
         validate
         is_valid?
       end
@@ -64,16 +68,6 @@ module ActiveStorageValidations
         detach_file if file_attached?
         validate
         has_an_error_message_which_is_custom_message?
-      end
-
-      def attach_dummy_file
-        dummy_file = {
-          io: Tempfile.new('.'),
-          filename: 'dummy.txt',
-          content_type: 'text/plain'
-        }
-
-        @subject.public_send(@attribute_name).attach(dummy_file)
       end
 
       def file_attached?
