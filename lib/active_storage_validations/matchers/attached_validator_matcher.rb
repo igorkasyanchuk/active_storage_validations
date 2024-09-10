@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative 'concerns/active_storageable.rb'
-require_relative 'concerns/allow_blankable.rb'
 require_relative 'concerns/attachable.rb'
 require_relative 'concerns/contextable.rb'
 require_relative 'concerns/messageable.rb'
@@ -16,7 +15,6 @@ module ActiveStorageValidations
 
     class AttachedValidatorMatcher
       include ActiveStorageable
-      include AllowBlankable
       include Attachable
       include Contextable
       include Messageable
@@ -51,7 +49,7 @@ module ActiveStorageValidations
       private
 
       def is_valid_when_file_attached?
-        attach_file(dummy_file) unless file_attached?
+        attach_file unless file_attached?
         validate
         is_valid?
       end
