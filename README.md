@@ -492,7 +492,6 @@ You are welcome to contribute.
 - https://github.com/vietqhoang
 - https://github.com/kemenaran
 - https://github.com/jrmhaig
-- https://github.com/tagliala
 - https://github.com/evedovelli
 - https://github.com/JuanVqz
 - https://github.com/luiseugenio
@@ -515,6 +514,10 @@ You are welcome to contribute.
 - https://github.com/tagliala
 - https://github.com/ocarreterom
 - https://github.com/aditya-cherukuri
+- https://github.com/searls
+- https://github.com/yenshirak
+- https://github.com/wataori
+- https://github.com/Scorpahr
 
 
 ## License
