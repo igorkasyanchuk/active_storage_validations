@@ -68,54 +68,54 @@ def most_common_mime_types
 end
 
 # Defines
-# jpg_file
-# jpeg_file
-# png_file
-# gif_file
-# webp_file
-# svg_file
-# bmp_file
-# psd_file
-# tiff_file
-# heic_file
-# mp4_file
-# avi_file
-# wmv_file
-# mov_file
-# mkv_file
-# ogv_file
-# webm_file
-# mp3_file
-# m4a_file
-# wav_file
-# ogg_file
-# aac_file
-# flac_file
-# txt_file
-# csv_file
-# html_file
-# css_file
-# json_file
-# xml_file
-# pdf_file
-# doc_file
-# docx_file
-# xls_file
-# xlsx_file
-# ppt_file
-# pptx_file
-# ppsx_file
-# odt_file
-# ods_file
-# odp_file
-# pages_file
-# numbers_file
-# key_file
-# zip_file
-# 7z_file
-# rar_file
-# gz_file
-# tar_file
+# def jpg_file
+# def jpeg_file
+# def png_file
+# def gif_file
+# def webp_file
+# def svg_file
+# def bmp_file
+# def psd_file
+# def tiff_file
+# def heic_file
+# def mp4_file
+# def avi_file
+# def wmv_file
+# def mov_file
+# def mkv_file
+# def ogv_file
+# def webm_file
+# def mp3_file
+# def m4a_file
+# def wav_file
+# def ogg_file
+# def aac_file
+# def flac_file
+# def txt_file
+# def csv_file
+# def html_file
+# def css_file
+# def json_file
+# def xml_file
+# def pdf_file
+# def doc_file
+# def docx_file
+# def xls_file
+# def xlsx_file
+# def ppt_file
+# def pptx_file
+# def ppsx_file
+# def odt_file
+# def ods_file
+# def odp_file
+# def pages_file
+# def numbers_file
+# def key_file
+# def zip_file
+# def 7z_file
+# def rar_file
+# def gz_file
+# def tar_file
 most_common_mime_types.each do |mime_type|
   define_method(:"#{mime_type[:extension]}_file") do
     {

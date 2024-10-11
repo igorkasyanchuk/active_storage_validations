@@ -98,8 +98,8 @@ By default, the gem does not prevent content type spoofing (prevent it by defaul
 Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (its content type detection relies on a different logic using content+filename+extension). To handle this issue, we consider a close parent content type to be a match. For example, for an ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content types are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS`.
 
 The difficulty to accurately predict a mime type may generate false positives, if so there are two solutions available:
-- If the ActiveStorage blob content type is closely related to the detected content type using the `file` analyzer, you can enhance `Marcel::TYPE_PARENTS` mapping using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `mime_types.rb` initializer. (Please drop an issue so we can add it to the gem for everyone!)
-- If the ActiveStorage blob content type is not closely related, you can disable the content type spoofing protection using `spoofing_protection: :none` parameter in the validator. (Please drop an issue so we can fix it for everyone!)
+- If the ActiveStorage blob content type is closely related to the detected content type using the `file` analyzer, you can enhance `Marcel::TYPE_PARENTS` mapping using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `config/initializers/mime_types.rb` file. (Please drop an issue so we can add it to the gem for everyone!)
+- If the ActiveStorage blob content type is not closely related, you still can disable the content type spoofing protection in the validator, if so, please drop us an issue so we can fix it for everyone!
 
 ```ruby
 class User < ApplicationRecord
