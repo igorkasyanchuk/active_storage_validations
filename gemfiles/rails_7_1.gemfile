@@ -2,4 +2,6 @@ source 'https://rubygems.org'
 
 %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| gem rails_subcomponent, '~> 7.1.0' }
 
+gem 'sqlite3', '~> 1.7' # Because 7.1 is still tested against Ruby 3.0
+
 gemspec :path => '../'
