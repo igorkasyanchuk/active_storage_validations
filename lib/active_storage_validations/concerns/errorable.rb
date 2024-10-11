@@ -9,7 +9,7 @@ module ActiveStorageValidations
       active_storage_validations_options = {
         validator_type: self.class.to_sym,
         custom_message: (options[:message] if options[:message].present?),
-        filename: get_filename(file)
+        filename: (get_filename(file) unless self.class.to_sym == :total_size)
       }.compact
 
       curated_options.merge(active_storage_validations_options)
@@ -29,7 +29,7 @@ module ActiveStorageValidations
       return nil unless file
 
       case file
-      when ActiveStorage::Attached then file.blob.filename.to_s
+      when ActiveStorage::Attached, ActiveStorage::Attachment then file.blob&.filename&.to_s
       when Hash then file[:filename]
       end
     end

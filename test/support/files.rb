@@ -133,9 +133,9 @@ end
 
 def file_10ko
   {
-    io: File.open(Rails.root.join('public', 'file_10ko')),
+    io: File.open(Rails.root.join('public', 'file_10ko.png')),
     filename: 'file_10ko',
-    content_type: 'text/html'
+    content_type: 'image/png'
   }
 end
 
@@ -186,4 +186,29 @@ def create_blob_from_file(file)
     content_type: file[:content_type],
     service_name: 'test'
   )
+end
+
+def create_blob(size: 1)
+  ActiveStorage::Blob.create_and_upload!(
+    io: StringIO.new('a' * size.kilobytes),
+    filename: "file_#{size}ko",
+    content_type: 'text/plain',
+    service_name: 'test'
+  )
+end
+
+def blob_file_0_5ko
+  create_blob(size: 0.5)
+end
+
+def blob_file_1ko
+  create_blob(size: 1)
+end
+
+def blob_file_2ko
+  create_blob(size: 2)
+end
+
+def blob_file_5ko
+  create_blob(size: 5)
 end

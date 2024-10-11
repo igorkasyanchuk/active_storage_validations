@@ -107,7 +107,7 @@ module ActiveStorageValidations
     end
 
     def new_image_from_path(path)
-      if vips_image_processor? && (Vips::get_suffixes.include?(File.extname(path).downcase) || !Vips::respond_to?(:vips_foreign_get_suffixes))
+      if vips_image_processor? && (supported_vips_suffix?(path) || vips_version_below_8_8? || open_uri_tempfile?(path))
         begin
           Vips::Image.new_from_file(path)
         rescue exception_class
@@ -120,6 +120,24 @@ module ActiveStorageValidations
       elsif defined?(MiniMagick)
         MiniMagick::Image.new(path)
       end
+    end
+
+    def supported_vips_suffix?(path)
+      Vips::get_suffixes.include?(File.extname(path).downcase)
+    end
+
+    def vips_version_below_8_8?
+      # FYI, Vips 8.8 was released in 2019
+      # https://github.com/libvips/libvips/releases/tag/v8.8.0
+      !Vips::respond_to?(:vips_foreign_get_suffixes)
+    end
+
+    def open_uri_tempfile?(path)
+      # When trying to open urls for 'large' images, OpenURI will return a
+      # tempfile. That tempfile does not have an extension indicating the type
+      # of file. However, Vips will be able to process it anyway.
+      # The 'large' file value is derived from OpenUri::Buffer class (> 10ko)
+      path.split('/').last.starts_with?("open-uri")
     end
 
     def valid_image?(image)

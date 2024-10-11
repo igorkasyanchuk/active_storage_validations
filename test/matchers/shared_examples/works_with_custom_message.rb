@@ -9,9 +9,11 @@ module WorksWithCustomMessage
         case validator_sym
         when :aspect_ratio then matcher.allowing(:square)
         when :attached then nil
+        when :processable_image then nil
         when :content_type then matcher.allowing('image/png')
         when :dimension then matcher.width(150).height(150)
         when :size then matcher.less_than_or_equal_to(5.megabytes)
+        when :total_size then matcher.less_than_or_equal_to(5.megabytes)
         end
       end
 

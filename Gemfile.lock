@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_storage_validations (1.1.4)
+    active_storage_validations (1.2.0)
       activejob (>= 6.1.4)
       activemodel (>= 6.1.4)
       activestorage (>= 6.1.4)
@@ -44,7 +44,9 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
-    ast (2.4.2)
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
+    bigdecimal (3.1.8)
     builder (3.3.0)
     coderay (1.1.3)
     combustion (1.5.0)
@@ -52,6 +54,9 @@ GEM
       railties (>= 3.0.0)
       thor (>= 0.14.6)
     concurrent-ruby (1.3.3)
+    crack (1.0.0)
+      bigdecimal
+      rexml
     crass (1.0.6)
     docile (1.4.1)
     erubi (1.13.0)
@@ -60,10 +65,9 @@ GEM
     ffi (1.17.0-x86_64-darwin)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    hashdiff (1.1.1)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
-    json (2.7.2)
-    language_server-protocol (3.17.0.3)
     logger (1.6.0)
     loofah (2.22.0)
       crass (~> 1.0.2)
@@ -85,13 +89,10 @@ GEM
       racc (~> 1.4)
     nokogiri (1.16.6-x86_64-linux)
       racc (~> 1.4)
-    parallel (1.25.1)
-    parser (3.3.4.0)
-      ast (~> 2.4.1)
-      racc
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
+    public_suffix (6.0.1)
     racc (1.8.0)
     rack (2.2.9)
     rack-test (2.1.0)
@@ -109,25 +110,8 @@ GEM
       method_source
       rake (>= 0.13)
       thor (~> 1.0)
-    rainbow (3.1.1)
     rake (13.2.1)
-    regexp_parser (2.9.2)
-    rexml (3.3.2)
-      strscan
-    rubocop (1.65.0)
-      json (~> 2.3)
-      language_server-protocol (>= 3.17.0)
-      parallel (~> 1.10)
-      parser (>= 3.3.0.2)
-      rainbow (>= 2.2.2, < 4.0)
-      regexp_parser (>= 2.4, < 3.0)
-      rexml (>= 3.2.5, < 4.0)
-      rubocop-ast (>= 1.31.1, < 2.0)
-      ruby-progressbar (~> 1.7)
-      unicode-display_width (>= 2.4.0, < 3.0)
-    rubocop-ast (1.31.3)
-      parser (>= 3.3.1.0)
-    ruby-progressbar (1.13.0)
+    rexml (3.3.7)
     ruby-vips (2.2.2)
       ffi (~> 1.12)
       logger
@@ -142,11 +126,13 @@ GEM
     sqlite3 (1.6.9-arm64-darwin)
     sqlite3 (1.6.9-x86_64-darwin)
     sqlite3 (1.6.9-x86_64-linux)
-    strscan (3.1.0)
     thor (1.3.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    unicode-display_width (2.5.0)
+    webmock (3.23.1)
+      addressable (>= 2.8.0)
+      crack (>= 0.3.2)
+      hashdiff (>= 0.4.0, < 2.0.0)
     zeitwerk (2.6.16)
 
 PLATFORMS
@@ -159,15 +145,14 @@ PLATFORMS
 DEPENDENCIES
   active_storage_validations!
   combustion (~> 1.3)
-  globalid
   marcel (>= 1.0.3)
   mini_magick (>= 4.9.5)
   minitest-focus (~> 1.4)
   pry
-  rubocop
   ruby-vips (>= 2.1.0)
   simplecov
   sqlite3
+  webmock (>= 3)
 
 BUNDLED WITH
    2.5.6

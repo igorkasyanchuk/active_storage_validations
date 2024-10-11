@@ -42,6 +42,7 @@ ActiveRecord::Schema.define do
     limit
     processable_image
     size
+    total_size
   ).each do |validator|
     create_table :"#{validator}_matchers", force: :cascade do |t|
       t.string :title
@@ -56,7 +57,7 @@ ActiveRecord::Schema.define do
       end
     end
 
-    if %i(content_type size).include? validator
+    if %i(content_type size total_size).include? validator
       create_table :"#{validator}_validator_check_validity_several_checks", force: :cascade do |t|
         t.datetime :created_at, null: false
         t.datetime :updated_at, null: false
@@ -106,6 +107,11 @@ ActiveRecord::Schema.define do
     end
   end
 
+  create_table :total_size_validator_check_validity_has_many_attached_onlies, force: :cascade do |t|
+    t.datetime :created_at, precision: 6, null: false
+    t.datetime :updated_at, precision: 6, null: false
+  end
+
   create_table :documents, force: :cascade do |t|
     t.datetime :created_at, precision: 6, null: false
     t.datetime :updated_at, precision: 6, null: false
@@ -136,6 +142,11 @@ ActiveRecord::Schema.define do
   end
 
   create_table :content_type_spoof_detectors, force: :cascade do |t|
+    t.datetime :created_at, precision: 6, null: false
+    t.datetime :updated_at, precision: 6, null: false
+  end
+
+  create_table :metadata, force: :cascade do |t|
     t.datetime :created_at, precision: 6, null: false
     t.datetime :updated_at, precision: 6, null: false
   end
