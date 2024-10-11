@@ -2,6 +2,7 @@ es:
   errors:
     messages:
       content_type_invalid: "tiene un tipo de contenido inválido"
+      spoofed_content_type: "tiene un tipo de contenido que no es el que se declara a través de su contenido, nombre de archivo y extensión"
       file_size_not_less_than: "el tamaño del archivo debe ser inferior a %{max_size} (el tamaño actual es %{file_size})"
       file_size_not_less_than_or_equal_to: "el tamaño del archivo debe ser menor o igual a %{max_size} (el tamaño actual es %{file_size})"
       file_size_not_greater_than: "el tamaño del archivo debe ser mayor que %{min_size} (el tamaño actual es %{file_size})"

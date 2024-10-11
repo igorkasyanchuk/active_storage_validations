@@ -18,7 +18,7 @@ module ActiveStorageValidations
 
       def has_an_error_message_which_is_custom_message?
         validator_errors_for_attribute.one? do |error|
-          error[:error] == @custom_message
+          error[:custom_message] == @custom_message
         end
       end
     end

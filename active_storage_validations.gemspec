@@ -20,11 +20,11 @@ Gem::Specification.new do |s|
 
   s.metadata['rubygems_mfa_required'] = 'true'
 
-  s.required_ruby_version = '>= 2.5.0' # We support Rails >= 6.1.3
+  s.required_ruby_version = '>= 2.5.0' # We support Rails >= 6.1.4
 
-  %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 5.2.0' } # Rails >= 5.2.0 should word, but we do not maintain it anymore
+  %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 6.1.4' }
   s.add_development_dependency 'combustion', "~> 1.3"
-  s.add_development_dependency 'marcel'
+  s.add_development_dependency 'marcel', ">= 1.0.3" # necessary for mime type spoofing features
   s.add_development_dependency 'mini_magick', ">= 4.9.5"
   s.add_development_dependency 'minitest-focus', '~> 1.4'
   s.add_development_dependency 'pry'

@@ -15,6 +15,8 @@ require 'active_storage_validations/processable_image_validator'
 require 'active_storage_validations/size_validator'
 require 'active_storage_validations/total_size_validator'
 
+require 'active_storage_validations/marcel_extensor'
+
 ActiveSupport.on_load(:active_record) do
   send :include, ActiveStorageValidations
 end

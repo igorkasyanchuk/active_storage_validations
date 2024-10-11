@@ -15,7 +15,7 @@ gemspec
 
 # This Rails version will be the one used when running `bundle exec rake test` locally
 # Uncomment the line then run `bundle install`
-# gem 'rails', '6.1.3.1'
+# gem 'rails', '6.1.4'
 # gem 'sqlite3', '~> 1.7'
 
 group :development, :test do
