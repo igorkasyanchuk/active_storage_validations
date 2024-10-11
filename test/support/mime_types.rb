@@ -4,7 +4,7 @@
 def most_common_mime_types
   [
     # Image
-    { mime_type: "image/jpg", extension: "jpg" },
+    { mime_type: "image/jpeg", extension: "jpg" },
     { mime_type: "image/jpeg", extension: "jpeg" },
     { mime_type: "image/png", extension: "png" },
     { mime_type: "image/gif", extension: "gif" },

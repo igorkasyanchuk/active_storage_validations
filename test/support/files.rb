@@ -127,7 +127,7 @@ def file_7ko_and_jpg
   {
     io: File.open(Rails.root.join('public', 'file_7ko_and_jpg.jpg')),
     filename: 'file_7ko_and_jpg',
-    content_type: 'image/jpg'
+    content_type: 'image/jpeg'
   }
 end
 
