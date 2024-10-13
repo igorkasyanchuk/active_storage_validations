@@ -91,7 +91,7 @@ Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/p
 ```
 
 **Content type spoofing protection**
-File content type spoofing happens when an ill-intentioned user uploads a file which hides its true content type by faking its extension and its declared content type value. For example, a user may try to upload a `.exe` file (application/x-msdownload content type) dissimulated as a `.jpg` file (image/jpg content type).
+File content type spoofing happens when an ill-intentioned user uploads a file which hides its true content type by faking its extension and its declared content type value. For example, a user may try to upload a `.exe` file (application/x-msdownload content type) dissimulated as a `.jpg` file (image/jpeg content type).
 
 By default, the gem does not prevent content type spoofing (prevent it by default is a breaking change that will be implemented in v2). The spoofing protection relies on both the linux `file` command and `Marcel` gem.
 
