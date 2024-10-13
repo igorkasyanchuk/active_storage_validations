@@ -25,21 +25,9 @@ module ActiveStorageValidations
     end
 
     def self.mock_metadata(attachment, width, height)
-      if Rails.gem_version >= Gem::Version.new('6.0.0')
-        # Mock the Metadata class for rails 6
-        mock = Struct.new(:metadata).new({ width: width, height: height })
-        stub_method(ActiveStorageValidations::Metadata, :new, mock) do
-          yield
-        end
-      else
-        # Stub the metadata analysis for rails 5
-        stub_method(attachment, :analyze, true) do
-          stub_method(attachment, :analyzed?, true) do
-            stub_method(attachment, :metadata, { width: width, height: height }) do
-              yield
-            end
-          end
-        end
+      mock = Struct.new(:metadata).new({ width: width, height: height })
+      stub_method(ActiveStorageValidations::Metadata, :new, mock) do
+        yield
       end
     end
   end

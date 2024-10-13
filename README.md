@@ -455,18 +455,6 @@ Tips:
 - To focus a specific file, use the TEST option provided by minitest, e.g. to only run size_validator_test.rb file you will execute the following command: `bundle exec rake test TEST=test/validators/size_validator_test.rb`
 
 
-## Known issues
-
-- There is an issue in Rails which it possible to get if you have added a validation and generating for example an image preview of attachments. It can be fixed with this:
-
-```erb
-  <% if @user.avatar.attached? && @user.avatar.attachment.blob.present? && @user.avatar.attachment.blob.persisted? %>
-    <%= image_tag @user.avatar %>
-  <% end %>
-```
-
-This is a Rails issue, and is fixed in Rails 6.
-
 ## Contributing
 
 You are welcome to contribute.

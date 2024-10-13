@@ -21,17 +21,13 @@ ActiveRecord::Schema.define do
     t.datetime :created_at, null: false
     t.index %i[key], name: :index_active_storage_blobs_on_key, unique: true
 
-    if Rails.gem_version >= Gem::Version.new('6.1.0')
-      t.string :service_name, null: false
-    end
+    t.string :service_name, null: false
   end
 
-  if Rails.gem_version >= Gem::Version.new('6.1.0')
-    create_table :active_storage_variant_records, force: :cascade do |t|
-      t.bigint :blob_id, null: false
-      t.string :variation_digest, null: false
-      t.index %i[blob_id variation_digest], name: :index_active_storage_variant_records_uniqueness, unique: true
-    end
+  create_table :active_storage_variant_records, force: :cascade do |t|
+    t.bigint :blob_id, null: false
+    t.string :variation_digest, null: false
+    t.index %i[blob_id variation_digest], name: :index_active_storage_variant_records_uniqueness, unique: true
   end
 
   %i(

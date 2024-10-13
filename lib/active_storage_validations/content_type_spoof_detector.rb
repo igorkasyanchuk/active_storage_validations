@@ -49,11 +49,7 @@ module ActiveStorageValidations
       when ActionDispatch::Http::UploadedFile
         attachable.read
       when String
-        blob = if Rails.gem_version < Gem::Version.new('6.1.0')
-                ActiveStorage::Blob.find_signed(attachable)
-              else
-                ActiveStorage::Blob.find_signed!(attachable)
-              end
+        blob = ActiveStorage::Blob.find_signed!(attachable)
         blob.download
       when ActiveStorage::Blob
         attachable.download
@@ -72,11 +68,7 @@ module ActiveStorageValidations
         end.read
       elsif attachables.all? { |attachable| attachable.is_a?(String) }
         # It's only possible to pass one String as attachable (not an array of String)
-        blob = if Rails.gem_version < Gem::Version.new('6.1.0')
-                 ActiveStorage::Blob.find_signed(attachables.first)
-               else
-                 ActiveStorage::Blob.find_signed!(attachables.first)
-               end
+        blob = ActiveStorage::Blob.find_signed!(attachables.first)
         blob.download
       elsif attachables.all? { |attachable| attachable.is_a?(ActiveStorage::Blob) }
         attachables.find { |blob| blob == @file.blob }.download
@@ -132,14 +124,7 @@ module ActiveStorageValidations
     end
 
     def parent_content_types(content_type)
-      if Rails.gem_version < Gem::Version.new('6.1.4')
-        []
-      else
-        # Marcel parent feature is only available starting from marcel v1.0.3
-        # Rails >= 6.1.4 relies on marcel ~> 1.0
-        # Rails < 6.1.4 relies on marcel ~> 0.3.1
-        Marcel::TYPE_PARENTS[content_type] || []
-      end
+      Marcel::TYPE_PARENTS[content_type] || []
     end
   end
 end

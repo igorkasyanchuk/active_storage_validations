@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Run tests using:
-# BUNDLE_GEMFILE=gemfiles/rails_5_2.gemfile bundle exec rake test
-# BUNDLE_GEMFILE=gemfiles/rails_6_0.gemfile bundle exec rake test
+# BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test
+# BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 
 require 'test_helper'
 
@@ -184,7 +184,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal e.errors.full_messages, ["Documents total number is out of range"]
   end
 
-  test 'validates number of files for Rails 6' do
+  test 'validates number of files' do
     la = LimitAttachment.create(name: 'klingon')
     la.files.attach([pdf_file, pdf_file, pdf_file, pdf_file, pdf_file, pdf_file])
     la.proc_files.attach([pdf_file, pdf_file, pdf_file, pdf_file, pdf_file, pdf_file])
@@ -194,26 +194,10 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal 6, la.files.count
     assert_equal 6, la.proc_files.count
 
-    if Rails.gem_version < Gem::Version.new('6.0.0')
-      assert_equal 6, la.files_blobs.count
-      assert_equal 6, la.proc_files_blobs.count
-    else
-      assert_equal 0, la.files_blobs.count
-      assert_equal 0, la.proc_files_blobs.count
-    end
+    assert_equal 0, la.files_blobs.count
+    assert_equal 0, la.proc_files_blobs.count
 
     assert_equal ['Files total number is out of range', 'Proc files total number is out of range'], la.errors.full_messages
-
-    if Rails.gem_version < Gem::Version.new('6.0.0')
-      la.files.first.purge
-      la.proc_files.first.purge
-      la.files.first.purge
-      la.proc_files.first.purge
-      la.files.first.purge
-      la.proc_files.first.purge
-      la.files.first.purge
-      la.proc_files.first.purge
-    end
 
     assert !la.valid?
     assert_equal ['Files total number is out of range', 'Proc files total number is out of range'], la.errors.full_messages
@@ -373,12 +357,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
 
     assert_nil e.dimension_min.attachment
     assert_nil e.proc_dimension_min.attachment
-    blob =
-      if Rails.gem_version >= Gem::Version.new('6.1.0')
-        ActiveStorage::Blob.create_and_upload!(**image_800x600_file)
-      else
-        ActiveStorage::Blob.create_after_upload!(**image_800x600_file)
-      end
+    blob = ActiveStorage::Blob.create_and_upload!(**image_800x600_file)
     e.dimension_min = blob.signed_id
     e.proc_dimension_min = blob.signed_id
     e.save!

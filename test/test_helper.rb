@@ -13,7 +13,7 @@ require 'combustion'
 Combustion.path = 'test/dummy'
 Combustion.initialize! :active_record, :active_storage, :active_job do
   config.active_storage.variant_processor = ENV['IMAGE_PROCESSOR']&.to_sym
-  config.active_job.queue_adapter = :inline if Rails.gem_version >= Gem::Version.new('6.0.0')
+  config.active_job.queue_adapter = :inline
 end
 
 # Load other test helpers

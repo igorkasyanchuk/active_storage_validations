@@ -68,11 +68,7 @@ module ActiveStorageValidations
       if is_string || file.is_a?(ActiveStorage::Blob)
         blob =
           if is_string
-            if Rails.gem_version < Gem::Version.new('6.1.0')
-              ActiveStorage::Blob.find_signed(file)
-            else
-              ActiveStorage::Blob.find_signed!(file)
-            end
+            ActiveStorage::Blob.find_signed!(file)
           else
             file
           end
