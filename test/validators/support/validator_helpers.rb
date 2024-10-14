@@ -10,16 +10,10 @@ module ValidatorHelpers
   def is_expected_to_have_error_options(error_options, **kwargs)
     subject.valid?(kwargs[:context])
 
-    # Rails 6.1.0 changes the form of ActiveModel’s errors collection
-    # https://github.com/rails/rails/blob/6-1-stable/activemodel/CHANGELOG.md#rails-610-december-09-2020
-    validator_error_options = if Rails.gem_version >= Gem::Version.new('6.1.0')
+    validator_error_options =
       subject.errors.find do |error|
         error.options[:validator_type] == kwargs[:validator] || validator_sym
       end.options
-    else
-      # For errors before Rails 6.1.0 we do not have error options
-      return true
-    end
 
     assert(
       error_options.all? do |key, _value|
@@ -32,16 +26,10 @@ module ValidatorHelpers
   def is_expected_to_have_error_message(message_key, **kwargs)
     subject.valid?(kwargs[:context])
 
-    # Rails 6.1.0 changes the form of ActiveModel’s errors collection
-    # https://github.com/rails/rails/blob/6-1-stable/activemodel/CHANGELOG.md#rails-610-december-09-2020
-    validator_error_message = if Rails.gem_version >= Gem::Version.new('6.1.0')
+    validator_error_message =
       subject.errors.find do |error|
         error.options[:validator_type] == kwargs[:validator] || validator_sym
       end.message
-    else
-      # For errors before Rails 6.1.0 we do not have error options
-      return true
-    end
 
     message = kwargs[:error_options][:custom_message] || I18n.t("errors.messages.#{message_key}", **kwargs[:error_options])
 
