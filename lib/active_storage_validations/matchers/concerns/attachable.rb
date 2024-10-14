@@ -8,6 +8,27 @@ module ActiveStorageValidations
         @subject.public_send(@attribute_name)
       end
 
+      def attach_files(count)
+        return unless count.positive?
+
+        file_array = Array.new(count, dummy_file)
+
+        @subject.public_send(@attribute_name).attach(file_array)
+      end
+
+      def detach_file
+        @subject.attachment_changes.delete(@attribute_name.to_s)
+      end
+      alias :detach_files :detach_file
+
+      def file_attached?
+        @subject.public_send(@attribute_name).attached?
+      end
+
+      def dummy_blob
+        ActiveStorage::Blob.create_and_upload!(**dummy_file)
+      end
+
       def dummy_file
         {
           io: io,
@@ -34,14 +55,6 @@ module ActiveStorageValidations
 
       def io
         @io ||= Tempfile.new('Hello world!')
-      end
-
-      def detach_file
-        @subject.attachment_changes.delete(@attribute_name.to_s)
-      end
-
-      def file_attached?
-        @subject.public_send(@attribute_name).attached?
       end
     end
   end
