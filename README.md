@@ -438,7 +438,8 @@ To run tests in root folder of gem:
 
 * `BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test` to run for Rails 6.1.4
 * `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
-* `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.0
+* `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.1
+* `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test` to run for Rails 7.2
 * `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main branch
 
 Snippet to run in console:
@@ -447,10 +448,12 @@ Snippet to run in console:
 BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 ```
 
