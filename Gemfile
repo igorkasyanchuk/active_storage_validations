@@ -20,5 +20,5 @@ gemspec
 
 group :development, :test do
   # To use a debugger:
-  # gem 'byebug', group: [:development, :test]
+  # gem 'byebug'
 end

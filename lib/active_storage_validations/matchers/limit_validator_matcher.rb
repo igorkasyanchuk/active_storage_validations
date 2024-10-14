@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'pry'
+
 require_relative 'concerns/active_storageable'
 require_relative 'concerns/allow_blankable'
 require_relative 'concerns/attachable'
@@ -42,13 +42,13 @@ module ActiveStorageValidations
         message.join("\n")
       end
 
-      def min(number)
-        @min = number
+      def min(count)
+        @min = count
         self
       end
 
-      def max(number)
-        @max = number
+      def max(count)
+        @max = count
         self
       end
 
@@ -58,12 +58,12 @@ module ActiveStorageValidations
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
           is_custom_message_valid? &&
-          file_number_not_smaller_than_min? &&
-          file_number_equal_min? &&
-          file_number_larger_than_min? &&
-          file_number_smaller_than_max? &&
-          file_number_equal_max? &&
-          file_number_not_larger_than_max?
+          file_count_not_smaller_than_min? &&
+          file_count_equal_min? &&
+          file_count_larger_than_min? &&
+          file_count_smaller_than_max? &&
+          file_count_equal_max? &&
+          file_count_not_larger_than_max?
       end
 
         private
@@ -73,32 +73,32 @@ module ActiveStorageValidations
 
         message << "  but there seem to have issues with the matcher methods you used, since:"
         @failure_message_artefacts.each do |error_case|
-          message << "  validation failed when provided with a #{error_case[:count]} file(s)"
+          message << "  validation failed when provided with #{error_case[:count]} file(s)"
         end
         message << "  whereas it should have passed"
       end
 
-      def file_number_not_smaller_than_min?
+      def file_count_not_smaller_than_min?
         @min.nil? || @min.zero? || !passes_validation_with_limits(@min - 1)
       end
 
-      def file_number_equal_min?
+      def file_count_equal_min?
         @min.nil? || @min.zero? || passes_validation_with_limits(@min)
       end
 
-      def file_number_larger_than_min?
+      def file_count_larger_than_min?
         @min.nil? || @min.zero? || @min == @max || passes_validation_with_limits(@min + 1)
       end
 
-      def file_number_smaller_than_max?
+      def file_count_smaller_than_max?
         @max.nil? || @min == @max || passes_validation_with_limits(@max - 1)
       end
 
-      def file_number_equal_max?
+      def file_count_equal_max?
         @max.nil? || passes_validation_with_limits(@max)
       end
 
-      def file_number_not_larger_than_max?
+      def file_count_not_larger_than_max?
         @max.nil? || !passes_validation_with_limits(@max + 1)
       end
 
@@ -110,11 +110,7 @@ module ActiveStorageValidations
       end
 
       def is_custom_message_valid?
-        unless @min.nil?
-          return true if @min.zero? && @max.nil?
-        end
-
-        return true unless @custom_message
+        return true if !@custom_message || (@min&.zero? && @max.nil?)
 
         @min.nil? ? attach_files(@max + 1) : attach_files(@min - 1)
         validate
@@ -125,26 +121,6 @@ module ActiveStorageValidations
       def add_failure_message_artefact(count)
         @failure_message_artefacts << { count: count }
         false
-      end
-
-      def attach_files(count)
-        return if count.negative? || count.zero?
-
-        file_array = []
-        (1..count).each do |i|
-          dummy_file = {
-            io: Tempfile.new('.'),
-            filename: "dummy_#{i}.txt",
-            content_type: 'text/plain'
-          }
-          file_array << dummy_file
-        end
-
-        @subject.public_send(@attribute_name).attach(file_array)
-      end
-
-      def detach_files
-        @subject.attachment_changes.delete(@attribute_name.to_s)
       end
     end
   end

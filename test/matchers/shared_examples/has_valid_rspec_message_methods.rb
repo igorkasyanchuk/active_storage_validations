@@ -37,7 +37,7 @@ module HasValidRspecMessageMethods
           <<~FAILURE_MESSAGE
             is expected to validate limit file of :#{model_attribute}
               but there seem to have issues with the matcher methods you used, since:
-              validation failed when provided with a 6 file(s)
+              validation failed when provided with 6 file(s)
               whereas it should have passed
           FAILURE_MESSAGE
         when :content_type
@@ -110,8 +110,8 @@ module HasValidRspecMessageMethods
           <<~FAILURE_MESSAGE
             is expected not to validate limit file of :#{model_attribute}
               but there seem to have issues with the matcher methods you used, since:
-              validation failed when provided with a 0 file(s)
-              validation failed when provided with a 6 file(s)
+              validation failed when provided with 0 file(s)
+              validation failed when provided with 6 file(s)
               whereas it should have passed
           FAILURE_MESSAGE
         when :content_type

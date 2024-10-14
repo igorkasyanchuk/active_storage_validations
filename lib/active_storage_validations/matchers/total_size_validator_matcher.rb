@@ -22,18 +22,9 @@ module ActiveStorageValidations
       protected
 
       def attach_file
-        # We attach blobs instead of io for has_many_attached relation
+        # has_many_attached relation
         @subject.public_send(@attribute_name).attach([dummy_blob])
         @subject.public_send(@attribute_name)
-      end
-
-      def dummy_blob
-        ActiveStorage::Blob.create_and_upload!(
-          io: io,
-          filename: 'test.png',
-          content_type: 'image/png',
-          service_name: 'test'
-        )
       end
     end
   end

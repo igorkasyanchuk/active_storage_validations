@@ -11,124 +11,26 @@ require 'matchers/shared_examples/works_with_context'
 require 'matchers/shared_examples/works_with_custom_message'
 
 module LimitValidatorMatcherTest
-  module DoesNotMatchWithAnyValues
-    extend ActiveSupport::Concern
-
-    included do
-      include LimitValidatorMatcherTest::DoesNotMatchWhenLowerValueThanLowerRangeBoundValue
-      include LimitValidatorMatcherTest::DoesNotMatchWhenValueEqualToLowerRangeBoundValue
-      include LimitValidatorMatcherTest::DoesNotMatchWhenValueEqualToHigherRangeBoundValue
-      include LimitValidatorMatcherTest::DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
-    end
-  end
-
-  module DoesNotMatchWhenLowerValueThanLowerRangeBoundValue
-    extend ActiveSupport::Concern
-
-    included do
-      let(:lower_than_lower_range_bound_value) { 0 }
-
-      describe 'when provided with a lower file number than the lower range bound file number specified in the model validations' do
-        subject { matcher.public_send(matcher_method, lower_than_lower_range_bound_value) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
-  end
-
-  module DoesNotMatchWhenValueEqualToLowerRangeBoundValue
-    extend ActiveSupport::Concern
-
-    included do
-      let(:lower_range_bound_value) { 1 }
-
-      describe 'when provided with the exact lower range bound file number specified in the model validations' do
-        subject { matcher.public_send(matcher_method, lower_range_bound_value) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
-  end
-
-  module DoesNotMatchWhenValueEqualToHigherRangeBoundValue
-    extend ActiveSupport::Concern
-
-    included do
-      let(:higher_range_bound_value) { 5 }
-
-      describe 'when provided with the exact higher range bound file number specified in the model validations' do
-        subject { matcher.public_send(matcher_method, higher_range_bound_value) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
-  end
-
-  module DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
-    extend ActiveSupport::Concern
-
-    included do
-      let(:higher_than_higher_range_bound_value) { 6 }
-
-      describe 'when provided with a higher file number than the higher range bound file number specified in the model validations' do
-        subject { matcher.public_send(matcher_method, higher_than_higher_range_bound_value) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
-  end
-
   module OnlyMatchWhenExactValue
     extend ActiveSupport::Concern
 
     included do
-      describe 'when provided with a lower file number than the file number specified in the model validations' do
+      describe 'when provided with a lower file count than the bound file count specified in the model validations' do
         subject { matcher.public_send(matcher_method, 1) }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
-      describe 'when provided with a higher file number than the file number specified in the model validations' do
-        subject { matcher.public_send(matcher_method, 5) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
-  end
-
-  module OnlyMatchWhenExactValues
-    extend ActiveSupport::Concern
-
-    included do
-      %i(min max).each do |number|
-        describe "when provided with a lower #{number} than the #{number} specified in the model validations" do
-          subject do
-            matcher.min(number == :min ? 0 : 1)
-            matcher.max(number == :max ? 0 : 1)
-          end
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-      end
-
-      describe 'when provided with the exact min and max limit of attached file specified in the model validations' do
-        subject do
-          matcher.min(1)
-          matcher.max(5)
-        end
+      describe 'when provided with the exact bound file count specified in the model validations' do
+        subject { matcher.public_send(matcher_method, validator_value) }
 
         it { is_expected_to_match_for(klass) }
       end
 
-      %i(min max).each do |number|
-        describe "when provided with a higher #{number} than the #{number} specified in the model validations" do
-          subject do
-            matcher.min(number == :min ? 9 : 5)
-            matcher.max(number == :max ? 9 : 5)
-          end
+      describe 'when provided with a higher file count than the bound file count specified in the model validations' do
+        subject { matcher.public_send(matcher_method, 9) }
 
-          it { is_expected_not_to_match_for(klass) }
-        end
+        it { is_expected_not_to_match_for(klass) }
       end
     end
   end
@@ -150,6 +52,19 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
     include HasCustomMatcher
   end
 
+  %i(min max).each do |bound|
+    describe "##{bound}" do
+      let(:matcher_method) { bound }
+
+      describe "when used on a limit validator using :#{bound} (e.g. limit: { #{bound}: 3 })" do
+        let(:model_attribute) { bound }
+        let(:validator_value) { 3 }
+
+        include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
+      end
+    end
+  end
+
   describe "#allow_blank" do
     include WorksWithAllowBlank
   end
@@ -162,78 +77,27 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
     include WorksWithContext
   end
 
-  describe "#min" do
-    let(:matcher_method) { :min }
-
-    describe "when used on a minimum file attached exact validator (e.g. number of file attached: { min: 1 })" do
-      let(:model_attribute) { :min_exact }
-
-      include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
-    end
-
-    describe "when used on a minimum file attached in validator (e.g. number of file attached: { min: { in: 1..5 } })" do
-      let(:model_attribute) { :min_in }
-      let(:validator_lower_range_bound_value) { 1 }
-
-      include LimitValidatorMatcherTest::DoesNotMatchWhenLowerValueThanLowerRangeBoundValue
-
-      include LimitValidatorMatcherTest::DoesNotMatchWhenValueEqualToHigherRangeBoundValue
-      include LimitValidatorMatcherTest::DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
-    end
-
-    describe "when used on a minimum file attached min validator (e.g. number of file attached: { min: 1 })" do
-      let(:model_attribute) { :min }
-      let(:validator_value) { 1 }
-
-      include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
-    end
-
-    describe "when used on a minimum file attached max validator (e.g. number of file attached: { min = max = 5 })" do
-      let(:model_attribute) { :max }
-
-      include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
-    end
-  end
-
-  describe "#max" do
-    let(:matcher_method) { :max }
-
-    describe "when used on a maximum file attached exact validator (e.g. number of file attached: { max: 5 })" do
-      let(:model_attribute) { :max_exact }
-
-      include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
-    end
-
-    describe "when used on a maximum file attached in validator (e.g. number of file attached: { max: { in: 1..5 } })" do
-      let(:model_attribute) { :max_in }
-      let(:validator_higher_range_bound_value) { 5 }
-
-      include LimitValidatorMatcherTest::DoesNotMatchWhenLowerValueThanLowerRangeBoundValue
-      include LimitValidatorMatcherTest::DoesNotMatchWhenValueEqualToLowerRangeBoundValue
-
-      include LimitValidatorMatcherTest::DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
-    end
-
-    describe "when used on a maximum file attached min validator (e.g. number of file attached: { max = min = 1 })" do
-      let(:model_attribute) { :min }
-
-      include LimitValidatorMatcherTest::DoesNotMatchWithAnyValues
-    end
-
-    describe "when used on a maximum file attached max validator (e.g. number of file attached: { max: 5 })" do
-      let(:model_attribute) { :max }
-      let(:validator_value) { 5 }
-
-      include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
-    end
-  end
-
   describe "Combinations" do
+    describe "#min + #max" do
+      let(:model_attribute) { :min_max }
+
+      describe "when used on a limit validator with :min and :max (e.g. limit: { min: 1 , max: 5 })" do
+        describe "and when provided with the :min and :max values specified in the model validations" do
+          subject do
+            matcher.public_send(:min, 1)
+            matcher.public_send(:max, 5)
+          end
+
+          it { is_expected_to_match_for(klass) }
+        end
+      end
+    end
+
     describe "#min + #with_message" do
       let(:model_attribute) { :min_with_message }
 
-      describe "when used on a number of file attached minimum with message validator (e.g. { number of file attached: { min: 1 }, message: 'Invalid limits.' })" do
-        describe "and when provided with the minimum number of file attached and message specified in the model validations" do
+      describe "when used on a :min with :message validator (e.g. limit: { min: 1 , message: 'Invalid limits.' })" do
+        describe "and when provided with the :min file count and :message specified in the model validations" do
           subject do
             matcher.public_send(:min, 1)
             matcher.with_message('Invalid limits.')
@@ -247,44 +111,14 @@ describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
     describe "#max + #with_message" do
       let(:model_attribute) { :max_with_message }
 
-      describe "when used on a number of file attached maximum max with message validator (e.g. { number of file attached: { max: 5 }, message: 'Invalid limits.' })" do
-        describe "and when provided with the maximum number of file attached and message specified in the model validations" do
+      describe "when used on a :max with :message validator (e.g. limit: { max: 5 , message: 'Invalid limits.' })" do
+        describe "and when provided with the :max and :message specified in the model validations" do
           subject do
             matcher.public_send(:max, 5)
             matcher.with_message('Invalid limits.')
           end
 
           it { is_expected_to_match_for(klass) }
-        end
-      end
-    end
-
-    %i(min max).each do |number|
-      describe "#file_number_#{number}" do
-        let(:model_attribute) { :"#{number}" }
-
-        describe "when provided with lower number of file attached than the number of file attached specified in the model validations" do
-          subject do
-            matcher.public_send(:"#{number}", 0)
-          end
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-
-        describe "when provided with number of file attached between the number of file attached specified in the model validations" do
-          subject do
-            matcher.public_send(:"#{number}", 3)
-          end
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-
-        describe "when provided with higher number of file attached than the number of file attached specified in the model validations" do
-          subject do
-            matcher.public_send(:"#{number}", 6)
-          end
-
-          it { is_expected_not_to_match_for(klass) }
         end
       end
     end

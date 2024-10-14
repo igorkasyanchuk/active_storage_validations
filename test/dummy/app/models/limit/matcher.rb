@@ -16,6 +16,11 @@ class Limit::Matcher < ApplicationRecord
   has_many_attached :custom_matcher
   validates :custom_matcher, limit: { min: 1, max: 5 }
 
+  %i(min max).each do |bound|
+    has_many_attached bound
+    validates bound, limit: { "#{bound}": 3 }
+  end
+
   has_many_attached :allow_blank
   validates :allow_blank, limit: { min: 1, max: 5 }, allow_blank: true
 
@@ -44,10 +49,9 @@ class Limit::Matcher < ApplicationRecord
   has_many_attached :failure_message_when_negated
   validates :failure_message_when_negated, limit: { min: 1, max: 5 }
 
-  has_many_attached :with_0_file
-  validates :with_0_file, limit: { min: 0 }
-
   # Combinations
+  has_many_attached :min_max
+  validates :min_max, limit: { min: 1, max: 5 }
   has_many_attached :min_with_message
   validates :min_with_message, limit: { min: 1, message: 'Invalid limits.' }
   has_many_attached :max_with_message
