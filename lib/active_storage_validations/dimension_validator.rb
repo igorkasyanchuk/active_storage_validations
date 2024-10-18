@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/errorable.rb'
+require_relative 'concerns/metadatable.rb'
 require_relative 'concerns/symbolizable.rb'
-require_relative 'metadata.rb'
 
 module ActiveStorageValidations
   class DimensionValidator < ActiveModel::EachValidator # :nodoc
-    include OptionProcUnfolding
+    include ActiveStorageable
     include Errorable
+    include OptionProcUnfolding
+    include Metadatable
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[width height min max].freeze
@@ -25,48 +28,19 @@ module ActiveStorageValidations
       dimension_height_equal_to
     ].freeze
 
-    def process_options(record)
-      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
-
-      [:width, :height].each do |length|
-        if flat_options[length] and flat_options[length].is_a?(Hash)
-          if (range = flat_options[length][:in])
-            raise ArgumentError, ":in must be a Range" unless range.is_a?(Range)
-            flat_options[length][:min], flat_options[length][:max] = range.min, range.max
-          end
-        end
-      end
-      [:min, :max].each do |dim|
-        if (range = flat_options[dim])
-          raise ArgumentError, ":#{dim} must be a Range (width..height)" unless range.is_a?(Range)
-          flat_options[:width] = { dim => range.first }
-          flat_options[:height] = { dim => range.last }
-        end
-      end
-
-      flat_options
-    end
-
     def check_validity!
       unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
         raise ArgumentError, 'You must pass either :width, :height, :min or :max to the validator'
       end
     end
 
-
     def validate_each(record, attribute, _value)
-      return true unless record.send(attribute).attached?
+      return if no_attachments?(record, attribute)
 
-      changes = record.attachment_changes[attribute.to_s]
-      return true if changes.blank?
-
-      files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
-      files.each do |file|
-        metadata = Metadata.new(file).metadata
-        next if is_valid?(record, attribute, file, metadata)
-        break
-      end
+      validate_changed_files_from_metadata(record, attribute)
     end
+
+    private
 
     def is_valid?(record, attribute, file, metadata)
       flat_options = process_options(record)
@@ -145,6 +119,28 @@ module ActiveStorageValidations
       end
 
       true # valid file
+    end
+
+    def process_options(record)
+      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+
+      [:width, :height].each do |length|
+        if flat_options[length] and flat_options[length].is_a?(Hash)
+          if (range = flat_options[length][:in])
+            raise ArgumentError, ":in must be a Range" unless range.is_a?(Range)
+            flat_options[length][:min], flat_options[length][:max] = range.min, range.max
+          end
+        end
+      end
+      [:min, :max].each do |dim|
+        if (range = flat_options[dim])
+          raise ArgumentError, ":#{dim} must be a Range (width..height)" unless range.is_a?(Range)
+          flat_options[:width] = { dim => range.first }
+          flat_options[:height] = { dim => range.last }
+        end
+      end
+
+      flat_options
     end
   end
 end

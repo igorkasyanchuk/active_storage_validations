@@ -39,8 +39,8 @@ module ActiveStorageValidations
 
       def processable_image
         {
-          io: File.open(Rails.root.join('public', 'image_1920x1080.png')),
-          filename: 'image_1920x1080_file.png',
+          io: StringIO.new(image_data),
+          filename: 'processable_image.png',
           content_type: 'image/png'
         }
       end
@@ -48,13 +48,18 @@ module ActiveStorageValidations
       def not_processable_image
         {
           io: Tempfile.new('.'),
-          filename: 'processable.txt',
+          filename: 'not_processable_image.txt',
           content_type: 'text/plain'
         }
       end
 
       def io
         @io ||= Tempfile.new('Hello world!')
+      end
+
+      def image_data
+        # Binary data for a 1x1 transparent PNG image
+        "\x89PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1F\x15\xC4\x89\x00\x00\x00\nIDATx\x9Cc\x00\x01\x00\x00\x05\x00\x01\r\n\x2D\xB4\x00\x00\x00\x00IEND\xAE\x42\x60\x82"
       end
     end
   end

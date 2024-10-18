@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/errorable.rb'
+require_relative 'concerns/metadatable.rb'
 require_relative 'concerns/symbolizable.rb'
-require_relative 'metadata.rb'
 
 module ActiveStorageValidations
   class AspectRatioValidator < ActiveModel::EachValidator # :nodoc
-    include OptionProcUnfolding
+    include ActiveStorageable
     include Errorable
+    include Metadatable
+    include OptionProcUnfolding
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[with].freeze
@@ -29,25 +32,16 @@ module ActiveStorageValidations
     end
 
     def validate_each(record, attribute, _value)
-      return true unless record.send(attribute).attached?
+      return if no_attachments?(record, attribute)
 
-      changes = record.attachment_changes[attribute.to_s]
-      return true if changes.blank?
-
-      files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
-
-      files.each do |file|
-        metadata = Metadata.new(file).metadata
-        next if is_valid?(record, attribute, file, metadata)
-        break
-      end
+      validate_changed_files_from_metadata(record, attribute)
     end
 
     private
 
-    def is_valid?(record, attribute, file, metadata)
+    def is_valid?(record, attribute, attachable, metadata)
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
-      errors_options = initialize_error_options(options, file)
+      errors_options = initialize_error_options(options, attachable)
 
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
         errors_options[:aspect_ratio] = flat_options[:with]
