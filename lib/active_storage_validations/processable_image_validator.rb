@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/errorable.rb'
+require_relative 'concerns/metadatable.rb'
 require_relative 'concerns/symbolizable.rb'
-require_relative 'metadata.rb'
 
 module ActiveStorageValidations
   class ProcessableImageValidator < ActiveModel::EachValidator # :nodoc
-    include OptionProcUnfolding
+    include ActiveStorageable
     include Errorable
+    include Metadatable
     include Symbolizable
 
     ERROR_TYPES = %i[
@@ -15,19 +17,18 @@ module ActiveStorageValidations
     ].freeze
 
     def validate_each(record, attribute, _value)
-      return true unless record.send(attribute).attached?
+      return if no_attachments?(record, attribute)
 
-      changes = record.attachment_changes[attribute.to_s]
-      return true if changes.blank?
+      validate_changed_files_from_metadata(record, attribute)
+    end
 
-      files = Array.wrap(changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable)
+    private
 
-      files.each do |file|
-        if !Metadata.new(file).valid?
-          errors_options = initialize_error_options(options, file)
-          add_error(record, attribute, ERROR_TYPES.first , **errors_options) unless Metadata.new(file).valid?
-        end
-      end
+    def is_valid?(record, attribute, attachable, metadata)
+      return if !metadata.empty?
+
+      errors_options = initialize_error_options(options, attachable)
+      add_error(record, attribute, ERROR_TYPES.first , **errors_options)
     end
   end
 end

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'concerns/errorable.rb'
-require_relative 'concerns/symbolizable.rb'
 require_relative 'base_size_validator.rb'
 
 module ActiveStorageValidations
@@ -17,14 +15,12 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       custom_check_validity!(record, attribute)
 
-      return true unless record.send(attribute).attached?
+      return if no_attachments?(record, attribute)
 
-      files = Array.wrap(record.send(attribute))
+      total_file_size = attached_files(record, attribute).sum { |file| file.blob.byte_size }
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
 
-      total_file_size = files.sum { |file| file.blob.byte_size }
-
-      return true if is_valid?(total_file_size, flat_options)
+      return if is_valid?(total_file_size, flat_options)
 
       errors_options = initialize_error_options(options, nil)
       populate_error_options(errors_options, flat_options)

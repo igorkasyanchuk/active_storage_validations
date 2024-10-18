@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/errorable.rb'
 require_relative 'concerns/symbolizable.rb'
 
 module ActiveStorageValidations
   class LimitValidator < ActiveModel::EachValidator # :nodoc:
+    include ActiveStorageable
     include OptionProcUnfolding
     include Errorable
     include Symbolizable
@@ -19,11 +21,11 @@ module ActiveStorageValidations
       ensure_arguments_validity
     end
 
-    def validate_each(record, attribute, _)
-      files = Array.wrap(record.send(attribute)).reject { |file| file.blank? }.compact.uniq
+    def validate_each(record, attribute, _value)
+      files = attached_files(record, attribute).reject(&:blank?)
       flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
 
-      return true if files_count_valid?(files.count, flat_options)
+      return if files_count_valid?(files.count, flat_options)
 
       errors_options = initialize_error_options(options)
       errors_options[:min] = flat_options[:min]

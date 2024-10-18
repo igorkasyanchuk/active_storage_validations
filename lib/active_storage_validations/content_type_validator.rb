@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/errorable.rb'
 require_relative 'concerns/symbolizable.rb'
 require_relative 'content_type_spoof_detector.rb'
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
+    include ActiveStorageable
     include OptionProcUnfolding
     include Errorable
     include Symbolizable
@@ -22,16 +24,13 @@ module ActiveStorageValidations
     end
 
     def validate_each(record, attribute, _value)
-      return true unless record.send(attribute).attached?
+      return if no_attachments?(record, attribute)
 
       types = authorized_types(record)
-      return true if types.empty?
+      return if types.empty?
 
-      files = Array.wrap(record.send(attribute))
-
-      files.each do |file|
-        next if is_valid?(record, attribute, file, types)
-        break
+      attached_files(record, attribute).each do |file|
+        is_valid?(record, attribute, file, types)
       end
     end
 
@@ -112,7 +111,7 @@ module ActiveStorageValidations
     def invalid_content_type_message(content_type)
       <<~ERROR_MESSAGE
         You must pass valid content types to the validator
-        '#{content_type}' is not find in Marcel::EXTENSIONS mimes
+        '#{content_type}' is not found in Marcel::EXTENSIONS mimes
       ERROR_MESSAGE
     end
 
