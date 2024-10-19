@@ -87,13 +87,15 @@ GEM
     marcel (1.0.4)
     method_source (1.0.0)
     mini_magick (4.12.0)
-    mini_portile2 (2.8.7)
     minitest (5.20.0)
     minitest-focus (1.4.0)
       minitest (>= 4, < 6)
     mutex_m (0.2.0)
-    nokogiri (1.15.5)
-      mini_portile2 (~> 2.8.2)
+    nokogiri (1.16.7-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.16.7-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.16.7-x86_64-linux)
       racc (~> 1.4)
     pry (0.14.2)
       coderay (~> 1.1)
@@ -156,7 +158,9 @@ GEM
     zeitwerk (2.6.12)
 
 PLATFORMS
+  arm64-darwin
   arm64-darwin-22
+  x86_64-darwin
   x86_64-darwin-21
   x86_64-linux
 
@@ -170,7 +174,7 @@ DEPENDENCIES
   marcel (>= 1.0.3)
   mini_magick (>= 4.9.5)
   minitest-focus (~> 1.4)
-  nokogiri (~> 1.15.5)
+  nokogiri (~> 1.16.7)
   pry
   ruby-vips (>= 2.1.0)
   simplecov

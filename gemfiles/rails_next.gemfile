@@ -4,4 +4,4 @@ gem 'rails', git: 'https://github.com/rails/rails'
 
 gemspec :path => '../'
 
-gem 'nokogiri', '~> 1.15.5', platforms: [:ruby]
+gem 'nokogiri', '~> 1.16.7'

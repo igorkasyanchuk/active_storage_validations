@@ -72,18 +72,24 @@ GEM
     method_source (1.0.0)
     mini_magick (4.11.0)
     mini_mime (1.1.2)
-    mini_portile2 (2.8.0)
+    mini_portile2 (2.8.7)
     minitest (5.16.3)
     minitest-focus (1.4.0)
       minitest (>= 4, < 6)
-    nokogiri (1.13.8)
-      mini_portile2 (~> 2.8.0)
+    nokogiri (1.16.7)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
+    nokogiri (1.16.7-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.16.7-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.16.7-x86_64-linux)
       racc (~> 1.4)
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
     public_suffix (6.0.0)
-    racc (1.6.0)
+    racc (1.8.1)
     rack (2.2.3)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
@@ -111,6 +117,9 @@ GEM
     simplecov_json_formatter (0.1.4)
     sqlite3 (1.7.3)
       mini_portile2 (~> 2.8.0)
+    sqlite3 (1.7.3-arm64-darwin)
+    sqlite3 (1.7.3-x86_64-darwin)
+    sqlite3 (1.7.3-x86_64-linux)
     thor (1.2.1)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
@@ -121,7 +130,10 @@ GEM
     zeitwerk (2.5.4)
 
 PLATFORMS
+  arm64-darwin
   ruby
+  x86_64-darwin
+  x86_64-linux
 
 DEPENDENCIES
   active_storage_validations!
@@ -133,6 +145,7 @@ DEPENDENCIES
   marcel (>= 1.0.3)
   mini_magick (>= 4.9.5)
   minitest-focus (~> 1.4)
+  nokogiri (~> 1.16.7)
   pry
   ruby-vips (>= 2.1.0)
   simplecov
