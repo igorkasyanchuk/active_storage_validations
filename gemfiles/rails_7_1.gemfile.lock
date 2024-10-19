@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    active_storage_validations (1.2.0)
+    active_storage_validations (1.3.0)
       activejob (>= 6.1.4)
       activemodel (>= 6.1.4)
       activestorage (>= 6.1.4)
@@ -87,15 +87,13 @@ GEM
     marcel (1.0.4)
     method_source (1.0.0)
     mini_magick (4.12.0)
+    mini_portile2 (2.8.7)
     minitest (5.20.0)
     minitest-focus (1.4.0)
       minitest (>= 4, < 6)
     mutex_m (0.2.0)
-    nokogiri (1.15.5-arm64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.15.5-x86_64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.15.5-x86_64-linux)
+    nokogiri (1.15.5)
+      mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     pry (0.14.2)
       coderay (~> 1.1)

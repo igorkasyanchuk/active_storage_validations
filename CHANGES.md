@@ -1,5 +1,11 @@
 - master
 
+- 1.3.0
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/256
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/268
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/267
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/263
+
 - 1.2.0
   Many improvements and fixes:
   - https://github.com/igorkasyanchuk/active_storage_validations/pull/236
