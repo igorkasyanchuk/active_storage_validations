@@ -170,6 +170,7 @@ DEPENDENCIES
   marcel (>= 1.0.3)
   mini_magick (>= 4.9.5)
   minitest-focus (~> 1.4)
+  nokogiri (~> 1.15.5)
   pry
   ruby-vips (>= 2.1.0)
   simplecov

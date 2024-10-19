@@ -154,14 +154,14 @@ GEM
       net-protocol
       timeout
     nio4r (2.5.8)
-    nokogiri (1.15.2)
+    nokogiri (1.15.6)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
     public_suffix (6.0.0)
-    racc (1.7.0)
+    racc (1.8.1)
     rack (2.2.3)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
@@ -209,6 +209,7 @@ DEPENDENCIES
   marcel (>= 1.0.3)
   mini_magick (>= 4.9.5)
   minitest-focus (~> 1.4)
+  nokogiri (~> 1.15.5)
   pry
   rails!
   ruby-vips (>= 2.1.0)
