@@ -92,7 +92,7 @@ GIT
 PATH
   remote: ..
   specs:
-    active_storage_validations (1.2.0)
+    active_storage_validations (1.3.0)
       activejob (>= 6.1.4)
       activemodel (>= 6.1.4)
       activestorage (>= 6.1.4)
@@ -154,18 +154,20 @@ GEM
       net-protocol
       timeout
     nio4r (2.5.8)
-    nokogiri (1.15.2)
+    nokogiri (1.16.7)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
-    nokogiri (1.15.2-x86_64-darwin)
+    nokogiri (1.16.7-arm64-darwin)
       racc (~> 1.4)
-    nokogiri (1.15.2-x86_64-linux)
+    nokogiri (1.16.7-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.16.7-x86_64-linux)
       racc (~> 1.4)
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
     public_suffix (6.0.0)
-    racc (1.7.0)
+    racc (1.8.1)
     rack (2.2.3)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
@@ -186,6 +188,7 @@ GEM
     simplecov_json_formatter (0.1.4)
     sqlite3 (1.7.3)
       mini_portile2 (~> 2.8.0)
+    sqlite3 (1.7.3-arm64-darwin)
     sqlite3 (1.7.3-x86_64-darwin)
     sqlite3 (1.7.3-x86_64-linux)
     strscan (3.0.1)
@@ -203,7 +206,9 @@ GEM
     zeitwerk (2.5.4)
 
 PLATFORMS
+  arm64-darwin
   ruby
+  x86_64-darwin
   x86_64-darwin-20
   x86_64-linux
 
@@ -213,6 +218,7 @@ DEPENDENCIES
   marcel (>= 1.0.3)
   mini_magick (>= 4.9.5)
   minitest-focus (~> 1.4)
+  nokogiri (~> 1.16.7)
   pry
   rails!
   ruby-vips (>= 2.1.0)

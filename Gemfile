@@ -18,6 +18,8 @@ gemspec
 # gem 'rails', '6.1.4'
 # gem 'sqlite3', '~> 1.7'
 
+gem 'nokogiri', '~> 1.16.7'
+
 group :development, :test do
   # To use a debugger:
   # gem 'byebug'
