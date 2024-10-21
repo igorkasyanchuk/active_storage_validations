@@ -13,6 +13,7 @@ def image_150x150_file
     content_type: 'image/png'
   }
 end
+alias :square_image_file :image_150x150_file
 
 def image_700x500_file
   {
@@ -21,6 +22,7 @@ def image_700x500_file
     content_type: 'image/png'
   }
 end
+alias :landscape_image_file :image_700x500_file
 
 def image_800x600_file
   {
@@ -37,6 +39,7 @@ def image_600x800_file
     content_type: 'image/png'
   }
 end
+alias :portrait_image_file :image_600x800_file
 
 def image_1200x900_file
   {
@@ -45,6 +48,7 @@ def image_1200x900_file
     content_type: 'image/png'
   }
 end
+alias :is_4_3_image_file :image_1200x900_file
 
 def image_1300x1000_file
   {
@@ -61,6 +65,7 @@ def image_1920x1080_file
     content_type: 'image/png'
   }
 end
+alias :is_16_9_image_file :image_1920x1080_file
 
 def tar_file_with_image_content_type
   {
