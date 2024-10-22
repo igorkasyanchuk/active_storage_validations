@@ -22,7 +22,6 @@ module ActiveStorageValidations
       aspect_ratio_not_portrait
       aspect_ratio_not_landscape
       aspect_ratio_is_not
-      aspect_ratio_unknown
     ].freeze
     PRECISION = 3.freeze
 
@@ -75,10 +74,6 @@ module ActiveStorageValidations
 
         errors_options[:aspect_ratio] = "#{x}:#{y}"
         add_error(record, attribute, :aspect_ratio_is_not, **errors_options)
-      else
-        errors_options[:aspect_ratio] = flat_options[:with]
-        add_error(record, attribute, :aspect_ratio_unknown, **errors_options)
-        return false
       end
     end
 

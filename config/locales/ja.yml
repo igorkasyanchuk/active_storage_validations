@@ -29,5 +29,4 @@ ja:
       aspect_ratio_not_portrait: "は縦長にしてください"
       aspect_ratio_not_landscape: "は横長にしてください"
       aspect_ratio_is_not: "のアスペクト比は %{aspect_ratio} にしてください"
-      aspect_ratio_unknown: "のアスペクト比を取得できませんでした"
       image_not_processable: "は不正な画像です"
