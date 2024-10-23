@@ -2,14 +2,15 @@
 
 require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/errorable.rb'
+require_relative 'concerns/optionable.rb'
 require_relative 'concerns/symbolizable.rb'
 require_relative 'content_type_spoof_detector.rb'
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
     include ActiveStorageable
-    include OptionProcUnfolding
     include Errorable
+    include Optionable
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[with in].freeze
@@ -37,7 +38,8 @@ module ActiveStorageValidations
     private
 
     def authorized_types(record)
-      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+      flat_options = set_flat_options(record)
+
       (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).compact.map do |type|
         case type
         when String, Symbol then Marcel::MimeType.for(declared_type: type.to_s, extension: type.to_s)

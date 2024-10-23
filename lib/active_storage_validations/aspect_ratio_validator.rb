@@ -3,6 +3,7 @@
 require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/errorable.rb'
 require_relative 'concerns/metadatable.rb'
+require_relative 'concerns/optionable.rb'
 require_relative 'concerns/symbolizable.rb'
 
 module ActiveStorageValidations
@@ -10,7 +11,7 @@ module ActiveStorageValidations
     include ActiveStorageable
     include Errorable
     include Metadatable
-    include OptionProcUnfolding
+    include Optionable
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[with].freeze
@@ -39,7 +40,7 @@ module ActiveStorageValidations
     private
 
     def is_valid?(record, attribute, attachable, metadata)
-      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+      flat_options = set_flat_options(record)
 
       return if image_metadata_missing?(record, attribute, attachable, flat_options, metadata)
 
@@ -54,7 +55,7 @@ module ActiveStorageValidations
     def image_metadata_missing?(record, attribute, attachable, flat_options, metadata)
       return false if metadata[:width].to_i > 0 && metadata[:height].to_i > 0
 
-      errors_options = initialize_error_options(self.options, attachable)
+      errors_options = initialize_error_options(options, attachable)
       errors_options[:aspect_ratio] = flat_options[:with]
       add_error(record, attribute, :image_metadata_missing, **errors_options)
       true
@@ -63,7 +64,7 @@ module ActiveStorageValidations
     def validate_square_aspect_ratio(record, attribute, attachable, flat_options, metadata)
       return if metadata[:width] == metadata[:height]
 
-      errors_options = initialize_error_options(self.options, attachable)
+      errors_options = initialize_error_options(options, attachable)
       errors_options[:aspect_ratio] = flat_options[:with]
       add_error(record, attribute, :aspect_ratio_not_square, **errors_options)
     end
@@ -71,7 +72,7 @@ module ActiveStorageValidations
     def validate_portrait_aspect_ratio(record, attribute, attachable, flat_options, metadata)
       return if metadata[:width] < metadata[:height]
 
-      errors_options = initialize_error_options(self.options, attachable)
+      errors_options = initialize_error_options(options, attachable)
       errors_options[:aspect_ratio] = flat_options[:with]
       add_error(record, attribute, :aspect_ratio_not_portrait, **errors_options)
     end
@@ -79,7 +80,7 @@ module ActiveStorageValidations
     def validate_landscape_aspect_ratio(record, attribute, attachable, flat_options, metadata)
       return true if metadata[:width] > metadata[:height]
 
-      errors_options = initialize_error_options(self.options, attachable)
+      errors_options = initialize_error_options(options, attachable)
       errors_options[:aspect_ratio] = flat_options[:with]
       add_error(record, attribute, :aspect_ratio_not_landscape, **errors_options)
     end
@@ -91,7 +92,7 @@ module ActiveStorageValidations
 
       return true if x > 0 && y > 0 && (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
 
-      errors_options = initialize_error_options(self.options, attachable)
+      errors_options = initialize_error_options(options, attachable)
       errors_options[:aspect_ratio] = "#{x}:#{y}"
       add_error(record, attribute, :aspect_ratio_is_not, **errors_options)
     end

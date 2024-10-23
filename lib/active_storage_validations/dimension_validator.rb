@@ -3,14 +3,15 @@
 require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/errorable.rb'
 require_relative 'concerns/metadatable.rb'
+require_relative 'concerns/optionable.rb'
 require_relative 'concerns/symbolizable.rb'
 
 module ActiveStorageValidations
   class DimensionValidator < ActiveModel::EachValidator # :nodoc
     include ActiveStorageable
     include Errorable
-    include OptionProcUnfolding
     include Metadatable
+    include Optionable
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[width height min max].freeze
@@ -122,7 +123,7 @@ module ActiveStorageValidations
     end
 
     def process_options(record)
-      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+      flat_options = set_flat_options(record)
 
       [:width, :height].each do |length|
         if flat_options[length] and flat_options[length].is_a?(Hash)

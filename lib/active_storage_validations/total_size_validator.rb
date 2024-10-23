@@ -18,7 +18,7 @@ module ActiveStorageValidations
       return if no_attachments?(record, attribute)
 
       total_file_size = attached_files(record, attribute).sum { |file| file.blob.byte_size }
-      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+      flat_options = set_flat_options(record)
 
       return if is_valid?(total_file_size, flat_options)
 

@@ -2,13 +2,14 @@
 
 require_relative 'concerns/active_storageable.rb'
 require_relative 'concerns/errorable.rb'
+require_relative 'concerns/optionable.rb'
 require_relative 'concerns/symbolizable.rb'
 
 module ActiveStorageValidations
   class LimitValidator < ActiveModel::EachValidator # :nodoc:
     include ActiveStorageable
-    include OptionProcUnfolding
     include Errorable
+    include Optionable
     include Symbolizable
 
     AVAILABLE_CHECKS = %i[max min].freeze
@@ -23,7 +24,7 @@ module ActiveStorageValidations
 
     def validate_each(record, attribute, _value)
       files = attached_files(record, attribute).reject(&:blank?)
-      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+      flat_options = set_flat_options(record)
 
       return if files_count_valid?(files.count, flat_options)
 
