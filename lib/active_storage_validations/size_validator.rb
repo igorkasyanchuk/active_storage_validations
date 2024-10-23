@@ -15,7 +15,7 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      flat_options = unfold_procs(record, self.options, AVAILABLE_CHECKS)
+      flat_options = set_flat_options(record)
 
       attached_files(record, attribute).each do |file|
         next if is_valid?(file.blob.byte_size, flat_options)

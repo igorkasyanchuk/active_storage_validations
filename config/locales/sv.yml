@@ -29,5 +29,4 @@ sv:
       aspect_ratio_not_portrait: "måste vara en porträttorienterad bild"
       aspect_ratio_not_landscape: "måste vara en landskapsorienterad bild"
       aspect_ratio_is_not: "måste ha en följande aspect ratio  %{aspect_ratio}"
-      aspect_ratio_unknown: "har en okänd aspect ratio"
       image_not_processable: "är inte en giltig bild"

@@ -29,5 +29,4 @@ it:
       aspect_ratio_not_portrait: "l’orientamento dell’immagine deve essere verticale"
       aspect_ratio_not_landscape: "l’orientamento dell’immagine deve essere orizzontale"
       aspect_ratio_is_not: "deve avere un rapporto altezza / larghezza di %{aspect_ratio}"
-      aspect_ratio_unknown: "ha un rapporto altezza / larghezza sconosciuto"
       image_not_processable: "non è un'immagine valida"

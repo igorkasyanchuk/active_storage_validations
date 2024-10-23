@@ -29,5 +29,4 @@ fr:
       aspect_ratio_not_portrait: "doit être une image en format portrait"
       aspect_ratio_not_landscape: "doit être une image en format paysage"
       aspect_ratio_is_not: "doit avoir un rapport hauteur / largeur de %{aspect_ratio}"
-      aspect_ratio_unknown: "a un rapport d'aspect inconnu"
       image_not_processable: "n'est pas une image valide"

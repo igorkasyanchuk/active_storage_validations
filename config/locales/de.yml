@@ -29,5 +29,4 @@ de:
       aspect_ratio_not_portrait: "muss Hochformat sein"
       aspect_ratio_not_landscape: "muss Querformat sein"
       aspect_ratio_is_not: "muss ein Bildseitenverhältnis von %{aspect_ratio} haben"
-      aspect_ratio_unknown: "hat ein unbekanntes Bildseitenverhältnis"
       image_not_processable: "ist kein gültiges Bild"
