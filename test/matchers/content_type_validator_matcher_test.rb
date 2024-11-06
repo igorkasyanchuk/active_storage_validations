@@ -49,7 +49,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     describe 'several' do
       let(:model_attribute) { :allowing_several }
       let(:allowed_types) { ['image/png', 'image/gif'] }
-      let(:not_allowed_types) { ['video/mkv', 'file/pdf'] }
+      let(:not_allowed_types) { ['video/x-matroska', 'application/pdf'] }
 
       describe 'when provided with the exact allowed types' do
         subject { matcher.allowing(*allowed_types) }
@@ -87,7 +87,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     describe 'several through regex' do
       let(:model_attribute) { :allowing_several_through_regex }
       let(:some_allowed_types) { ['image/png', 'image/gif'] }
-      let(:not_allowed_types) { ['video/mkv', 'file/pdf'] }
+      let(:not_allowed_types) { ['video/x-matroska', 'application/pdf'] }
 
       describe 'when provided with only allowed types but not all types' do
         subject { matcher.allowing(*some_allowed_types) }
@@ -131,7 +131,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       describe 'when provided with any type but the allowed type' do
         subject { matcher.rejecting(any_type) }
 
-        let(:any_type) { 'video/mkv' }
+        let(:any_type) { 'video/x-matroska' }
 
         it { is_expected_to_match_for(klass) }
       end
@@ -149,7 +149,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       describe 'when provided with any types but the allowed type' do
         subject { matcher.rejecting(*any_types) }
 
-        let(:any_types) { ['video/mkv', 'image/gif'] }
+        let(:any_types) { ['video/x-matroska', 'image/gif'] }
 
         it { is_expected_to_match_for(klass) }
       end
@@ -157,7 +157,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       describe 'when provided with any types and the allowed type' do
         subject { matcher.rejecting(*types) }
 
-        let(:any_types) { ['video/mkv', 'image/gif'] }
+        let(:any_types) { ['video/x-matroska', 'image/gif'] }
         let(:types) { any_types + [allowed_type] }
 
         it { is_expected_not_to_match_for(klass) }
@@ -180,7 +180,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
   describe 'Combinations' do
     describe '#allowing + #with_message' do
       let(:model_attribute) { :allowing_one_with_message }
-      let(:allowed_type) { 'file/pdf' }
+      let(:allowed_type) { 'application/pdf' }
 
       describe 'when provided with the exact allowed type' do
         describe 'and when provided with the message specified in the model validations' do
@@ -196,7 +196,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
 
     describe '#rejecting + #with_message' do
       let(:model_attribute) { :allowing_one_with_message }
-      let(:not_allowed_type) { 'video/mkv' }
+      let(:not_allowed_type) { 'video/x-matroska' }
 
       describe 'when provided with a not allowed type' do
         describe 'and when provided with the message specified in the model validations' do
@@ -213,7 +213,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     describe '#allowing + #rejecting' do
       let(:model_attribute) { :allowing_one }
       let(:allowed_type) { 'image/png' }
-      let(:not_allowed_type) { 'video/mkv' }
+      let(:not_allowed_type) { 'video/x-matroska' }
 
       describe 'when provided with the exact allowed type' do
         describe 'and when provided with a not allowed type specified in the model validations' do
@@ -229,8 +229,8 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
 
     describe '#allowing + #rejecting + #with_message' do
       let(:model_attribute) { :allowing_one_with_message }
-      let(:allowed_type) { 'file/pdf' }
-      let(:not_allowed_type) { 'video/mkv' }
+      let(:allowed_type) { 'application/pdf' }
+      let(:not_allowed_type) { 'video/x-matroska' }
 
       describe 'when provided with the exact allowed type' do
         describe 'and when provided with a not allowed type' do

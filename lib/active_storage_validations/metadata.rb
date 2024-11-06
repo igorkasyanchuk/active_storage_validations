@@ -8,13 +8,13 @@ module ActiveStorageValidations
 
     class InvalidImageError < StandardError; end
 
-    attr_reader :file
+    attr_reader :attachable
 
     DEFAULT_IMAGE_PROCESSOR = :mini_magick.freeze
 
-    def initialize(file)
+    def initialize(attachable)
       require_image_processor
-      @file = file
+      @attachable = attachable
     end
 
     def valid?
@@ -64,14 +64,9 @@ module ActiveStorageValidations
     end
 
     def read_image
-      is_string = file.is_a?(String)
-      if is_string || file.is_a?(ActiveStorage::Blob)
-        blob =
-          if is_string
-            ActiveStorage::Blob.find_signed!(file)
-          else
-            file
-          end
+      is_string = attachable.is_a?(String)
+      if is_string || attachable.is_a?(ActiveStorage::Blob)
+        blob = is_string ? ActiveStorage::Blob.find_signed!(attachable) : attachable
 
         tempfile = Tempfile.new(["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter])
         tempfile.binmode
@@ -107,9 +102,9 @@ module ActiveStorageValidations
         begin
           Vips::Image.new_from_file(path)
         rescue exception_class
-          # We handle cases where an error is raised when reading the file
+          # We handle cases where an error is raised when reading the attachable
           # because Vips can throw errors rather than returning false
-          # We stumble upon this issue while reading 0 byte size file
+          # We stumble upon this issue while reading 0 byte size attachable
           # https://github.com/janko/image_processing/issues/97
           false
         end
@@ -156,13 +151,13 @@ module ActiveStorageValidations
     end
 
     def read_file_path
-      case file
+      case attachable
       when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
-        file.path
+        attachable.path
       when Hash
-        io = file.fetch(:io)
+        io = attachable.fetch(:io)
         if io.is_a?(StringIO)
-          tempfile = Tempfile.new([File.basename(file[:filename], '.*'), File.extname(file[:filename])])
+          tempfile = Tempfile.new([File.basename(attachable[:filename], '.*'), File.extname(attachable[:filename])])
           tempfile.binmode
           IO.copy_stream(io, tempfile)
           io.rewind
@@ -172,6 +167,10 @@ module ActiveStorageValidations
         else
           File.open(io).path
         end
+      when File
+        attachable.path
+      when Pathname
+        attachable.to_s
       else
         raise "Something wrong with params."
       end

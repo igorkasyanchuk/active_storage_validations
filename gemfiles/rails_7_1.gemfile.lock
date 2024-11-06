@@ -90,6 +90,8 @@ GEM
     minitest (5.20.0)
     minitest-focus (1.4.0)
       minitest (>= 4, < 6)
+    minitest-mock_expectations (1.2.0)
+    minitest-stub_any_instance (1.0.3)
     mutex_m (0.2.0)
     nokogiri (1.16.7-arm64-darwin)
       racc (~> 1.4)
@@ -174,6 +176,8 @@ DEPENDENCIES
   marcel (>= 1.0.3)
   mini_magick (>= 4.9.5)
   minitest-focus (~> 1.4)
+  minitest-mock_expectations (~> 1.2, >= 1.2.0)
+  minitest-stub_any_instance (~> 1.0, >= 1.0.3)
   nokogiri (~> 1.16.7)
   pry
   ruby-vips (>= 2.1.0)

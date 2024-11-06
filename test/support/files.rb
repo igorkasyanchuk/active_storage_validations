@@ -5,6 +5,7 @@ def bad_dummy_file
     content_type: 'text/plain'
   }
 end
+alias :extension_content_type_mismatch_file :bad_dummy_file
 
 def image_150x150_file
   {
@@ -152,11 +153,11 @@ def file_17ko_and_png
   }
 end
 
-def spoofed_jpg
+def spoofed_jpeg
   {
     io: File.open(Rails.root.join('public', 'spoofed.jpg')),
     filename: 'spoofed.jpg',
-    content_type: 'spoofed.jpg'
+    content_type: 'image/jpeg'
   }
 end
 

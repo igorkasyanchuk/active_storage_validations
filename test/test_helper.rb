@@ -18,9 +18,11 @@ end
 
 # Load other test helpers
 require 'rails/test_help'
-require 'minitest/mock'
-require 'minitest/spec'
 require 'minitest/focus'
+require 'minitest/mock'
+require "minitest/mock_expectations"
+require 'minitest/spec'
+require 'minitest/stub_any_instance'
 require 'webmock/minitest'
 
 # Filter out Minitest backtrace while allowing backtrace from other libraries

@@ -27,7 +27,7 @@ def most_common_mime_types
     # Audio
     { mime_type: "audio/mpeg", extension: "mp3" },
     { mime_type: "audio/mp4", extension: "m4a" },
-    { mime_type: "audio/wav", extension: "wav" },
+    { mime_type: "audio/x-wav", extension: "wav" },
     { mime_type: "audio/ogg", extension: "ogg" },
     { mime_type: "audio/aac", extension: "aac" },
     { mime_type: "audio/flac", extension: "flac" },

@@ -51,5 +51,5 @@ class ContentType::Matcher < ApplicationRecord
 
   # Combinations
   has_one_attached :allowing_one_with_message
-  validates :allowing_one_with_message, content_type: { in: ['file/pdf'], message: 'Not authorized file type.' }
+  validates :allowing_one_with_message, content_type: { in: ['application/pdf'], message: 'Not authorized file type.' }
 end
