@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'validators/shared_examples/works_fine_with_attachables'
 require 'validators/shared_examples/works_with_all_rails_common_validation_options'
 
 describe ActiveStorageValidations::ProcessableImageValidator do
@@ -10,6 +11,8 @@ describe ActiveStorageValidations::ProcessableImageValidator do
   let(:params) { {} }
 
   describe 'Validator checks' do
+    include WorksFineWithAttachables
+
     let(:model) { validator_test_class::Check.new(params) }
 
     describe 'when provided with an image that is processable' do

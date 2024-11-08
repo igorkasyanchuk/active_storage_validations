@@ -91,9 +91,10 @@ Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/p
 ```
 
 **Content type spoofing protection**
+
 File content type spoofing happens when an ill-intentioned user uploads a file which hides its true content type by faking its extension and its declared content type value. For example, a user may try to upload a `.exe` file (application/x-msdownload content type) dissimulated as a `.jpg` file (image/jpeg content type).
 
-By default, the gem does not prevent content type spoofing (prevent it by default is a breaking change that will be implemented in v2). The spoofing protection relies on both the linux `file` command and `Marcel` gem.
+By default, the gem does not prevent content type spoofing (prevent it by default is a breaking change that will be implemented in v2). The spoofing protection relies on both the linux `file` command and `Marcel` gem. Be careful, since it needs to load the whole file io to perform the analysis, it will use a lot of RAM for very large files. Therefore it could be a wise decision not to enable it in this case.
 
 Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (its content type detection relies on a different logic using content+filename+extension). To handle this issue, we consider a close parent content type to be a match. For example, for an ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content types are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS`.
 
@@ -437,7 +438,7 @@ To run tests in root folder of gem:
 
 * `BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test` to run for Rails 6.1.4
 * `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
-* `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.0
+* `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.1
 * `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main branch
 
 Snippet to run in console:

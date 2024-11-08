@@ -30,8 +30,9 @@ module ActiveStorageValidations
 
       case file
       when ActiveStorage::Attached, ActiveStorage::Attachment then file.blob&.filename&.to_s
+      when ActiveStorage::Blob then file.filename
       when Hash then file[:filename]
-      end
+      end.to_s
     end
   end
 end

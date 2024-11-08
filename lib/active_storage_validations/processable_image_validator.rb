@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 require_relative 'concerns/active_storageable.rb'
+require_relative 'concerns/attachable.rb'
 require_relative 'concerns/errorable.rb'
-require_relative 'concerns/metadatable.rb'
 require_relative 'concerns/symbolizable.rb'
 
 module ActiveStorageValidations
   class ProcessableImageValidator < ActiveModel::EachValidator # :nodoc
     include ActiveStorageable
+    include Attachable
     include Errorable
-    include Metadatable
     include Symbolizable
 
     ERROR_TYPES = %i[

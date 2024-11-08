@@ -27,11 +27,11 @@ describe ActiveStorageValidations::ContentTypeSpoofDetector do
         describe "when the file is spoofed (meaning its content does not match filename extension and supplied content_type)" do
           subject { model.public_send(attribute).attach(spoofed_file) and model }
 
-          let(:spoofed_file) { spoofed_jpg }
+          let(:spoofed_file) { spoofed_jpeg }
 
           let(:error_options) do
             {
-              filename: spoofed_jpg[:filename]
+              filename: spoofed_jpeg[:filename]
             }
           end
 
@@ -94,7 +94,7 @@ describe ActiveStorageValidations::ContentTypeSpoofDetector do
   describe 'with has_many_attached relationship' do
     let(:attribute) { :many_spoofing_protection }
 
-    describe "when the file is okay" do
+    describe "when the files are okay" do
       subject { model.public_send(attribute).attach(okay_files) and model }
 
       let(:okay_files) { [okay_jpg_1, okay_jpg_2] }
@@ -103,89 +103,22 @@ describe ActiveStorageValidations::ContentTypeSpoofDetector do
 
       it { is_expected_to_be_valid }
     end
-  end
 
-  describe "working with all attachable formats" do
-    # As stated in ActiveStorage documentation, attachables can be of 4 formats:
-    #   ActionDispatch::Http::UploadedFile object
-    #   Signed reference to blob from direct upload
-    #   Hash representing the io / filename / content_type
-    #   ActiveStorage::Blob object
+    describe "when one of the file is spoofed" do
+      subject { model.public_send(attribute).attach(files) and model }
 
-    %w(one many).each do |relationship_type|
-      describe relationship_type do
-        let(:attribute) { :"#{'many_' if relationship_type == 'many'}spoofing_protection" }
-
-        describe "ActionDispatch::Http::UploadedFile object" do
-          subject { model.public_send(attribute).attach(attachable) and model }
-
-          let(:attachable) do
-            relationship_type == 'one' ? uploaded_file : [uploaded_file, uploaded_file]
-          end
-          let(:uploaded_file) do
-            tempfile = Tempfile.new(['example', '.jpeg'])
-            tempfile.write(File.read(Rails.root.join('public', 'most_common_mime_types', 'example.jpeg')))
-            tempfile.rewind
-
-            ActionDispatch::Http::UploadedFile.new({
-              tempfile: tempfile,
-              filename: 'example.jpeg',
-              type: 'image/jpeg'
-            })
-          end
-
-          it { is_expected_to_be_valid }
-        end
-
-        describe "Signed reference to blob from direct upload" do
-          # It's only possible to attach one String (not an array of String)
-          subject { model.public_send(attribute).attach(signed_reference) and model }
-
-          let(:signed_reference) do
-            ActiveStorage::Blob.create_and_upload!(
-              io: File.open(Rails.root.join('public', 'most_common_mime_types', 'example.jpeg')),
-              filename: 'example.jpeg',
-              content_type: 'image/jpeg',
-              service_name: 'test'
-            ).signed_id
-          end
-
-          it { is_expected_to_be_valid }
-        end
-
-        describe "Hash representing the io / filename / content_type" do
-          # It's only possible to attach one Hash (not an array of Hash)
-          subject { model.public_send(attribute).attach(hash_representation) and model }
-
-          let(:hash_representation) do
-            {
-              io: File.open(Rails.root.join('public', 'most_common_mime_types', 'example.jpeg')),
-              filename: 'example.jpeg',
-              content_type: 'image/jpeg'
-            }
-          end
-
-          it { is_expected_to_be_valid }
-        end
-
-        describe "ActiveStorage::Blob object" do
-          subject { model.public_send(attribute).attach(attachable) and model }
-
-          let(:attachable) do
-            relationship_type == 'one' ? blob : [blob, blob]
-          end
-          let(:blob) do
-            ActiveStorage::Blob.create_and_upload!(
-              io: File.open(Rails.root.join('public', 'most_common_mime_types', 'example.jpeg')),
-              filename: 'example.jpeg',
-              content_type: 'image/jpeg',
-              service_name: 'test'
-            )
-          end
-
-          it { is_expected_to_be_valid }
-        end
+      let(:files) { [okay_jpg, spoofed_jpeg_file] }
+      let(:okay_jpg) { create_blob_from_file(jpeg_file) }
+      let(:spoofed_jpeg_file) { create_blob_from_file(spoofed_jpeg) }
+      let(:error_options) do
+        {
+          filename: spoofed_jpeg[:filename]
+        }
       end
+
+      it { is_expected_not_to_be_valid }
+      it { is_expected_to_have_error_message("spoofed_content_type", error_options: error_options, validator: :content_type) }
+      it { is_expected_to_have_error_options(error_options, validator: :content_type) }
     end
   end
 

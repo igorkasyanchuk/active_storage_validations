@@ -21,6 +21,9 @@ class ContentType::Validator::Check < ApplicationRecord
     end
   end
 
+  has_one_attached :extension_content_type_mismatch
+  validates :extension_content_type_mismatch, content_type: :png
+
   %w(symbol string regex).each do |type|
     has_one_attached :"with_#{type}"
     has_one_attached :"with_#{type}_proc"

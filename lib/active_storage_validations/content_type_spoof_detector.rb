@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/attachable'
 require_relative 'concerns/loggable'
 require 'open3'
 
@@ -7,12 +8,13 @@ module ActiveStorageValidations
   class ContentTypeSpoofDetector
     class FileCommandLineToolNotInstalledError < StandardError; end
 
+    include Attachable
     include Loggable
 
-    def initialize(record, attribute, file)
+    def initialize(record, attribute, attachable)
       @record = record
       @attribute = attribute
-      @file = file
+      @attachable = attachable
     end
 
     def spoofed?
@@ -27,60 +29,22 @@ module ActiveStorageValidations
     private
 
     def filename
-      @filename ||= @file.blob.present? && @file.blob.filename.to_s
+      @filename ||= attachable_filename(@attachable).to_s
     end
 
     def supplied_content_type
-      # We remove potential mime type parameters
-      @supplied_content_type ||= @file.blob.present? && @file.blob.content_type.downcase.split(/[;,\s]/, 2).first
+      @supplied_content_type ||= attachable_content_type(@attachable)
     end
 
     def io
-      @io ||= case @record.public_send(@attribute)
-              when ActiveStorage::Attached::One then get_io_from_one
-              when ActiveStorage::Attached::Many then get_io_from_many
-              end
+      @io ||= attachable_io(@attachable)
     end
 
-    def get_io_from_one
-      attachable = @record.attachment_changes[@attribute.to_s].attachable
-
-      case attachable
-      when ActionDispatch::Http::UploadedFile
-        attachable.read
-      when String
-        blob = ActiveStorage::Blob.find_signed!(attachable)
-        blob.download
-      when ActiveStorage::Blob
-        attachable.download
-      when Hash
-        attachable[:io].read
-      end
-    end
-
-    def get_io_from_many
-      attachables = @record.attachment_changes[@attribute.to_s].attachables
-
-      if attachables.all? { |attachable| attachable.is_a?(ActionDispatch::Http::UploadedFile) }
-        attachables.find do |uploaded_file|
-          checksum = ActiveStorage::Blob.new.send(:compute_checksum_in_chunks, uploaded_file)
-          checksum == @file.checksum
-        end.read
-      elsif attachables.all? { |attachable| attachable.is_a?(String) }
-        # It's only possible to pass one String as attachable (not an array of String)
-        blob = ActiveStorage::Blob.find_signed!(attachables.first)
-        blob.download
-      elsif attachables.all? { |attachable| attachable.is_a?(ActiveStorage::Blob) }
-        attachables.find { |blob| blob == @file.blob }.download
-      elsif attachables.all? { |attachable| attachable.is_a?(Hash) }
-        # It's only possible to pass one Hash as attachable (not an array of Hash)
-        attachables.first[:io].read
-      end
-    end
-
+    # Return the content_type found by Open3 analysis.
+    #
+    # Using Open3 is a better alternative than Marcel (Marcel::MimeType.for(io))
+    # for analyzing content type solely based on the file io.
     def content_type_from_analyzer
-      # Using Open3 is a better alternative than Marcel (Marcel::MimeType.for(io))
-      # for analyzing content type solely based on the file io
       @content_type_from_analyzer ||= open3_mime_type_for_io
     end
 

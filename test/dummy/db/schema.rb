@@ -75,6 +75,18 @@ ActiveRecord::Schema.define do
     end
   end
 
+  %i(
+    aspect_ratio
+    content_type
+    dimension
+    processable_image
+  ).each do |validator|
+    create_table :"#{validator}_validator_using_attachables", force: :cascade do |t|
+      t.datetime :created_at, null: false
+      t.datetime :updated_at, null: false
+    end
+  end
+
   %w(proc_option invalid_named_argument invalid_is_xy_argument).each do |invalid_case|
     create_table :"aspect_ratio_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false
@@ -82,7 +94,7 @@ ActiveRecord::Schema.define do
     end
   end
 
-  %w(proc_option invalid_content_type).each do |invalid_case|
+  %w(proc_option invalid_content_type invalid_extension regex_option).each do |invalid_case|
     create_table :"content_type_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false

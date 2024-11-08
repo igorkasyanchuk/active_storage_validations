@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'validators/shared_examples/checks_validator_validity'
+require 'validators/shared_examples/works_fine_with_attachables'
 require 'validators/shared_examples/works_with_all_rails_common_validation_options'
 
 describe ActiveStorageValidations::ContentTypeValidator do
@@ -20,13 +21,37 @@ describe ActiveStorageValidations::ContentTypeValidator do
         let(:error_message) do
           <<~ERROR_MESSAGE
             You must pass valid content types to the validator
-            '#{invalid_content_type.to_s}' is not find in Marcel::EXTENSIONS mimes
+            '#{invalid_content_type}' is not found in Marcel::TYPE_EXTS
           ERROR_MESSAGE
         end
-        let(:invalid_content_type) { :invalid }
+        let(:invalid_content_type) { "xxx/invalid" }
 
         it 'raises an error at model initialization' do
           assert_raises(ArgumentError, error_message) { subject }
+        end
+      end
+
+      describe 'when the passed option is an invalid extension' do
+        subject { validator_test_class::CheckValidityInvalidExtension.new(params) }
+
+        let(:error_message) do
+          <<~ERROR_MESSAGE
+            You must pass valid content types extensions to the validator
+            '#{invalid_extension.to_s}' is not found in Marcel::EXTENSIONS
+          ERROR_MESSAGE
+        end
+        let(:invalid_extension) { :invalid }
+
+        it 'raises an error at model initialization' do
+          assert_raises(ArgumentError, error_message) { subject }
+        end
+      end
+
+      describe 'when the passed option is a Regex' do
+        subject { validator_test_class::CheckValidityRegexOption.new(params) }
+
+        it 'does not perform a check, and therefore is valid' do
+          assert_nothing_raised { subject }
         end
       end
 
@@ -41,7 +66,29 @@ describe ActiveStorageValidations::ContentTypeValidator do
   end
 
   describe 'Validator checks' do
+    include WorksFineWithAttachables
+
     let(:model) { validator_test_class::Check.new(params) }
+
+    describe "#extension_matches_content_type?" do
+      describe "when the attachable content_type and extension cannot match (e.g. 'text/plain' and .png)" do
+        subject { model.public_send(attribute).attach(file_with_issue) and model }
+
+        let(:attribute) { :extension_content_type_mismatch }
+        let(:file_with_issue) { extension_content_type_mismatch_file }
+        let(:error_options) do
+          {
+            authorized_types: "PNG",
+            content_type: extension_content_type_mismatch_file[:content_type],
+            filename: extension_content_type_mismatch_file[:filename]
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+    end
 
     describe ":with" do
       # validates :with_string, content_type: 'png'
@@ -151,7 +198,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
         describe "when the file is spoofed" do
           subject { model.public_send(attribute).attach(spoofed_file) and model }
 
-          let(:spoofed_file) { spoofed_jpg }
+          let(:spoofed_file) { spoofed_jpeg }
 
           it { is_expected_not_to_be_valid }
         end
@@ -163,7 +210,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
         describe "when the file is spoofed" do
           subject { model.public_send(attribute).attach(spoofed_file) and model }
 
-          let(:spoofed_file) { spoofed_jpg }
+          let(:spoofed_file) { spoofed_jpeg }
 
           it { is_expected_to_be_valid }
         end

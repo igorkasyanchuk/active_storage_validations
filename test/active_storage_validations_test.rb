@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-# Run tests using:
-# BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test
-# BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
-
 require 'test_helper'
 
 class ActiveStorageValidations::Test < ActiveSupport::TestCase

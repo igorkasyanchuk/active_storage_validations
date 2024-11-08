@@ -30,7 +30,7 @@ class ContentTypeSpoofDetector < ApplicationRecord
     { media: 'video', type: :wmv },
     { media: 'video', type: :mov },
     { media: 'video', type: :mkv },
-    # { media: 'video', type: :ogv }, => issue with content_type validator, handled below
+    { media: 'video', type: :ogv },
     { media: 'video', type: :webm },
     # Audio
     { media: 'audio', type: :mp3 },
@@ -65,15 +65,10 @@ class ContentTypeSpoofDetector < ApplicationRecord
     { media: 'application', type: :'7z' },
     { media: 'application', type: :rar },
     { media: 'application', type: :gz },
-    # { media: 'application', type: :tar }, => issue with content_type validator, handled below
+    { media: 'application', type: :tar }
   ].each do |content_type|
     has_one_attached :"#{content_type[:media]}_#{content_type[:type]}"
     validates :"#{content_type[:media]}_#{content_type[:type]}",
               content_type: { with: content_type[:type], spoofing_protection: true }
   end
-
-  has_one_attached :video_ogv
-  validates :video_ogv, content_type: { with: 'video/theora', spoofing_protection: true }
-  has_one_attached :application_tar
-  validates :application_tar, content_type: { in: ['application/x-tar', 'application/x-gtar'], spoofing_protection: true }
 end
