@@ -14,7 +14,6 @@ jobs:
           - rails_7_1
           - rails_7_2
           - rails_8_0
-          - rails_next
         image_processor:
           - vips
           - mini_magick
@@ -53,4 +52,3 @@ jobs:
 
       - name: Run tests
         run: bundle exec rake test
-    continue-on-error: ${{ matrix.gemfile == 'rails_next' }}
