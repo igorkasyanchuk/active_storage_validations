@@ -97,6 +97,7 @@ PATH
       activemodel (>= 6.1.4)
       activestorage (>= 6.1.4)
       activesupport (>= 6.1.4)
+      marcel (>= 1.0.3)
 
 GEM
   remote: https://rubygems.org/
@@ -217,7 +218,6 @@ PLATFORMS
 DEPENDENCIES
   active_storage_validations!
   combustion (~> 1.3)
-  marcel (>= 1.0.3)
   mini_magick (>= 4.9.5)
   minitest-focus (~> 1.4)
   minitest-mock_expectations (~> 1.2, >= 1.2.0)

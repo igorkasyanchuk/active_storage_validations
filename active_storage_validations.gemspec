@@ -23,9 +23,9 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.5.0' # We support Rails >= 6.1.4
 
   %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 6.1.4' }
+  s.add_dependency 'marcel', ">= 1.0.3" # necessary for mime type spoofing features, required for Rails >= 6.1.4 anyway
 
   s.add_development_dependency 'combustion', "~> 1.3"
-  s.add_development_dependency 'marcel', ">= 1.0.3" # necessary for mime type spoofing features
   s.add_development_dependency 'mini_magick', ">= 4.9.5"
   s.add_development_dependency 'minitest-focus', '~> 1.4'
   s.add_development_dependency 'minitest-mock_expectations', '~> 1.2', '>= 1.2.0'
