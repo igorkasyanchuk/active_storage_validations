@@ -21,6 +21,14 @@ jobs:
         exclude:
           - ruby: '3.1'
             gemfile: rails_8_0
+          - gemfile: rails_6_1_4
+        include:
+          - ruby: '3.0'
+            gemfile: rails_6_1_4
+            image_processor: vips
+          - ruby: '3.0'
+            gemfile: rails_6_1_4
+            image_processor: mini_magick
     runs-on: ubuntu-latest
     steps:
       - name: Install libvips
