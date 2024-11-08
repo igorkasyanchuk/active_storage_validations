@@ -16,3 +16,5 @@ coverage/
 test/dummy/db/combustion_test.sqlite3*
 
 /.byebug_history
+
+.tool-versions
