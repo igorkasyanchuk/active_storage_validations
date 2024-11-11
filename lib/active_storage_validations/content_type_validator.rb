@@ -63,7 +63,7 @@ module ActiveStorageValidations
     end
 
     def extension_matches_content_type?(record, attribute, attachable)
-      extension = @attachable_filename.split('.').second
+      extension = @attachable_filename.split('.').last
 
       possible_extensions = Marcel::TYPE_EXTS[@attachable_content_type]
       return true if possible_extensions && extension.in?(possible_extensions)
