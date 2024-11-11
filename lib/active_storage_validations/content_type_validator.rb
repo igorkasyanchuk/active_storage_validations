@@ -63,7 +63,7 @@ module ActiveStorageValidations
     end
 
     def extension_matches_content_type?(record, attribute, attachable)
-      extension = @attachable_filename.split('.').second
+      extension = @attachable_filename.split('.').last
 
       possible_extensions = Marcel::TYPE_EXTS[@attachable_content_type]
       return true if possible_extensions && extension.in?(possible_extensions)
@@ -111,15 +111,23 @@ module ActiveStorageValidations
     def initialize_and_populate_error_options(options, attachable)
       errors_options = initialize_error_options(options, attachable)
       errors_options[:content_type] = @attachable_content_type
-      errors_options[:authorized_types] = authorized_content_types_to_human_format
+      errors_options[:human_content_type] = content_type_to_human_format(@attachable_content_type)
+      errors_options[:authorized_types] = content_type_to_human_format(@authorized_content_types)
       errors_options
     end
 
-    def authorized_content_types_to_human_format
-      @authorized_content_types
-        .map do |authorized_content_type|
-          authorized_content_type.is_a?(Regexp) ? authorized_content_type.source : authorized_content_type.to_s.split('/').last.upcase
+    def content_type_to_human_format(content_type)
+      Array(content_type)
+        .map do |content_type|
+          case content_type
+          when String, Symbol
+            content_type.to_s.match?(/\//) ? Marcel::TYPE_EXTS[content_type.to_s]&.first&.upcase : content_type.upcase
+          when Regexp
+            content_type.source
+          end
         end
+        .flatten
+        .compact
         .join(', ')
     end
 

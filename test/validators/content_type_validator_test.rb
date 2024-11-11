@@ -79,14 +79,52 @@ describe ActiveStorageValidations::ContentTypeValidator do
         let(:error_options) do
           {
             authorized_types: "PNG",
-            content_type: extension_content_type_mismatch_file[:content_type],
-            filename: extension_content_type_mismatch_file[:filename]
+            content_type: file_with_issue[:content_type],
+            filename: file_with_issue[:filename]
           }
         end
 
         it { is_expected_not_to_be_valid }
         it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
         it { is_expected_to_have_error_options(error_options) }
+      end
+
+      describe "when the file has 2 extensions (e.g. hello.docx.pdf)" do
+        describe "and we only allow the first extension content_type (e.g. 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' (docx))" do
+          subject { model.public_send(attribute).attach(docx_file_with_two_extensions) and model }
+
+          let(:attribute) { :extension_two_extensions_docx }
+          let(:docx_file_with_two_extensions) do
+            docx_file.tap do |file|
+              file[:filename] += ".pdf"
+            end
+          end
+          let(:error_options) do
+            {
+              authorized_types: "DOCX",
+              content_type: docx_file_with_two_extensions[:content_type],
+              filename: docx_file_with_two_extensions[:filename]
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+          it { is_expected_to_have_error_options(error_options) }
+        end
+
+        describe "and we allow the last extension content_type (e.g. 'application/pdf')" do
+          subject { model.public_send(attribute).attach(docx_file_with_two_extensions) and model }
+
+          let(:attribute) { :extension_two_extensions_pdf }
+          let(:docx_file_with_two_extensions) do
+            docx_file.tap do |file|
+              file[:filename] += ".pdf"
+              file[:content_type] = "application/pdf"
+            end
+          end
+
+          it { is_expected_to_be_valid }
+        end
       end
     end
 
