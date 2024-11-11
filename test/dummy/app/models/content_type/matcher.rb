@@ -23,6 +23,9 @@ class ContentType::Matcher < ApplicationRecord
   has_one_attached :allowing_several_through_regex
   validates :allowing_several_through_regex, content_type: [/\Aimage\/.*\z/]
 
+  has_one_attached :allowing_sneaky_edge_cases
+  validates :allowing_sneaky_edge_cases, content_type: ["image/svg+xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
+
   has_one_attached :allow_blank
   validates :allow_blank, content_type: ['image/png'], allow_blank: true
 
