@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'concerns/attachable'
-require_relative 'concerns/loggable'
+require_relative 'shared/attachable'
+require_relative 'shared/loggable'
 require 'open3'
 
 module ActiveStorageValidations

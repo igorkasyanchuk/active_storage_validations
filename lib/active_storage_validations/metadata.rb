@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'concerns/loggable'
+require_relative 'shared/loggable'
 
 module ActiveStorageValidations
   class Metadata

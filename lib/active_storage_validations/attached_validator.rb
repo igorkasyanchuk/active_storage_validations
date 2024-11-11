@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative 'concerns/active_storageable.rb'
-require_relative 'concerns/errorable.rb'
-require_relative 'concerns/symbolizable.rb'
+require_relative 'shared/active_storageable'
+require_relative 'shared/errorable'
+require_relative 'shared/symbolizable'
 
 module ActiveStorageValidations
   class AttachedValidator < ActiveModel::EachValidator # :nodoc:

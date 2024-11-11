@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'concerns/active_storageable.rb'
-require_relative 'concerns/attachable.rb'
-require_relative 'concerns/contextable.rb'
-require_relative 'concerns/messageable.rb'
-require_relative 'concerns/rspecable.rb'
-require_relative 'concerns/validatable.rb'
+require_relative 'shared/active_storageable'
+require_relative 'shared/attachable'
+require_relative 'shared/contextable'
+require_relative 'shared/messageable'
+require_relative 'shared/rspecable'
+require_relative 'shared/validatable'
 
 module ActiveStorageValidations
   module Matchers
