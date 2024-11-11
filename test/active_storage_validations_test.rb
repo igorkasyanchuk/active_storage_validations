@@ -51,6 +51,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
         validator_type: :content_type,
         authorized_types: 'PNG',
         content_type: 'text/plain',
+        human_content_type: 'TXT',
         filename: 'apple-touch-icon.png'
       }
     ], proc_avatar: [
@@ -59,6 +60,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
        validator_type: :content_type,
        authorized_types: 'PNG',
        content_type: 'text/plain',
+       human_content_type: 'TXT',
        filename: 'apple-touch-icon.png'
      }
     ]

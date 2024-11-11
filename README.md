@@ -221,7 +221,8 @@ aspect_ratio_is_not: "must be a %{aspect_ratio} image"
 
 ### Content type
 The `content_type_invalid` key has three variables that you can use:
-- `content_type` containing the content type of the sent file
+- `content_type` containing the exact content type of the sent file
+- `human_content_type` containing a more user-friendly version of the sent file content type (e.g. 'TXT' for 'text/plain')
 - `authorized_types` containing the list of authorized content types
 - `filename` containing the current file name
 
