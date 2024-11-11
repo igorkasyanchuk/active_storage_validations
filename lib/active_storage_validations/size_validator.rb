@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'base_size_validator.rb'
+require_relative 'base_size_validator'
 
 module ActiveStorageValidations
   class SizeValidator < BaseSizeValidator
