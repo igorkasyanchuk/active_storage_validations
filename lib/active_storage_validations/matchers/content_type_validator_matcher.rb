@@ -32,7 +32,7 @@ module ActiveStorageValidations
         initialize_messageable
         initialize_rspecable
         @attribute_name = attribute_name
-        @allowed_types = @rejected_types = []
+        @allowed_content_types = @rejected_content_types = []
       end
 
       def description
@@ -45,13 +45,13 @@ module ActiveStorageValidations
         message.join("\n")
       end
 
-      def allowing(*types)
-        @allowed_types = types.flatten
+      def allowing(*content_types)
+        @allowed_content_types = content_types.flatten
         self
       end
 
-      def rejecting(*types)
-        @rejected_types = types.flatten
+      def rejecting(*content_types)
+        @rejected_content_types = content_types.flatten
         self
       end
 
@@ -62,21 +62,21 @@ module ActiveStorageValidations
           is_context_valid? &&
           is_allowing_blank? &&
           is_custom_message_valid? &&
-          all_allowed_types_allowed? &&
-          all_rejected_types_rejected?
+          all_allowed_content_types_allowed? &&
+          all_rejected_content_types_rejected?
       end
 
       protected
 
       def build_failure_message(message)
-        if @allowed_types_not_allowed.present?
-          message << "  the following content type#{'s' if @allowed_types.count > 1} should be allowed: :#{@allowed_types.join(", :")}"
-          message << "  but #{pluralize(@allowed_types_not_allowed)} rejected"
+        if @allowed_content_types_not_allowed.present?
+          message << "  the following content type#{'s' if @allowed_content_types.count > 1} should be allowed: :#{@allowed_content_types.join(", :")}"
+          message << "  but #{pluralize(@allowed_content_types_not_allowed)} rejected"
         end
 
-        if @rejected_types_not_rejected.present?
-          message << "  the following content type#{'s' if @rejected_types.count > 1} should be rejected: :#{@rejected_types.join(", :")}"
-          message << "  but #{pluralize(@rejected_types_not_rejected)} accepted"
+        if @rejected_content_types_not_rejected.present?
+          message << "  the following content type#{'s' if @rejected_content_types.count > 1} should be rejected: :#{@rejected_content_types.join(", :")}"
+          message << "  but #{pluralize(@rejected_content_types_not_rejected)} accepted"
         end
       end
 
@@ -88,25 +88,25 @@ module ActiveStorageValidations
         end
       end
 
-      def all_allowed_types_allowed?
-        @allowed_types_not_allowed ||= @allowed_types.reject { |type| type_allowed?(type) }
-        @allowed_types_not_allowed.empty?
+      def all_allowed_content_types_allowed?
+        @allowed_content_types_not_allowed ||= @allowed_content_types.reject { |type| type_allowed?(type) }
+        @allowed_content_types_not_allowed.empty?
       end
 
-      def all_rejected_types_rejected?
-        @rejected_types_not_rejected ||= @rejected_types.select { |type| type_allowed?(type) }
-        @rejected_types_not_rejected.empty?
+      def all_rejected_content_types_rejected?
+        @rejected_content_types_not_rejected ||= @rejected_content_types.select { |type| type_allowed?(type) }
+        @rejected_content_types_not_rejected.empty?
       end
 
-      def type_allowed?(type)
-        attach_file_of_type(type)
+      def type_allowed?(content_type)
+        attach_file_with_content_type(content_type)
         validate
         detach_file
         is_valid?
       end
 
-      def attach_file_of_type(type)
-        @subject.public_send(@attribute_name).attach(attachment_for(type))
+      def attach_file_with_content_type(content_type)
+        @subject.public_send(@attribute_name).attach(attachment_for(content_type))
       end
 
       def is_custom_message_valid?
@@ -121,13 +121,13 @@ module ActiveStorageValidations
         @subject.public_send(@attribute_name).attach(attachment_for('fake/fake'))
       end
 
-      def attachment_for(type)
-        suffix = type.to_s.split('/').last
+      def attachment_for(content_type)
+        suffix = Marcel::TYPE_EXTS[content_type.to_s]&.first || 'fake'
 
         {
           io: Tempfile.new('.'),
           filename: "test.#{suffix}",
-          content_type: type
+          content_type: content_type
         }
       end
 
