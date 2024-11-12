@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-require_relative 'shared/attachable'
-require_relative 'shared/loggable'
+require_relative 'shared/asv_attachable'
+require_relative 'shared/asv_loggable'
 require 'open3'
 
 module ActiveStorageValidations
   class ContentTypeSpoofDetector
     class FileCommandLineToolNotInstalledError < StandardError; end
 
-    include Attachable
-    include Loggable
+    include ASVAttachable
+    include ASVLoggable
 
     def initialize(record, attribute, attachable)
       @record = record

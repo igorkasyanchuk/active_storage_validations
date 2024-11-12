@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module ActiveStorageValidations
-  # ActiveStorageValidations::Optionable
+  # ActiveStorageValidations::ASVOptionable
   #
   # Helper method to flatten the validator options.
-  module Optionable
+  module ASVOptionable
     extend ActiveSupport::Concern
 
     private

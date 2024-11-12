@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 module ActiveStorageValidations
-  module Errorable
+  module ASVErrorable
     extend ActiveSupport::Concern
 
     def initialize_error_options(options, file = nil)

@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module ActiveStorageValidations
-  # ActiveStorageValidations::ActiveStorageable
+  # ActiveStorageValidations::ASVActiveStorageable
   #
   # Validator helper methods to make our code more explicit.
-  module ActiveStorageable
+  module ASVActiveStorageable
     extend ActiveSupport::Concern
 
     private

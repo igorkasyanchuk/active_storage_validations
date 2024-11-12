@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 module ActiveStorageValidations
-  module Loggable
+  module ASVLoggable
     extend ActiveSupport::Concern
 
     def logger

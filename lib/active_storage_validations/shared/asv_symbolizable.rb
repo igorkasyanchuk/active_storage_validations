@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 module ActiveStorageValidations
-  module Symbolizable
+  module ASVSymbolizable
     extend ActiveSupport::Concern
 
     class_methods do

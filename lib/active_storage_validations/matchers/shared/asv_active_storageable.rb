@@ -1,8 +1,10 @@
-require "active_support/concern"
+# frozen_string_literal: true
+
+require 'active_support/concern'
 
 module ActiveStorageValidations
   module Matchers
-    module ActiveStorageable
+    module ASVActiveStorageable
       extend ActiveSupport::Concern
 
       private

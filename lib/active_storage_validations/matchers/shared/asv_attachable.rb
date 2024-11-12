@@ -1,6 +1,12 @@
+# frozen_string_literal: true
+
+require 'active_support/concern'
+
 module ActiveStorageValidations
   module Matchers
-    module Attachable
+    module ASVAttachable
+      extend ActiveSupport::Concern
+
       private
 
       def attach_file(file = dummy_file)

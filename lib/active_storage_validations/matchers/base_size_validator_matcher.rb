@@ -3,26 +3,26 @@
 # Big thank you to the paperclip validation matchers:
 # https://github.com/thoughtbot/paperclip/blob/v6.1.0/lib/paperclip/matchers/validate_attachment_size_matcher.rb
 
-require_relative 'shared/active_storageable'
-require_relative 'shared/allow_blankable'
-require_relative 'shared/attachable'
-require_relative 'shared/contextable'
-require_relative 'shared/messageable'
-require_relative 'shared/rspecable'
-require_relative 'shared/validatable'
+require_relative 'shared/asv_active_storageable'
+require_relative 'shared/asv_allow_blankable'
+require_relative 'shared/asv_attachable'
+require_relative 'shared/asv_contextable'
+require_relative 'shared/asv_messageable'
+require_relative 'shared/asv_rspecable'
+require_relative 'shared/asv_validatable'
 
 module ActiveStorageValidations
   module Matchers
     class BaseSizeValidatorMatcher
       # BaseSizeValidatorMatcher is an abstract class and shouldn't be instantiated directly.
 
-      include ActiveStorageable
-      include AllowBlankable
-      include Attachable
-      include Contextable
-      include Messageable
-      include Rspecable
-      include Validatable
+      include ASVActiveStorageable
+      include ASVAllowBlankable
+      include ASVAttachable
+      include ASVContextable
+      include ASVMessageable
+      include ASVRspecable
+      include ASVValidatable
 
       def initialize(attribute_name)
         initialize_allow_blankable

@@ -1,8 +1,10 @@
-require "active_support/concern"
+# frozen_string_literal: true
+
+require 'active_support/concern'
 
 module ActiveStorageValidations
   module Matchers
-    module AllowBlankable
+    module ASVAllowBlankable
       extend ActiveSupport::Concern
 
       def initialize_allow_blankable

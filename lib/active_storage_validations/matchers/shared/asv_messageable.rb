@@ -1,8 +1,10 @@
-require "active_support/concern"
+# frozen_string_literal: true
+
+require 'active_support/concern'
 
 module ActiveStorageValidations
   module Matchers
-    module Messageable
+    module ASVMessageable
       extend ActiveSupport::Concern
 
       def initialize_messageable

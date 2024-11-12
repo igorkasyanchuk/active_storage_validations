@@ -3,10 +3,6 @@
 require 'test_helper'
 
 class ActiveStorageValidations::Test < ActiveSupport::TestCase
-  test 'truth' do
-    assert_kind_of Module, ActiveStorageValidations
-  end
-
   test 'validates presence' do
     u = User.new(name: 'John Smith')
     assert !u.valid?
