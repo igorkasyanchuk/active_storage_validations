@@ -83,6 +83,17 @@ module WorksFineWithAttachables
 
               it { is_expected_to_be_valid }
 
+              describe "when not passed with a content_type" do
+                let(:attachable) do
+                  {
+                    io: File.open(png_image),
+                    filename: 'image_150x150.png'
+                  }
+                end
+
+                it { is_expected_to_be_valid }
+              end
+
               describe "Remote file" do
                 before do
                   stub_request(:get, url)
