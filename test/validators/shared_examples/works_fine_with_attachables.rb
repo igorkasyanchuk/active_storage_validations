@@ -1,3 +1,5 @@
+require "open-uri"
+
 module WorksFineWithAttachables
   extend ActiveSupport::Concern
 
@@ -80,6 +82,47 @@ module WorksFineWithAttachables
               end
 
               it { is_expected_to_be_valid }
+
+              describe "Remote file" do
+                before do
+                  stub_request(:get, url)
+                    .to_return(body: File.open(Rails.root.join('public', fetched_file)), status: 200)
+                end
+
+                let(:url) { "https://example_image.jpg" }
+                let(:uri) { URI.parse(url) }
+                let(:attachable) do
+                  {
+                    io: io,
+                    filename: fetched_file,
+                    content_type: 'image/png'
+                  }
+                end
+
+                describe "using StringIO constructor as io" do
+                  let(:io) { StringIO.new(remote_image.to_s) }
+                  let(:remote_image) { Net::HTTP.get(uri) }
+                  let(:fetched_file) { 'image_150x150.png' }
+
+                  it { is_expected_to_be_valid }
+                end
+
+                describe "using URI.open constructor as io" do
+                  let(:io) { uri.open }
+
+                  describe "Opening small images (< 10ko) resulting in OpenUri returning a StringIO" do
+                    let(:fetched_file) { 'image_150x150.png' }
+
+                    it { is_expected_to_be_valid }
+                  end
+
+                  describe "Opening large images (>= 10ko) resulting in OpenUri returning a Tempfile" do
+                    let(:fetched_file) { 'file_28ko.png' }
+
+                    it { is_expected_to_be_valid }
+                  end
+                end
+              end
             end
 
             describe "String object representing the signed reference to blob" do
