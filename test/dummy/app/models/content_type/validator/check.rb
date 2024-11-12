@@ -27,6 +27,8 @@ class ContentType::Validator::Check < ApplicationRecord
   validates :extension_two_extensions_docx, content_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   has_one_attached :extension_two_extensions_pdf
   validates :extension_two_extensions_pdf, content_type: 'application/pdf'
+  has_one_attached :pdf_file
+  validates :pdf_file, content_type: 'application/pdf'
 
   %w(symbol string regex).each do |type|
     has_one_attached :"with_#{type}"
