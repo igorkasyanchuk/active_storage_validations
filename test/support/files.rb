@@ -153,6 +153,14 @@ def file_17ko_and_png
   }
 end
 
+def file_28ko
+  {
+    io: File.open(Rails.root.join('public', 'file_28ko.png')),
+    filename: 'file_28ko',
+    content_type: 'image/png'
+  }
+end
+
 def spoofed_jpeg
   {
     io: File.open(Rails.root.join('public', 'spoofed.jpg')),
