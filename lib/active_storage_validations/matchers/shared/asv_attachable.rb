@@ -1,6 +1,6 @@
 module ActiveStorageValidations
   module Matchers
-    module Attachable
+    module ASVAttachable
       private
 
       def attach_file(file = dummy_file)

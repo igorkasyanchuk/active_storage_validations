@@ -2,7 +2,7 @@ require "active_support/concern"
 
 module ActiveStorageValidations
   module Matchers
-    module Contextable
+    module ASVContextable
       extend ActiveSupport::Concern
 
       def initialize_contextable

@@ -1,5 +1,5 @@
 module ActiveStorageValidations
-  module Loggable
+  module ASVLoggable
     extend ActiveSupport::Concern
 
     def logger

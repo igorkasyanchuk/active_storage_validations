@@ -1,14 +1,14 @@
 require_relative "../metadata"
 
 module ActiveStorageValidations
-  # ActiveStorageValidations::Attachable
+  # ActiveStorageValidations::ASVAttachable
   #
   # Validator methods for analyzing attachable.
   #
   # An attachable is a file representation such as ActiveStorage::Blob,
   # ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile, Hash, String,
   # File or Pathname
-  module Attachable
+  module ASVAttachable
     extend ActiveSupport::Concern
 
     private

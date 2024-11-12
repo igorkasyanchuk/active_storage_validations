@@ -2,7 +2,7 @@ require "active_support/concern"
 
 module ActiveStorageValidations
   module Matchers
-    module Validatable
+    module ASVValidatable
       extend ActiveSupport::Concern
 
       private

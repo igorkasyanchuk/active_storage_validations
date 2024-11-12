@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-require_relative 'shared/active_storageable'
-require_relative 'shared/errorable'
-require_relative 'shared/optionable'
-require_relative 'shared/symbolizable'
+require_relative 'shared/asv_active_storageable'
+require_relative 'shared/asv_errorable'
+require_relative 'shared/asv_optionable'
+require_relative 'shared/asv_symbolizable'
 
 module ActiveStorageValidations
   class BaseSizeValidator < ActiveModel::EachValidator # :nodoc:
-    include ActiveStorageable
-    include Errorable
-    include Optionable
-    include Symbolizable
+    include ASVActiveStorageable
+    include ASVErrorable
+    include ASVOptionable
+    include ASVSymbolizable
 
     delegate :number_to_human_size, to: ActiveSupport::NumberHelper
 

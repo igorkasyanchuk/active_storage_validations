@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-require_relative 'shared/active_storageable'
-require_relative 'shared/attachable'
-require_relative 'shared/errorable'
-require_relative 'shared/optionable'
-require_relative 'shared/symbolizable'
+require_relative 'shared/asv_active_storageable'
+require_relative 'shared/asv_attachable'
+require_relative 'shared/asv_errorable'
+require_relative 'shared/asv_optionable'
+require_relative 'shared/asv_symbolizable'
 
 module ActiveStorageValidations
   class DimensionValidator < ActiveModel::EachValidator # :nodoc
-    include ActiveStorageable
-    include Attachable
-    include Errorable
-    include Optionable
-    include Symbolizable
+    include ASVActiveStorageable
+    include ASVAttachable
+    include ASVErrorable
+    include ASVOptionable
+    include ASVSymbolizable
 
     AVAILABLE_CHECKS = %i[width height min max].freeze
     ERROR_TYPES = %i[

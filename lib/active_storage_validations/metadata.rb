@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative 'shared/loggable'
+require_relative 'shared/asv_loggable'
 
 module ActiveStorageValidations
   class Metadata
-    include Loggable
+    include ASVLoggable
 
     class InvalidImageError < StandardError; end
 

@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require_relative 'shared/active_storageable'
-require_relative 'shared/errorable'
-require_relative 'shared/symbolizable'
+require_relative 'shared/asv_active_storageable'
+require_relative 'shared/asv_errorable'
+require_relative 'shared/asv_symbolizable'
 
 module ActiveStorageValidations
   class AttachedValidator < ActiveModel::EachValidator # :nodoc:
-    include ActiveStorageable
-    include Errorable
-    include Symbolizable
+    include ASVActiveStorageable
+    include ASVErrorable
+    include ASVSymbolizable
 
     ERROR_TYPES = %i[blank].freeze
 

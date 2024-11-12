@@ -30,6 +30,13 @@ ActiveRecord::Schema.define do
     t.index %i[blob_id variation_digest], name: :index_active_storage_variant_records_uniqueness, unique: true
   end
 
+  # Gem specific test tables
+
+  create_table :active_storage_validations_checks, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
   %i(
     aspect_ratio
     attached
