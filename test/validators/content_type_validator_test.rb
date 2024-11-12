@@ -130,7 +130,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
       describe "when the extension is in uppercase" do
         subject { model.public_send(attribute).attach(pdf_file_with_extension_in_uppercase) and model }
 
-        let(:attribute) { :pdf_file }
+        let(:attribute) { :extension_upcase_extension }
         let(:pdf_file_with_extension_in_uppercase) do
           pdf_file.tap do |file|
             file[:filename][".pdf"] = ".PDF"
@@ -143,7 +143,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
       describe "when the extension is missing" do
         subject { model.public_send(attribute).attach(pdf_file_without_extension) and model }
 
-        let(:attribute) { :pdf_file }
+        let(:attribute) { :extension_missing_extension }
         let(:pdf_file_without_extension) do
           pdf_file.tap do |file|
             file[:filename][".pdf"] = ""
