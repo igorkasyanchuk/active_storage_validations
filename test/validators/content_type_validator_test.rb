@@ -126,6 +126,41 @@ describe ActiveStorageValidations::ContentTypeValidator do
           it { is_expected_to_be_valid }
         end
       end
+
+      describe "when the extension is in uppercase" do
+        subject { model.public_send(attribute).attach(pdf_file_with_extension_in_uppercase) and model }
+
+        let(:attribute) { :extension_upcase_extension }
+        let(:pdf_file_with_extension_in_uppercase) do
+          pdf_file.tap do |file|
+            file[:filename][".pdf"] = ".PDF"
+          end
+        end
+
+        it { is_expected_to_be_valid }
+      end
+
+      describe "when the extension is missing" do
+        subject { model.public_send(attribute).attach(pdf_file_without_extension) and model }
+
+        let(:attribute) { :extension_missing_extension }
+        let(:pdf_file_without_extension) do
+          pdf_file.tap do |file|
+            file[:filename][".pdf"] = ""
+          end
+        end
+        let(:error_options) do
+          {
+            authorized_types: "PDF",
+            content_type: pdf_file_without_extension[:content_type],
+            filename: pdf_file_without_extension[:filename]
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
     end
 
     describe ":with" do

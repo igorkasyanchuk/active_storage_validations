@@ -67,7 +67,7 @@ module ActiveStorageValidations
 
       extension = @attachable_filename.split('.').last
       possible_extensions = Marcel::TYPE_EXTS[@attachable_content_type]
-      return true if possible_extensions && extension.in?(possible_extensions)
+      return true if possible_extensions && extension.downcase.in?(possible_extensions)
 
       errors_options = initialize_and_populate_error_options(options, attachable)
       add_error(record, attribute, ERROR_TYPES.first, **errors_options)
