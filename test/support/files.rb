@@ -193,6 +193,14 @@ def not_identifiable_io_file
   }
 end
 
+def video_file
+  {
+    io: File.open(Rails.root.join('public', 'video.mp4')),
+    filename: 'video',
+    content_type: 'video/mp4'
+  }
+end
+
 def create_blob_from_file(file)
   ActiveStorage::Blob.create_and_upload!(
     io: file[:io],

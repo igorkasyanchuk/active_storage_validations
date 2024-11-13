@@ -20,6 +20,7 @@ class User < ApplicationRecord
   has_many_attached :proc_photos
   has_many_attached :proc_photo_with_messages
   has_one_attached :proc_image_regex
+  has_one_attached :video
 
   validates :name, presence: true
 
@@ -29,6 +30,7 @@ class User < ApplicationRecord
   validates :image_regex, content_type: /\Aimage\/.*\z/
   validates :conditional_image, attached: true, if: -> { name == 'Foo' }
   validates :conditional_image_2, attached: true, content_type: -> (record) {[/\Aimage\/.*\z/]}, size: { less_than: 10.megabytes }, if: -> { name == 'Peter Griffin' }
+  validates :video, content_type: [:mp4, :mpeg, :webm]
 
   validates :moon_picture, content_type: ['image/png'], size: { greater_than: 0 }
 
