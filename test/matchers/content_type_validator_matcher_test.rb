@@ -260,4 +260,20 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       end
     end
   end
+
+  describe "working with most common mime types" do
+    most_common_mime_types.each do |common_mime_type|
+      describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
+        subject { matcher.allowing(allowed_type) }
+
+        let(:allowed_type) { common_mime_type[:mime_type] }
+        let(:media) { common_mime_type[:mime_type].split('/').first }
+        let(:content) { common_mime_type[:extension].underscore }
+
+        let(:model_attribute) { [media, content].join('_') } # e.g. image_jpeg
+
+        it { is_expected_to_match_for(klass) }
+      end
+    end
+  end
 end

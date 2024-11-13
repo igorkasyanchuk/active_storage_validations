@@ -254,6 +254,27 @@ describe ActiveStorageValidations::ContentTypeValidator do
       end
     end
 
+    describe "working with most common mime types" do
+      most_common_mime_types.each do |common_mime_type|
+        describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
+          subject { model.public_send(attribute).attach(allowed_file) and model }
+
+          let(:media) { common_mime_type[:mime_type].split('/').first }
+          let(:content) { common_mime_type[:extension].underscore }
+          let(:attribute) { [media, content].join('_') } # e.g. image_jpeg
+          let(:allowed_file) do
+            {
+              io: File.open(Rails.root.join('public', "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
+              filename: "example.#{common_mime_type[:extension]}",
+              content_type: common_mime_type[:mime_type]
+            }
+          end
+
+          it { is_expected_to_be_valid }
+        end
+      end
+    end
+
     describe "Edge cases" do
       describe "when using a file that has a content_type with a parameter (e.g. 'application/x-rar-compressed;version=5')" do
         subject { model.public_send(attribute).attach(file_having_content_type_with_parameter) and model }
