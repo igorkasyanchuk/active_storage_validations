@@ -29,6 +29,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_image_regex.attach(image_150x150_file)
     u.photos.attach(bad_dummy_file)
     u.proc_photos.attach(bad_dummy_file)
+    u.video.attach(video_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ['Photos has an invalid content type', 'Proc photos has an invalid content type']
 
@@ -39,6 +40,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_image_regex.attach(image_150x150_file)
     u.photos.attach(image_150x150_file)
     u.proc_photos.attach(image_150x150_file)
+    u.video.attach(video_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Proc avatar has an invalid content type']
     assert_equal u.errors.details, avatar: [
@@ -68,6 +70,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_image_regex.attach(image_150x150_file)
     u.photos.attach(pdf_file) # Should be handled by regex match.
     u.proc_photos.attach(pdf_file) # Should be handled by regex match.
+    u.video.attach(video_file)
     assert u.valid?
 
     u = User.new(name: 'John Smith')
@@ -77,6 +80,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_image_regex.attach(bad_dummy_file)
     u.photos.attach(image_150x150_file)
     u.proc_photos.attach(image_150x150_file)
+    u.video.attach(video_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ['Image regex has an invalid content type', 'Proc image regex has an invalid content type']
 
@@ -87,6 +91,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_image_regex.attach(bad_dummy_file)
     u.photos.attach(bad_dummy_file)
     u.proc_photos.attach(bad_dummy_file)
+    u.video.attach(video_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Image regex has an invalid content type', 'Proc avatar has an invalid content type', 'Proc photos has an invalid content type', 'Proc image regex has an invalid content type']
 
@@ -96,6 +101,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.photos.attach(image_150x150_file)
     u.proc_photos.attach(image_150x150_file)
     u.conditional_image_2.attach(image_150x150_file)
+    u.video.attach(video_file)
     assert u.valid?
     assert_equal u.errors.full_messages, []
 
@@ -105,6 +111,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.photos.attach(bad_dummy_file)
     u.proc_photos.attach(image_150x150_file)
     u.conditional_image_2.attach(bad_dummy_file)
+    u.video.attach(video_file)
     assert !u.valid?
     assert_equal u.errors.full_messages, ["Avatar has an invalid content type", "Photos has an invalid content type", "Conditional image 2 has an invalid content type", "Proc avatar has an invalid content type"]
   end
