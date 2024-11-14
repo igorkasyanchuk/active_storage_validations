@@ -404,6 +404,8 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_ratio_one.attach(image_150x150_file)
     e.ratio_many.attach([image_600x800_file])
     e.proc_ratio_many.attach([image_600x800_file])
+    e.ratio_in.attach(image_150x150_file)
+    e.proc_ratio_in.attach(image_150x150_file)
     e.save!
 
     e = RatioModel.new(name: 'Princess Leia')
@@ -411,6 +413,8 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_ratio_one.attach(image_150x150_file)
     e.ratio_many.attach([image_150x150_file])
     e.proc_ratio_many.attach([image_150x150_file])
+    e.ratio_in.attach(image_150x150_file)
+    e.proc_ratio_in.attach(image_150x150_file)
     e.save
     assert !e.valid?
     assert_equal e.errors.full_messages, ["Ratio many must be a portrait image", "Proc ratio many must be a portrait image"]
@@ -422,6 +426,8 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_ratio_many.attach([image_600x800_file])
     e.image1.attach(image_150x150_file)
     e.proc_image1.attach(image_150x150_file)
+    e.ratio_in.attach(image_150x150_file)
+    e.proc_ratio_in.attach(image_150x150_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ["Image1 must have an aspect ratio of 16:9", 'Proc image1 must have an aspect ratio of 16:9']
 
@@ -432,7 +438,33 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_ratio_many.attach([image_600x800_file])
     e.image1.attach(image_1920x1080_file)
     e.proc_image1.attach(image_1920x1080_file)
+    e.ratio_in.attach(image_150x150_file)
+    e.proc_ratio_in.attach(image_150x150_file)
     assert !e.valid?
     assert_equal e.errors.full_messages, ["Ratio one is not a valid image", 'Proc ratio one is not a valid image']
+
+    e = RatioModel.new(name: 'Princess Leia')
+    e.ratio_one.attach(image_150x150_file)
+    e.proc_ratio_one.attach(image_150x150_file)
+    e.ratio_many.attach([image_600x800_file])
+    e.proc_ratio_many.attach([image_600x800_file])
+    e.ratio_in.attach(image_1920x1080_file)
+    e.proc_ratio_in.attach(image_1920x1080_file)
+    assert !e.valid?
+    assert_equal e.errors.details, ratio_in: [
+      {
+        error: :aspect_ratio_invalid,
+        validator_type: :aspect_ratio,
+        filename: 'image_1920x1080_file.png',
+        aspect_ratio: 'square, portrait'
+      }
+    ], proc_ratio_in: [
+     {
+       error: :aspect_ratio_invalid,
+       validator_type: :aspect_ratio,
+       filename: 'image_1920x1080_file.png',
+       aspect_ratio: 'square, portrait'
+     }
+    ] 
   end
 end
