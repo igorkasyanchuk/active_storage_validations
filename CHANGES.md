@@ -1,5 +1,10 @@
 - master
 
+- 1.3.4
+  Bug fixes:
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/296
+  - https://github.com/igorkasyanchuk/active_storage_validations/pull/297
+
 - 1.3.3
   Bug fixes:
   - https://github.com/igorkasyanchuk/active_storage_validations/pull/290/files
