@@ -70,98 +70,101 @@ describe ActiveStorageValidations::ContentTypeValidator do
 
     let(:model) { validator_test_class::Check.new(params) }
 
-    describe "#extension_matches_content_type?" do
-      describe "when the attachable content_type and extension cannot match (e.g. 'text/plain' and .png)" do
-        subject { model.public_send(attribute).attach(file_with_issue) and model }
+    # Dead code that we keep here for some time, maybe we will find a solution
+    # to this check later? (November 2024)
+    #
+    # describe "#extension_matches_content_type?" do
+    #   describe "when the attachable content_type and extension cannot match (e.g. 'text/plain' and .png)" do
+    #     subject { model.public_send(attribute).attach(file_with_issue) and model }
 
-        let(:attribute) { :extension_content_type_mismatch }
-        let(:file_with_issue) { extension_content_type_mismatch_file }
-        let(:error_options) do
-          {
-            authorized_types: "PNG",
-            content_type: file_with_issue[:content_type],
-            filename: file_with_issue[:filename]
-          }
-        end
+    #     let(:attribute) { :extension_content_type_mismatch }
+    #     let(:file_with_issue) { extension_content_type_mismatch_file }
+    #     let(:error_options) do
+    #       {
+    #         authorized_types: "PNG",
+    #         content_type: file_with_issue[:content_type],
+    #         filename: file_with_issue[:filename]
+    #       }
+    #     end
 
-        it { is_expected_not_to_be_valid }
-        it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
-        it { is_expected_to_have_error_options(error_options) }
-      end
+    #     it { is_expected_not_to_be_valid }
+    #     it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+    #     it { is_expected_to_have_error_options(error_options) }
+    #   end
 
-      describe "when the file has 2 extensions (e.g. hello.docx.pdf)" do
-        describe "and we only allow the first extension content_type (e.g. 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' (docx))" do
-          subject { model.public_send(attribute).attach(docx_file_with_two_extensions) and model }
+    #   describe "when the file has 2 extensions (e.g. hello.docx.pdf)" do
+    #     describe "and we only allow the first extension content_type (e.g. 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' (docx))" do
+    #       subject { model.public_send(attribute).attach(docx_file_with_two_extensions) and model }
 
-          let(:attribute) { :extension_two_extensions_docx }
-          let(:docx_file_with_two_extensions) do
-            docx_file.tap do |file|
-              file[:filename] += ".pdf"
-            end
-          end
-          let(:error_options) do
-            {
-              authorized_types: "DOCX",
-              content_type: docx_file_with_two_extensions[:content_type],
-              filename: docx_file_with_two_extensions[:filename]
-            }
-          end
+    #       let(:attribute) { :extension_two_extensions_docx }
+    #       let(:docx_file_with_two_extensions) do
+    #         docx_file.tap do |file|
+    #           file[:filename] += ".pdf"
+    #         end
+    #       end
+    #       let(:error_options) do
+    #         {
+    #           authorized_types: "DOCX",
+    #           content_type: docx_file_with_two_extensions[:content_type],
+    #           filename: docx_file_with_two_extensions[:filename]
+    #         }
+    #       end
 
-          it { is_expected_not_to_be_valid }
-          it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
-          it { is_expected_to_have_error_options(error_options) }
-        end
+    #       it { is_expected_not_to_be_valid }
+    #       it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+    #       it { is_expected_to_have_error_options(error_options) }
+    #     end
 
-        describe "and we allow the last extension content_type (e.g. 'application/pdf')" do
-          subject { model.public_send(attribute).attach(docx_file_with_two_extensions) and model }
+    #     describe "and we allow the last extension content_type (e.g. 'application/pdf')" do
+    #       subject { model.public_send(attribute).attach(docx_file_with_two_extensions) and model }
 
-          let(:attribute) { :extension_two_extensions_pdf }
-          let(:docx_file_with_two_extensions) do
-            docx_file.tap do |file|
-              file[:filename] += ".pdf"
-              file[:content_type] = "application/pdf"
-            end
-          end
+    #       let(:attribute) { :extension_two_extensions_pdf }
+    #       let(:docx_file_with_two_extensions) do
+    #         docx_file.tap do |file|
+    #           file[:filename] += ".pdf"
+    #           file[:content_type] = "application/pdf"
+    #         end
+    #       end
 
-          it { is_expected_to_be_valid }
-        end
-      end
+    #       it { is_expected_to_be_valid }
+    #     end
+    #   end
 
-      describe "when the extension is in uppercase" do
-        subject { model.public_send(attribute).attach(pdf_file_with_extension_in_uppercase) and model }
+    #   describe "when the extension is in uppercase" do
+    #     subject { model.public_send(attribute).attach(pdf_file_with_extension_in_uppercase) and model }
 
-        let(:attribute) { :extension_upcase_extension }
-        let(:pdf_file_with_extension_in_uppercase) do
-          pdf_file.tap do |file|
-            file[:filename][".pdf"] = ".PDF"
-          end
-        end
+    #     let(:attribute) { :extension_upcase_extension }
+    #     let(:pdf_file_with_extension_in_uppercase) do
+    #       pdf_file.tap do |file|
+    #         file[:filename][".pdf"] = ".PDF"
+    #       end
+    #     end
 
-        it { is_expected_to_be_valid }
-      end
+    #     it { is_expected_to_be_valid }
+    #   end
 
-      describe "when the extension is missing" do
-        subject { model.public_send(attribute).attach(pdf_file_without_extension) and model }
+    #   describe "when the extension is missing" do
+    #     subject { model.public_send(attribute).attach(pdf_file_without_extension) and model }
 
-        let(:attribute) { :extension_missing_extension }
-        let(:pdf_file_without_extension) do
-          pdf_file.tap do |file|
-            file[:filename][".pdf"] = ""
-          end
-        end
-        let(:error_options) do
-          {
-            authorized_types: "PDF",
-            content_type: pdf_file_without_extension[:content_type],
-            filename: pdf_file_without_extension[:filename]
-          }
-        end
+    #     let(:attribute) { :extension_missing_extension }
+    #     let(:pdf_file_without_extension) do
+    #       pdf_file.tap do |file|
+    #         file[:filename][".pdf"] = ""
+    #       end
+    #     end
+    #     let(:error_options) do
+    #       {
+    #         authorized_types: "PDF",
+    #         content_type: pdf_file_without_extension[:content_type],
+    #         filename: pdf_file_without_extension[:filename]
+    #       }
+    #     end
 
-        it { is_expected_not_to_be_valid }
-        it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
-        it { is_expected_to_have_error_options(error_options) }
-      end
-    end
+    #     it { is_expected_not_to_be_valid }
+    #     it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+    #     it { is_expected_to_have_error_options(error_options) }
+    #   end
+    # end
 
     describe ":with" do
       # validates :with_string, content_type: 'png'
