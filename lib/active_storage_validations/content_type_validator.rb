@@ -56,23 +56,32 @@ module ActiveStorageValidations
       @attachable_filename = attachable_filename(attachable).to_s
     end
 
+    # Check if the provided content_type is authorized and not spoofed against
+    # the file io.
     def is_valid?(record, attribute, attachable)
-      extension_matches_content_type?(record, attribute, attachable) &&
-        authorized_content_type?(record, attribute, attachable) &&
+      authorized_content_type?(record, attribute, attachable) &&
         not_spoofing_content_type?(record, attribute, attachable)
     end
 
-    def extension_matches_content_type?(record, attribute, attachable)
-      return true if !@attachable_filename || !@attachable_content_type
+    # Dead code that we keep here for some time, maybe we will find a solution
+    # to this check later? (November 2024)
+    #
+    # We do not perform any validations against the extension because it is an
+    # unreliable source of truth. For example, a `.csv` file could have its
+    # `text/csv` content_type changed to  `application/vnd.ms-excel` because
+    # it had been opened by Excel at some point, making the file extension vs
+    # file content_type check invalid.
+    # def extension_matches_content_type?(record, attribute, attachable)
+    #   return true if !@attachable_filename || !@attachable_content_type
 
-      extension = @attachable_filename.split('.').last
-      possible_extensions = Marcel::TYPE_EXTS[@attachable_content_type]
-      return true if possible_extensions && extension.downcase.in?(possible_extensions)
+    #   extension = @attachable_filename.split('.').last
+    #   possible_extensions = Marcel::TYPE_EXTS[@attachable_content_type]
+    #   return true if possible_extensions && extension.downcase.in?(possible_extensions)
 
-      errors_options = initialize_and_populate_error_options(options, attachable)
-      add_error(record, attribute, ERROR_TYPES.first, **errors_options)
-      false
-    end
+    #   errors_options = initialize_and_populate_error_options(options, attachable)
+    #   add_error(record, attribute, ERROR_TYPES.first, **errors_options)
+    #   false
+    # end
 
     def authorized_content_type?(record, attribute, attachable)
       attachable_content_type_is_authorized = @authorized_content_types.any? do |authorized_content_type|
