@@ -152,7 +152,7 @@ module ActiveStorageValidations
     def ensure_content_types_validity
       return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
 
-      ([options[:with]] || options[:in]).each do |content_type|
+      (Array(options[:with]) + Array(options[:in])).each do |content_type|
         raise ArgumentError, invalid_content_type_option_message(content_type) if invalid_option?(content_type)
       end
     end

@@ -16,18 +16,36 @@ describe ActiveStorageValidations::ContentTypeValidator do
 
     describe 'content type validity' do
       describe 'when the passed option is an invalid content type' do
-        subject { validator_test_class::CheckValidityInvalidContentType.new(params) }
+        describe ":with" do
+          subject { validator_test_class::CheckValidityInvalidContentTypeWith.new(params) }
 
-        let(:error_message) do
-          <<~ERROR_MESSAGE
-            You must pass valid content types to the validator
-            '#{invalid_content_type}' is not found in Marcel::TYPE_EXTS
-          ERROR_MESSAGE
+          let(:error_message) do
+            <<~ERROR_MESSAGE
+              You must pass valid content types to the validator
+              '#{invalid_content_type}' is not found in Marcel::TYPE_EXTS
+            ERROR_MESSAGE
+          end
+          let(:invalid_content_type) { "xxx/invalid" }
+
+          it 'raises an error at model initialization' do
+            assert_raises(ArgumentError, error_message) { subject }
+          end
         end
-        let(:invalid_content_type) { "xxx/invalid" }
 
-        it 'raises an error at model initialization' do
-          assert_raises(ArgumentError, error_message) { subject }
+        describe ":in" do
+          subject { validator_test_class::CheckValidityInvalidContentTypeIn.new(params) }
+
+          let(:error_message) do
+            <<~ERROR_MESSAGE
+              You must pass valid content types to the validator
+              '#{invalid_content_type}' is not found in Marcel::TYPE_EXTS
+            ERROR_MESSAGE
+          end
+          let(:invalid_content_type) { "xxx/invalid1" }
+
+          it 'raises an error at model initialization' do
+            assert_raises(ArgumentError, error_message) { subject }
+          end
         end
       end
 
