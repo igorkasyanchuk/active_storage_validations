@@ -89,16 +89,16 @@ describe ActiveStorageValidations::AspectRatioValidator do
 
     let(:model) { validator_test_class::Check.new(params) }
 
-    describe ":with" do
+    describe ':with' do
       # validates :with_named_square, aspect_ratio: :square
       # validates :with_named_portrait, aspect_ratio: :portrait
       # validates :with_named_landscape, aspect_ratio: :landscape
       # validates :with_named_square_proc, aspect_ratio: -> (record) { :square }
       # validates :with_named_portrait_proc, aspect_ratio: -> (record) { :portrait }
       # validates :with_named_landscape_proc, aspect_ratio: -> (record) { :landscape }
-      %w(value proc).each do |value_type|
-        describe "named aspect_ratio" do
-          %i(square portrait landscape).each do |named_aspect_ratio|
+      %w[value proc].each do |value_type|
+        describe 'named aspect_ratio' do
+          %i[square portrait landscape].each do |named_aspect_ratio|
             describe ":#{named_aspect_ratio}" do
               let(:attribute) { :"with_#{named_aspect_ratio}#{'_proc' if value_type == 'proc'}" }
 
@@ -128,7 +128,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
                 end
                 let(:error_options) do
                   {
-                    aspect_ratio: named_aspect_ratio,
+                    aspect_ratio: named_aspect_ratio.to_s,
                     filename: not_allowed_file[:filename]
                   }
                 end
@@ -141,7 +141,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
           end
         end
 
-        describe "regex aspect_ratio" do
+        describe 'regex aspect_ratio' do
           let(:attribute) { :"with_regex#{'_proc' if value_type == 'proc'}" }
 
           describe 'when provided with an allowed aspect_ratio file' do
@@ -158,28 +158,69 @@ describe ActiveStorageValidations::AspectRatioValidator do
             let(:not_allowed_file) { is_4_3_image_file }
             let(:error_options) do
               {
-                aspect_ratio: "16:9",
+                aspect_ratio: '16:9',
                 filename: not_allowed_file[:filename]
               }
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("aspect_ratio_is_not", error_options: error_options) }
+            it { is_expected_to_have_error_message('aspect_ratio_is_not', error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
       end
     end
 
-    describe "Edge cases" do
-      describe "when the passed file is not a valid image" do
-        subject { model.public_send(attribute).attach(empty_io_file) and model }
+    describe ':in' do
+      %w[value proc].each do |value_type|
+        describe value_type do
+          let(:attribute) { :"in_aspect_ratios#{'_proc' if value_type == 'proc'}" }
 
+          describe 'when provided with an allowed aspect_ratio file' do
+            subject { model.public_send(attribute).attach(allowed_file) and model }
+
+            let(:allowed_file) { [square_image_file, portrait_image_file, is_16_9_image_file].sample }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe 'when provided with a not allowed aspect_ratio file' do
+            subject { model.public_send(attribute).attach(not_allowed_file) and model }
+
+            let(:not_allowed_file) { is_4_3_image_file }
+
+            let(:error_options) do
+              {
+                aspect_ratio: 'square, portrait, 16:9',
+                filename: not_allowed_file[:filename]
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message('aspect_ratio_invalid', error_options: error_options) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+        end
+      end
+    end
+
+    describe 'Edge cases' do
+      describe 'when the passed file is not a valid image' do
         let(:attribute) { :with_invalid_image_file }
-        let(:error_options) do
-          {
-            filename: empty_io_file[:filename]
-          }
+
+        describe 'when provided with a not allowed aspect_ratio file' do
+          subject { model.public_send(attribute).attach(not_allowed_file) and model }
+
+          let(:not_allowed_file) { empty_io_file }
+          let(:error_options) do
+            {
+              filename: not_allowed_file[:filename]
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_message('image_metadata_missing', error_options: error_options) }
+          it { is_expected_to_have_error_options(error_options) }
         end
 
         it { is_expected_not_to_be_valid }
