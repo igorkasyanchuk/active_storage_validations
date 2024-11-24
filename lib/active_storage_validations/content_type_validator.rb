@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'shared/asv_active_storageable'
+require_relative 'shared/asv_analyzable'
 require_relative 'shared/asv_attachable'
 require_relative 'shared/asv_errorable'
 require_relative 'shared/asv_optionable'
@@ -10,6 +11,7 @@ require_relative 'content_type_spoof_detector'
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
     include ASVActiveStorageable
+    include ASVAnalyzable
     include ASVAttachable
     include ASVErrorable
     include ASVOptionable

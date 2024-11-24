@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'shared/asv_active_storageable'
+require_relative 'shared/asv_analyzable'
 require_relative 'shared/asv_attachable'
 require_relative 'shared/asv_errorable'
 require_relative 'shared/asv_optionable'
@@ -9,6 +10,7 @@ require_relative 'shared/asv_symbolizable'
 module ActiveStorageValidations
   class AspectRatioValidator < ActiveModel::EachValidator # :nodoc
     include ASVActiveStorageable
+    include ASVAnalyzable
     include ASVAttachable
     include ASVErrorable
     include ASVOptionable
@@ -53,7 +55,7 @@ module ActiveStorageValidations
     end
 
     def image_metadata_missing?(record, attribute, attachable, flat_options, metadata)
-      return false if metadata[:width].to_i > 0 && metadata[:height].to_i > 0
+      return false if metadata.present? && metadata[:width].to_i > 0 && metadata[:height].to_i > 0
 
       errors_options = initialize_error_options(options, attachable)
       errors_options[:aspect_ratio] = flat_options[:with]

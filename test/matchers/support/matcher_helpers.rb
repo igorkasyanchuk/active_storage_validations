@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MatcherHelpers
   require 'active_storage_validations/matchers'
 
