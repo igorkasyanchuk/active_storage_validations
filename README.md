@@ -354,8 +354,8 @@ describe User do
 
   # limit
   # #min, #max
-  it { is_expected.to validate_limit_of(:avatar).min(1) }
-  it { is_expected.to validate_limit_of(:avatar).max(5) }
+  it { is_expected.to validate_limits_of(:avatar).min(1) }
+  it { is_expected.to validate_limits_of(:avatar).max(5) }
 
   # content_type:
   # #allowing, #rejecting
