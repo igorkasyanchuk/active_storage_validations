@@ -16,11 +16,15 @@ module ActiveStorageValidations
       end
 
       Tempfile.create(binmode: true) do |tempfile|
-        if image(tempfile)
-          yield image(tempfile)
-        else
-          logger.info "Skipping image analysis because Vips doesn't support the file"
-          {}
+        begin
+          if image(tempfile)
+            yield image(tempfile)
+          else
+            logger.info "Skipping image analysis because Vips doesn't support the file"
+            {}
+          end
+        ensure
+          tempfile.close
         end
       end
     rescue ::Vips::Error => error
