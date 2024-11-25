@@ -28,7 +28,7 @@ module ReturnsTheRightMetadataForAnyAttachable
         #   Pathname object
 
         let(:png_image) { Rails.root.join('public', 'image_150x150.png') }
-        let(:expected_metadata) { { width: 150, height: 150} }
+        let(:expected_metadata) { { width: 150, height: 150 } }
 
         describe "ActiveStorage::Blob object" do
           let(:attachable) do
@@ -171,6 +171,20 @@ module ReturnsTheRightMetadataForAnyAttachable
       end
 
       describe "Edge cases" do
+        describe "rotated image" do
+          let(:attachable) do
+            ActiveStorage::Blob.create_and_upload!(
+              io: File.open(Rails.root.join('public', 'image_700x500_rotated_90.png')),
+              filename: 'image_700x500_rotated_90.png',
+              content_type: 'image/png',
+              service_name: 'test'
+            )
+          end
+          let(:expected_metadata) { { width: 700, height: 500 } }
+
+          it { is_expected_to_return_the_right_metadata }
+        end
+
         describe "0 byte size file" do
           let(:attachable) do
             ActiveStorage::Blob.create_and_upload!(
