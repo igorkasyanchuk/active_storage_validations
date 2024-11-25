@@ -16,11 +16,13 @@ module ActiveStorageValidations
         return {}
       end
 
-      if image.valid?
-        yield image
-      else
-        logger.info "Skipping image analysis because ImageMagick doesn't support the file"
-        {}
+      Tempfile.create(binmode: true) do |tempfile|
+        if image(tempfile).valid?
+          yield image(tempfile)
+        else
+          logger.info "Skipping image analysis because ImageMagick doesn't support the file"
+          {}
+        end
       end
     rescue MiniMagick::Error => error
       logger.error "Skipping image analysis due to an ImageMagick error: #{error.message}"

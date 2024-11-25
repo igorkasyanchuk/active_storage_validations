@@ -24,19 +24,15 @@ module ActiveStorageValidations
 
     private
 
-    def image
+    def image(tempfile)
       case @attachable
       when ActiveStorage::Blob, String
         blob = @attachable.is_a?(String) ? ActiveStorage::Blob.find_signed!(@attachable) : @attachable
-        tempfile_from_blob(blob) do |tempfile|
-          image_from_path(tempfile.path)
-        end
+        image_from_tempfile_path(tempfile, blob)
       when Hash
         io = @attachable[:io]
         if io.is_a?(StringIO)
-          tempfile_from_io(io) do |tempfile|
-            image_from_path(tempfile.path)
-          end
+          image_from_tempfile_path(tempfile, io)
         else
           File.open(io) do |file|
             image_from_path(file.path)
@@ -53,25 +49,17 @@ module ActiveStorageValidations
       end
     end
 
-    def tempfile_from_blob(blob)
-      Tempfile.create(["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter], binmode: true) do |tempfile|
-        blob.download { |chunk| tempfile.write(chunk) }
-
-        tempfile.flush
-        tempfile.rewind
-        yield tempfile
+    def image_from_tempfile_path(tempfile, file_representation)
+      if file_representation.is_a?(ActiveStorage::Blob)
+        file_representation.download { |chunk| tempfile.write(chunk) }
+      else
+        IO.copy_stream(file_representation, tempfile)
+        file_representation.rewind
       end
-    end
 
-    def tempfile_from_io(io)
-      Tempfile.create([File.basename(@attachable[:filename], '.*'), File.extname(@attachable[:filename])], binmode: true) do |tempfile|
-        IO.copy_stream(io, tempfile)
-        io.rewind
-
-        tempfile.flush
-        tempfile.rewind
-        yield tempfile
-      end
+      tempfile.flush
+      tempfile.rewind
+      image_from_path(tempfile.path)
     end
 
     def read_image
