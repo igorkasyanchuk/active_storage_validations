@@ -27,15 +27,12 @@ module ReturnsTheRightMetadataForAnyAttachable
         #   File object
         #   Pathname object
 
-        let(:png_image) { Rails.root.join('public', 'image_150x150.png') }
-        let(:expected_metadata) { { width: 150, height: 150 } }
-
         describe "ActiveStorage::Blob object" do
           let(:attachable) do
             ActiveStorage::Blob.create_and_upload!(
-              io: File.open(png_image),
-              filename: 'image_150x150.png',
-              content_type: 'image/png',
+              io: media_io,
+              filename: media_filename,
+              content_type: media_content_type,
               service_name: 'test'
             )
           end
@@ -45,14 +42,14 @@ module ReturnsTheRightMetadataForAnyAttachable
 
         describe "ActionDispatch::Http::UploadedFile object" do
           let(:attachable) do
-            tempfile = Tempfile.new(['image_150x150', '.png'])
-            tempfile.write(File.read(png_image))
+            tempfile = Tempfile.new([media_filename, media_extension])
+            tempfile.write(File.read(media_path))
             tempfile.rewind
 
             ActionDispatch::Http::UploadedFile.new({
               tempfile: tempfile,
-              filename: 'image_150x150.png',
-              type: 'image/png'
+              filename: media_filename,
+              type: media_content_type
             })
           end
 
@@ -60,7 +57,7 @@ module ReturnsTheRightMetadataForAnyAttachable
         end
 
         describe "Rack::Test::UploadedFile object" do
-          let(:attachable) { Rack::Test::UploadedFile.new(png_image, 'image/png') }
+          let(:attachable) { Rack::Test::UploadedFile.new(media_path, media_content_type) }
 
           it { is_expected_to_return_the_right_metadata }
         end
@@ -68,9 +65,9 @@ module ReturnsTheRightMetadataForAnyAttachable
         describe "Hash object representing the io / filename / content_type" do
           let(:attachable) do
             {
-              io: File.open(png_image),
-              filename: 'image_150x150.png',
-              content_type: 'image/png'
+              io: media_io,
+              filename: media_filename,
+              content_type: media_content_type
             }
           end
 
@@ -79,8 +76,8 @@ module ReturnsTheRightMetadataForAnyAttachable
           describe "when not passed with a content_type" do
             let(:attachable) do
               {
-                io: File.open(png_image),
-                filename: 'image_150x150.png'
+                io: media_io,
+                filename: media_filename
               }
             end
 
@@ -99,14 +96,14 @@ module ReturnsTheRightMetadataForAnyAttachable
               {
                 io: io,
                 filename: fetched_file,
-                content_type: 'image/png'
+                content_type: media_content_type
               }
             end
 
             describe "using StringIO constructor as io" do
               let(:io) { StringIO.new(remote_image.to_s) }
               let(:remote_image) { Net::HTTP.get(uri) }
-              let(:fetched_file) { 'image_150x150.png' }
+              let(:fetched_file) { media_filename }
 
               it { is_expected_to_return_the_right_metadata }
             end
@@ -114,14 +111,15 @@ module ReturnsTheRightMetadataForAnyAttachable
             describe "using URI.open constructor as io" do
               let(:io) { uri.open }
 
-              describe "Opening small images (< 10ko) resulting in OpenUri returning a StringIO" do
-                let(:fetched_file) { 'image_150x150.png' }
+              describe "Opening small media (< 10ko) resulting in OpenUri returning a StringIO" do
+                let(:fetched_file) { media_filename }
 
                 it { is_expected_to_return_the_right_metadata }
               end
 
-              describe "Opening large images (>= 10ko) resulting in OpenUri returning a Tempfile" do
-                let(:fetched_file) { 'image_150x150_28ko.png' }
+              describe "Opening large media (>= 10ko) resulting in OpenUri returning a Tempfile" do
+                let(:fetched_file) { media_filename_over_10ko }
+                let(:expected_metadata) { expected_metadata_over_10ko }
 
                 it { is_expected_to_return_the_right_metadata }
               end
@@ -132,9 +130,9 @@ module ReturnsTheRightMetadataForAnyAttachable
         describe "String object representing the signed reference to blob" do
           let(:attachable) do
             blob = ActiveStorage::Blob.create_and_upload!(
-              io: File.open(png_image),
-              filename: 'image_150x150.png',
-              content_type: 'image/png',
+              io: media_io,
+              filename: media_filename,
+              content_type: media_content_type,
               service_name: 'test'
             )
             blob.signed_id
@@ -144,7 +142,7 @@ module ReturnsTheRightMetadataForAnyAttachable
         end
 
         describe "File object" do
-          let(:attachable) { File.open(png_image) }
+          let(:attachable) { media_io }
 
           if Rails.gem_version >= Gem::Version.new('7.1.0.rc1')
             it { is_expected_to_return_the_right_metadata }
@@ -154,7 +152,7 @@ module ReturnsTheRightMetadataForAnyAttachable
         end
 
         describe "Pathname object" do
-          let(:attachable) { Pathname.new(png_image) }
+          let(:attachable) { Pathname.new(media_path) }
 
           if Rails.gem_version >= Gem::Version.new('7.1.0.rc1')
             it { is_expected_to_return_the_right_metadata }
@@ -171,19 +169,16 @@ module ReturnsTheRightMetadataForAnyAttachable
       end
 
       describe "Edge cases" do
-        describe "rotated image" do
-          # Using a jpg file to test because the behaviour is uniform among OS,
-          # we tried doing it with a png file but the result was different
-          # between our local machine and the CI.
+        describe "rotated media" do
           let(:attachable) do
             ActiveStorage::Blob.create_and_upload!(
-              io: File.open(Rails.root.join('public', 'image_700x500_rotated_90.jpg')),
-              filename: 'image_700x500_rotated_90.jpg',
-              content_type: 'image/jpeg',
+              io: File.open(Rails.root.join('public', media_filename_rotated)),
+              filename: media_filename_rotated,
+              content_type: media_content_type_rotated,
               service_name: 'test'
             )
           end
-          let(:expected_metadata) { { width: 700, height: 500 } }
+          let(:expected_metadata) { expected_metadata_rotated }
 
           it { is_expected_to_return_the_right_metadata }
         end
@@ -191,9 +186,9 @@ module ReturnsTheRightMetadataForAnyAttachable
         describe "0 byte size file" do
           let(:attachable) do
             ActiveStorage::Blob.create_and_upload!(
-              io: File.open(Rails.root.join('public', 'image_file_0ko.png')),
-              filename: 'image_150x150.png',
-              content_type: 'image/png',
+              io: File.open(Rails.root.join('public', media_filename_0ko)),
+              filename: media_filename_0ko,
+              content_type: media_content_type,
               service_name: 'test'
             )
           end

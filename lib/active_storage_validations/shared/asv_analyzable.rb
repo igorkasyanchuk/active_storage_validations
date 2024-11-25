@@ -19,6 +19,7 @@ module ActiveStorageValidations
     def analyzer_for(attachable)
       case attachable_media_type(attachable)
       when "image" then image_analyzer_for(attachable)
+      when "video" then video_analyzer_for(attachable)
       else fallback_analyzer_for(attachable)
       end
     end
@@ -36,6 +37,10 @@ module ActiveStorageValidations
       # Rails returns nil for default image processor, because it is set in an after initialize callback
       # https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/engine.rb
       ActiveStorage.variant_processor || DEFAULT_IMAGE_PROCESSOR
+    end
+
+    def video_analyzer_for(attachable)
+      ActiveStorageValidations::Analyzer::VideoAnalyzer.new(attachable)
     end
 
     def fallback_analyzer_for(attachable)
