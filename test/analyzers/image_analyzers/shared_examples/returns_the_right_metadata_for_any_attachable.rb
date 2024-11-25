@@ -8,11 +8,11 @@ module ReturnsTheRightMetadataForAnyAttachable
   included do
     describe "#metadata" do
       def is_expected_to_return_the_right_metadata
-        assert(subject, expected_metadata)
+        assert_equal(expected_metadata, subject)
       end
 
       def is_expected_to_return_empty_metadata
-        assert(subject, {})
+        assert_equal({}, subject)
       end
 
       subject { analyzer.metadata }
@@ -172,11 +172,14 @@ module ReturnsTheRightMetadataForAnyAttachable
 
       describe "Edge cases" do
         describe "rotated image" do
+          # Using a jpg file to test because the behaviour is uniform among OS,
+          # we tried doing it with a png file but the result was different
+          # between our local machine and the CI.
           let(:attachable) do
             ActiveStorage::Blob.create_and_upload!(
-              io: File.open(Rails.root.join('public', 'image_700x500_rotated_90.png')),
-              filename: 'image_700x500_rotated_90.png',
-              content_type: 'image/png',
+              io: File.open(Rails.root.join('public', 'image_700x500_rotated_90.jpg')),
+              filename: 'image_700x500_rotated_90.jpg',
+              content_type: 'image/jpeg',
               service_name: 'test'
             )
           end
