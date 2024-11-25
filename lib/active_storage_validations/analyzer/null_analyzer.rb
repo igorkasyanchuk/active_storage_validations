@@ -11,10 +11,6 @@ module ActiveStorageValidations
   #   ActiveStorage::Analyzer::NullAnalyzer.new(attachable).metadata
   #   # => {}
   class Analyzer::NullAnalyzer < Analyzer
-    def self.accept?(attachable)
-      true
-    end
-
     def metadata
       {}
     end

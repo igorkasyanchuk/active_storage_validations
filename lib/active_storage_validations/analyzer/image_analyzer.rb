@@ -12,10 +12,6 @@ module ActiveStorageValidations
   #   ActiveStorage::Analyzer::ImageAnalyzer::ImageMagick.new(attachable).metadata
   #   # => { width: 4104, height: 2736 }
   class Analyzer::ImageAnalyzer < Analyzer
-    def self.accept?(attachable)
-      image?(attachable)
-    end
-
     def metadata
       read_image do |image|
         if rotated_image?(image)
@@ -32,14 +28,20 @@ module ActiveStorageValidations
       case @attachable
       when ActiveStorage::Blob, String
         blob = @attachable.is_a?(String) ? ActiveStorage::Blob.find_signed!(@attachable) : @attachable
-        tempfile = tempfile_from_blob(blob)
-
-        image_from_path(tempfile.path)
+        tempfile_from_blob(blob) do |tempfile|
+          image_from_path(tempfile.path)
+        end
       when Hash
         io = @attachable[:io]
-        file = io.is_a?(StringIO) ? tempfile_from_io(io) : File.open(io)
-
-        image_from_path(file.path)
+        if io.is_a?(StringIO)
+          tempfile_from_io(io) do |tempfile|
+            image_from_path(tempfile.path)
+          end
+        else
+          File.open(io) do |file|
+            image_from_path(file.path)
+          end
+        end
       when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
         image_from_path(@attachable.path)
       when File
@@ -52,24 +54,28 @@ module ActiveStorageValidations
     end
 
     def tempfile_from_blob(blob)
-      tempfile = Tempfile.new(["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter], binmode: true)
+      Tempfile.create(["ActiveStorage-#{blob.id}-", blob.filename.extension_with_delimiter], binmode: true) do |tempfile|
+        blob.download { |chunk| tempfile.write(chunk) }
 
-      blob.download { |chunk| tempfile.write(chunk) }
-
-      tempfile.flush
-      tempfile.rewind
-      tempfile
+        tempfile.flush
+        tempfile.rewind
+        yield tempfile
+      end
     end
 
     def tempfile_from_io(io)
-      tempfile = Tempfile.new([File.basename(@attachable[:filename], '.*'), File.extname(@attachable[:filename])], binmode: true)
+      Tempfile.create([File.basename(@attachable[:filename], '.*'), File.extname(@attachable[:filename])], binmode: true) do |tempfile|
+        IO.copy_stream(io, tempfile)
+        io.rewind
 
-      IO.copy_stream(io, tempfile)
-      io.rewind
+        tempfile.flush
+        tempfile.rewind
+        yield tempfile
+      end
+    end
 
-      tempfile.flush
-      tempfile.rewind
-      tempfile
+    def read_image
+      raise NotImplementedError
     end
 
     def image_from_path(path)

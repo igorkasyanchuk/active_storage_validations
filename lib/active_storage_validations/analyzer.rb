@@ -16,30 +16,6 @@ module ActiveStorageValidations
 
     attr_reader :attachable
 
-    # Implement this method in a concrete subclass. Have it return true when given an attachable from which
-    # the analyzer can extract metadata.
-    def self.accept?(attachable)
-      false
-    end
-
-    # Returns true if the attachable media_type matches, like image?(attachable) returns
-    # true for 'image/png'
-    class << self
-      %w[
-        image
-        audio
-        video
-      ].each do |media_type|
-        define_method(:"#{media_type}?") do |attachable|
-          attachable_content_type(attachable).start_with?(media_type)
-        end
-      end
-
-      def attachable_content_type(attachable)
-        new(attachable).send(:attachable_content_type, attachable)
-      end
-    end
-
     def initialize(attachable)
       @attachable = attachable
     end
