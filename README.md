@@ -447,6 +447,35 @@ The `aspect_ratio` validator error messages expose 2 values that you can use:
 
 ### Processable image
 
+Validates if the attached files can be processed by MiniMagick or Vips.
+
+#### Options
+
+The `processable_image` validator has no options.
+
+#### Examples
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+
+  validates :avatar, processable_image: true # restricts the file to be processable by MiniMagick or Vips
+end
+```
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      image_not_processable: "is not a valid image"
+```
+
+The `processable_image` validator error messages expose 1 value that you can use:
+- `filename` containing the current filename in error
+
 ---
 
 ## Upgrading from 1.x to 2.x
@@ -476,7 +505,7 @@ But this major version bump also comes with some breaking changes. Below are the
 <!-- * validates dimension of images/videos -->
 <!-- * validates number of uploaded files (min/max required) -->
 <!-- * validates aspect ratio (if square, portrait, landscape, is_16_9, ...) -->
-* validates if file can be processed by MiniMagick or Vips
+<!-- * validates if file can be processed by MiniMagick or Vips -->
 <!-- * custom error messages -->
 <!-- * allow procs for dynamic determination of values -->
 
@@ -578,19 +607,6 @@ en:
       aspect_ratio_not_landscape: "must be a landscape image"
       aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
       image_not_processable: "is not a valid image"
-```
-
-In several cases, Active Storage Validations provides variables to help you customize messages:
-
-
-### Processable image
-The `image_not_processable` key supports one variable that you can use:
-- `filename` containing the current file name
-
-For example :
-
-```yml
-image_not_processable: "is not a valid image (file: %{filename})"
 ```
 
 ## Sample
