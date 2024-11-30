@@ -401,6 +401,48 @@ The `dimension` validator error messages expose 6 values that you can use:
 
 ### Aspect ratio
 
+Validates the aspect ratio of the attached files.
+
+#### Options
+
+The `aspect_ratio` validator has several options:
+- `with`: defines the exact allowed aspect ratio (e.g. `16/9`)
+
+This validator can define aspect ratios in several ways:
+- Symbols:
+  - prebuilt aspect ratios: `:square`, `:portrait`, `:landscape`
+  - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc.
+
+#### Examples
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+
+  validates :avatar, aspect_ratio: :square # restricts the aspect ratio to 1:1
+  validates :avatar, aspect_ratio: :portrait # restricts the aspect ratio to x:y where y > x
+  validates :avatar, aspect_ratio: :landscape # restricts the aspect ratio to x:y where x > y
+  validates :avatar, aspect_ratio: :is_16_9 # restricts the aspect ratio to 16:9
+end
+```
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      aspect_ratio_not_square: "must be a square image"
+      aspect_ratio_not_portrait: "must be a portrait image"
+      aspect_ratio_not_landscape: "must be a landscape image"
+      aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
+```
+
+The `aspect_ratio` validator error messages expose 2 values that you can use:
+- `aspect_ratio` containing the expected aspect ratio, especially usefull for custom aspect ratio
+- `filename` containing the current filename in error
+
 ---
 
 ### Processable image
@@ -433,7 +475,7 @@ But this major version bump also comes with some breaking changes. Below are the
 <!-- * validates total size of files -->
 <!-- * validates dimension of images/videos -->
 <!-- * validates number of uploaded files (min/max required) -->
-* validates aspect ratio (if square, portrait, landscape, is_16_9, ...)
+<!-- * validates aspect ratio (if square, portrait, landscape, is_16_9, ...) -->
 * validates if file can be processed by MiniMagick or Vips
 <!-- * custom error messages -->
 <!-- * allow procs for dynamic determination of values -->
@@ -540,16 +582,6 @@ en:
 
 In several cases, Active Storage Validations provides variables to help you customize messages:
 
-### Aspect ratio
-The keys starting with `aspect_ratio_` support two variables that you can use:
-- `aspect_ratio` containing the expected aspect ratio, especially useful for custom aspect ratio
-- `filename` containing the current file name
-
-For example :
-
-```yml
-aspect_ratio_is_not: "must be a %{aspect_ratio} image"
-```
 
 ### Processable image
 The `image_not_processable` key supports one variable that you can use:
