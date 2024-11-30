@@ -28,6 +28,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Dimension](#dimension)
   - [Aspect ratio](#aspect-ratio)
   - [Processable image](#processable-image)
+- [Upgrading from 1.x to 2.x](#upgrading-from-1x-to-2x)
 - [Usage](#usage)
 - [Internationalization (I18n)](#internationalization-i18n)
 - [Test matchers](#test-matchers)
@@ -368,6 +369,22 @@ The `dimension` validator error messages expose 6 values that you can use:
 
 ---
 
+## Upgrading from 1.x to 2.x
+
+If you are upgrading from 1.x to 2.x, you will be pleased to note that a lot of things have been added and improved!
+
+Added features:
+- `dimension` validator now supports videos
+- `aspect_ratio` validator now supports videos
+
+But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
+- Error messages
+  - The error messages have been completely rewritten to be more consistent and easier to understand.
+  - Some error messages variables names have been changed to improve readability:
+    - `dimension` validator:
+      - `length` has been replaced by `exact`
+
+🚧 TODO: Add more details about the other changes when implemented
 
 
 ## What it can do
