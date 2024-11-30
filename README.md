@@ -17,8 +17,17 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
 
 - [Getting started](#getting-started)
   - [Installation](#installation)
+  - [Error messages (I18n)](#error-messages-i18n)
   - [Using image metadata validators](#using-image-metadata-validators)
   - [Using video and audio metadata validators](#using-video-and-audio-metadata-validators)
+- [Validators](#validators)
+  - [Attached](#attached)
+  - [Content type](#content-type)
+  - [Size](#size)
+  - [Total size](#total-size)
+  - [Dimension](#dimension)
+  - [Aspect ratio](#aspect-ratio)
+  - [Processable image](#processable-image)
 - [Usage](#usage)
 - [Internationalization (I18n)](#internationalization-i18n)
 - [Test matchers](#test-matchers)
@@ -41,6 +50,10 @@ And then execute:
 $ bundle
 ```
 
+### Error messages (I18n)
+
+Once you have installed the gem, you need to add the gem I18n error messages to your app. See [Internationalization (I18n)](#internationalization-i18n) section for more details.
+
 ### Using image metadata validators
 
 Optionally, to use the image metadata validators (`dimension`, `aspect_ratio` and `processable_image`), you will have to add one of the corresponding gems:
@@ -57,10 +70,148 @@ Plus, you have to be sure to have the corresponding command-line tool installed 
 
 To use the video and audio metadata validators (`dimension`, `aspect_ratio` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
 
+## Validators
+
+List of validators:
+- [Attached](#attached): validates if file(s) attached
+- [Content type](#content-type): validates file content type
+- [Size](#size): validates file size
+- [Total size](#total-size): validates total file size for several files
+- [Dimension](#dimension): validates image / video dimensions
+- [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
+- [Processable image](#processable-image): validates if an image can be processed
+
+**Proc usage**
+
+Every validator can use procs instead of values in all the validator examples:
+```ruby
+class User < ApplicationRecord
+  has_many_attached :files
+
+  validates :files, limit: { max: -> (record) { record.admin? ? 100 : 10 } }
+end
+```
+
+---
+
+### Attached
+
+Validates if the attachment is present.
+
+#### Options
+
+The `attached` validator has no options.
+
+#### Examples
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+
+  validates :avatar, attached: true
+end
+```
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      blank: "can't be blank"
+```
+
+The error message for this validator relies on Rails own `blank` error message.
+
+---
+
+### Content type
+
+Validates if the attachment has an allowed content type.
+
+#### Usage
+
+The `content_type` validator has several options:
+- `with`: defines the exact allowed content type (string, symbol or regex)
+- `in`: defines the allowed content types (array of strings or symbols)
+- `spoofing_protection`: enables content type spoofing protection (boolean, defaults to `false`)
+
+As mentioned above, this validator can define content types in several ways:
+- String: `image/png` or `png`
+- Symbol: `:png`
+- Regex: `/\Avideo\/.*\z/`
+
+#### Usage
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+
+  validates :avatar, content_type: 'image/png' # only allows PNG images
+  validates :avatar, content_type: :png # only allows PNG images
+  validates :avatar, content_type: /\Avideo\/.*\z/ # only allows video files
+  validates :avatar, content_type: ['image/png', 'image/jpeg'] # only allows PNG and JPEG images
+  validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true } # only allows PNG, JPEG and their variants, with spoofing protection enabled
+end
+```
+
+#### Content type shorthands
+
+If you choose to use a content_type 'shorthand' (like `png`), note that it will be converted to a full content type using `Marcel::MimeType.for` under the hood. Therefore, you should check if the content_type is registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb). If it's not, you can register it by adding the following code to your `config/initializers/mime_types.rb` file:
+```ruby
+Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files
+```
+
+#### Content type spoofing protection
+
+By default, the gem does not prevent content type spoofing. You can enable it by setting the `spoofing_protection` option to `true` in your validator options.
+
+##### What is content type spoofing?
+File content type spoofing happens when an ill-intentioned user uploads a file which hides its true content type by faking its extension and its declared content type value. For example, a user may try to upload a `.exe` file (application/x-msdownload content type) dissimulated as a `.jpg` file (image/jpeg content type).
+
+##### How do we prevent it?
+The spoofing protection relies on both the linux `file` command and `Marcel` gem. Be careful, since it needs to load the whole file io to perform the analysis, it will use a lot of RAM for very large files. Therefore it could be a wise decision not to enable it in this case.
+
+Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (ActiveStorage content type detection relies on a different logic using content+filename+extension). To handle this issue, we consider a close parent content type to be a match. For example, for an ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content types are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS`.
+
+##### Edge cases
+The difficulty to accurately predict a mime type may generate false positives, if so there are two solutions available:
+- If the ActiveStorage blob content type is closely related to the detected content type using the `file` analyzer, you can enhance `Marcel::TYPE_PARENTS` mapping using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `config/initializers/mime_types.rb` file. (Please drop an issue so we can add it to the gem for everyone!)
+- If the ActiveStorage blob content type is not closely related, you still can disable the content type spoofing protection in the validator, if so, please drop us an issue so we can fix it for everyone!
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      content_type_invalid: "has an invalid content type"
+```
+
+The `content_type` validator error message exposes 4 values that you can use:
+- `content_type` containing the exact content type of the sent file (e.g. `image/png`)
+- `human_content_type` containing a more user-friendly version of the sent file content type (e.g. 'TXT' for 'text/plain')
+- `authorized_types` containing the list of authorized content types (e.g. 'PNG, JPEG' for `['image/png', 'image/jpeg']`)
+- `filename` containing the filename
+
+### Size
+
+### Total size
+
+### Dimension
+
+### Aspect ratio
+
+### Processable image
+
+
+
 ## What it can do
 
-* validates if file(s) attached
-* validates content type
+<!-- * validates if file(s) attached -->
+<!-- * validates content type -->
 * validates size of files
 * validates total size of files
 * validates dimension of images/videos
@@ -114,49 +265,6 @@ end
 
 ### More examples
 
-- Content type validation using symbols or regex.
-
-```ruby
-class User < ApplicationRecord
-  has_one_attached :avatar
-  has_many_attached :photos
-
-  validates :avatar, attached: true, content_type: :png
-  # or
-  validates :photos, attached: true, content_type: [:png, :jpg, :jpeg]
-  # or
-  validates :avatar, content_type: /\Aimage\/.*\z/
-end
-```
-Please note that the symbol types must be registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb) that's used by this gem to infer the full content type.
-Example code for adding a new content type to Marcel:
-```ruby
-# config/initializers/mime_types.rb
-Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files
-```
-
-**Content type spoofing protection**
-
-File content type spoofing happens when an ill-intentioned user uploads a file which hides its true content type by faking its extension and its declared content type value. For example, a user may try to upload a `.exe` file (application/x-msdownload content type) dissimulated as a `.jpg` file (image/jpeg content type).
-
-By default, the gem does not prevent content type spoofing (prevent it by default is a breaking change that will be implemented in v2). The spoofing protection relies on both the linux `file` command and `Marcel` gem. Be careful, since it needs to load the whole file io to perform the analysis, it will use a lot of RAM for very large files. Therefore it could be a wise decision not to enable it in this case.
-
-Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (its content type detection relies on a different logic using content+filename+extension). To handle this issue, we consider a close parent content type to be a match. For example, for an ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content types are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS`.
-
-The difficulty to accurately predict a mime type may generate false positives, if so there are two solutions available:
-- If the ActiveStorage blob content type is closely related to the detected content type using the `file` analyzer, you can enhance `Marcel::TYPE_PARENTS` mapping using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `config/initializers/mime_types.rb` file. (Please drop an issue so we can add it to the gem for everyone!)
-- If the ActiveStorage blob content type is not closely related, you still can disable the content type spoofing protection in the validator, if so, please drop us an issue so we can fix it for everyone!
-
-```ruby
-class User < ApplicationRecord
-  has_one_attached :avatar
-
-  validates :avatar, attached: true, content_type: :png # spoofing_protection not enabled, at your own risks!
-  validates :avatar, attached: true, content_type: { with: :png, spoofing_protection: true } # spoofing_protection enabled
-end
-```
-
-
 - Dimension validation with `width`, `height` and `in`.
 
 ```ruby
@@ -201,17 +309,6 @@ class User < ApplicationRecord
 end
 ```
 
-- Proc Usage:
-
-Procs can be used instead of values in all the above examples. They will be called on every validation.
-```ruby
-class User < ApplicationRecord
-  has_many_attached :proc_files
-
-  validates :proc_files, limit: { max: -> (record) { record.admin? ? 100 : 10 } }
-end
-
-```
 
 ## Internationalization (I18n)
 
@@ -262,19 +359,6 @@ For example :
 
 ```yml
 aspect_ratio_is_not: "must be a %{aspect_ratio} image"
-```
-
-### Content type
-The `content_type_invalid` key has three variables that you can use:
-- `content_type` containing the exact content type of the sent file
-- `human_content_type` containing a more user-friendly version of the sent file content type (e.g. 'TXT' for 'text/plain')
-- `authorized_types` containing the list of authorized content types
-- `filename` containing the current file name
-
-For example :
-
-```yml
-content_type_invalid: "has an invalid content type : %{content_type}, authorized types are %{authorized_types}"
 ```
 
 ### Dimension
