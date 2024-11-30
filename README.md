@@ -497,7 +497,7 @@ But this major version bump also comes with some breaking changes. Below are the
 
 ## Internationalization (I18n)
 
-Active Storage Validations uses I18n for error messages. For this, add these keys in your translation file:
+Active Storage Validations uses I18n for error messages. Add these keys in your translation files to make them available:
 
 ```yml
 en:
