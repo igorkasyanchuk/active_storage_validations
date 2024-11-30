@@ -539,18 +539,21 @@ Very simple example of validation with file attached, content type check and cus
 
 [![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
 
+
 ## Test matchers
-Provides RSpec-compatible and Minitest-compatible matchers for testing the validators.
+
+The gem also provides RSpec-compatible and Minitest-compatible matchers for testing the validators.
 
 ### RSpec
 
+#### Setup
 In `spec_helper.rb`, you'll need to require the matchers:
 
 ```ruby
 require 'active_storage_validations/matchers'
 ```
 
-And _include_ the module:
+And include the module:
 
 ```ruby
 RSpec.configure do |config|
@@ -558,6 +561,7 @@ RSpec.configure do |config|
 end
 ```
 
+#### Matchers
 Matcher methods available:
 
 ```ruby
@@ -630,6 +634,8 @@ end
 ```
 
 ### Minitest
+
+#### Setup
 To use the matchers, make sure you have the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem up and running.
 
 You need to require the matchers:
@@ -638,7 +644,7 @@ You need to require the matchers:
 require 'active_storage_validations/matchers'
 ```
 
-And _extend_ the module:
+And extend the module:
 
 ```ruby
 class ActiveSupport::TestCase
@@ -646,6 +652,7 @@ class ActiveSupport::TestCase
 end
 ```
 
+#### Matchers
 Then you can use the matchers with the syntax specified in the RSpec section, just use `should validate_method` instead of `it { is_expected_to validate_method }` as specified in the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem.
 
 
