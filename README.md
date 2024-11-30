@@ -251,6 +251,50 @@ The `size` validator error messages expose 4 values that you can use:
 
 ### Total size
 
+Validates the total file size for several files.
+
+#### Options
+
+The `total_size` validator has several options:
+- `less_than`: defines the strict maximum allowed total file size
+- `less_than_or_equal_to`: defines the maximum allowed total file size
+- `greater_than`: defines the strict minimum allowed total file size
+- `greater_than_or_equal_to`: defines the minimum allowed total file size
+- `between`: defines the allowed total file size range
+
+#### Examples
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_many_attached :certificates
+
+  validates :certificates, total_size: { less_than: 10.megabytes } # restricts the total size to < 10MB
+  validates :certificates, total_size: { less_than_or_equal_to: 10.megabytes } # restricts the total size to <= 10MB
+  validates :certificates, total_size: { greater_than: 1.kilobyte } # restricts the total size to > 1KB
+  validates :certificates, total_size: { greater_than_or_equal_to: 1.kilobyte } # restricts the total size to >= 1KB
+  validates :certificates, total_size: { between: 1.kilobyte..10.megabytes } # restricts the total size to between 1KB and 10MB
+end
+```
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      total_file_size_not_less_than: "total file size must be less than %{max_size} (current size is %{total_file_size})"
+      total_file_size_not_less_than_or_equal_to: "total file size must be less than or equal to %{max_size} (current size is %{total_file_size})"
+      total_file_size_not_greater_than: "total file size must be greater than %{min_size} (current size is %{total_file_size})"
+      total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min_size} (current size is %{total_file_size})"
+      total_file_size_not_between: "total file size must be between %{min_size} and %{max_size} (current size is %{total_file_size})"
+```
+
+The `total_size` validator error messages expose 4 values that you can use:
+- `file_size` containing the current file size (e.g. `1.5MB`)
+- `min` containing the minimum allowed total file size (e.g. `1KB`)
+- `max` containing the maximum allowed total file size (e.g. `2MB`)
+
 ---
 
 ### Dimension
@@ -433,18 +477,6 @@ For example :
 
 ```yml
 dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel."
-```
-
-### Total file size
-The keys starting with `total_file_size_not_` support three variables that you can use:
-- `total_file_size` containing the current total file size
-- `min` containing the minimum file size
-- `max` containing the maximum file size
-
-For example :
-
-```yml
-total_file_size_not_between: "total file size must be between %{min_size} and %{max_size} (current size is %{total_file_size})"
 ```
 
 ### Number of files
