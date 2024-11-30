@@ -32,7 +32,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
 - [Upgrading from 1.x to 2.x](#upgrading-from-1x-to-2x)
 - [Internationalization (I18n)](#internationalization-i18n)
 - [Test matchers](#test-matchers)
-- [Tests & Contributing](#tests--contributing)
+- [Contributing](#contributing)
 - [Additional information](#additional-information)
 
 ## Getting started
@@ -649,11 +649,15 @@ end
 Then you can use the matchers with the syntax specified in the RSpec section, just use `should validate_method` instead of `it { is_expected_to validate_method }` as specified in the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem.
 
 
-## Tests & Contributing
+## Contributing
 
-To run tests in root folder of gem:
+If you want to contribute to the project, you will have to fork the repository and create a new branch from the `master` branch. Then build your feature, or fix the issue, and create a pull request. Be sure to add tests for your changes.
 
-* `BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test` to run for Rails 7.0
+Before submitting your pull request, run the tests to make sure everything works as expected.
+
+To run the gem tests, launch the following commands in the root folder of gem repository:
+
+* `BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test` to run for Rails 6.1.4
 * `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
 * `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.1
 * `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test` to run for Rails 7.2
@@ -676,7 +680,7 @@ BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test
 
 Tips:
 - To focus a specific test, use the `focus` class method provided by [minitest-focus](https://github.com/minitest/minitest-focus)
-- To focus a specific file, use the TEST option provided by minitest, e.g. to only run size_validator_test.rb file you will execute the following command: `bundle exec rake test TEST=test/validators/size_validator_test.rb`
+- To focus a specific file, use the TEST option provided by minitest, e.g. to only run `size_validator_test.rb` file you will launch the following command: `bundle exec rake test TEST=test/validators/size_validator_test.rb`
 
 
 ## Additional information
