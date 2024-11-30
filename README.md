@@ -22,6 +22,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Using video and audio metadata validators](#using-video-and-audio-metadata-validators)
 - [Validators](#validators)
   - [Attached](#attached)
+  - [Limit](#limit)
   - [Content type](#content-type)
   - [Size](#size)
   - [Total size](#total-size)
@@ -75,6 +76,7 @@ To use the video and audio metadata validators (`dimension`, `aspect_ratio` and 
 
 List of validators:
 - [Attached](#attached): validates if file(s) attached
+- [Limit](#limit): validates number of uploaded files
 - [Content type](#content-type): validates file content type
 - [Size](#size): validates file size
 - [Total size](#total-size): validates total file size for several files
@@ -124,6 +126,42 @@ en:
 ```
 
 The error message for this validator relies on Rails own `blank` error message.
+
+---
+
+### Limit
+
+Validates the number of uploaded files.
+
+#### Options
+
+The `limit` validator has several options:
+- `min`: defines the minimum allowed number of files
+- `max`: defines the maximum allowed number of files
+
+#### Examples
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_many_attached :certificates
+
+  validates :certificates, limit: { min: 1, max: 10 } # restricts the number of files to between 1 and 10
+end
+```
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      limit_out_of_range: "total number is out of range"
+```
+
+The `limit` validator error messages expose 2 values that you can use:
+- `min` containing the minimum allowed number of files (e.g. `1`)
+- `max` containing the maximum allowed number of files (e.g. `10`)
 
 ---
 
@@ -394,7 +432,7 @@ But this major version bump also comes with some breaking changes. Below are the
 <!-- * validates size of files -->
 <!-- * validates total size of files -->
 <!-- * validates dimension of images/videos -->
-* validates number of uploaded files (min/max required)
+<!-- * validates number of uploaded files (min/max required) -->
 * validates aspect ratio (if square, portrait, landscape, is_16_9, ...)
 * validates if file can be processed by MiniMagick or Vips
 <!-- * custom error messages -->
@@ -511,18 +549,6 @@ For example :
 
 ```yml
 aspect_ratio_is_not: "must be a %{aspect_ratio} image"
-```
-
-
-### Number of files
-The `limit_out_of_range` key supports two variables that you can use:
-- `min` containing the minimum number of files
-- `max` containing the maximum number of files
-
-For example :
-
-```yml
-limit_out_of_range: "total number is out of range. range: [%{min}, %{max}]"
 ```
 
 ### Processable image
