@@ -8,9 +8,10 @@
 [![https://www.patreon.com/igorkasyanchuk](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/patron.svg?raw=true)](https://www.patreon.com/igorkasyanchuk)
 [![Listed on OpenSource-Heroes.com](https://opensource-heroes.com/badge-v1.svg)](https://opensource-heroes.com/r/igorkasyanchuk/active_storage_validations)
 
-If you are using `active_storage` gem and you want to add simple validations for it, like presence or content_type you need to write a custom validation method.
 
-This gems doing it for you. Just use `attached: true` or `content_type: 'image/png'` validation.
+Active Storage Validations is a gem that allows you to add validations for Active Storage attributes.
+
+This gems is doing it right for you! Just use `validates :avatar, attached: true, content_type: 'image/png'` and that's it!
 
 ## Table of Contents
 
