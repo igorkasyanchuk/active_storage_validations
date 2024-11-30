@@ -533,12 +533,6 @@ en:
       image_not_processable: "is not a valid image"
 ```
 
-## Sample
-
-Very simple example of validation with file attached, content type check and custom error message.
-
-[![Sample](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)](https://raw.githubusercontent.com/igorkasyanchuk/active_storage_validations/master/docs/preview.png)
-
 
 ## Test matchers
 
