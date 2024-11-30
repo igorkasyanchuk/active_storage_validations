@@ -12,6 +12,50 @@ If you are using `active_storage` gem and you want to add simple validations for
 
 This gems doing it for you. Just use `attached: true` or `content_type: 'image/png'` validation.
 
+## Table of Contents
+
+- [Getting started](#getting-started)
+  - [Installation](#installation)
+  - [Using image metadata validators](#using-image-metadata-validators)
+  - [Using video and audio metadata validators](#using-video-and-audio-metadata-validators)
+- [Usage](#usage)
+- [Internationalization (I18n)](#internationalization-i18n)
+- [Test matchers](#test-matchers)
+- [Tests & Contributing](#tests--contributing)
+- [Additional information](#additional-information)
+
+## Getting started
+
+### Installation
+
+Active Storage Validations work with Rails 6.1.4 onwards. Add this line to your application's Gemfile:
+
+```ruby
+gem 'active_storage_validations'
+```
+
+And then execute:
+
+```sh
+$ bundle
+```
+
+### Using image metadata validators
+
+Optionally, to use the image metadata validators (`dimension`, `aspect_ratio` and `processable_image`), you will have to add one of the corresponding gems:
+
+```ruby
+gem 'mini_magick', '>= 4.9.5'
+# Or
+gem 'ruby-vips', '>= 2.1.0'
+```
+
+Plus, you have to be sure to have the corresponding command-line tool installed on your system. For example, to use `mini_magick` gem, you need to have `imagemagick` installed on your system (both on your local and in your CI / production environments).
+
+### Using video and audio metadata validators
+
+To use the video and audio metadata validators (`dimension`, `aspect_ratio` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
+
 ## What it can do
 
 * validates if file(s) attached
@@ -293,25 +337,6 @@ For example :
 image_not_processable: "is not a valid image (file: %{filename})"
 ```
 
-## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'active_storage_validations'
-
-# Optional, to use :dimension validator or :aspect_ratio validator
-gem 'mini_magick', '>= 4.9.5'
-# Or
-gem 'ruby-vips', '>= 2.1.0'
-```
-
-And then execute:
-
-```bash
-$ bundle
-```
-
 ## Sample
 
 Very simple example of validation with file attached, content type check and custom error message.
@@ -427,11 +452,6 @@ end
 
 Then you can use the matchers with the syntax specified in the RSpec section, just use `should validate_method` instead of `it { is_expected_to validate_method }` as specified in the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem.
 
-## Todo
-
-* verify with remote storages (s3, etc)
-* verify how it works with direct upload
-* add more translations
 
 ## Tests & Contributing
 
