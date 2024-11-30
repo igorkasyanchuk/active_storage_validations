@@ -130,7 +130,7 @@ The error message for this validator relies on Rails own `blank` error message.
 
 Validates if the attachment has an allowed content type.
 
-#### Usage
+#### Options
 
 The `content_type` validator has several options:
 - `with`: defines the exact allowed content type (string, symbol or regex)
@@ -142,7 +142,7 @@ As mentioned above, this validator can define content types in several ways:
 - Symbol: `:png`
 - Regex: `/\Avideo\/.*\z/`
 
-#### Usage
+#### Examples
 
 Use it like this:
 ```ruby
@@ -190,21 +190,80 @@ en:
       content_type_invalid: "has an invalid content type"
 ```
 
-The `content_type` validator error message exposes 4 values that you can use:
+The `content_type` validator error messages expose 4 values that you can use:
 - `content_type` containing the exact content type of the sent file (e.g. `image/png`)
 - `human_content_type` containing a more user-friendly version of the sent file content type (e.g. 'TXT' for 'text/plain')
 - `authorized_types` containing the list of authorized content types (e.g. 'PNG, JPEG' for `['image/png', 'image/jpeg']`)
 - `filename` containing the filename
 
+---
+
 ### Size
+
+Validates each attached file size.
+
+#### Options
+
+The `size` validator has several options:
+- `less_than`: defines the strict maximum allowed file size
+- `less_than_or_equal_to`: defines the maximum allowed file size
+- `greater_than`: defines the strict minimum allowed file size
+- `greater_than_or_equal_to`: defines the minimum allowed file size
+- `between`: defines the allowed file size range
+
+It is always a good practice to limit the maximum file size to a reasonable value (like 2MB for avatar images).
+
+#### Examples
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+
+  validates :avatar, size: { less_than: 2.megabytes } # restricts the file size to < 2MB
+  validates :avatar, size: { less_than_or_equal_to: 2.megabytes } # restricts the file size to <= 2MB
+  validates :avatar, size: { greater_than: 1.kilobyte } # restricts the file size to > 1KB
+  validates :avatar, size: { greater_than_or_equal_to: 1.kilobyte } # restricts the file size to >= 1KB
+  validates :avatar, size: { between: 1.kilobyte..2.megabytes } # restricts the file size to between 1KB and 2MB
+end
+```
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      file_size_not_less_than: "file size must be less than %{max_size} (current size is %{file_size})"
+      file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max_size} (current size is %{file_size})"
+      file_size_not_greater_than: "file size must be greater than %{min_size} (current size is %{file_size})"
+      file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min_size} (current size is %{file_size})"
+      file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
+```
+
+The `size` validator error messages expose 4 values that you can use:
+- `file_size` containing the current file size (e.g. `1.5MB`)
+- `min` containing the minimum allowed file size (e.g. `1KB`)
+- `max` containing the maximum allowed file size (e.g. `2MB`)
+- `filename` containing the current file name
+
+---
 
 ### Total size
 
+---
+
 ### Dimension
+
+---
 
 ### Aspect ratio
 
+---
+
 ### Processable image
+
+---
 
 
 
@@ -212,7 +271,7 @@ The `content_type` validator error message exposes 4 values that you can use:
 
 <!-- * validates if file(s) attached -->
 <!-- * validates content type -->
-* validates size of files
+<!-- * validates size of files -->
 * validates total size of files
 * validates dimension of images/videos
 * validates number of uploaded files (min/max required)
@@ -374,19 +433,6 @@ For example :
 
 ```yml
 dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel."
-```
-
-### File size
-The keys starting with `file_size_not_` support four variables that you can use:
-- `file_size` containing the current file size
-- `min` containing the minimum file size
-- `max` containing the maximum file size
-- `filename` containing the current file name
-
-For example :
-
-```yml
-file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
 ```
 
 ### Total file size
