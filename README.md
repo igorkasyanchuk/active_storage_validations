@@ -195,6 +195,28 @@ class User < ApplicationRecord
 end
 ```
 
+#### Best practices
+
+When using the `content_type` validator, it is recommended to reflect the allowed content types in the html [`accept` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) in the corresponding file fields in your views. This will prevent users from trying to upload files with not allowed content types (however it is only an UX improvement, a malicious user can still try to upload files with not allowed content types therefore the backend validation).
+
+For example, if you want to only allow PNG and JPEG images, you can do this:
+```ruby
+class User < ApplicationRecord
+  ACCEPTED_CONTENT_TYPES = ['image/png', 'image/jpeg'].freeze
+
+  has_one_attached :avatar
+
+  validates :avatar, content_type: ACCEPTED_CONTENT_TYPES
+end
+```
+
+```erb
+<%= form_with model: @user do |f| %>
+  <%= f.file_field :avatar,
+                   accept: ACCEPTED_CONTENT_TYPES.join(',') %>
+<% end %>
+```
+
 #### Content type shorthands
 
 If you choose to use a content_type 'shorthand' (like `png`), note that it will be converted to a full content type using `Marcel::MimeType.for` under the hood. Therefore, you should check if the content_type is registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb). If it's not, you can register it by adding the following code to your `config/initializers/mime_types.rb` file:
