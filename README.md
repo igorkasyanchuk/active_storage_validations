@@ -82,6 +82,8 @@ List of validators:
 - [Dimension](#dimension): validates image / video dimensions
 - [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
 - [Processable image](#processable-image): validates if an image can be processed
+🚧 TODO: Add `duration` validator
+🚧 TODO: Update `processable_image` validator to `processable`
 
 **Proc usage**
 
@@ -443,6 +445,7 @@ Validates the aspect ratio of the attached files.
 
 The `aspect_ratio` validator has several options:
 - `with`: defines the exact allowed aspect ratio (e.g. `16/9`)
+🚧 TODO: Add :in option when ready
 
 This validator can define aspect ratios in several ways:
 - Symbols:
