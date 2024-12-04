@@ -16,18 +16,48 @@ describe ActiveStorageValidations::ContentTypeValidator do
 
     describe 'content type validity' do
       describe 'when the passed option is an invalid content type' do
-        subject { validator_test_class::CheckValidityInvalidContentType.new(params) }
+        describe ":with" do
+          subject { validator_test_class::CheckValidityInvalidContentTypeWith.new(params) }
 
-        let(:error_message) do
-          <<~ERROR_MESSAGE
-            You must pass valid content types to the validator
-            '#{invalid_content_type}' is not found in Marcel::TYPE_EXTS
-          ERROR_MESSAGE
+          let(:error_message) do
+            <<~ERROR_MESSAGE
+              You must pass valid content types to the validator
+              '#{invalid_content_type}' is not found in Marcel::TYPE_EXTS
+            ERROR_MESSAGE
+          end
+          let(:invalid_content_type) { "xxx/invalid" }
+
+          it 'raises an error at model initialization' do
+            assert_raises(ArgumentError, error_message) { subject }
+          end
         end
-        let(:invalid_content_type) { "xxx/invalid" }
 
-        it 'raises an error at model initialization' do
-          assert_raises(ArgumentError, error_message) { subject }
+        describe ":in" do
+          subject { validator_test_class::CheckValidityInvalidContentTypeIn.new(params) }
+
+          let(:error_message) do
+            <<~ERROR_MESSAGE
+              You must pass valid content types to the validator
+              '#{invalid_content_type}' is not found in Marcel::TYPE_EXTS
+            ERROR_MESSAGE
+          end
+          let(:invalid_content_type) { "xxx/invalid1" }
+
+          it 'raises an error at model initialization' do
+            assert_raises(ArgumentError, error_message) { subject }
+          end
+        end
+
+        describe "when the passed option is 'image/jpg'" do
+          subject { validator_test_class::CheckValidityInvalidContentTypeJpg.new(params) }
+
+          let(:error_message) do
+            "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
+          end
+
+          it 'raises an error at model initialization' do
+            assert_raises(ArgumentError, error_message) { subject }
+          end
         end
       end
 
@@ -250,6 +280,27 @@ describe ActiveStorageValidations::ContentTypeValidator do
               end
             end
           end
+        end
+      end
+    end
+
+    describe "working with most common mime types" do
+      most_common_mime_types.each do |common_mime_type|
+        describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
+          subject { model.public_send(attribute).attach(allowed_file) and model }
+
+          let(:media) { common_mime_type[:mime_type].split('/').first }
+          let(:content) { common_mime_type[:extension].underscore }
+          let(:attribute) { [media, content].join('_') } # e.g. image_jpeg
+          let(:allowed_file) do
+            {
+              io: File.open(Rails.root.join('public', "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
+              filename: "example.#{common_mime_type[:extension]}",
+              content_type: common_mime_type[:mime_type]
+            }
+          end
+
+          it { is_expected_to_be_valid }
         end
       end
     end
