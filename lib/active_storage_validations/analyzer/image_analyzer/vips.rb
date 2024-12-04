@@ -7,7 +7,7 @@ module ActiveStorageValidations
 
     private
 
-    def read_image
+    def read_media
       begin
         require "ruby-vips"
       rescue LoadError
@@ -17,8 +17,8 @@ module ActiveStorageValidations
 
       Tempfile.create(binmode: true) do |tempfile|
         begin
-          if image(tempfile)
-            yield image(tempfile)
+          if media(tempfile)
+            yield media(tempfile)
           else
             logger.info "Skipping image analysis because Vips doesn't support the file"
             {}
@@ -32,7 +32,7 @@ module ActiveStorageValidations
       {}
     end
 
-    def image_from_path(path)
+    def media_from_path(path)
       instrument("vips") do
         begin
           ::Vips::Image.new_from_file(path, access: :sequential)
