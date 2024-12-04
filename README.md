@@ -531,6 +531,11 @@ But this major version bump also comes with some breaking changes. Below are the
   - Some error messages variables names have been changed to improve readability:
     - `dimension` validator:
       - `length` has been replaced by `exact`
+- `content_type` validator
+  - The `:in` option now only accepts 'valid' content types (ie content types deemed by Marcel as valid).
+    - The check was mistakenly only performed on the `:with` option previously. Therefore, invalid content types were accepted in the `:in` option, which is not the expected behavior.
+    - This might break some cases when you had for example `content_type: ['image/png', 'image/jpg']`, because `image/jpg` is not a valid content type, it should be replaced by `image/jpeg`.
+  - An `ArgumentError` is now raised if `image/jpg` is used to make it easier to fix. You should now only use `image/jpeg`.
 
 🚧 TODO: Add more details about the other changes when implemented
 

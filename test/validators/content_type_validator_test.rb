@@ -47,6 +47,18 @@ describe ActiveStorageValidations::ContentTypeValidator do
             assert_raises(ArgumentError, error_message) { subject }
           end
         end
+
+        describe "when the passed option is 'image/jpg'" do
+          subject { validator_test_class::CheckValidityInvalidContentTypeJpg.new(params) }
+
+          let(:error_message) do
+            "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
+          end
+
+          it 'raises an error at model initialization' do
+            assert_raises(ArgumentError, error_message) { subject }
+          end
+        end
       end
 
       describe 'when the passed option is an invalid extension' do

@@ -181,6 +181,10 @@ module ActiveStorageValidations
     end
 
     def invalid_content_type?(content_type)
+      if content_type == 'image/jpg'
+        raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
+      end
+
       Marcel::TYPE_EXTS[content_type.to_s] == nil
     end
 
