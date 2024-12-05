@@ -124,12 +124,12 @@ describe ActiveStorageValidations::ContentTypeSpoofDetector do
 
   describe "working with most common mime types" do
     most_common_mime_types.each do |common_mime_type|
-      describe ".#{common_mime_type[:mime_type]} file" do
+      describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
         subject { model.public_send(attribute).attach(okay_file) and model }
 
         let(:media) { common_mime_type[:mime_type].split('/').first }
         let(:content) { common_mime_type[:extension].underscore }
-        let(:attribute) { [media, content].join('_') }
+        let(:attribute) { [media, content].join('_') } # e.g. image_jpeg
         let(:okay_file) do
           {
             io: File.open(Rails.root.join('public', "most_common_mime_types", "example.#{common_mime_type[:extension]}")),

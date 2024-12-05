@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'shared/asv_active_storageable'
+require_relative 'shared/asv_analyzable'
 require_relative 'shared/asv_attachable'
 require_relative 'shared/asv_errorable'
 require_relative 'shared/asv_optionable'
@@ -10,6 +11,7 @@ require_relative 'content_type_spoof_detector'
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
     include ASVActiveStorageable
+    include ASVAnalyzable
     include ASVAttachable
     include ASVErrorable
     include ASVOptionable
@@ -150,7 +152,7 @@ module ActiveStorageValidations
     def ensure_content_types_validity
       return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
 
-      ([options[:with]] || options[:in]).each do |content_type|
+      (Array(options[:with]) + Array(options[:in])).each do |content_type|
         raise ArgumentError, invalid_content_type_option_message(content_type) if invalid_option?(content_type)
       end
     end
@@ -179,6 +181,10 @@ module ActiveStorageValidations
     end
 
     def invalid_content_type?(content_type)
+      if content_type == 'image/jpg'
+        raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
+      end
+
       Marcel::TYPE_EXTS[content_type.to_s] == nil
     end
 

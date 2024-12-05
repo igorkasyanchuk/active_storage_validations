@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'shared/asv_analyzable'
 require_relative 'shared/asv_attachable'
 require_relative 'shared/asv_loggable'
 require 'open3'
@@ -8,6 +9,7 @@ module ActiveStorageValidations
   class ContentTypeSpoofDetector
     class FileCommandLineToolNotInstalledError < StandardError; end
 
+    include ASVAnalyzable
     include ASVAttachable
     include ASVLoggable
 
@@ -51,19 +53,22 @@ module ActiveStorageValidations
     def open3_mime_type_for_io
       return nil if io.blank?
 
-      Tempfile.create do |tempfile|
-        tempfile.binmode
+      Tempfile.create(binmode: true) do |tempfile|
         tempfile.write(io)
         tempfile.rewind
 
-        command = "file -b --mime-type #{tempfile.path}"
-        output, status = Open3.capture2(command)
+        stdout, status = Open3.capture2(
+          'file',
+          '-b',
+          '--mime-type',
+          tempfile.path
+        )
 
         if status.success?
-          mime_type = output.strip
+          mime_type = stdout.strip
           return mime_type
         else
-          raise "Error determining MIME type: #{output}"
+          raise "Error determining MIME type: #{stdout}"
         end
 
       rescue Errno::ENOENT

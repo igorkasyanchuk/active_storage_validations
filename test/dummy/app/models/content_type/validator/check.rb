@@ -43,6 +43,13 @@ class ContentType::Validator::Check < ApplicationRecord
     validates :"in_#{type.pluralize}", content_type: example_for(type, several: true)
     validates :"in_#{type.pluralize}_proc", content_type: -> (record) { example_for(type, several: true) }
   end
+
+  most_common_mime_types.each do |content_type|
+    has_one_attached :"#{content_type[:media]}_#{content_type[:type]}"
+    validates :"#{content_type[:media]}_#{content_type[:type]}",
+              content_type: content_type[:type]
+  end
+
   has_one_attached :content_type_with_parameter
   validates :content_type_with_parameter, content_type: :rar
 
