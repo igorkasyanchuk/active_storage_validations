@@ -303,7 +303,8 @@ end
 
 #### Best practices
 
-It is always a good practice to limit the maximum file size to a reasonable value (like 2MB for avatar images). This helps prevent server storage issues, reduces upload/download times, and ensures better performance. Large files can consume excessive bandwidth and storage space, potentially impacting both server resources and user experience. Additionally, setting size limits helps protect against malicious file uploads that could overwhelm the system.
+It is always a good practice to limit the maximum file size to a reasonable value (like 2MB for avatar images). This helps prevent server storage issues, reduces upload/download times, and ensures better performance. Large files can consume excessive bandwidth and storage space, potentially impacting both server resources and user experience.
+Plus, not setting a size limit inside your Rails app might lead into your server throwing a `413 Content Too Large` error, which is as nice as a Rails validatin error.
 
 #### Error messages (I18n)
 
