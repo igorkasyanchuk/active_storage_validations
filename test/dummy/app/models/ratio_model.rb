@@ -10,9 +10,12 @@ class RatioModel < ApplicationRecord
   has_one_attached :landscape_image
   has_one_attached :squared_image
   has_one_attached :widescreen_image
+  has_one_attached :ratio_in
+  has_one_attached :proc_ratio_in
 
   validates :ratio_one, attached: true, aspect_ratio: :square
   validates :ratio_many, attached: true, aspect_ratio: :portrait # portrait
+  validates :ratio_in, attached: true, aspect_ratio: { in: [:square, :portrait] }
   validates :image1, aspect_ratio: :is_16_9 # portrait
 
   validates :portrait_image, aspect_ratio: :portrait
@@ -24,5 +27,6 @@ class RatioModel < ApplicationRecord
   #validates :ratio_many, attached: true, aspect_ratio: :portrait # portrait
   validates :proc_ratio_one, attached: true, aspect_ratio: -> (record) {:square}
   validates :proc_ratio_many, attached: true, aspect_ratio: -> (record) {:portrait} # portrait
+  validates :proc_ratio_in, attached: true, aspect_ratio: -> (record) {[:square, :portrait]}
   validates :proc_image1, aspect_ratio: -> (record) {:is_16_9} # portrait
 end

@@ -30,3 +30,4 @@ fr:
       aspect_ratio_not_landscape: "doit être une image en format paysage"
       aspect_ratio_is_not: "doit avoir un rapport hauteur / largeur de %{aspect_ratio}"
       image_not_processable: "n'est pas une image valide"
+      aspect_ratio_invalid: "a un rapport hauteur / largeur invalide"

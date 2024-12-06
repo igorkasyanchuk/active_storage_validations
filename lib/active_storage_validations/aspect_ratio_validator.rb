@@ -14,15 +14,16 @@ module ActiveStorageValidations
     include ASVOptionable
     include ASVSymbolizable
 
-    AVAILABLE_CHECKS = %i[with].freeze
+    AVAILABLE_CHECKS = %i[with in].freeze
     NAMED_ASPECT_RATIOS = %i[square portrait landscape].freeze
     ASPECT_RATIO_REGEX = /is_([1-9]\d*)_([1-9]\d*)/.freeze
     ERROR_TYPES = %i[
-      image_metadata_missing
       aspect_ratio_not_square
       aspect_ratio_not_portrait
       aspect_ratio_not_landscape
       aspect_ratio_is_not
+      aspect_ratio_invalid
+      image_metadata_missing
     ].freeze
     PRECISION = 3.freeze
 
@@ -44,11 +45,34 @@ module ActiveStorageValidations
 
       return if image_metadata_missing?(record, attribute, attachable, flat_options, metadata)
 
-      case flat_options[:with]
-      when :square then validate_square_aspect_ratio(record, attribute, attachable, flat_options, metadata)
-      when :portrait then validate_portrait_aspect_ratio(record, attribute, attachable, flat_options, metadata)
-      when :landscape then validate_landscape_aspect_ratio(record, attribute, attachable, flat_options, metadata)
-      when ASPECT_RATIO_REGEX then validate_regex_aspect_ratio(record, attribute, attachable, flat_options, metadata)
+      aspect_ratios = aspect_ratios(flat_options).compact
+      errors = add_errors(aspect_ratios, metadata)
+
+      return true if errors.length != aspect_ratios.length
+
+      error = aspect_ratios.length == 1 ? errors.first : :aspect_ratio_invalid
+
+      errors_options = initialize_error_options(options, attachable)
+      errors_options[:aspect_ratio] = string_aspect_ratios(flat_options)
+      add_error(record, attribute, error, **errors_options)
+      false
+    end
+
+    def add_errors(aspect_ratios, metadata)
+      aspect_ratios.map do |aspect_ratio|
+        aspect_ratio_error(aspect_ratio, metadata)
+      end.compact.uniq
+    end
+
+    def aspect_ratio_error(aspect_ratio, metadata)
+      if aspect_ratio == :square && !valid_square_aspect_ratio?(metadata)
+        :aspect_ratio_not_square
+      elsif aspect_ratio == :portrait && !valid_portrait_aspect_ratio?(metadata)
+        :aspect_ratio_not_portrait
+      elsif aspect_ratio == :landscape && !valid_landscape_aspect_ratio?(metadata)
+        :aspect_ratio_not_landscape
+      elsif ASPECT_RATIO_REGEX.match?(aspect_ratio) && !valid_regex_aspect_ratio?(aspect_ratio, metadata)
+        :aspect_ratio_is_not
       end
     end
 
@@ -56,63 +80,71 @@ module ActiveStorageValidations
       return false if metadata[:width].to_i > 0 && metadata[:height].to_i > 0
 
       errors_options = initialize_error_options(options, attachable)
-      errors_options[:aspect_ratio] = flat_options[:with]
+      errors_options[:aspect_ratio] = string_aspect_ratios(flat_options)
       add_error(record, attribute, :image_metadata_missing, **errors_options)
       true
     end
 
-    def validate_square_aspect_ratio(record, attribute, attachable, flat_options, metadata)
-      return if metadata[:width] == metadata[:height]
-
-      errors_options = initialize_error_options(options, attachable)
-      errors_options[:aspect_ratio] = flat_options[:with]
-      add_error(record, attribute, :aspect_ratio_not_square, **errors_options)
+    def valid_square_aspect_ratio?(metadata)
+      metadata[:width] == metadata[:height]
     end
 
-    def validate_portrait_aspect_ratio(record, attribute, attachable, flat_options, metadata)
-      return if metadata[:width] < metadata[:height]
-
-      errors_options = initialize_error_options(options, attachable)
-      errors_options[:aspect_ratio] = flat_options[:with]
-      add_error(record, attribute, :aspect_ratio_not_portrait, **errors_options)
+    def valid_portrait_aspect_ratio?(metadata)
+      metadata[:width] < metadata[:height]
     end
 
-    def validate_landscape_aspect_ratio(record, attribute, attachable, flat_options, metadata)
-      return if metadata[:width] > metadata[:height]
-
-      errors_options = initialize_error_options(options, attachable)
-      errors_options[:aspect_ratio] = flat_options[:with]
-      add_error(record, attribute, :aspect_ratio_not_landscape, **errors_options)
+    def valid_landscape_aspect_ratio?(metadata)
+      metadata[:width] > metadata[:height]
     end
 
-    def validate_regex_aspect_ratio(record, attribute, attachable, flat_options, metadata)
-      flat_options[:with] =~ ASPECT_RATIO_REGEX
-      x = $1.to_i
-      y = $2.to_i
+    def valid_regex_aspect_ratio?(aspect_ratio, metadata)
+      aspect_ratio =~ ASPECT_RATIO_REGEX
+      x = ::Regexp.last_match(1).to_i
+      y = ::Regexp.last_match(2).to_i
 
-      return if x > 0 && y > 0 && (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
-
-      errors_options = initialize_error_options(options, attachable)
-      errors_options[:aspect_ratio] = "#{x}:#{y}"
-      add_error(record, attribute, :aspect_ratio_is_not, **errors_options)
+      x > 0 && y > 0 && (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
     end
 
     def ensure_at_least_one_validator_option
-      unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-        raise ArgumentError, 'You must pass :with to the validator'
-      end
+      return if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
+
+      raise ArgumentError, 'You must pass either :with or :in to the validator'
     end
 
     def ensure_aspect_ratio_validity
-      return true if options[:with]&.is_a?(Proc)
+      return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
 
-      unless NAMED_ASPECT_RATIOS.include?(options[:with]) || options[:with] =~ ASPECT_RATIO_REGEX
-        raise ArgumentError, <<~ERROR_MESSAGE
-          You must pass a valid aspect ratio to the validator
-          It should either be a named aspect ratio (#{NAMED_ASPECT_RATIOS.join(', ')})
-          Or an aspect ratio like 'is_16_9' (matching /#{ASPECT_RATIO_REGEX.source}/)
-        ERROR_MESSAGE
+      aspect_ratios(options).each do |aspect_ratio|
+        unless NAMED_ASPECT_RATIOS.include?(aspect_ratio) || aspect_ratio =~ ASPECT_RATIO_REGEX
+          raise ArgumentError, invalid_aspect_ratio_message
+        end
       end
+    end
+
+    def invalid_aspect_ratio_message
+      <<~ERROR_MESSAGE
+        You must pass a valid aspect ratio to the validator
+        It should either be a named aspect ratio (#{NAMED_ASPECT_RATIOS.join(', ')})
+        Or an aspect ratio like 'is_16_9' (matching /#{ASPECT_RATIO_REGEX.source}/)
+      ERROR_MESSAGE
+    end
+
+    def aspect_ratios(flat_options)
+      (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in]))
+    end
+
+    def string_aspect_ratios(flat_options)
+      aspect_ratios(flat_options).map do |aspect_ratio|
+        if NAMED_ASPECT_RATIOS.include?(aspect_ratio)
+          aspect_ratio
+        else
+          aspect_ratio =~ ASPECT_RATIO_REGEX
+          x = ::Regexp.last_match(1).to_i
+          y = ::Regexp.last_match(2).to_i
+
+          "#{x}:#{y}"
+        end
+      end.join(', ')
     end
   end
 end

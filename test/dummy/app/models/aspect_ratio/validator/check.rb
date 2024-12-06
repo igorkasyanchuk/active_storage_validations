@@ -23,4 +23,9 @@ class AspectRatio::Validator::Check < ApplicationRecord
 
   has_one_attached :with_invalid_image_file
   validates :with_invalid_image_file, aspect_ratio: :square
+
+  has_one_attached :in_aspect_ratios
+  has_one_attached :in_aspect_ratios_proc
+  validates :in_aspect_ratios, aspect_ratio: %i(square portrait is_16_9)
+  validates :in_aspect_ratios_proc, aspect_ratio: -> (record) { %i(square portrait is_16_9) }
 end
