@@ -17,15 +17,15 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[with in].freeze
     NAMED_ASPECT_RATIOS = %i[square portrait landscape].freeze
     ASPECT_RATIO_REGEX = /is_([1-9]\d*)_([1-9]\d*)/.freeze
-    PRECISION = 3
     ERROR_TYPES = %i[
-      aspect_ratio_invalid
-      image_metadata_missing
       aspect_ratio_not_square
       aspect_ratio_not_portrait
       aspect_ratio_not_landscape
       aspect_ratio_is_not
+      aspect_ratio_invalid
+      image_metadata_missing
     ].freeze
+    PRECISION = 3.freeze
 
     def check_validity!
       ensure_at_least_one_validator_option
@@ -46,9 +46,7 @@ module ActiveStorageValidations
       return if image_metadata_missing?(record, attribute, attachable, flat_options, metadata)
 
       aspect_ratios = aspect_ratios(flat_options).compact
-      errors = aspect_ratios.map do |aspect_ratio|
-        aspect_ratio_error(aspect_ratio, metadata)
-      end.compact
+      errors = add_errors(aspect_ratios, metadata)
 
       return true if errors.length != aspect_ratios.length
 
@@ -60,12 +58,21 @@ module ActiveStorageValidations
       false
     end
 
+    def add_errors(aspect_ratios, metadata)
+      aspect_ratios.map do |aspect_ratio|
+        aspect_ratio_error(aspect_ratio, metadata)
+      end.compact.uniq
+    end
+
     def aspect_ratio_error(aspect_ratio, metadata)
-      case aspect_ratio
-      when :square then validate_square_aspect_ratio(metadata)
-      when :portrait then validate_portrait_aspect_ratio(metadata)
-      when :landscape then validate_landscape_aspect_ratio(metadata)
-      when ASPECT_RATIO_REGEX then valid_regex_aspect_ratio?(aspect_ratio, metadata)
+      if aspect_ratio == :square && !valid_square_aspect_ratio?(metadata)
+        :aspect_ratio_not_square
+      elsif aspect_ratio == :portrait && !valid_portrait_aspect_ratio?(metadata)
+        :aspect_ratio_not_portrait
+      elsif aspect_ratio == :landscape && !valid_landscape_aspect_ratio?(metadata)
+        :aspect_ratio_not_landscape
+      elsif ASPECT_RATIO_REGEX.match?(aspect_ratio) && !valid_regex_aspect_ratio?(aspect_ratio, metadata)
+        :aspect_ratio_is_not
       end
     end
 
@@ -78,16 +85,16 @@ module ActiveStorageValidations
       true
     end
 
-    def validate_square_aspect_ratio(metadata)
-      :aspect_ratio_not_square unless metadata[:width] == metadata[:height]
+    def valid_square_aspect_ratio?(metadata)
+      metadata[:width] == metadata[:height]
     end
 
-    def validate_portrait_aspect_ratio(metadata)
-      :aspect_ratio_not_portrait unless metadata[:width] < metadata[:height]
+    def valid_portrait_aspect_ratio?(metadata)
+      metadata[:width] < metadata[:height]
     end
 
-    def validate_landscape_aspect_ratio(metadata)
-      :aspect_ratio_not_landscape unless metadata[:width] > metadata[:height]
+    def valid_landscape_aspect_ratio?(metadata)
+      metadata[:width] > metadata[:height]
     end
 
     def valid_regex_aspect_ratio?(aspect_ratio, metadata)
@@ -95,9 +102,7 @@ module ActiveStorageValidations
       x = ::Regexp.last_match(1).to_i
       y = ::Regexp.last_match(2).to_i
 
-      unless x > 0 && y > 0 && (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
-        :aspect_ratio_is_not
-      end
+      x > 0 && y > 0 && (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
     end
 
     def ensure_at_least_one_validator_option
@@ -111,15 +116,16 @@ module ActiveStorageValidations
 
       aspect_ratios(options).each do |aspect_ratio|
         unless NAMED_ASPECT_RATIOS.include?(aspect_ratio) || aspect_ratio =~ ASPECT_RATIO_REGEX
-          raise ArgumentError, invalid_aspect_ratio_message(aspect_ratio)
+          raise ArgumentError, invalid_aspect_ratio_message
         end
       end
     end
 
-    def invalid_aspect_ratio_message(aspect_ratio)
+    def invalid_aspect_ratio_message
       <<~ERROR_MESSAGE
-        You must pass valid content types to the validator
-        '#{aspect_ratio}' is not found in Marcel::EXTENSIONS mimes
+        You must pass a valid aspect ratio to the validator
+        It should either be a named aspect ratio (#{NAMED_ASPECT_RATIOS.join(', ')})
+        Or an aspect ratio like 'is_16_9' (matching /#{ASPECT_RATIO_REGEX.source}/)
       ERROR_MESSAGE
     end
 
