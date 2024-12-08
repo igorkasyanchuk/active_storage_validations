@@ -43,10 +43,10 @@ module ActiveStorageValidations
         @subject = subject.is_a?(Class) ? subject.new : subject
 
         is_a_valid_active_storage_attribute? &&
-        is_context_valid? &&
-        is_custom_message_valid? &&
-        is_valid_when_image_processable? &&
-        is_invalid_when_image_not_processable?
+          is_context_valid? &&
+          is_custom_message_valid? &&
+          is_valid_when_image_processable? &&
+          is_invalid_when_image_not_processable?
       end
 
       private

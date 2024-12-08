@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "open-uri"
 
 module WorksFineWithAttachables
@@ -217,7 +219,7 @@ module WorksFineWithAttachables
 
       describe "when doing an update" do
         before do
-          subject.using_attachables.attach(attachable_1)
+          subject.using_attachables.attach([attachable_1])
           subject.save!
         end
 
@@ -238,7 +240,7 @@ module WorksFineWithAttachables
         end
 
         it "updates the attribute accordingly and does not break" do
-          subject.using_attachables.attach(attachable_2)
+          subject.using_attachables.attach([attachable_2])
           subject.save!
           assert(subject.valid?)
         end

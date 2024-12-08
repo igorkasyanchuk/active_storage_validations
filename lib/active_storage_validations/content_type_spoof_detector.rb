@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'shared/asv_analyzable'
 require_relative 'shared/asv_attachable'
 require_relative 'shared/asv_loggable'
 require 'open3'
@@ -8,6 +9,7 @@ module ActiveStorageValidations
   class ContentTypeSpoofDetector
     class FileCommandLineToolNotInstalledError < StandardError; end
 
+    include ASVAnalyzable
     include ASVAttachable
     include ASVLoggable
 

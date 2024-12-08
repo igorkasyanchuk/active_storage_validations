@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ValidatorHelpers
   def is_expected_to_be_valid(**kwargs)
     subject && assert(subject.valid?(kwargs[:context]))

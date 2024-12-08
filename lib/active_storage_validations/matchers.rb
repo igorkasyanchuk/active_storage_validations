@@ -27,7 +27,8 @@ module ActiveStorageValidations
 
     def self.mock_metadata(attachment, width, height)
       mock = Struct.new(:metadata).new({ width: width, height: height })
-      stub_method(ActiveStorageValidations::Metadata, :new, mock) do
+
+      stub_method(ActiveStorageValidations::Analyzer, :new, mock) do
         yield
       end
     end
