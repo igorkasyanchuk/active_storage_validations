@@ -65,24 +65,59 @@ module ActiveStorageValidations
       full_attachable_content_type(attachable) && full_attachable_content_type(attachable).downcase.split(/[;,\s]/, 2).first
     end
 
+    # Retrieve the content_type from attachable using the same logic as Rails
+    # ActiveStorage::Blob::Identifiable#identify_content_type
+    def attachable_content_type_rails_like(attachable)
+      Marcel::MimeType.for(
+        attachable_io(attachable, max_byte_size: 4.kilobytes),
+        name: attachable_filename(attachable).to_s,
+        declared_type: full_attachable_content_type(attachable)
+      )
+    end
+
     # Retrieve the io from attachable.
-    def attachable_io(attachable)
+    def attachable_io(attachable, max_byte_size: nil)
+      io = case attachable
+           when ActiveStorage::Blob
+             max_byte_size ? attachable.download_chunk(0...max_byte_size) : attachable.download
+           when ActionDispatch::Http::UploadedFile
+             max_byte_size ? attachable.read(max_byte_size) : attachable.read
+           when Rack::Test::UploadedFile
+             max_byte_size ? attachable.read(max_byte_size) : attachable.read
+           when String
+             blob = ActiveStorage::Blob.find_signed!(attachable)
+             max_byte_size ? blob.download_chunk(0...max_byte_size) : blob.download
+           when Hash
+             max_byte_size ? attachable[:io].read(max_byte_size) : attachable[:io].read
+           when File
+             raise_rails_like_error(attachable) unless supports_file_attachment?
+             max_byte_size ? attachable.read(max_byte_size) : attachable.read
+           when Pathname
+             raise_rails_like_error(attachable) unless supports_pathname_attachment?
+             max_byte_size ? attachable.read(max_byte_size) : attachable.read
+           else
+             raise_rails_like_error(attachable)
+           end
+
+      rewind_attachable_io(attachable)
+      io
+    end
+
+    # Rewind the io attachable.
+    def rewind_attachable_io(attachable)
       case attachable
-      when ActiveStorage::Blob
-        attachable.download
-      when ActionDispatch::Http::UploadedFile
-        attachable.read
-      when Rack::Test::UploadedFile
-        attachable.read
-      when String
-        blob = ActiveStorage::Blob.find_signed!(attachable)
-        blob.download
+      when ActiveStorage::Blob, String
+        # nothing to do
+      when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
+        attachable.rewind
       when Hash
-        attachable[:io].read
+        attachable[:io].rewind
       when File
-        supports_file_attachment? ? attachable : raise_rails_like_error(attachable)
+        raise_rails_like_error(attachable) unless supports_file_attachment?
+        attachable.rewind
       when Pathname
-        supports_pathname_attachment? ? attachable.read : raise_rails_like_error(attachable)
+        raise_rails_like_error(attachable) unless supports_pathname_attachment?
+        File.open(attachable) { |f| f.rewind }
       else
         raise_rails_like_error(attachable)
       end
