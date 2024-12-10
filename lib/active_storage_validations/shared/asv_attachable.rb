@@ -79,14 +79,14 @@ module ActiveStorageValidations
     def attachable_io(attachable, max_byte_size: nil)
       io = case attachable
            when ActiveStorage::Blob
-             max_byte_size ? attachable.download_chunk(0...max_byte_size) : attachable.download
+             (max_byte_size && supports_blob_download_chunk?) ? attachable.download_chunk(0...max_byte_size) : attachable.download
            when ActionDispatch::Http::UploadedFile
              max_byte_size ? attachable.read(max_byte_size) : attachable.read
            when Rack::Test::UploadedFile
              max_byte_size ? attachable.read(max_byte_size) : attachable.read
            when String
              blob = ActiveStorage::Blob.find_signed!(attachable)
-             max_byte_size ? blob.download_chunk(0...max_byte_size) : blob.download
+             (max_byte_size && supports_blob_download_chunk?) ? blob.download_chunk(0...max_byte_size) : blob.download
            when Hash
              max_byte_size ? attachable[:io].read(max_byte_size) : attachable[:io].read
            when File
@@ -162,6 +162,13 @@ module ActiveStorageValidations
       Rails.gem_version >= Gem::Version.new('7.1.0.rc1')
     end
     alias :supports_pathname_attachment? :supports_file_attachment?
+
+    # Check if the current Rails version supports ActiveStorage::Blob#download_chunk
+    #
+    # https://github.com/rails/rails/blob/7-0-stable/activestorage/CHANGELOG.md#rails-700alpha1-september-15-2021
+    def supports_blob_download_chunk?
+      Rails.gem_version >= Gem::Version.new('7.0.0.alpha1')
+    end
 
     # Retrieve the content_type from the file name only
     def marcel_content_type_from_filename(attachable)
