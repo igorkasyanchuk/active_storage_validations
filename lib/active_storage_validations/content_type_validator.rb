@@ -52,7 +52,7 @@ module ActiveStorageValidations
     end
 
     def set_attachable_cached_values(attachable)
-      @attachable_content_type = attachable_content_type(attachable)
+      @attachable_content_type = attachable_content_type_rails_like(attachable)
       @attachable_filename = attachable_filename(attachable).to_s
     end
 
