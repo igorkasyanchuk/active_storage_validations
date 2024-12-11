@@ -10,7 +10,7 @@ module ActiveStorageValidations
 
     def read_image
       begin
-        require "mini_magick"
+        require "mini_magick" unless defined?(MiniMagick)
       rescue LoadError
         logger.info "Skipping image analysis because the mini_magick gem isn't installed"
         return {}

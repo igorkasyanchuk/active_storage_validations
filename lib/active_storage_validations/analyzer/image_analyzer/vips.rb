@@ -9,7 +9,7 @@ module ActiveStorageValidations
 
     def read_image
       begin
-        require "ruby-vips"
+        require "vips" unless defined?(::Vips)
       rescue LoadError
         logger.info "Skipping image analysis because the ruby-vips gem isn't installed"
         return {}
