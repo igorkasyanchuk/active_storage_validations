@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "../metadata"
-
 module ActiveStorageValidations
   # ActiveStorageValidations::ASVAttachable
   #
@@ -20,7 +18,7 @@ module ActiveStorageValidations
     # to perform file analyses.
     def validate_changed_files_from_metadata(record, attribute)
       attachables_from_changes(record, attribute).each do |attachable|
-        is_valid?(record, attribute, attachable, Metadata.new(attachable).metadata)
+        is_valid?(record, attribute, attachable, metadata_for(attachable))
       end
     end
 
@@ -64,7 +62,7 @@ module ActiveStorageValidations
     def attachable_content_type(attachable)
       full_attachable_content_type(attachable) && full_attachable_content_type(attachable).downcase.split(/[;,\s]/, 2).first
     end
-
+      
     # Retrieve the content_type from attachable using the same logic as Rails
     # ActiveStorage::Blob::Identifiable#identify_content_type
     def attachable_content_type_rails_like(attachable)
@@ -75,6 +73,13 @@ module ActiveStorageValidations
       )
     end
 
+    # Retrieve the media type of the attachable, which is the first part of the
+    # content type (or mime type).
+    # Possible values are: application/audio/example/font/image/model/text/video
+    def attachable_media_type(attachable)
+      (full_attachable_content_type(attachable) || marcel_content_type_from_filename(attachable)).split("/").first
+    end
+    
     # Retrieve the io from attachable.
     def attachable_io(attachable, max_byte_size: nil)
       io = case attachable
