@@ -36,7 +36,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get -y install libvips
 
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set BUNDLE_GEMFILE
         run: echo 'BUNDLE_GEMFILE=${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile' >> $GITHUB_ENV
