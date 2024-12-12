@@ -5,7 +5,23 @@ require "open-uri"
 module WorksFineWithAttachables
   extend ActiveSupport::Concern
 
+  class_methods do
+    def file_fixture_path
+      @file_fixture_path ||= Rails.root.join('test/fixtures/files').to_s
+    end
+  end
+
   included do
+    # I couldn't find a better way to do use `file_fixture_upload` with our test
+    # setup.
+    include ActionDispatch::TestProcess::FixtureFile
+
+    def fixture_file_upload(filename, mime_type = nil, binary = false)
+      path = File.join(self.class.file_fixture_path, filename)
+      Rack::Test::UploadedFile.new(path, mime_type, binary)
+    end
+    alias :file_fixture_upload :fixture_file_upload
+
     describe "works fine with attachables" do
       subject { validator_test_class::UsingAttachable.new(params) }
 
@@ -244,6 +260,14 @@ module WorksFineWithAttachables
           subject.save!
           assert(subject.valid?)
         end
+      end
+
+      describe "when using `file_fixture_upload` (or its alias `fixture_file_upload`)" do
+        let(:attachable) { fixture_file_upload('image_150x150.png', 'image/png') }
+
+        before { subject.using_attachable.attach(attachable) }
+
+        it { is_expected_to_be_valid }
       end
     end
   end
