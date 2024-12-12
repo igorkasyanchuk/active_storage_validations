@@ -205,6 +205,28 @@ module WorksFineWithAttachables
         end
       end
 
+      describe "rewinding the attachable io" do
+        let(:attachable) do
+          {
+            io: File.open(png_image, 'rb'), # read as binary to prevent encoding mismatch
+            filename: 'image_150x150.png',
+            content_type: 'image/png'
+          }
+        end
+
+        before do
+          @io = attachable[:io].read
+          attachable[:io].rewind
+        end
+
+        subject { model.using_attachable.attach(attachable) and model }
+
+        it "rewinds the attachable io" do
+          subject.save!
+          assert_equal(@io, subject.using_attachable.blob.download)
+        end
+      end
+
       describe "when there are no attachments" do
         it { is_expected_to_be_valid }
 
