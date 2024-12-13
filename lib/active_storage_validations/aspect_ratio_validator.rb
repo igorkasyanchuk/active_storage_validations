@@ -45,35 +45,32 @@ module ActiveStorageValidations
 
       return if image_metadata_missing?(record, attribute, attachable, flat_options, metadata)
 
-      aspect_ratios = aspect_ratios(flat_options).compact
-      errors = add_errors(aspect_ratios, metadata)
-
-      return true if errors.length != aspect_ratios.length
-
-      error = aspect_ratios.length == 1 ? errors.first : :aspect_ratio_invalid
+      @authorized_aspect_ratios = authorized_aspect_ratios(flat_options).compact
+      
+      return true if authorized_aspect_ratio?(record, attribute, attachable, metadata)
 
       errors_options = initialize_error_options(options, attachable)
       errors_options[:aspect_ratio] = string_aspect_ratios(flat_options)
-      add_error(record, attribute, error, **errors_options)
+      add_error(record, attribute, aspect_ratio_error_mapping, **errors_options)
       false
     end
 
-    def add_errors(aspect_ratios, metadata)
-      aspect_ratios.map do |aspect_ratio|
-        aspect_ratio_error(aspect_ratio, metadata)
-      end.compact.uniq
+    def authorized_aspect_ratio?(record, attribute, attachable, metadata)
+      attachable_aspect_ratio_is_authorized = @authorized_aspect_ratios.any? do |authorized_aspect_ratio|
+        case authorized_aspect_ratio
+        when :square then valid_square_aspect_ratio?(metadata)
+        when :portrait then valid_portrait_aspect_ratio?(metadata)
+        when :landscape then valid_landscape_aspect_ratio?(metadata)
+        when ASPECT_RATIO_REGEX then valid_regex_aspect_ratio?(authorized_aspect_ratio, metadata)
+        end
+      end
     end
 
-    def aspect_ratio_error(aspect_ratio, metadata)
-      if aspect_ratio == :square && !valid_square_aspect_ratio?(metadata)
-        :aspect_ratio_not_square
-      elsif aspect_ratio == :portrait && !valid_portrait_aspect_ratio?(metadata)
-        :aspect_ratio_not_portrait
-      elsif aspect_ratio == :landscape && !valid_landscape_aspect_ratio?(metadata)
-        :aspect_ratio_not_landscape
-      elsif ASPECT_RATIO_REGEX.match?(aspect_ratio) && !valid_regex_aspect_ratio?(aspect_ratio, metadata)
-        :aspect_ratio_is_not
-      end
+    def aspect_ratio_error_mapping
+      return :aspect_ratio_invalid unless @authorized_aspect_ratios.length == 1
+
+      aspect_ratio = @authorized_aspect_ratios.first
+      NAMED_ASPECT_RATIOS.include?(aspect_ratio) ? :"aspect_ratio_not_#{aspect_ratio}" : :aspect_ratio_is_not
     end
 
     def image_metadata_missing?(record, attribute, attachable, flat_options, metadata)
@@ -114,7 +111,7 @@ module ActiveStorageValidations
     def ensure_aspect_ratio_validity
       return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
 
-      aspect_ratios(options).each do |aspect_ratio|
+      authorized_aspect_ratios(options).each do |aspect_ratio|
         unless NAMED_ASPECT_RATIOS.include?(aspect_ratio) || aspect_ratio =~ ASPECT_RATIO_REGEX
           raise ArgumentError, invalid_aspect_ratio_message
         end
@@ -129,12 +126,12 @@ module ActiveStorageValidations
       ERROR_MESSAGE
     end
 
-    def aspect_ratios(flat_options)
+    def authorized_aspect_ratios(flat_options)
       (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in]))
     end
 
     def string_aspect_ratios(flat_options)
-      aspect_ratios(flat_options).map do |aspect_ratio|
+      authorized_aspect_ratios(flat_options).map do |aspect_ratio|
         if NAMED_ASPECT_RATIOS.include?(aspect_ratio)
           aspect_ratio
         else
