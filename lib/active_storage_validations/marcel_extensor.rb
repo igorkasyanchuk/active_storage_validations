@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "marcel"
+
 Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)
 Marcel::MimeType.extend "audio/x-hx-aac-adts", parents: %(audio/x-aac)
 Marcel::MimeType.extend "audio/x-m4a", parents: %(audio/mp4)
