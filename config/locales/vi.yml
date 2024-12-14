@@ -30,3 +30,4 @@ vi:
       aspect_ratio_not_landscape: "phải là ảnh ngang"
       aspect_ratio_is_not: "phải có tỉ lệ ảnh %{aspect_ratio}"
       image_not_processable: "không phải là ảnh"
+      aspect_ratio_invalid: "có tỷ lệ khung hình không hợp lệ"

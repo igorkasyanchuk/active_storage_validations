@@ -30,3 +30,4 @@ sv:
       aspect_ratio_not_landscape: "måste vara en landskapsorienterad bild"
       aspect_ratio_is_not: "måste ha en följande aspect ratio  %{aspect_ratio}"
       image_not_processable: "är inte en giltig bild"
+      aspect_ratio_invalid: "har ett ogiltigt bildförhållande"
