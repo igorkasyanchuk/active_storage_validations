@@ -12,7 +12,11 @@ module ActiveStorageValidations
   #   ActiveStorage::Analyzer::ImageAnalyzer::ImageMagick.new(attachable).metadata
   #   # => { width: 4104, height: 2736 }
   class Analyzer::ImageAnalyzer < Analyzer
+    @@supported_analyzers = {}
+
     def metadata
+      return {} unless analyzer_supported?
+
       read_image do |image|
         if rotated_image?(image)
           { width: image.height, height: image.width }
@@ -62,6 +66,14 @@ module ActiveStorageValidations
       image_from_path(tempfile.path)
     end
 
+    def analyzer_supported?
+      if @@supported_analyzers.key?(self)
+        @@supported_analyzers.fetch(self)
+      else
+        @@supported_analyzers[self] = supported?
+      end
+    end
+
     def read_image
       raise NotImplementedError
     end
@@ -71,6 +83,10 @@ module ActiveStorageValidations
     end
 
     def rotated_image?(image)
+      raise NotImplementedError
+    end
+
+    def supported?
       raise NotImplementedError
     end
   end
