@@ -44,6 +44,7 @@ module ActiveStorageValidations
       require "vips"
       true
     rescue LoadError
+      logger.info "Skipping image analysis because the ruby-vips gem isn't installed"
       false
     end
 
