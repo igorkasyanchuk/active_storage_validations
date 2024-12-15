@@ -62,10 +62,12 @@ module ActiveStorageValidations
     def attachable_content_type(attachable)
       full_attachable_content_type(attachable) && full_attachable_content_type(attachable).downcase.split(/[;,\s]/, 2).first
     end
-      
+
     # Retrieve the content_type from attachable using the same logic as Rails
     # ActiveStorage::Blob::Identifiable#identify_content_type
     def attachable_content_type_rails_like(attachable)
+      return attachable_content_type(attachable) if attachable.is_a?(ActiveStorage::Blob) && !attachable.persisted?
+
       Marcel::MimeType.for(
         attachable_io(attachable, max_byte_size: 4.kilobytes),
         name: attachable_filename(attachable).to_s,

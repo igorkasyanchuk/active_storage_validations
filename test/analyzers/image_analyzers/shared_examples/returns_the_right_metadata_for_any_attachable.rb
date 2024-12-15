@@ -30,7 +30,7 @@ module ReturnsTheRightMetadataForAnyAttachable
         let(:png_image) { Rails.root.join('public', 'image_150x150.png') }
         let(:expected_metadata) { { width: 150, height: 150 } }
 
-        describe "ActiveStorage::Blob object" do
+        describe "persisted ActiveStorage::Blob object" do
           let(:attachable) do
             ActiveStorage::Blob.create_and_upload!(
               io: File.open(png_image),
@@ -41,6 +41,17 @@ module ReturnsTheRightMetadataForAnyAttachable
           end
 
           it { is_expected_to_return_the_right_metadata }
+        end
+
+        describe "non-persisted ActiveStorage::Blob object" do
+          let(:attachable) do
+            ActiveStorage::Blob.new(
+              io: File.open(png_image),
+              filename: 'image_150x150.png',
+              content_type: 'image/png',
+              service_name: 'test'
+            )
+          end
         end
 
         describe "ActionDispatch::Http::UploadedFile object" do
