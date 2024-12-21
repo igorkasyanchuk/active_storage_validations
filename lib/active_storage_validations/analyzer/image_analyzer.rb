@@ -12,8 +12,10 @@ module ActiveStorageValidations
   #   ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick.new(attachable).metadata
   #   # => { width: 4104, height: 2736 }
   class Analyzer::ImageAnalyzer < Analyzer
+    @@supported_analyzers = {}
+
     def metadata
-      @@supported_analyzers = {}
+      return {} unless analyzer_supported?
 
       read_media do |media|
         if rotated_image?(media)
@@ -25,6 +27,14 @@ module ActiveStorageValidations
     end
 
     private
+
+    def analyzer_supported?
+      if @@supported_analyzers.key?(self)
+        @@supported_analyzers.fetch(self)
+      else
+        @@supported_analyzers[self] = supported?
+      end
+    end
 
     # Override this method in a concrete subclass. Have it return true if the image is rotated.
     def rotated_image?(media)

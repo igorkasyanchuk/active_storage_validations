@@ -201,10 +201,6 @@ describe ActiveStorageValidations::AspectRatioValidator do
             it { is_expected_to_have_error_options(error_options) }
           end
         end
-
-        it { is_expected_not_to_be_valid }
-        it { is_expected_to_have_error_message("image_metadata_missing", error_options: error_options) }
-        it { is_expected_to_have_error_options(error_options) }
       end
     end
 
