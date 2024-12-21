@@ -51,7 +51,7 @@ module ActiveStorageValidations
     end
 
     def open3_mime_type_for_io
-      return nil if io.blank?
+      return nil if io.bytesize == 0
 
       Tempfile.create do |tempfile|
         tempfile.binmode
