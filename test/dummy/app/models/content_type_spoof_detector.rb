@@ -11,15 +11,12 @@ class ContentTypeSpoofDetector < ApplicationRecord
   has_many_attached :many_spoofing_protection
   validates :many_spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
 
-  most_common_mime_types.each do |content_type|
+  most_common_mime_types.reject { |common_mime_type| common_mime_type[:type] == :ogv } # issue with ogv
+                        .each do |content_type|
     has_one_attached :"#{content_type[:media]}_#{content_type[:type]}"
     validates :"#{content_type[:media]}_#{content_type[:type]}",
               content_type: { with: content_type[:type], spoofing_protection: true }
-
-    # Issues with content_type validator
-    has_one_attached :video_ogv
-    validates :video_ogv, content_type: { with: 'video/theora', spoofing_protection: true }
-    has_one_attached :application_tar
-    validates :application_tar, content_type: { in: ['application/x-tar', 'application/x-gtar'], spoofing_protection: true }
   end
+  has_one_attached :video_ogv
+  validates :video_ogv, content_type: { with: 'video/theora', spoofing_protection: true }
 end
