@@ -13,6 +13,8 @@ module ActiveStorageValidations
   #   # => { width: 4104, height: 2736 }
   class Analyzer::ImageAnalyzer < Analyzer
     def metadata
+      @@supported_analyzers = {}
+
       read_media do |media|
         if rotated_image?(media)
           { width: media.height, height: media.width }
@@ -26,6 +28,11 @@ module ActiveStorageValidations
 
     # Override this method in a concrete subclass. Have it return true if the image is rotated.
     def rotated_image?(media)
+      raise NotImplementedError
+    end
+
+    # Override this method in a concrete subclass. Have it return true if the analyzer is supported.
+    def supported?
       raise NotImplementedError
     end
   end

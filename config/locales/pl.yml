@@ -30,3 +30,4 @@ pl:
       aspect_ratio_not_landscape: "musi mieć proporcje pejzażu"
       aspect_ratio_is_not: "musi mieć proporcje %{aspect_ratio}"
       image_not_processable: "nie jest prawidłowym obrazem"
+      aspect_ratio_invalid: "ma nieprawidłowy współczynnik proporcji"

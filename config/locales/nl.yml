@@ -30,3 +30,4 @@ nl:
       aspect_ratio_not_landscape: "moet een liggende afbeelding zijn"
       aspect_ratio_is_not: "moet een beeldverhouding hebben van %{aspect_ratio}"
       image_not_processable: "is geen geldige afbeelding"
+      aspect_ratio_invalid: "heeft een ongeldige beeldverhouding"

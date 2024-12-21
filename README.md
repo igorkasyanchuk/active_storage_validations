@@ -577,6 +577,7 @@ en:
       aspect_ratio_not_landscape: "must be a landscape image"
       aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
       image_not_processable: "is not a valid image"
+      aspect_ratio_invalid: "has invalid aspect ratio"
 ```
 
 

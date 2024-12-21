@@ -96,7 +96,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
   end
 
   describe 'Validator checks' do
-    include WorksFineWithAttachables
+    include WorksFineWithAttachables # when using spoofing_protection
 
     let(:model) { validator_test_class::Check.new(params) }
 

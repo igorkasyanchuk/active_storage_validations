@@ -12,6 +12,6 @@
 class ContentType::Validator::UsingAttachable < ApplicationRecord
   has_one_attached :using_attachable
   has_many_attached :using_attachables
-  validates :using_attachable, content_type: :png
-  validates :using_attachables, content_type: :png
+  validates :using_attachable, content_type: { with: :png, spoofing_protection: true }
+  validates :using_attachables, content_type: { with: :png, spoofing_protection: true }
 end

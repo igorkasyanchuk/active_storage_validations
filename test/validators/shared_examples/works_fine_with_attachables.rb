@@ -5,7 +5,23 @@ require "open-uri"
 module WorksFineWithAttachables
   extend ActiveSupport::Concern
 
+  class_methods do
+    def file_fixture_path
+      @file_fixture_path ||= Rails.root.join('test/fixtures/files').to_s
+    end
+  end
+
   included do
+    # I couldn't find a better way to do use `file_fixture_upload` with our test
+    # setup.
+    include ActionDispatch::TestProcess::FixtureFile
+
+    def fixture_file_upload(filename, mime_type = nil, binary = false)
+      path = File.join(self.class.file_fixture_path, filename)
+      Rack::Test::UploadedFile.new(path, mime_type, binary)
+    end
+    alias :file_fixture_upload :fixture_file_upload
+
     describe "works fine with attachables" do
       subject { validator_test_class::UsingAttachable.new(params) }
 
@@ -189,6 +205,28 @@ module WorksFineWithAttachables
         end
       end
 
+      describe "rewinding the attachable io" do
+        let(:attachable) do
+          {
+            io: File.open(png_image, 'rb'), # read as binary to prevent encoding mismatch
+            filename: 'image_150x150.png',
+            content_type: 'image/png'
+          }
+        end
+
+        before do
+          @io = attachable[:io].read
+          attachable[:io].rewind
+        end
+
+        subject { model.using_attachable.attach(attachable) and model }
+
+        it "rewinds the attachable io" do
+          subject.save!
+          assert_equal(@io, subject.using_attachable.blob.download)
+        end
+      end
+
       describe "when there are no attachments" do
         it { is_expected_to_be_valid }
 
@@ -244,6 +282,14 @@ module WorksFineWithAttachables
           subject.save!
           assert(subject.valid?)
         end
+      end
+
+      describe "when using `file_fixture_upload` (or its alias `fixture_file_upload`)" do
+        let(:attachable) { fixture_file_upload('image_150x150.png', 'image/png') }
+
+        before { subject.using_attachable.attach(attachable) }
+
+        it { is_expected_to_be_valid }
       end
     end
   end

@@ -30,3 +30,4 @@ es:
       aspect_ratio_not_landscape: "debe ser una imagen apaisada"
       aspect_ratio_is_not: "debe tener una relación de aspecto de %{aspect_ratio}"
       image_not_processable: "no es una imagen válida"
+      aspect_ratio_invalid: "tiene una relación de aspecto no válida"

@@ -8,13 +8,6 @@ module ActiveStorageValidations
     private
 
     def read_media
-      begin
-        require "ruby-vips"
-      rescue LoadError
-        logger.info "Skipping image analysis because the ruby-vips gem isn't installed"
-        return {}
-      end
-
       Tempfile.create(binmode: true) do |tempfile|
         begin
           if media(tempfile)
@@ -51,6 +44,14 @@ module ActiveStorageValidations
     def rotated_image?(image)
       ROTATIONS === image.get("exif-ifd0-Orientation")
     rescue ::Vips::Error
+      false
+    end
+
+    def supported?
+      require "vips"
+      true
+    rescue LoadError
+      logger.info "Skipping image analysis because the ruby-vips gem isn't installed"
       false
     end
   end
