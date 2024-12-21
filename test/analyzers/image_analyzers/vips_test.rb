@@ -14,10 +14,12 @@ describe ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips do
   # before do
   #   @original_variant_processor = Rails.application.config.active_storage.variant_processor
   #   Rails.application.config.active_storage.variant_processor = :vips
+  #   ActiveStorage.variant_processor = :vips
   # end
 
   # after do
   #   Rails.application.config.active_storage.variant_processor = @original_variant_processor
+  #   ActiveStorage.variant_processor = @original_variant_processor
   # end
 
   include ReturnsTheRightMetadataForAnyAttachable
