@@ -9,13 +9,6 @@ module ActiveStorageValidations
     private
 
     def read_image
-      begin
-        require "mini_magick" unless defined?(MiniMagick)
-      rescue LoadError
-        logger.info "Skipping image analysis because the mini_magick gem isn't installed"
-        return {}
-      end
-
       Tempfile.create(binmode: true) do |tempfile|
         begin
           if image(tempfile).valid?
@@ -41,6 +34,14 @@ module ActiveStorageValidations
 
     def rotated_image?(image)
       %w[ RightTop LeftBottom TopRight BottomLeft ].include?(image["%[orientation]"])
+    end
+
+    def supported?
+      require "mini_magick"
+      true
+    rescue LoadError
+      logger.info "Skipping image analysis because the mini_magick gem isn't installed"
+      false
     end
   end
 end
