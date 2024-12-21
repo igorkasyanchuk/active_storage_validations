@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'open3'
+require_relative 'shared/asv_ff_probable'
 
 module ActiveStorageValidations
   # = ActiveStorageValidations Video \Analyzer
@@ -23,11 +24,13 @@ module ActiveStorageValidations
   #
   # This analyzer requires the {FFmpeg}[https://www.ffmpeg.org] system library, which is not provided by \Rails.
   class Analyzer::VideoAnalyzer < Analyzer
+    include ASVFFProbable
+
     def metadata
       read_media do |media|
         {
-          width: Integer(width),
-          height: Integer(height),
+          width: (Integer(width) if width),
+          height: (Integer(height) if height),
           duration: duration,
           angle: angle,
           audio: audio?,
@@ -37,49 +40,6 @@ module ActiveStorageValidations
     end
 
     private
-
-    def read_media
-      Tempfile.create(binmode: true) do |tempfile|
-        begin
-          if media(tempfile).present?
-            yield media(tempfile)
-          else
-            logger.info "Skipping image analysis because ImageMagick doesn't support the file"
-            {}
-          end
-        ensure
-          tempfile.close
-        end
-      end
-    rescue Errno::ENOENT
-      logger.info "Skipping video analysis because ffprobe isn't installed"
-      {}
-    end
-
-    def media_from_path(path)
-      instrument(File.basename(ffprobe_path)) do
-        stdout, stderr, status = Open3.capture3(
-          ffprobe_path,
-          "-print_format", "json",
-          "-show_streams",
-          "-show_format",
-          "-v", "error",
-          path
-        )
-
-        if status.success?
-          JSON.parse(stdout)
-        else
-          # FFprobe returns an stderr when the file is not valid or not a video.
-          logger.info "Skipping video analysis because FFprobe doesn't support the file"
-          nil
-        end
-      end
-    end
-
-    def ffprobe_path
-      ActiveStorage.paths[:ffprobe] || "ffprobe"
-    end
 
     def width
       if rotated?
@@ -161,18 +121,6 @@ module ActiveStorageValidations
 
     def side_data
       @side_data ||= video_stream["side_data_list"] || {}
-    end
-
-    def video_stream
-      @video_stream ||= streams.detect { |stream| stream["codec_type"] == "video" } || {}
-    end
-
-    def audio_stream
-      @audio_stream ||= streams.detect { |stream| stream["codec_type"] == "audio" } || {}
-    end
-
-    def streams
-      @streams ||= @media["streams"] || []
     end
 
     def container
