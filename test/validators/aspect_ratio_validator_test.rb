@@ -128,7 +128,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
                 end
                 let(:error_options) do
                   {
-                    aspect_ratio: named_aspect_ratio,
+                    aspect_ratio: named_aspect_ratio.to_s,
                     filename: not_allowed_file[:filename]
                   }
                 end
@@ -165,6 +165,39 @@ describe ActiveStorageValidations::AspectRatioValidator do
 
             it { is_expected_not_to_be_valid }
             it { is_expected_to_have_error_message("aspect_ratio_is_not", error_options: error_options) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+        end
+      end
+    end
+
+    describe ':in' do
+      %w[value proc].each do |value_type|
+        describe value_type do
+          let(:attribute) { :"in_aspect_ratios#{'_proc' if value_type == 'proc'}" }
+
+          describe 'when provided with an allowed aspect_ratio file' do
+            subject { model.public_send(attribute).attach(allowed_file) and model }
+
+            let(:allowed_file) { [square_image_file, portrait_image_file, is_16_9_image_file].sample }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe 'when provided with a not allowed aspect_ratio file' do
+            subject { model.public_send(attribute).attach(not_allowed_file) and model }
+
+            let(:not_allowed_file) { is_4_3_image_file }
+
+            let(:error_options) do
+              {
+                aspect_ratio: 'square, portrait, 16:9',
+                filename: not_allowed_file[:filename]
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message('aspect_ratio_invalid', error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end

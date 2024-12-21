@@ -30,3 +30,4 @@ tr:
       aspect_ratio_not_landscape: "yatay bir imaj olmalı"
       aspect_ratio_is_not: "%{aspect_ratio} en boy oranına sahip olmalı"
       image_not_processable: "geçerli bir imaj değil"
+      aspect_ratio_invalid: "geçersiz bir en boy oranına sahip"

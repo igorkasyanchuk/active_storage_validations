@@ -30,3 +30,4 @@ da:
       aspect_ratio_not_landscape: "skal være et landskabsbillede"
       aspect_ratio_is_not: "skal have et størrelsesforhold på %{aspect_ratio}"
       image_not_processable: "er ikke et gyldigt billede"
+      aspect_ratio_invalid: "har et ugyldigt billedformat"
