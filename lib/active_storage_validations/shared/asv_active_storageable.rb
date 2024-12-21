@@ -9,8 +9,8 @@ module ActiveStorageValidations
 
     private
 
-    # Retrieve either an ActiveStorage::Attached::One or an
-    # ActiveStorage::Attached::Many instance depending on attribute definition
+    # Retrieve either an `ActiveStorage::Attached::One` or an
+    # `ActiveStorage::Attached::Many` instance depending on attribute definition
     def attached_files(record, attribute)
       Array.wrap(record.send(attribute))
     end
