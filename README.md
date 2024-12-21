@@ -472,71 +472,8 @@ You are welcome to contribute.
 />](https://opensource-heroes.com/r/igorkasyanchuk/active_storage_validations)
 
 ## Contributors (BIG THANK YOU)
-- https://github.com/schweigert
-- https://github.com/tleneveu
-- https://github.com/reckerswartz
-- https://github.com/Uysim
-- https://github.com/D-system
-- https://github.com/ivanelrey
-- https://github.com/phlegx
-- https://github.com/rr-dev
-- https://github.com/dsmalko
-- https://github.com/danderozier
-- https://github.com/cseelus
-- https://github.com/vkinelev
-- https://github.com/reed
-- https://github.com/connorshea
-- https://github.com/Atul9
-- https://github.com/victorbueno
-- https://github.com/UICJohn
-- https://github.com/giovannibonetti
-- https://github.com/dlepage
-- https://github.com/StefSchenkelaars
-- https://github.com/willnet
-- https://github.com/mohanklein
-- https://github.com/High5Apps
-- https://github.com/mschnitzer
-- https://github.com/sinankeskin
-- https://github.com/alejandrodevs
-- https://github.com/molfar
-- https://github.com/connorshea
-- https://github.com/yshmarov
-- https://github.com/fongfan999
-- https://github.com/cooperka
-- https://github.com/dolarsrg
-- https://github.com/jayshepherd
-- https://github.com/ohbarye
-- https://github.com/randsina
-- https://github.com/vietqhoang
-- https://github.com/kemenaran
-- https://github.com/jrmhaig
-- https://github.com/evedovelli
-- https://github.com/JuanVqz
-- https://github.com/luiseugenio
-- https://github.com/equivalent
-- https://github.com/NARKOZ
-- https://github.com/stephensolis
-- https://github.com/kwent
-- https://github.com/Animesh-Ghosh
-- https://github.com/gr8bit
-- https://github.com/codegeek319
-- https://github.com/clwy-cn
-- https://github.com/kukicola
-- https://github.com/sobrinho
-- https://github.com/iainbeeston
-- https://github.com/marckohlbrugge
-- https://github.com/Mth0158
-- https://github.com/technicalpickles
-- https://github.com/ricsdeol
-- https://github.com/Fonsan
-- https://github.com/tagliala
-- https://github.com/ocarreterom
-- https://github.com/aditya-cherukuri
-- https://github.com/searls
-- https://github.com/yenshirak
-- https://github.com/wataori
-- https://github.com/Scorpahr
 
+https://github.com/igorkasyanchuk/active_storage_validations/graphs/contributors
 
 ## License
 
