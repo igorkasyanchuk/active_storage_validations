@@ -59,7 +59,7 @@ module ActiveStorageValidations
 
     def duration
       duration = video_stream["duration"] || container["duration"]
-      Float(duration) if duration
+      Float(duration).round(1) if duration
     end
 
     def angle
