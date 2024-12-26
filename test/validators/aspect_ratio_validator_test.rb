@@ -126,9 +126,25 @@ describe ActiveStorageValidations::AspectRatioValidator do
                   when :landscape then square_image_file
                   end
                 end
+                let(:width) do
+                  case named_aspect_ratio
+                  when :square then 600
+                  when :portrait then 700
+                  when :landscape then 150
+                  end
+                end
+                let(:height) do
+                  case named_aspect_ratio
+                  when :square then 800
+                  when :portrait then 500
+                  when :landscape then 150
+                  end
+                end
                 let(:error_options) do
                   {
-                    aspect_ratio: named_aspect_ratio.to_s,
+                    authorized_aspect_ratios: named_aspect_ratio.to_s,
+                    width: width,
+                    height: height,
                     filename: not_allowed_file[:filename]
                   }
                 end
@@ -158,13 +174,15 @@ describe ActiveStorageValidations::AspectRatioValidator do
             let(:not_allowed_file) { is_4_3_image_file }
             let(:error_options) do
               {
-                aspect_ratio: "16:9",
+                authorized_aspect_ratios: "16:9",
+                width: 1200,
+                height: 900,
                 filename: not_allowed_file[:filename]
               }
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("aspect_ratio_is_not", error_options: error_options) }
+            it { is_expected_to_have_error_message("aspect_ratio_not_x_y", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
@@ -191,7 +209,9 @@ describe ActiveStorageValidations::AspectRatioValidator do
 
             let(:error_options) do
               {
-                aspect_ratio: 'square, portrait, 16:9',
+                authorized_aspect_ratios: 'square, portrait, 16:9',
+                width: 1200,
+                height: 900,
                 filename: not_allowed_file[:filename]
               }
             end

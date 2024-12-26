@@ -23,7 +23,7 @@ module ActiveStorageValidations
       aspect_ratio_not_square
       aspect_ratio_not_portrait
       aspect_ratio_not_landscape
-      aspect_ratio_is_not
+      aspect_ratio_not_x_y
       aspect_ratio_invalid
       media_metadata_missing
     ].freeze
@@ -64,23 +64,26 @@ module ActiveStorageValidations
       return true if attachable_aspect_ratio_is_authorized
 
       errors_options = initialize_error_options(options, attachable)
-      errors_options[:aspect_ratio] = string_aspect_ratios
-      add_error(record, attribute, aspect_ratio_error_mapping, **errors_options)
+      error_type = aspect_ratio_error_mapping
+      errors_options[:authorized_aspect_ratios] = string_aspect_ratios
+      errors_options[:width] = metadata[:width]
+      errors_options[:height] = metadata[:height]
+      add_error(record, attribute, error_type, **errors_options)
       false
     end
 
     def aspect_ratio_error_mapping
-      return :aspect_ratio_invalid unless @authorized_aspect_ratios.one?
+      return :aspect_ratio_invalid if @authorized_aspect_ratios.many?
 
       aspect_ratio = @authorized_aspect_ratios.first
-      NAMED_ASPECT_RATIOS.include?(aspect_ratio) ? :"aspect_ratio_not_#{aspect_ratio}" : :aspect_ratio_is_not
+      NAMED_ASPECT_RATIOS.include?(aspect_ratio) ? :"aspect_ratio_not_#{aspect_ratio}" : :aspect_ratio_not_x_y
     end
 
     def media_metadata_missing?(record, attribute, attachable, metadata)
       return false if metadata[:width].to_i > 0 && metadata[:height].to_i > 0
 
       errors_options = initialize_error_options(options, attachable)
-      errors_options[:aspect_ratio] = string_aspect_ratios
+      errors_options[:authorized_aspect_ratios] = string_aspect_ratios
       add_error(record, attribute, :media_metadata_missing, **errors_options)
       true
     end

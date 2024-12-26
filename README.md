@@ -475,16 +475,18 @@ end
 en:
   errors:
     messages:
-      aspect_ratio_not_square: "must be a square image"
-      aspect_ratio_not_portrait: "must be a portrait image"
-      aspect_ratio_not_landscape: "must be a landscape image"
-      aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
-      aspect_ratio_invalid: "has an invalid aspect ratio"
+      aspect_ratio_not_square: "must be square (current file is %{width}x%{height}px)"
+      aspect_ratio_not_portrait: "must be portrait (current file is %{width}x%{height}px)"
+      aspect_ratio_not_landscape: "must be landscape (current file is %{width}x%{height}px)"
+      aspect_ratio_not_x_y: "must be %{authorized_aspect_ratios} (current file is %{width}x%{height}px)"
+      aspect_ratio_invalid: "has an invalid aspect ratio (valid aspect ratios are %{authorized_aspect_ratios})"
       media_metadata_missing: "is not a valid media file"
 ```
 
-The `aspect_ratio` validator error messages expose 2 values that you can use:
-- `aspect_ratio` containing the expected aspect ratio, especially usefull for custom aspect ratio
+The `aspect_ratio` validator error messages expose 4 values that you can use:
+- `authorized_aspect_ratios` containing the authorized aspect ratios
+- `width` containing the current width of the image/video
+- `height` containing the current height of the image/video
 - `filename` containing the current filename in error
 
 ---
@@ -535,9 +537,15 @@ But this major version bump also comes with some breaking changes. Below are the
   - The error messages have been completely rewritten to be more consistent and easier to understand (not breaking but might be a good idea to update them with the new versions)
   - Some keys have been changed:
     - `image_metadata_missing` has been replaced by `media_metadata_missing`
+    - `aspect_ratio_is_not` has been replaced by `aspect_ratio_not_x_y`
   - Some error messages variables names have been changed to improve readability:
     - `dimension` validator:
       - `length` has been replaced by `exact`
+    - `aspect_ratio` validator:
+      - `aspect_ratio` has been replaced by `authorized_aspect_ratios`
+    - `content_type` validator:
+      - `authorized_types` has been replaced by `authorized_human_content_types`
+
 - `content_type` validator
   - The `:in` option now only accepts 'valid' content types (ie content types deemed by Marcel as valid).
     - The check was mistakenly only performed on the `:with` option previously. Therefore, invalid content types were accepted in the `:in` option, which is not the expected behavior.
@@ -578,12 +586,12 @@ en:
       dimension_height_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
       dimension_width_equal_to: "width must be equal to %{length} pixel"
       dimension_height_equal_to: "height must be equal to %{length} pixel"
-      aspect_ratio_not_square: "must be a square image"
-      aspect_ratio_not_portrait: "must be a portrait image"
-      aspect_ratio_not_landscape: "must be a landscape image"
-      aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
+      aspect_ratio_not_square: "must be square (current file is %{width}x%{height}px)"
+      aspect_ratio_not_portrait: "must be portrait (current file is %{width}x%{height}px)"
+      aspect_ratio_not_landscape: "must be landscape (current file is %{width}x%{height}px)"
+      aspect_ratio_not_x_y: "must be %{authorized_aspect_ratios} (current file is %{width}x%{height}px)"
+      aspect_ratio_invalid: "has an invalid aspect ratio (valid aspect ratios are %{authorized_aspect_ratios})"
       image_not_processable: "is not a valid image"
-      aspect_ratio_invalid: "has invalid aspect ratio"
 ```
 
 
