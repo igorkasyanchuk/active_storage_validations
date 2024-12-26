@@ -14,7 +14,7 @@ sv:
       total_file_size_not_greater_than_or_equal_to: "total filstorlek måste vara större än eller lika med %{min_size} (nuvarande storlek är %{total_file_size})"
       total_file_size_not_between: "total filstorlek måste vara mellan %{min_size} och %{max_size} (nuvarande storlek är %{total_file_size})"
       limit_out_of_range: "antalet filer är utanför det godkända intervallet"
-      image_metadata_missing: "bilden sankar metadata"
+      media_metadata_missing: "är inte en giltig mediefil"
       dimension_min_inclusion: "måste minst vara %{width} x %{height} pixlar"
       dimension_max_inclusion: "måste vara mindre eller lika med %{width} x %{height} pixlar"
       dimension_width_inclusion: "bredden är utanför %{min} till %{max} pixlar"

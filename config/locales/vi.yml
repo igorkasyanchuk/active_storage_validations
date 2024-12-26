@@ -14,7 +14,7 @@ vi:
       total_file_size_not_greater_than_or_equal_to: "tổng kích thước tệp phải lớn hơn hoặc bằng %{min_size} (kích thước hiện tại là %{total_file_size})"
       total_file_size_not_between: "tổng kích thước tệp phải nằm trong khoảng từ %{min_size} đến %{max_size} (kích thước hiện tại là %{total_file_size})"
       limit_out_of_range: "tổng số tệp vượt giới hạn"
-      image_metadata_missing: "không phải là ảnh"
+      media_metadata_missing: "không phải là ảnh"
       dimension_min_inclusion: "phải lớn hơn hoặc bằng %{width} x %{height} pixel"
       dimension_max_inclusion: "phải nhỏ hơn hoặc bằng %{width} x %{height} pixel"
       dimension_width_inclusion: "chiều rộng không nằm trong %{min} và %{max} pixel"

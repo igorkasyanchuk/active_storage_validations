@@ -14,7 +14,7 @@ pl:
       total_file_size_not_greater_than_or_equal_to: "całkowity rozmiar pliku musi być większy lub równy %{min_size} (obecny rozmiar to %{total_file_size})"
       total_file_size_not_between: "całkowity rozmiar pliku musi mieścić się w przedziale od %{min_size} do %{max_size} (obecny rozmiar to %{total_file_size})"
       limit_out_of_range: "ilość przekracza dopuszczalny zakres"
-      image_metadata_missing: "nie jest prawidłowym obrazem"
+      media_metadata_missing: "nie jest prawidłowym plikiem multimedialnym"
       dimension_min_inclusion: "musi być równe lub większe od %{width} x %{height} pixeli"
       dimension_max_inclusion: "musi być równe lub mniejsze od %{width} x %{height} pixeli"
       dimension_width_inclusion: "szerokość musi wynosić od %{min} do %{max} pixeli"

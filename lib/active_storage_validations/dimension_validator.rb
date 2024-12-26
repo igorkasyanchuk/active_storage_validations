@@ -18,7 +18,6 @@ module ActiveStorageValidations
 
     AVAILABLE_CHECKS = %i[width height min max].freeze
     ERROR_TYPES = %i[
-      image_metadata_missing
       dimension_min_inclusion
       dimension_max_inclusion
       dimension_width_inclusion
@@ -29,6 +28,7 @@ module ActiveStorageValidations
       dimension_height_less_than_or_equal_to
       dimension_width_equal_to
       dimension_height_equal_to
+      media_metadata_missing
     ].freeze
 
     def check_validity!
@@ -51,7 +51,7 @@ module ActiveStorageValidations
 
       # Validation fails unless file metadata contains valid width and height.
       if metadata[:width].to_i <= 0 || metadata[:height].to_i <= 0
-        add_error(record, attribute, :image_metadata_missing, **errors_options)
+        add_error(record, attribute, :media_metadata_missing, **errors_options)
         return false
       end
 

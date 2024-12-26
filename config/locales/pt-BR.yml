@@ -14,7 +14,7 @@ pt-BR:
       total_file_size_not_greater_than_or_equal_to: "o tamanho total do arquivo deve ser maior ou igual a %{min_size} (o tamanho atual é %{total_file_size})"
       total_file_size_not_between: "o tamanho total do arquivo deve estar entre %{min_size} e %{max_size} (o tamanho atual é %{total_file_size})"
       limit_out_of_range: "o número total está fora do limite"
-      image_metadata_missing: "não é uma imagem válida"
+      media_metadata_missing: "não é um arquivo de mídia válido"
       dimension_min_inclusion: "deve ser maior ou igual a %{width} x %{height} pixels"
       dimension_max_inclusion: "deve ser menor ou igual a %{width} x %{height} pixels"
       dimension_width_inclusion: "deve ter largura entre %{min} e %{max} pixels"

@@ -14,7 +14,7 @@ ru:
       total_file_size_not_greater_than_or_equal_to: "общий размер файла должен быть больше или равен %{min_size} (текущий размер %{total_file_size})"
       total_file_size_not_between: "общий размер файла должен быть между %{min_size} и %{max_size} (текущий размер %{total_file_size})"
       limit_out_of_range: "количество файлов больше требуемого"
-      image_metadata_missing: "не является допустимым изображением"
+      media_metadata_missing: "не является действительным медиафайлом"
       dimension_min_inclusion: "должен быть больше или равно %{width} x %{height} пикселям"
       dimension_max_inclusion: "должно быть меньше или равно %{width} x %{height} пикселям"
       dimension_width_inclusion: "ширина не включена между %{min} и %{max} пикселям"

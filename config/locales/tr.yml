@@ -14,7 +14,7 @@ tr:
       total_file_size_not_greater_than_or_equal_to: "toplam dosya boyutu %{min_size} değerinden büyük veya eşit olmalıdır (geçerli boyut %{total_file_size}'dir)"
       total_file_size_not_between: "toplam dosya boyutu %{min_size} ile %{max_size} arasında olmalıdır (geçerli boyut %{total_file_size}'dir)"
       limit_out_of_range: "toplam miktar aralık dışında"
-      image_metadata_missing: "geçerli bir imaj değil"
+      media_metadata_missing: "geçerli bir medya dosyası değil"
       dimension_min_inclusion: "%{width} x %{height} piksele eşit ya da büyük olmalı"
       dimension_max_inclusion: "%{width} x %{height} piksele eşit ya da küçük olmalı"
       dimension_width_inclusion: "en %{min} ve %{max} piksel aralığı dışında"

@@ -426,6 +426,7 @@ en:
       dimension_height_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
       dimension_width_equal_to: "width must be equal to %{length} pixel"
       dimension_height_equal_to: "height must be equal to %{length} pixel"
+      media_metadata_missing: "is not a valid media file"
 ```
 
 The `dimension` validator error messages expose 6 values that you can use:
@@ -479,6 +480,7 @@ en:
       aspect_ratio_not_landscape: "must be a landscape image"
       aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
       aspect_ratio_invalid: "has an invalid aspect ratio"
+      media_metadata_missing: "is not a valid media file"
 ```
 
 The `aspect_ratio` validator error messages expose 2 values that you can use:
@@ -530,7 +532,9 @@ Added features:
 
 But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
 - Error messages
-  - The error messages have been completely rewritten to be more consistent and easier to understand.
+  - The error messages have been completely rewritten to be more consistent and easier to understand (not breaking but might be a good idea to update them with the new versions)
+  - Some keys have been changed:
+    - `image_metadata_missing` has been replaced by `media_metadata_missing`
   - Some error messages variables names have been changed to improve readability:
     - `dimension` validator:
       - `length` has been replaced by `exact`
@@ -563,7 +567,7 @@ en:
       total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min_size} (current size is %{total_file_size})"
       total_file_size_not_between: "total file size must be between %{min_size} and %{max_size} (current size is %{total_file_size})"
       limit_out_of_range: "total number is out of range"
-      image_metadata_missing: "is not a valid image"
+      media_metadata_missing: "is not a valid media file"
       dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel"
       dimension_max_inclusion: "must be less than or equal to %{width} x %{height} pixel"
       dimension_width_inclusion: "width is not included between %{min} and %{max} pixel"

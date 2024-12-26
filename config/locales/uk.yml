@@ -14,7 +14,7 @@ uk:
       total_file_size_not_greater_than_or_equal_to: "загальний розмір файлу має бути більшим або дорівнювати %{min_size} (поточний розмір %{total_file_size})"
       total_file_size_not_between: "загальний розмір файлу має бути від %{min_size} до %{max_size} (поточний розмір %{total_file_size})"
       limit_out_of_range: "кількість файлів більше необхідного"
-      image_metadata_missing: "не є допустимим зображенням"
+      media_metadata_missing: "не є допустимим зображенням"
       dimension_min_inclusion: "мусить бути більше або дорівнювати %{width} x %{height} пікселям"
       dimension_max_inclusion: "мусить бути менше або дорівнювати %{width} x %{height} пікселям"
       dimension_width_inclusion: "ширина не включена між %{min} і %{max} пікселям"

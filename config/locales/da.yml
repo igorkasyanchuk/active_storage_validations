@@ -14,7 +14,7 @@ da:
       total_file_size_not_greater_than_or_equal_to: "den samlede filstørrelse skal være større end eller lig med %{min_size} (aktuel størrelse er %{total_file_size})"
       total_file_size_not_between: "den samlede filstørrelse skal være mellem %{min_size} og %{max_size} (aktuel størrelse er %{total_file_size})"
       limit_out_of_range: "det samlede antal er uden for rækkevidde"
-      image_metadata_missing: "er ikke et gyldigt billede"
+      media_metadata_missing: "er ikke en gyldig mediefil"
       dimension_min_inclusion: "skal være større end eller lig med %{width} x %{height} pixel"
       dimension_max_inclusion: "skal være mindre end eller lig med %{width} x %{height} pixel"
       dimension_width_inclusion: "bredden er ikke inkluderet mellem %{min} og %{max} pixel"

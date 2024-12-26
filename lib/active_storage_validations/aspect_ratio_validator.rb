@@ -25,7 +25,7 @@ module ActiveStorageValidations
       aspect_ratio_not_landscape
       aspect_ratio_is_not
       aspect_ratio_invalid
-      image_metadata_missing
+      media_metadata_missing
     ].freeze
     PRECISION = 3.freeze
 
@@ -47,7 +47,7 @@ module ActiveStorageValidations
     private
 
     def is_valid?(record, attribute, attachable, metadata)
-      !image_metadata_missing?(record, attribute, attachable, metadata) &&
+      !media_metadata_missing?(record, attribute, attachable, metadata) &&
         authorized_aspect_ratio?(record, attribute, attachable, metadata)
     end
 
@@ -76,12 +76,12 @@ module ActiveStorageValidations
       NAMED_ASPECT_RATIOS.include?(aspect_ratio) ? :"aspect_ratio_not_#{aspect_ratio}" : :aspect_ratio_is_not
     end
 
-    def image_metadata_missing?(record, attribute, attachable, metadata)
+    def media_metadata_missing?(record, attribute, attachable, metadata)
       return false if metadata[:width].to_i > 0 && metadata[:height].to_i > 0
 
       errors_options = initialize_error_options(options, attachable)
       errors_options[:aspect_ratio] = string_aspect_ratios
-      add_error(record, attribute, :image_metadata_missing, **errors_options)
+      add_error(record, attribute, :media_metadata_missing, **errors_options)
       true
     end
 

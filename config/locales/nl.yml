@@ -14,7 +14,7 @@ nl:
       total_file_size_not_greater_than_or_equal_to: "totale bestandsgrootte moet groter zijn dan of gelijk zijn aan %{min_size} (huidige grootte is %{total_file_size})"
       total_file_size_not_between: "totale bestandsgrootte moet tussen %{min_size} en %{max_size} liggen (huidige grootte is %{total_file_size})"
       limit_out_of_range: "totaal aantal valt buiten het vereiste bereik"
-      image_metadata_missing: "is geen geldige afbeelding"
+      media_metadata_missing: "is geen geldig mediabestand"
       dimension_min_inclusion: "moet groter of gelijk zijn aan %{width} x %{height} pixels"
       dimension_max_inclusion: "moet kleiner of gelijk zijn aan %{width} x %{height} pixels"
       dimension_width_inclusion: "breedte niet tussen de %{min} en %{max} pixels"

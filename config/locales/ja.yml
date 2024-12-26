@@ -14,7 +14,7 @@ ja:
       total_file_size_not_greater_than_or_equal_to: "ファイルの合計サイズは %{min_size} 以上である必要があります (現在のサイズは %{total_file_size})"
       total_file_size_not_between: "ファイルの合計サイズは %{min_size} から %{max_size} までである必要があります (現在のサイズは %{total_file_size})"
       limit_out_of_range: "の数が許容範囲外です"
-      image_metadata_missing: "は不正な画像です"
+      media_metadata_missing: "有効なメディアファイルではありません"
       dimension_min_inclusion: "は %{width} x %{height} ピクセル以上の大きさにしてください"
       dimension_max_inclusion: "は %{width} x %{height} ピクセル以下の大きさにしてください"
       dimension_width_inclusion: "の横幅は %{min} ピクセル以上 %{max} ピクセル以下にしてください"
