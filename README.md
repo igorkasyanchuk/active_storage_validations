@@ -446,7 +446,7 @@ Validates the aspect ratio of the attached files.
 
 The `aspect_ratio` validator has several options:
 - `with`: defines the exact allowed aspect ratio (e.g. `16/9`)
-🚧 TODO: Add :in option when ready
+- `in`: defines the allowed aspect ratios (e.g. `16/9..16/10`)
 
 This validator can define aspect ratios in several ways:
 - Symbols:
@@ -464,6 +464,7 @@ class User < ApplicationRecord
   validates :avatar, aspect_ratio: :portrait # restricts the aspect ratio to x:y where y > x
   validates :avatar, aspect_ratio: :landscape # restricts the aspect ratio to x:y where x > y
   validates :avatar, aspect_ratio: :is_16_9 # restricts the aspect ratio to 16:9
+  validates :avatar, aspect_ratio: %i[square is_16_9] # restricts the aspect ratio to 1:1 and 16:9
 end
 ```
 
@@ -477,6 +478,7 @@ en:
       aspect_ratio_not_portrait: "must be a portrait image"
       aspect_ratio_not_landscape: "must be a landscape image"
       aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
+      aspect_ratio_invalid: "has an invalid aspect ratio"
 ```
 
 The `aspect_ratio` validator error messages expose 2 values that you can use:

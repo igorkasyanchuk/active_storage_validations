@@ -20,6 +20,7 @@ module ActiveStorageValidations
       case attachable_media_type(attachable)
       when "image" then image_analyzer_for(attachable)
       when "video" then video_analyzer_for(attachable)
+      when "audio" then audio_analyzer_for(attachable)
       else fallback_analyzer_for(attachable)
       end
     end
@@ -41,6 +42,10 @@ module ActiveStorageValidations
 
     def video_analyzer_for(attachable)
       ActiveStorageValidations::Analyzer::VideoAnalyzer.new(attachable)
+    end
+
+    def audio_analyzer_for(attachable)
+      ActiveStorageValidations::Analyzer::AudioAnalyzer.new(attachable)
     end
 
     def fallback_analyzer_for(attachable)

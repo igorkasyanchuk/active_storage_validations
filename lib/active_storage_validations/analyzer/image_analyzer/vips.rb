@@ -34,7 +34,6 @@ module ActiveStorageValidations
           # supported attachable.
           # We stumbled upon this issue while reading 0 byte size attachable
           # https://github.com/janko/image_processing/issues/97
-          logger.info "Skipping image analysis because Vips doesn't support the file"
           nil
         end
       end

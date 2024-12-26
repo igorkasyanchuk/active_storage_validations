@@ -9,6 +9,7 @@ require 'active_storage_validations/analyzer/image_analyzer/image_magick'
 require 'active_storage_validations/analyzer/image_analyzer/vips'
 require 'active_storage_validations/analyzer/null_analyzer'
 require 'active_storage_validations/analyzer/video_analyzer'
+require 'active_storage_validations/analyzer/audio_analyzer'
 
 require 'active_storage_validations/railtie'
 require 'active_storage_validations/engine'

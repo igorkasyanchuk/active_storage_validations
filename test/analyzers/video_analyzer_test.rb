@@ -19,9 +19,9 @@ describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
   let(:media_io) { File.open(media_path) }
   let(:media_content_type) { 'video/mp4' }
   let(:media_content_type_rotated) { media_content_type }
-  let(:expected_metadata) { { width: 150, height: 150, duration: 1.733333, audio: false, video: true } }
-  let(:expected_metadata_over_10ko) { { width: 150, height: 150, duration: 9.642967, audio: false, video: true } }
-  let(:expected_metadata_rotated) { { width: 700, height: 500, duration: 1.733333, audio: false, video: true } }
+  let(:expected_metadata) { { width: 150, height: 150, duration: 1.7, audio: false, video: true } }
+  let(:expected_metadata_over_10ko) { { width: 150, height: 150, duration: 9.6, audio: false, video: true } }
+  let(:expected_metadata_rotated) { { width: 700, height: 500, duration: 1.7, audio: false, video: true } }
 
   include ReturnsTheRightMetadataForAnyAttachable
 end
