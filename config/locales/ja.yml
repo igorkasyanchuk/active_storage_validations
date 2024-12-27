@@ -2,7 +2,7 @@ ja:
   errors:
     messages:
       content_type_invalid: "のContent Typeが不正です"
-      spoofed_content_type: "コンテンツ、ファイル名、拡張子で宣言されているコンテンツ タイプと異なるコンテンツ タイプが含まれています"
+      spoofed_content_type: "コンテンツを通じて宣言されていないコンテンツタイプがある"
       file_size_not_less_than: "ファイル サイズは %{max_size} 未満にする必要があります (現在のサイズは %{file_size})"
       file_size_not_less_than_or_equal_to: "ファイル サイズは %{max_size} 以下である必要があります (現在のサイズは %{file_size})"
       file_size_not_greater_than: "ファイル サイズは %{min_size} より大きい必要があります (現在のサイズは %{file_size} です)"

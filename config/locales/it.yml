@@ -2,7 +2,7 @@ it:
   errors:
     messages:
       content_type_invalid: "ha un tipo di contenuto non valido"
-      spoofed_content_type: "ha un tipo di contenuto che non è quello dichiarato tramite contenuto, nome file ed estensione"
+      spoofed_content_type: "ha un tipo di contenuto che non è quello che viene dichiarato attraverso il suo contenuto"
       file_size_not_less_than: "la dimensione del file deve essere inferiore a %{max_size} (la dimensione attuale è %{file_size})"
       file_size_not_less_than_or_equal_to: "la dimensione del file deve essere minore o uguale a %{max_size} (la dimensione attuale è %{file_size})"
       file_size_not_greater_than: "la dimensione del file deve essere maggiore di %{min_size} (la dimensione attuale è %{file_size})"

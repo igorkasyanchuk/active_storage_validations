@@ -2,7 +2,7 @@ sv:
   errors:
     messages:
       content_type_invalid: "Har en ogiltig filtyp"
-      spoofed_content_type: "har en innehållstyp som inte är vad den deklareras genom sitt innehåll, filnamn och tillägg"
+      spoofed_content_type: "har en innehållstyp som inte är vad den förklaras genom dess innehåll"
       file_size_not_less_than: "filstorleken måste vara mindre än %{max_size} (nuvarande storlek är %{file_size})"
       file_size_not_less_than_or_equal_to: "filstorleken måste vara mindre än eller lika med %{max_size} (nuvarande storlek är %{file_size})"
       file_size_not_greater_than: "filstorleken måste vara större än %{min_size} (nuvarande storlek är %{file_size})"

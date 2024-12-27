@@ -263,6 +263,7 @@ en:
   errors:
     messages:
       content_type_invalid: "has an invalid content type"
+      spoofed_content_type: "has a content type that is not what it is declared through its content"
 ```
 
 The `content_type` validator error messages expose 4 values that you can use:
@@ -564,6 +565,7 @@ en:
   errors:
     messages:
       content_type_invalid: "has an invalid content type"
+      spoofed_content_type: "has a content type that is not what it is declared through its content"
       file_size_not_less_than: "file size must be less than %{max_size} (current size is %{file_size})"
       file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max_size} (current size is %{file_size})"
       file_size_not_greater_than: "file size must be greater than %{min_size} (current size is %{file_size})"

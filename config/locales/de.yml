@@ -2,7 +2,7 @@ de:
   errors:
     messages:
       content_type_invalid: "hat einen ungültigen Dateityp"
-      spoofed_content_type: "hat einen Inhaltstyp, der nicht dem entspricht, was durch Inhalt, Dateinamen und Erweiterung deklariert wird"
+      spoofed_content_type: "hat einen Inhaltstyp, der nicht durch seinen Inhalt deklariert ist"
       file_size_not_less_than: "Dateigröße muss kleiner als %{max_size} sein (aktuelle Dateigröße ist %{file_size})"
       file_size_not_less_than_or_equal_to: "Dateigröße muss kleiner oder gleich %{max_size} sein (aktuelle Dateigröße ist %{file_size})"
       file_size_not_greater_than: "Dateigröße muss größer als %{min_size} sein (aktuelle Dateigröße ist %{file_size})"

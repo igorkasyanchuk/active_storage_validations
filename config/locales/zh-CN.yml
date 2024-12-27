@@ -2,7 +2,7 @@ zh-CN:
   errors:
     messages:
       content_type_invalid: "文件类型错误"
-      spoofed_content_type: "内容类型与通过内容、文件名和扩展名声明的内容类型不同"
+      spoofed_content_type: "具有的内容类型不是通过其内容声明的内容类型"
       file_size_not_less_than: "文件大小必须小于 %{max_size}（当前大小为 %{file_size})"
       file_size_not_less_than_or_equal_to: "文件大小必须小于或等于 %{max_size}（当前大小为 %{file_size})"
       file_size_not_greater_than: "文件大小必须大于 %{min_size}（当前大小为 %{file_size})"

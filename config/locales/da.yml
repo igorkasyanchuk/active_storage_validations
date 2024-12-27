@@ -2,7 +2,7 @@ da:
   errors:
     messages:
       content_type_invalid: "har en ugyldig indholdstype"
-      spoofed_content_type: "har en indholdstype, der ikke er, hvad den erklæres gennem sit indhold, filnavn og udvidelse"
+      spoofed_content_type: "har en indholdstype, der ikke er, hvad den erklæres gennem dens indhold"
       file_size_not_less_than: "filstørrelsen skal være mindre end %{max_size} (den nuværende størrelse er %{file_size})"
       file_size_not_less_than_or_equal_to: "filstørrelsen skal være mindre end eller lig med %{max_size} (den nuværende størrelse er %{file_size})"
       file_size_not_greater_than: "filstørrelsen skal være større end %{min_size} (den nuværende størrelse er %{file_size})"
