@@ -1,7 +1,9 @@
 en:
   errors:
     messages:
-      content_type_invalid: "has an invalid content type"
+      content_type_invalid:
+        one: "has an invalid content type (authorized content type is %{authorized_human_content_types})"
+        other: "has an invalid content type (authorized content types are %{authorized_human_content_types})"
       spoofed_content_type: "has a content type that is not what it is declared through its content"
       file_size_not_less_than: "file size must be less than %{max_size} (current size is %{file_size})"
       file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max_size} (current size is %{file_size})"

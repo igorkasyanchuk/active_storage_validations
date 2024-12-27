@@ -1,7 +1,9 @@
 pt-BR:
   errors:
     messages:
-      content_type_invalid: "tem um tipo de arquivo inválido"
+      content_type_invalid:
+        one: "tem um tipo de conteúdo inválido (o tipo de conteúdo autorizado é %{authorized_human_content_types})"
+        other: "tem um tipo de conteúdo inválido (os tipos de conteúdo autorizados são %{authorized_human_content_types})"
       spoofed_content_type: "tem um tipo de conteúdo que não é o que é declarado através de seu conteúdo"
       file_size_not_less_than: "o tamanho do arquivo deve ser menor que %{max_size} (o tamanho atual é %{file_size})"
       file_size_not_less_than_or_equal_to: "o tamanho do arquivo deve ser menor ou igual a %{max_size} (o tamanho atual é %{file_size})"

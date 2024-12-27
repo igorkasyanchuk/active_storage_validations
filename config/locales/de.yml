@@ -1,7 +1,9 @@
 de:
   errors:
     messages:
-      content_type_invalid: "hat einen ungültigen Dateityp"
+      content_type_invalid:
+        one: "hat einen ungültigen Inhaltstyp (autorisierter Inhaltstyp ist %{authorized_human_content_types})"
+        other: "hat einen ungültigen Inhaltstyp (autorisierte Inhaltstypen sind %{authorized_human_content_types})"
       spoofed_content_type: "hat einen Inhaltstyp, der nicht durch seinen Inhalt deklariert ist"
       file_size_not_less_than: "Dateigröße muss kleiner als %{max_size} sein (aktuelle Dateigröße ist %{file_size})"
       file_size_not_less_than_or_equal_to: "Dateigröße muss kleiner oder gleich %{max_size} sein (aktuelle Dateigröße ist %{file_size})"

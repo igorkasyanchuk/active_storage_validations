@@ -1,7 +1,9 @@
 it:
   errors:
     messages:
-      content_type_invalid: "ha un tipo di contenuto non valido"
+      content_type_invalid:
+        one: "ha un tipo di contenuto non valido (il tipo di contenuto autorizzato è %{authorized_human_content_types})"
+        other: "ha un tipo di contenuto non valido (i tipi di contenuto autorizzati sono %{authorized_human_content_types})"
       spoofed_content_type: "ha un tipo di contenuto che non è quello che viene dichiarato attraverso il suo contenuto"
       file_size_not_less_than: "la dimensione del file deve essere inferiore a %{max_size} (la dimensione attuale è %{file_size})"
       file_size_not_less_than_or_equal_to: "la dimensione del file deve essere minore o uguale a %{max_size} (la dimensione attuale è %{file_size})"

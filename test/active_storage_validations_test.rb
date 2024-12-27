@@ -31,7 +31,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_photos.attach(bad_dummy_file)
     u.video.attach(video_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Photos has an invalid content type', 'Proc photos has an invalid content type']
+    assert_equal u.errors.full_messages, ['Photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)', 'Proc photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)']
 
     u = User.new(name: 'John Smith')
     u.avatar.attach(bad_dummy_file)
@@ -42,23 +42,25 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_photos.attach(image_150x150_file)
     u.video.attach(video_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Proc avatar has an invalid content type']
+    assert_equal u.errors.full_messages, ['Avatar has an invalid content type (authorized content type is PNG)', 'Proc avatar has an invalid content type (authorized content type is PNG)']
     assert_equal u.errors.details, avatar: [
       {
         error: :content_type_invalid,
         validator_type: :content_type,
-        authorized_types: 'PNG',
+        authorized_human_content_types: 'PNG',
         content_type: 'text/plain',
         human_content_type: 'TXT',
+        count: 1,
         filename: 'apple-touch-icon.png'
       }
     ], proc_avatar: [
      {
        error: :content_type_invalid,
        validator_type: :content_type,
-       authorized_types: 'PNG',
+       authorized_human_content_types: 'PNG',
        content_type: 'text/plain',
        human_content_type: 'TXT',
+       count: 1,
        filename: 'apple-touch-icon.png'
      }
     ]
@@ -82,7 +84,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_photos.attach(image_150x150_file)
     u.video.attach(video_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Image regex has an invalid content type', 'Proc image regex has an invalid content type']
+    assert_equal u.errors.full_messages, ['Image regex has an invalid content type (authorized content type is \\Aimage/.*\\z)', 'Proc image regex has an invalid content type (authorized content type is \\Aimage/.*\\z)']
 
     u = User.new(name: 'John Smith')
     u.avatar.attach(bad_dummy_file)
@@ -93,7 +95,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_photos.attach(bad_dummy_file)
     u.video.attach(video_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Image regex has an invalid content type', 'Proc avatar has an invalid content type', 'Proc photos has an invalid content type', 'Proc image regex has an invalid content type']
+    assert_equal u.errors.full_messages, ['Avatar has an invalid content type (authorized content type is PNG)', 'Photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)', 'Image regex has an invalid content type (authorized content type is \\Aimage/.*\\z)', 'Proc avatar has an invalid content type (authorized content type is PNG)', 'Proc photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)', 'Proc image regex has an invalid content type (authorized content type is \\Aimage/.*\\z)']
 
     u = User.new(name: 'Peter Griffin')
     u.avatar.attach(image_150x150_file)
@@ -113,7 +115,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.conditional_image_2.attach(bad_dummy_file)
     u.video.attach(video_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Avatar has an invalid content type", "Photos has an invalid content type", "Conditional image 2 has an invalid content type", "Proc avatar has an invalid content type"]
+    assert_equal u.errors.full_messages, ["Avatar has an invalid content type (authorized content type is PNG)", "Photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)", "Conditional image 2 has an invalid content type (authorized content type is \\Aimage/.*\\z)", "Proc avatar has an invalid content type (authorized content type is PNG)"]
   end
 
   # trying to attach webp file with PNG extension, but real content type is detected
@@ -126,7 +128,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.photos.attach(webp_file)
     u.proc_photos.attach(webp_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Proc avatar has an invalid content type', 'Proc photos has an invalid content type']
+    assert_equal u.errors.full_messages, ['Avatar has an invalid content type (authorized content type is PNG)', 'Photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)', 'Proc avatar has an invalid content type (authorized content type is PNG)', 'Proc photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)']
   end
 
   test 'validates microsoft office document' do
@@ -242,7 +244,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.image.attach(html_file)
     e.proc_image.attach(html_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Image is not a valid media file", "Image is not a valid media file", "Image has an invalid content type", "Proc image is not a valid media file", "Proc image is not a valid media file", "Proc image has an invalid content type"]
+    assert_equal e.errors.full_messages, ["Image is not a valid media file", "Image is not a valid media file", "Image has an invalid content type (authorized content types are PNG, JPG)", "Proc image is not a valid media file", "Proc image is not a valid media file", "Proc image has an invalid content type (authorized content types are PNG, JPG)"]
 
     e = OnlyImage.new
     e.image.attach(image_1920x1080_file)
@@ -254,7 +256,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.image.attach(pdf_file)
     e.proc_image.attach(pdf_file)
     assert !e.valid?
-    assert e.errors.full_messages.include?("Image has an invalid content type")
+    assert e.errors.full_messages.include?("Image has an invalid content type (authorized content types are PNG, JPG)")
 
     e = OnlyImage.new
     e.image.attach(image_1920x1080_file)

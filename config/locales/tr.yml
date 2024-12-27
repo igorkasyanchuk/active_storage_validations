@@ -1,7 +1,9 @@
 tr:
   errors:
     messages:
-      content_type_invalid: "geçersiz dosya tipine sahip"
+      content_type_invalid:
+        one: "geçersiz içerik türüne sahip (yetkili içerik türü %{authorized_human_content_types})"
+        other: "geçersiz içerik türüne sahip (yetkili içerik türleri %{authorized_human_content_types})"
       spoofed_content_type: "içeriği ile bildirildiği içerik olmayan bir içerik türüne sahiptir"
       file_size_not_less_than: "dosya boyutu %{max_size} boyutundan küçük olmalıdır (geçerli boyut %{file_size}'dir)"
       file_size_not_less_than_or_equal_to: "dosya boyutu %{max_size} değerinden küçük veya ona eşit olmalıdır (geçerli boyut %{file_size}'dir)"

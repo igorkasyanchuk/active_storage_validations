@@ -1,7 +1,9 @@
 uk:
   errors:
     messages:
-      content_type_invalid: "має неприпустимий тип вмісту"
+      content_type_invalid:
+        one: "має недійсний тип вмісту (уповноважений тип вмісту становить %{autorized_human_content_types})"
+        other: "має недійсний тип вмісту (дозволені типи вмісту %{autorized_human_content_types})"
       spoofed_content_type: "має тип вмісту, який не є тим, що він оголошений через його вміст"
       file_size_not_less_than: "розмір файлу має бути менше %{max_size} (поточний розмір %{file_size})"
       file_size_not_less_than_or_equal_to: "розмір файлу має бути меншим або дорівнювати %{max_size} (поточний розмір %{file_size})"

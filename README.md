@@ -262,14 +262,17 @@ The difficulty to accurately predict a mime type may generate false positives, i
 en:
   errors:
     messages:
-      content_type_invalid: "has an invalid content type"
+      content_type_invalid:
+        one: "has an invalid content type (authorized content type is %{authorized_human_content_types})"
+        other: "has an invalid content type (authorized content types are %{authorized_human_content_types})"
       spoofed_content_type: "has a content type that is not what it is declared through its content"
 ```
 
-The `content_type` validator error messages expose 4 values that you can use:
+The `content_type` validator error messages expose 5 values that you can use:
 - `content_type` containing the exact content type of the sent file (e.g. `image/png`)
 - `human_content_type` containing a more user-friendly version of the sent file content type (e.g. 'TXT' for 'text/plain')
-- `authorized_types` containing the list of authorized content types (e.g. 'PNG, JPEG' for `['image/png', 'image/jpeg']`)
+- `authorized_human_content_types` containing the list of authorized content types (e.g. 'PNG, JPEG' for `['image/png', 'image/jpeg']`)
+- `count` containing the number of authorized content types (e.g. `2`)
 - `filename` containing the filename
 
 ---
@@ -536,6 +539,10 @@ Added features:
 But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
 - Error messages
   - The error messages have been completely rewritten to be more consistent and easier to understand (not breaking but might be a good idea to update them with the new versions)
+  - Some validator errors have been totally changed:
+    - `limit` validator keys have been totally reworked
+    - `dimension` validator keys have been totally reworked
+    - `content_type` validator keys have been totally reworked
   - Some keys have been changed:
     - `image_metadata_missing` has been replaced by `media_metadata_missing`
     - `aspect_ratio_is_not` has been replaced by `aspect_ratio_not_x_y`
@@ -564,7 +571,9 @@ Active Storage Validations uses I18n for error messages. Add these keys in your 
 en:
   errors:
     messages:
-      content_type_invalid: "has an invalid content type"
+      content_type_invalid:
+        one: "has an invalid content type (authorized content type is %{authorized_human_content_types})"
+        other: "has an invalid content type (authorized content types are %{authorized_human_content_types})"
       spoofed_content_type: "has a content type that is not what it is declared through its content"
       file_size_not_less_than: "file size must be less than %{max_size} (current size is %{file_size})"
       file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max_size} (current size is %{file_size})"

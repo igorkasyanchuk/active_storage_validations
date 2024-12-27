@@ -111,7 +111,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
     #     let(:file_with_issue) { extension_content_type_mismatch_file }
     #     let(:error_options) do
     #       {
-    #         authorized_types: "PNG",
+    #         authorized_human_content_types: "PNG",
     #         content_type: file_with_issue[:content_type],
     #         filename: file_with_issue[:filename]
     #       }
@@ -134,7 +134,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
     #       end
     #       let(:error_options) do
     #         {
-    #           authorized_types: "DOCX",
+    #           authorized_human_content_types: "DOCX",
     #           content_type: docx_file_with_two_extensions[:content_type],
     #           filename: docx_file_with_two_extensions[:filename]
     #         }
@@ -184,7 +184,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
     #     end
     #     let(:error_options) do
     #       {
-    #         authorized_types: "PDF",
+    #         authorized_human_content_types: "PDF",
     #         content_type: pdf_file_without_extension[:content_type],
     #         filename: pdf_file_without_extension[:filename]
     #       }
@@ -221,11 +221,12 @@ describe ActiveStorageValidations::ContentTypeValidator do
                 subject { model.public_send(attribute).attach(not_allowed_file) and model }
 
                 let(:not_allowed_file) { numbers_file }
-                let(:authorized_types) { type == 'regex' ? '\\Aimage/.*\\z' : 'PNG' }
+                let(:authorized_human_content_types) { type == 'regex' ? '\\Aimage/.*\\z' : 'PNG' }
                 let(:error_options) do
                   {
-                    authorized_types: authorized_types,
+                    authorized_human_content_types: authorized_human_content_types,
                     content_type: not_allowed_file[:content_type],
+                    count: 1,
                     filename: not_allowed_file[:filename]
                   }
                 end
@@ -265,11 +266,12 @@ describe ActiveStorageValidations::ContentTypeValidator do
                 subject { model.public_send(attribute).attach(not_allowed_file) and model }
 
                 let(:not_allowed_file) { numbers_file }
-                let(:authorized_types) { type == 'regex' ? '\\Aimage/.*\\z, \\Afile/.*\\z' : 'PNG, GIF' }
+                let(:authorized_human_content_types) { type == 'regex' ? '\\Aimage/.*\\z, \\Afile/.*\\z' : 'PNG, GIF' }
                 let(:error_options) do
                   {
-                    authorized_types: authorized_types,
+                    authorized_human_content_types: authorized_human_content_types,
                     content_type: not_allowed_file[:content_type],
+                    count: 2,
                     filename: not_allowed_file[:filename]
                   }
                 end

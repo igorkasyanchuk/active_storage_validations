@@ -1,7 +1,9 @@
 sv:
   errors:
     messages:
-      content_type_invalid: "Har en ogiltig filtyp"
+      content_type_invalid:
+        one: "har en ogiltig innehållstyp (auktoriserad innehållstyp är %{authorized_human_content_types})"
+        other: "har en ogiltig innehållstyp (auktoriserade innehållstyper är %{authorized_human_content_types})"
       spoofed_content_type: "har en innehållstyp som inte är vad den förklaras genom dess innehåll"
       file_size_not_less_than: "filstorleken måste vara mindre än %{max_size} (nuvarande storlek är %{file_size})"
       file_size_not_less_than_or_equal_to: "filstorleken måste vara mindre än eller lika med %{max_size} (nuvarande storlek är %{file_size})"

@@ -1,7 +1,9 @@
 ja:
   errors:
     messages:
-      content_type_invalid: "のContent Typeが不正です"
+      content_type_invalid:
+        one: "無効なコンテンツタイプがあります（許可されたコンテンツタイプは%{authorized_human_content_types}です)"
+        other: "無効なコンテンツタイプがあります（許可されたコンテンツタイプは%{authorized_human_content_types}です)"
       spoofed_content_type: "コンテンツを通じて宣言されていないコンテンツタイプがある"
       file_size_not_less_than: "ファイル サイズは %{max_size} 未満にする必要があります (現在のサイズは %{file_size})"
       file_size_not_less_than_or_equal_to: "ファイル サイズは %{max_size} 以下である必要があります (現在のサイズは %{file_size})"
