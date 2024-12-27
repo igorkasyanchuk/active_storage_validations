@@ -15,7 +15,18 @@ pl:
       total_file_size_not_greater_than: "całkowity rozmiar pliku musi być większy niż %{min_size} (obecny rozmiar to %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "całkowity rozmiar pliku musi być większy lub równy %{min_size} (obecny rozmiar to %{total_file_size})"
       total_file_size_not_between: "całkowity rozmiar pliku musi mieścić się w przedziale od %{min_size} do %{max_size} (obecny rozmiar to %{total_file_size})"
-      limit_out_of_range: "ilość przekracza dopuszczalny zakres"
+      limit_out_of_range:
+        zero: "brak dołączonych plików (musi mieć między %{min} a %{max} pliki)"
+        one: "załączony tylko 1 plik (musi mieć między %{min} a %{max} pliki)"
+        other: "całkowita liczba plików musi wynosić między %{min} a %{max} pliki (dołączone są %{count} pliki)"
+      limit_min_not_reached:
+        zero: "brak dołączonych plików (musi mieć co najmniej %{min} pliki)"
+        one: "dołączony tylko 1 plik (musi mieć co najmniej %{min} pliki)"
+        other: "%{count} pliki dołączone (musi mieć co najmniej %{min} pliki)"
+      limit_max_exceeded:
+        zero: "brak dołączonych plików (maksymalnie jest to %{max} pliki)"
+        one: "zbyt wiele dołączonych plików (maksymalnie jest to %{max} pliki, otrzymano %{count})"
+        other: "zbyt wiele dołączonych plików (maksymalnie jest to %{max} pliki, otrzymano %{count})"
       media_metadata_missing: "nie jest prawidłowym plikiem multimedialnym"
       dimension_min_inclusion: "musi być równe lub większe od %{width} x %{height} pixeli"
       dimension_max_inclusion: "musi być równe lub mniejsze od %{width} x %{height} pixeli"

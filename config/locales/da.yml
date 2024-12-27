@@ -15,7 +15,18 @@ da:
       total_file_size_not_greater_than: "den samlede filstørrelse skal være større end %{min_size} (aktuel størrelse er %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "den samlede filstørrelse skal være større end eller lig med %{min_size} (aktuel størrelse er %{total_file_size})"
       total_file_size_not_between: "den samlede filstørrelse skal være mellem %{min_size} og %{max_size} (aktuel størrelse er %{total_file_size})"
-      limit_out_of_range: "det samlede antal er uden for rækkevidde"
+      limit_out_of_range:
+        zero: "ingen filer vedhæftet (skal have mellem %{min} og %{max} filer)"
+        one: "kun 1 fil vedhæftet (skal have mellem %{min} og %{max} filer)"
+        other: "det samlede antal filer skal være mellem %{min} og %{max} filer (der er %{count} filer vedhæftet)"
+      limit_min_not_reached:
+        zero: "ingen filer vedhæftet (skal have mindst %{min} filer)"
+        one: "kun 1 fil vedhæftet (skal have mindst %{min} filer)"
+        other: "%{count} filer vedhæftet (skal have mindst %{min} filer)"
+      limit_max_exceeded:
+        zero: "ingen filer vedhæftet (maks. er %{max} filer)"
+        one: "for mange vedhæftede filer (maks. er %{max} filer, fik %{count})"
+        other: "for mange vedhæftede filer (maks. er %{max} filer, fik %{count})"
       media_metadata_missing: "er ikke en gyldig mediefil"
       dimension_min_inclusion: "skal være større end eller lig med %{width} x %{height} pixel"
       dimension_max_inclusion: "skal være mindre end eller lig med %{width} x %{height} pixel"

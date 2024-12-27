@@ -70,11 +70,12 @@ describe ActiveStorageValidations::LimitValidator do
               {
                 min: 2,
                 max: nil,
+                count: 1
               }
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("limit_out_of_range", error_options: error_options) }
+            it { is_expected_to_have_error_message("limit_min_not_reached", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
@@ -106,12 +107,71 @@ describe ActiveStorageValidations::LimitValidator do
               {
                 min: nil,
                 max: 1,
+                count: 2
               }
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("limit_out_of_range", error_options: error_options) }
+            it { is_expected_to_have_error_message("limit_max_exceeded", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
+          end
+        end
+      end
+    end
+
+    describe 'Combinations' do
+      describe ':min + :max' do
+        # validates :range, limit: { min: 1, max: 3 }
+        # validates :range_proc, limit: { min: -> (record) { 1 }, max: -> (record) { 3 } }
+        %w(value proc).each do |value_type|
+          describe value_type do
+            let(:model) { "#{validator_test_class}::CheckRange#{'Proc' if value_type == 'proc'}".constantize.new(params) }
+            let(:attribute) { :"range#{'_proc' if value_type == 'proc'}" }
+
+            describe 'when provided with a right number of files' do
+              subject { model.public_send(attribute).attach([file_1, file_2]) and model }
+
+              let(:file_1) { png_file }
+              let(:file_2) { gif_file }
+
+              it { is_expected_to_be_valid }
+            end
+
+            describe 'when provided with a wrong number of files' do
+              describe 'that is below the lower bound (:max)' do
+                subject { model.public_send(attribute).attach() and model }
+
+
+                let(:error_options) do
+                  {
+                    min: 1,
+                    max: 3,
+                    count: 0
+                  }
+                end
+
+                it { is_expected_not_to_be_valid }
+                it { is_expected_to_have_error_message("limit_out_of_range", error_options: error_options) }
+                it { is_expected_to_have_error_options(error_options) }
+              end
+
+              describe 'that is over the upper bound (:max)' do
+                subject { model.public_send(attribute).attach([file_1, file_1, file_1, file_1]) and model }
+
+                let(:file_1) { png_file }
+                let(:error_options) do
+                  {
+                    min: 1,
+                    max: 3,
+                    count: 4
+                  }
+                end
+
+                it { is_expected_not_to_be_valid }
+                it { is_expected_to_have_error_message("limit_out_of_range", error_options: error_options) }
+                it { is_expected_to_have_error_options(error_options) }
+              end
+            end
           end
         end
       end

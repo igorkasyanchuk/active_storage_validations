@@ -15,7 +15,18 @@ it:
       total_file_size_not_greater_than: "la dimensione totale dei file deve essere maggiore di %{min_size} (la dimensione attuale è %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "la dimensione totale dei file deve essere maggiore o uguale a %{min_size} (la dimensione attuale è %{total_file_size})"
       total_file_size_not_between: "la dimensione totale dei file deve essere compresa tra %{min_size} e %{max_size} (la dimensione attuale è %{total_file_size})"
-      limit_out_of_range: "il valore è al di fuori dell’intervallo consentito"
+      limit_out_of_range:
+        zero: "nessun file allegato (deve avere tra %{min} e %{max} file)"
+        one: "solo 1 file allegato (deve avere tra %{min} e %{max} file)"
+        other: "il numero totale di file deve essere compreso tra %{min} e %{max} file (ci sono %{count} file allegati)"
+      limit_min_not_reached:
+        zero: "nessun file allegato (deve avere almeno %{min} file)"
+        one: "solo 1 file allegato (deve avere almeno %{min} file)"
+        other: "%{count} file allegati (deve avere almeno %{min} file)"
+      limit_max_exceeded:
+        zero: "nessun file allegato (massimo è %{max} file)"
+        one: "troppi file allegati (massimo è %{max} file, ottenuto %{count})"
+        other: "troppi file allegati (massimo è %{max} file, ottenuto %{count})"
       media_metadata_missing: "non è un file multimediale valido"
       dimension_min_inclusion: "deve essere maggiore o uguale a %{width} x %{height} pixel"
       dimension_max_inclusion: "deve essere minore o uguale a %{width} x %{height} pixel"

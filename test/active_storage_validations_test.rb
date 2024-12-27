@@ -177,14 +177,14 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ['Documents total number is out of range', 'Proc documents total number is out of range']
+    assert_equal e.errors.full_messages, ['Documents total number of files must be between 1 and 3 files (there are 4 files attached)', 'Proc documents total number of files must be between 1 and 3 files (there are 4 files attached)']
   end
 
   test 'validates minimum number of files' do
     e = Project.new(title: 'Death Star')
     e.proc_documents.attach(pdf_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Documents total number is out of range"]
+    assert_equal e.errors.full_messages, ["Documents no files attached (must have between 1 and 3 files)"]
   end
 
   test 'validates number of files' do
@@ -200,10 +200,10 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal 0, la.files_blobs.count
     assert_equal 0, la.proc_files_blobs.count
 
-    assert_equal ['Files total number is out of range', 'Proc files total number is out of range'], la.errors.full_messages
+    assert_equal ['Files too many files attached (maximum is 4 files, got 6)', 'Proc files too many files attached (maximum is 4 files, got 6)'], la.errors.full_messages
 
     assert !la.valid?
-    assert_equal ['Files total number is out of range', 'Proc files total number is out of range'], la.errors.full_messages
+    assert_equal ['Files too many files attached (maximum is 4 files, got 6)', 'Proc files too many files attached (maximum is 4 files, got 6)'], la.errors.full_messages
   end
 
   test 'validates number of files v2' do

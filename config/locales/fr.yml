@@ -15,7 +15,18 @@ fr:
       total_file_size_not_greater_than: "la taille totale des fichiers doit être supérieure à %{min_size} (la taille actuelle est %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "la taille totale des fichiers doit être supérieure ou égale à %{min_size} (la taille actuelle est %{total_file_size})"
       total_file_size_not_between: "la taille totale des fichiers doit être comprise entre %{min_size} et %{max_size} (la taille actuelle est %{total_file_size})"
-      limit_out_of_range: "le nombre total est hors limites"
+      limit_out_of_range:
+        zero: "pas de fichiers joints (doit avoir entre %{min} et %{max} fichiers)"
+        one: "seulement 1 fichier joint (doit avoir entre %{min} et %{max} fichiers)"
+        other: "le nombre total de fichiers doit être compris entre %{min} et %{max} fichiers (il y a %{count} fichiers attachés)"
+      limit_min_not_reached:
+        zero: "pas de fichiers joints (doit avoir au moins %{min} fichiers)"
+        one: "seulement 1 fichier joint (doit avoir au moins %{min} fichiers)"
+        other: "%{count} fichiers attachés (doit avoir au moins %{min} fichiers)"
+      limit_max_exceeded:
+        zero: "pas de fichiers joints (le maximum autorisé est %{max} fichiers)"
+        one: "trop de fichiers joints (le maximum autorisé est %{max} fichiers, obtenu %{count})"
+        other: "trop de fichiers joints (le maximum autorisé est %{max} fichiers, obtenu %{count})"
       media_metadata_missing: "n'est pas un fichier média valide"
       dimension_min_inclusion: "doit être supérieur ou égal à %{width} x %{height} pixels"
       dimension_max_inclusion: "doit être inférieur ou égal à %{width} x %{height} pixels"

@@ -15,7 +15,18 @@ zh-CN:
       total_file_size_not_greater_than: "总文件大小必须大于 %{min_size}（当前大小为 %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "文件总大小必须大于或等于 %{min_size}（当前大小为 %{total_file_size})"
       total_file_size_not_between: "总文件大小必须介于 %{min_size} 和 %{max_size} 之间（当前大小为 %{total_file_size})"
-      limit_out_of_range: "文件数超出限定范围"
+      limit_out_of_range:
+        zero: "未附加文件（必须具有%{min}和%{max}文件之间)"
+        one: "仅附加1个文件（必须具有%{min}和%{max}文件之间)"
+        other: "文件总数必须在%{min}和%{max}文件之间（已连接%{count}文件)"
+      limit_min_not_reached:
+        zero: "未附加文件（必须至少具有%{min}文件)"
+        one: "仅附加1个文件（必须至少具有%{min}文件)"
+        other: "%{count}文件已连接（必须至少具有%{min}文件)"
+      limit_max_exceeded:
+        zero: "未附加文件（最大为%{max}文件)"
+        one: "附加的文件太多（最大为%{max}文件,得到%{count})"
+        other: "附加的文件太多（最大为%{max}文件,得到%{count})"
       media_metadata_missing: "不是有效的媒体文件"
       dimension_min_inclusion: "必须大于或等于 %{width} x %{height} 像素"
       dimension_max_inclusion: "必须小于或等于 %{width} x %{height} 像素"

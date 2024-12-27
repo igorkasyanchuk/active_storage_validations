@@ -15,7 +15,18 @@ pt-BR:
       total_file_size_not_greater_than: "o tamanho total do arquivo deve ser maior que %{min_size} (o tamanho atual é %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "o tamanho total do arquivo deve ser maior ou igual a %{min_size} (o tamanho atual é %{total_file_size})"
       total_file_size_not_between: "o tamanho total do arquivo deve estar entre %{min_size} e %{max_size} (o tamanho atual é %{total_file_size})"
-      limit_out_of_range: "o número total está fora do limite"
+      limit_out_of_range:
+        zero: "nenhum ficheiro anexado (deve ter entre %{min} e %{max})"
+        one: "apenas 1 ficheiro anexado (deve ter entre %{min} e %{max})"
+        other: "o número total de ficheiros deve estar entre os ficheiros %{min} e %{max} (há ficheiros %{count} anexados)"
+      limit_min_not_reached:
+        zero: "sem ficheiros anexados (deve ter pelo menos %{min})"
+        one: "apenas 1 ficheiro anexado (deve ter pelo menos %{min} ficheiros)"
+        other: "%{count} ficheiros anexados (deve ter pelo menos %{min} ficheiros)"
+      limit_max_exceeded:
+        zero: "sem ficheiros anexados (o máximo é %{max})"
+        one: "muitos ficheiros anexados (o máximo é %{max}, obteve %{count})"
+        other: "muitos ficheiros anexados (o máximo é %{max}, obteve %{count})"
       media_metadata_missing: "não é um arquivo de mídia válido"
       dimension_min_inclusion: "deve ser maior ou igual a %{width} x %{height} pixels"
       dimension_max_inclusion: "deve ser menor ou igual a %{width} x %{height} pixels"

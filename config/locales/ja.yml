@@ -15,7 +15,18 @@ ja:
       total_file_size_not_greater_than: "ファイルの合計サイズは %{min_size} より大きくなければなりません (現在のサイズは %{total_file_size} です)"
       total_file_size_not_greater_than_or_equal_to: "ファイルの合計サイズは %{min_size} 以上である必要があります (現在のサイズは %{total_file_size})"
       total_file_size_not_between: "ファイルの合計サイズは %{min_size} から %{max_size} までである必要があります (現在のサイズは %{total_file_size})"
-      limit_out_of_range: "の数が許容範囲外です"
+      limit_out_of_range:
+        zero: "添付されたファイルはありません(%{min}と%{max}ファイルの間にある必要があります)"
+        one: "1つのファイルのみが添付されています(%{min}と%{max}ファイルの間にある必要があります)"
+        other: "ファイルの総数は、%{min}と%{max}ファイルの間でなければなりません(%{count}ファイルが添付されています)"
+      limit_min_not_reached:
+        zero: "添付されたファイルはありません(少なくとも%{min}ファイルが必要です)"
+        one: "1つのファイルのみが添付されています(少なくとも%{min}ファイルが必要です)"
+        other: "%{count}添付ファイル（少なくとも%{min}ファイルが必要です)"
+      limit_max_exceeded:
+        zero: "添付されたファイルはありません(最大は%{最大}ファイル)"
+        one: "添付されているファイルが多すぎます(最大は%{max}ファイル、%{count})"
+        other: "添付されているファイルが多すぎます(最大は%{max}ファイル、%{count})"
       media_metadata_missing: "有効なメディアファイルではありません"
       dimension_min_inclusion: "は %{width} x %{height} ピクセル以上の大きさにしてください"
       dimension_max_inclusion: "は %{width} x %{height} ピクセル以下の大きさにしてください"

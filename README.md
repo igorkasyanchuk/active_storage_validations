@@ -157,12 +157,24 @@ end
 en:
   errors:
     messages:
-      limit_out_of_range: "total number is out of range"
+      limit_out_of_range:
+        zero: "no files attached (must have between %{min} and %{max} files)"
+        one: "only 1 file attached (must have between %{min} and %{max} files)"
+        other: "total number of files must be between %{min} and %{max} files (there are %{count} files attached)"
+      limit_min_not_reached:
+        zero: "no files attached (must have at least %{min} files)"
+        one: "only 1 file attached (must have at least %{min} files)"
+        other: "%{count} files attached (must have at least %{min} files)"
+      limit_max_exceeded:
+        zero: "no files attached (maximum is %{max} files)"
+        one: "too many files attached (maximum is %{max} files, got %{count})"
+        other: "too many files attached (maximum is %{max} files, got %{count})"
 ```
 
 The `limit` validator error messages expose 2 values that you can use:
 - `min` containing the minimum allowed number of files (e.g. `1`)
 - `max` containing the maximum allowed number of files (e.g. `10`)
+- `count` containing the current number of files (e.g. `5`)
 
 ---
 
@@ -308,7 +320,7 @@ end
 #### Best practices
 
 It is always a good practice to limit the maximum file size to a reasonable value (like 2MB for avatar images). This helps prevent server storage issues, reduces upload/download times, and ensures better performance. Large files can consume excessive bandwidth and storage space, potentially impacting both server resources and user experience.
-Plus, not setting a size limit inside your Rails app might lead into your server throwing a `413 Content Too Large` error, which is as nice as a Rails validatin error.
+Plus, not setting a size limit inside your Rails app might lead into your server throwing a `413 Content Too Large` error, which is not as nice as a Rails validation error.
 
 #### Error messages (I18n)
 
@@ -535,6 +547,7 @@ If you are upgrading from 1.x to 2.x, you will be pleased to note that a lot of 
 Added features:
 - `dimension` validator now supports videos
 - `aspect_ratio` validator now supports videos
+- All error messages have been given an upgrade and new variables that you can use
 
 But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
 - Error messages
@@ -585,7 +598,18 @@ en:
       total_file_size_not_greater_than: "total file size must be greater than %{min_size} (current size is %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min_size} (current size is %{total_file_size})"
       total_file_size_not_between: "total file size must be between %{min_size} and %{max_size} (current size is %{total_file_size})"
-      limit_out_of_range: "total number is out of range"
+      limit_out_of_range:
+        zero: "no files attached (must have between %{min} and %{max} files)"
+        one: "only 1 file attached (must have between %{min} and %{max} files)"
+        other: "total number of files must be between %{min} and %{max} files (there are %{count} files attached)"
+      limit_min_not_reached:
+        zero: "no files attached (must have at least %{min} files)"
+        one: "only 1 file attached (must have at least %{min} files)"
+        other: "%{count} files attached (must have at least %{min} files)"
+      limit_max_exceeded:
+        zero: "no files attached (maximum is %{max} files)"
+        one: "too many files attached (maximum is %{max} files, got %{count})"
+        other: "too many files attached (maximum is %{max} files, got %{count})"
       media_metadata_missing: "is not a valid media file"
       dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel"
       dimension_max_inclusion: "must be less than or equal to %{width} x %{height} pixel"

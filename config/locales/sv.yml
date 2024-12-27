@@ -15,7 +15,18 @@ sv:
       total_file_size_not_greater_than: "total filstorlek måste vara större än %{min_size} (nuvarande storlek är %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "total filstorlek måste vara större än eller lika med %{min_size} (nuvarande storlek är %{total_file_size})"
       total_file_size_not_between: "total filstorlek måste vara mellan %{min_size} och %{max_size} (nuvarande storlek är %{total_file_size})"
-      limit_out_of_range: "antalet filer är utanför det godkända intervallet"
+      limit_out_of_range:
+        zero: "inga filer bifogade (måste ha mellan %{min} och %{max} filer)"
+        one: "endast en fil bifogad (måste ha mellan %{min} och %{max} filer)"
+        other: "totalt antal filer måste vara mellan %{min} och %{max} filer (det finns %{count} filer bifogade)"
+      limit_min_not_reached:
+        zero: "inga filer bifogade (måste ha minst %{min} filer)"
+        one: "endast en fil bifogad (måste ha minst %{min} filer)"
+        other: "%{count} filer bifogade (måste ha minst %{min} filer)"
+      limit_max_exceeded:
+        zero: "inga filer bifogade (maximalt är %{max} filer)"
+        one: "för många filer bifogade (maximalt är %{max} -filer, fick %{count})"
+        other: "för många filer bifogade (maximalt är %{max} -filer, fick %{count})"
       media_metadata_missing: "är inte en giltig mediefil"
       dimension_min_inclusion: "måste minst vara %{width} x %{height} pixlar"
       dimension_max_inclusion: "måste vara mindre eller lika med %{width} x %{height} pixlar"

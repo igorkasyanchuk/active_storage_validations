@@ -15,7 +15,18 @@ es:
       total_file_size_not_greater_than: "el tamaño total del archivo debe ser mayor que %{min_size} (el tamaño actual es %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "el tamaño total del archivo debe ser mayor o igual a %{min_size} (el tamaño actual es %{total_file_size})"
       total_file_size_not_between: "el tamaño total del archivo debe estar entre %{min_size} y %{max_size} (el tamaño actual es %{total_file_size})"
-      limit_out_of_range: "el número total está fuera de rango"
+      limit_out_of_range:
+        zero: "no hay archivos adjuntos (debe tener entre %{min} y %{max} archivos)"
+        one: "solo 1 archivo adjunto (debe tener entre %{min} y %{max} archivos)"
+        other: "el número total de archivos debe estar entre %{min} y %{max} archivos (hay %{count} archivos adjuntos)"
+      limit_min_not_reached:
+        zero: "no hay archivos adjuntos (debe tener al menos %{min} archivos)"
+        one: "solo 1 archivo adjunto (debe tener al menos %{min} archivos)"
+        other: "%{count} archivos adjuntos (debe tener al menos %{min} archivos)"
+      limit_max_exceeded:
+        zero: "no hay archivos adjuntos (máximo es %{max} archivos)"
+        one: "demasiados archivos adjuntos (máximo es %{max} archivos, got %{count})"
+        other: "demasiados archivos adjuntos (máximo es %{max} archivos, got %{count})"
       media_metadata_missing: "no es un archivo multimedia válido"
       dimension_min_inclusion: "debe ser mayor o igual a %{width} x %{height} pixel"
       dimension_max_inclusion: "debe ser menor o igual a %{width} x %{height} pixel"

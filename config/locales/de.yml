@@ -15,7 +15,18 @@ de:
       total_file_size_not_greater_than: "Die gesamte Dateigröße muss größer als %{min_size} sein (aktuelle Dateigröße ist %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "Die gesamte Dateigröße muss größer oder gleich %{min_size} sein (aktuelle Dateigröße ist %{total_file_size})"
       total_file_size_not_between: "Die gesamte Dateigröße muss zwischen %{min_size} und %{max_size} liegen (aktuelle Dateigröße ist %{total_file_size})"
-      limit_out_of_range: "Anzahl ist außerhalb des gültigen Bereichs"
+      limit_out_of_range:
+        zero: "Keine Dateien angehängt (müssen zwischen %{min} und %{max} Dateien haben)"
+        one: "Nur 1 Datei ist angehängt (müssen zwischen %{min} und %{max} Dateien haben)"
+        other: "Die Gesamtzahl der Dateien muss zwischen %{min} und %{max} liegen (es sind Dateien mit %{count} angehängt)."
+      limit_min_not_reached:
+        zero: "Keine Dateien angehängt (müssen mindestens %{min} Dateien haben)"
+        one: "Nur 1 Datei ist angehängt (müssen mindestens %{min} Dateien haben)"
+        other: "%{count} Dateien angehängt (müssen mindestens %{min} Dateien haben)"
+      limit_max_exceeded:
+        zero: "Keine Dateien angehängt (maximal %{max} Dateien)"
+        one: "zu viele angehängte Dateien (maximal %{max} Dateien, %{count})"
+        other: "Zu viele angehängte Dateien (maximal %{max} Dateien, %{count})"
       media_metadata_missing: "ist keine gültige Mediendatei"
       dimension_min_inclusion: "muss größer oder gleich %{width} x %{height} Pixel sein"
       dimension_max_inclusion: "muss kleiner oder gleich %{width} x %{height} Pixel sein"

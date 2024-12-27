@@ -15,7 +15,18 @@ nl:
       total_file_size_not_greater_than: "totale bestandsgrootte moet groter zijn dan %{min_size} (huidige grootte is %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "totale bestandsgrootte moet groter zijn dan of gelijk zijn aan %{min_size} (huidige grootte is %{total_file_size})"
       total_file_size_not_between: "totale bestandsgrootte moet tussen %{min_size} en %{max_size} liggen (huidige grootte is %{total_file_size})"
-      limit_out_of_range: "totaal aantal valt buiten het vereiste bereik"
+      limit_out_of_range:
+        zero: "geen bestanden bijgevoegd (moet tussen %{min} en %{max} bestanden hebben)"
+        one: "slechts 1 bijgevoegd bestand (moet tussen %{min} en %{max} bestanden hebben)"
+        other: "het totale aantal bestanden moet tussen %{min} en %{max} bestanden liggen (er zijn %{count} bestanden bijgevoegd)"
+      limit_min_not_reached:
+        zero: "geen bestanden bijgevoegd (moet ten minste %{min} bestanden hebben)"
+        one: "slechts 1 bijgevoegd bestand (moet ten minste %{min} bestanden hebben)"
+        other: "%{count} bestanden bijgevoegd (moet ten minste %{min} bestanden hebben)"
+      limit_max_exceeded:
+        zero: "geen bestanden bijgevoegd (maximaal is %{max} bestanden)"
+        one: "te veel bijgevoegde bestanden (maximaal is %{max} bestanden, kreeg %{count})"
+        other: "te veel bijgevoegde bestanden (maximum is %{max} bestanden, kreeg %{count})"
       media_metadata_missing: "is geen geldig mediabestand"
       dimension_min_inclusion: "moet groter of gelijk zijn aan %{width} x %{height} pixels"
       dimension_max_inclusion: "moet kleiner of gelijk zijn aan %{width} x %{height} pixels"

@@ -15,7 +15,18 @@ vi:
       total_file_size_not_greater_than: "tổng kích thước tệp phải lớn hơn %{min_size} (kích thước hiện tại là %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "tổng kích thước tệp phải lớn hơn hoặc bằng %{min_size} (kích thước hiện tại là %{total_file_size})"
       total_file_size_not_between: "tổng kích thước tệp phải nằm trong khoảng từ %{min_size} đến %{max_size} (kích thước hiện tại là %{total_file_size})"
-      limit_out_of_range: "tổng số tệp vượt giới hạn"
+      limit_out_of_range:
+        zero: "không có tệp nào được đính kèm (phải có giữa các tệp %{min} và %{max})"
+        one: "chỉ có 1 tệp được đính kèm (phải có giữa các tệp %{min} và %{max})"
+        other: "tổng số tệp phải nằm trong khoảng từ %{min} và %{max} tệp (có các tệp %{count} được đính kèm)"
+      limit_min_not_reached:
+        zero: "không có tệp nào được đính kèm (phải có ít nhất %{min} tệp)"
+        one: "chỉ có 1 tệp được đính kèm (phải có ít nhất %{min} tệp)"
+        other: "các tệp %{count} được đính kèm (phải có ít nhất %{min} tệp)"
+      limit_max_exceeded:
+        zero: "không có tệp nào được đính kèm (tối đa là các tệp %{max})"
+        one: "quá nhiều tệp được đính kèm (tối đa là các tệp %{max}, có %{count})"
+        other: "quá nhiều tệp được đính kèm (tối đa là các tệp %{max}, có %{count})"
       media_metadata_missing: "không phải là ảnh"
       dimension_min_inclusion: "phải lớn hơn hoặc bằng %{width} x %{height} pixel"
       dimension_max_inclusion: "phải nhỏ hơn hoặc bằng %{width} x %{height} pixel"
