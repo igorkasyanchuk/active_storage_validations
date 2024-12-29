@@ -139,7 +139,7 @@ describe ActiveStorageValidations::LimitValidator do
 
             describe 'when provided with a wrong number of files' do
               describe 'that is below the lower bound (:max)' do
-                subject { model.public_send(attribute).attach() and model }
+                subject { model }
 
 
                 let(:error_options) do
