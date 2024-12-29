@@ -43,4 +43,4 @@ en:
       aspect_ratio_not_landscape: "must be landscape (current file is %{width}x%{height}px)"
       aspect_ratio_not_x_y: "must be %{authorized_aspect_ratios} (current file is %{width}x%{height}px)"
       aspect_ratio_invalid: "has an invalid aspect ratio (valid aspect ratios are %{authorized_aspect_ratios})"
-      image_not_processable: "is not a valid image"
+      file_not_processable: "is not identified as a valid media file"

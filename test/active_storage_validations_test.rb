@@ -257,7 +257,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_image.attach(image_1920x1080_file)
     e.another_image.attach(tar_file_with_image_content_type)
     assert !e.valid?
-    assert_equal ["Another image is not a valid image"], e.errors.full_messages
+    assert_equal ["Another image is not identified as a valid media file"], e.errors.full_messages
 
     e = OnlyImage.new
     e.image.attach(image_1920x1080_file)

@@ -13,7 +13,7 @@ module HasCustomMatcher
         case validator_sym
         when :aspect_ratio then custom_matcher_builder.validate_aspect_ratio_of(model_attribute).allowing(:square)
         when :attached then custom_matcher_builder.validate_attached_of(model_attribute)
-        when :processable_image then custom_matcher_builder.validate_processable_image_of(model_attribute)
+        when :processable_file then custom_matcher_builder.validate_processable_file_of(model_attribute)
         when :limit then custom_matcher_builder.validate_limits_of(model_attribute).min(1).max(5)
         when :content_type then custom_matcher_builder.validate_content_type_of(model_attribute).allowing('image/png')
         when :dimension then custom_matcher_builder.validate_dimensions_of(model_attribute).width(150).height(150)

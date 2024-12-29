@@ -2,7 +2,7 @@
 
 # == Schema Information
 #
-# Table name: processable_image_validator_with_ifs
+# Table name: processable_file_validator_with_ifs
 #
 #  title      :string
 #  id         :integer          not null, primary key
@@ -10,11 +10,11 @@
 #  updated_at :datetime         not null
 #
 
-class ProcessableImage::Validator::WithIf < ApplicationRecord
+class ProcessableFile::Validator::WithIf < ApplicationRecord
   has_one_attached :with_if
   has_one_attached :with_if_proc
-  validates :with_if, processable_image: true, if: :title_is_image?
-  validates :with_if_proc, processable_image: true, if: -> { self.title == 'Right title' }
+  validates :with_if, processable_file: true, if: :title_is_image?
+  validates :with_if_proc, processable_file: true, if: -> { self.title == 'Right title' }
 
   def title_is_image?
     title == 'image'

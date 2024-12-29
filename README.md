@@ -57,7 +57,7 @@ Once you have installed the gem, you need to add the gem I18n error messages to 
 
 ### Using image metadata validators
 
-Optionally, to use the image metadata validators (`dimension`, `aspect_ratio` and `processable_image`), you will have to add one of the corresponding gems:
+Optionally, to use the image metadata validators (`dimension`, `aspect_ratio` and `processable_file`), you will have to add one of the corresponding gems:
 
 ```ruby
 gem 'mini_magick', '>= 4.9.5'
@@ -69,7 +69,7 @@ Plus, you have to be sure to have the corresponding command-line tool installed 
 
 ### Using video and audio metadata validators
 
-To use the video and audio metadata validators (`dimension`, `aspect_ratio` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
+To use the video and audio metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
 
 ## Validators
 
@@ -81,9 +81,8 @@ List of validators:
 - [Total size](#total-size): validates total file size for several files
 - [Dimension](#dimension): validates image / video dimensions
 - [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
-- [Processable image](#processable-image): validates if an image can be processed
+- [Processable file](#processable-file): validates if a file can be processed
 🚧 TODO: Add `duration` validator
-🚧 TODO: Update `processable_image` validator to `processable`
 
 **Proc usage**
 
@@ -507,13 +506,13 @@ The `aspect_ratio` validator error messages expose 4 values that you can use:
 
 ---
 
-### Processable image
+### Processable file
 
-Validates if the attached files can be processed by MiniMagick or Vips.
+Validates if the attached files can be processed by MiniMagick or Vips (image) or ffmpeg (video/audio).
 
 #### Options
 
-The `processable_image` validator has no options.
+The `processable_file` validator has no options.
 
 #### Examples
 
@@ -522,7 +521,7 @@ Use it like this:
 class User < ApplicationRecord
   has_one_attached :avatar
 
-  validates :avatar, processable_image: true # restricts the file to be processable by MiniMagick or Vips
+  validates :avatar, processable_file: true # ensures that the file is processable by MiniMagick or Vips (image) or ffmpeg (video/audio)
 end
 ```
 
@@ -532,10 +531,10 @@ end
 en:
   errors:
     messages:
-      image_not_processable: "is not a valid image"
+      file_not_processable: "is not identified as a valid media file"
 ```
 
-The `processable_image` validator error messages expose 1 value that you can use:
+The `processable_file` validator error messages expose 1 value that you can use:
 - `filename` containing the current filename in error
 
 ---
@@ -547,6 +546,7 @@ If you are upgrading from 1.x to 2.x, you will be pleased to note that a lot of 
 Added features:
 - `dimension` validator now supports videos
 - `aspect_ratio` validator now supports videos
+- `processable_image` validator is now `processable_file` validator and supports image/video/audio
 - All error messages have been given an upgrade and new variables that you can use
 
 But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
@@ -556,6 +556,7 @@ But this major version bump also comes with some breaking changes. Below are the
     - `limit` validator keys have been totally reworked
     - `dimension` validator keys have been totally reworked
     - `content_type` validator keys have been totally reworked
+    - `processable_image` validator keys have been totally reworked
   - Some keys have been changed:
     - `image_metadata_missing` has been replaced by `media_metadata_missing`
     - `aspect_ratio_is_not` has been replaced by `aspect_ratio_not_x_y`
@@ -570,6 +571,10 @@ But this major version bump also comes with some breaking changes. Below are the
     - The check was mistakenly only performed on the `:with` option previously. Therefore, invalid content types were accepted in the `:in` option, which is not the expected behavior.
     - This might break some cases when you had for example `content_type: ['image/png', 'image/jpg']`, because `image/jpg` is not a valid content type, it should be replaced by `image/jpeg`.
   - An `ArgumentError` is now raised if `image/jpg` is used to make it easier to fix. You should now only use `image/jpeg`.
+
+- `processable_image` validator
+  - The validator has been replaced by `processable_file` validator, be sure to replace `processable_image: true` to `processable_file: true`
+  - The associated matcher has also been updated accordingly, be sure to replace `validate_processable_image_of` to `validate_processable_file_of`
 
 🚧 TODO: Add more details about the other changes when implemented
 
@@ -624,7 +629,7 @@ en:
       aspect_ratio_not_landscape: "must be landscape (current file is %{width}x%{height}px)"
       aspect_ratio_not_x_y: "must be %{authorized_aspect_ratios} (current file is %{width}x%{height}px)"
       aspect_ratio_invalid: "has an invalid aspect ratio (valid aspect ratios are %{authorized_aspect_ratios})"
-      image_not_processable: "is not a valid image"
+      file_not_processable: "is not identified as a valid media file"
 ```
 
 
@@ -662,8 +667,8 @@ describe User do
   # attached
   it { is_expected.to validate_attached_of(:avatar) }
 
-  # processable_image
-  it { is_expected.to validate_processable_image_of(:avatar) }
+  # processable_file
+  it { is_expected.to validate_processable_file_of(:avatar) }
 
   # limit
   # #min, #max

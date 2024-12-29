@@ -43,4 +43,4 @@ ru:
       aspect_ratio_not_landscape: "должен быть ландшафт (текущий файл %{width}x%{height} пикселей)"
       aspect_ratio_not_x_y: "должно быть %{authorized_aspect_ratios} (текущий файл %{width}x%{height} пикселей)"
       aspect_ratio_invalid: "имеет недействительное соотношение сторон (действительные соотношения сторон %{authorized_aspect_ratios})"
-      image_not_processable: "не является допустимым изображением"
+      file_not_processable: "не идентифицируется как действительный медиафайл"

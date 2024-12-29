@@ -201,6 +201,14 @@ def not_identifiable_io_file
   }
 end
 
+def audio_file
+  {
+    io: File.open(Rails.root.join('public', 'audio.mp3')),
+    filename: 'audio',
+    content_type: 'audio/mp3'
+  }
+end
+
 def video_file
   {
     io: File.open(Rails.root.join('public', 'video.mp4')),

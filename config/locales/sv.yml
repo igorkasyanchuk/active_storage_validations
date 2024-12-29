@@ -43,4 +43,4 @@ sv:
       aspect_ratio_not_landscape: "måste vara landskap (nuvarande fil är %{width}x%{height} pixlar)"
       aspect_ratio_not_x_y: "måste vara% { authorized_aspect_ratios } (nuvarande fil är %{width}x%{height} pixlar)"
       aspect_ratio_invalid: "har ett ogiltigt bildförhållande (giltiga bildförhållanden är %{förväntat_aspect_ratios})"
-      image_not_processable: "är inte en giltig bild"
+      file_not_processable: "identifieras inte som en giltig mediefil"

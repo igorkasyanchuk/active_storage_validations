@@ -43,4 +43,4 @@ tr:
       aspect_ratio_not_landscape: "yatay olmalıdır (geçerli dosya %{width}x%{height}px)"
       aspect_ratio_not_x_y: "%{authorized_aspect_ratios} olmalıdır (geçerli dosya %{width}x%{height}px)"
       aspect_ratio_invalid: "geçersiz bir en boy oranına sahiptir (geçerli en boy oranları %{authorized_aspect_ratios})"
-      image_not_processable: "geçerli bir imaj değil"
+      file_not_processable: "geçerli bir medya dosyası olarak tanımlanmadı"
