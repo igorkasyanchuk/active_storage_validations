@@ -157,12 +157,24 @@ end
 en:
   errors:
     messages:
-      limit_out_of_range: "total number is out of range"
+      limit_out_of_range:
+        zero: "no files attached (must have between %{min} and %{max} files)"
+        one: "only 1 file attached (must have between %{min} and %{max} files)"
+        other: "total number of files must be between %{min} and %{max} files (there are %{count} files attached)"
+      limit_min_not_reached:
+        zero: "no files attached (must have at least %{min} files)"
+        one: "only 1 file attached (must have at least %{min} files)"
+        other: "%{count} files attached (must have at least %{min} files)"
+      limit_max_exceeded:
+        zero: "no files attached (maximum is %{max} files)"
+        one: "too many files attached (maximum is %{max} files, got %{count})"
+        other: "too many files attached (maximum is %{max} files, got %{count})"
 ```
 
 The `limit` validator error messages expose 2 values that you can use:
 - `min` containing the minimum allowed number of files (e.g. `1`)
 - `max` containing the maximum allowed number of files (e.g. `10`)
+- `count` containing the current number of files (e.g. `5`)
 
 ---
 
@@ -262,13 +274,17 @@ The difficulty to accurately predict a mime type may generate false positives, i
 en:
   errors:
     messages:
-      content_type_invalid: "has an invalid content type"
+      content_type_invalid:
+        one: "has an invalid content type (authorized content type is %{authorized_human_content_types})"
+        other: "has an invalid content type (authorized content types are %{authorized_human_content_types})"
+      spoofed_content_type: "has a content type that is not what it is declared through its content"
 ```
 
-The `content_type` validator error messages expose 4 values that you can use:
+The `content_type` validator error messages expose 5 values that you can use:
 - `content_type` containing the exact content type of the sent file (e.g. `image/png`)
 - `human_content_type` containing a more user-friendly version of the sent file content type (e.g. 'TXT' for 'text/plain')
-- `authorized_types` containing the list of authorized content types (e.g. 'PNG, JPEG' for `['image/png', 'image/jpeg']`)
+- `authorized_human_content_types` containing the list of authorized content types (e.g. 'PNG, JPEG' for `['image/png', 'image/jpeg']`)
+- `count` containing the number of authorized content types (e.g. `2`)
 - `filename` containing the filename
 
 ---
@@ -304,7 +320,7 @@ end
 #### Best practices
 
 It is always a good practice to limit the maximum file size to a reasonable value (like 2MB for avatar images). This helps prevent server storage issues, reduces upload/download times, and ensures better performance. Large files can consume excessive bandwidth and storage space, potentially impacting both server resources and user experience.
-Plus, not setting a size limit inside your Rails app might lead into your server throwing a `413 Content Too Large` error, which is as nice as a Rails validatin error.
+Plus, not setting a size limit inside your Rails app might lead into your server throwing a `413 Content Too Large` error, which is not as nice as a Rails validation error.
 
 #### Error messages (I18n)
 
@@ -416,16 +432,17 @@ end
 en:
   errors:
     messages:
-      dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel"
-      dimension_max_inclusion: "must be less than or equal to %{width} x %{height} pixel"
-      dimension_width_inclusion: "width is not included between %{min} and %{max} pixel"
-      dimension_height_inclusion: "height is not included between %{min} and %{max} pixel"
-      dimension_width_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
-      dimension_height_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
-      dimension_width_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
-      dimension_height_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
-      dimension_width_equal_to: "width must be equal to %{length} pixel"
-      dimension_height_equal_to: "height must be equal to %{length} pixel"
+      dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixel"
+      dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixel"
+      dimension_width_not_included_in: "width is not included between %{min} and %{max} pixel"
+      dimension_height_not_included_in: "height is not included between %{min} and %{max} pixel"
+      dimension_width_not_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
+      dimension_height_not_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
+      dimension_width_not_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
+      dimension_height_not_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
+      dimension_width_not_equal_to: "width must be equal to %{length} pixel"
+      dimension_height_not_equal_to: "height must be equal to %{length} pixel"
+      media_metadata_missing: "is not a valid media file"
 ```
 
 The `dimension` validator error messages expose 6 values that you can use:
@@ -474,15 +491,18 @@ end
 en:
   errors:
     messages:
-      aspect_ratio_not_square: "must be a square image"
-      aspect_ratio_not_portrait: "must be a portrait image"
-      aspect_ratio_not_landscape: "must be a landscape image"
-      aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
-      aspect_ratio_invalid: "has an invalid aspect ratio"
+      aspect_ratio_not_square: "must be square (current file is %{width}x%{height}px)"
+      aspect_ratio_not_portrait: "must be portrait (current file is %{width}x%{height}px)"
+      aspect_ratio_not_landscape: "must be landscape (current file is %{width}x%{height}px)"
+      aspect_ratio_not_x_y: "must be %{authorized_aspect_ratios} (current file is %{width}x%{height}px)"
+      aspect_ratio_invalid: "has an invalid aspect ratio (valid aspect ratios are %{authorized_aspect_ratios})"
+      media_metadata_missing: "is not a valid media file"
 ```
 
-The `aspect_ratio` validator error messages expose 2 values that you can use:
-- `aspect_ratio` containing the expected aspect ratio, especially usefull for custom aspect ratio
+The `aspect_ratio` validator error messages expose 4 values that you can use:
+- `authorized_aspect_ratios` containing the authorized aspect ratios
+- `width` containing the current width of the image/video
+- `height` containing the current height of the image/video
 - `filename` containing the current filename in error
 
 ---
@@ -527,13 +547,24 @@ If you are upgrading from 1.x to 2.x, you will be pleased to note that a lot of 
 Added features:
 - `dimension` validator now supports videos
 - `aspect_ratio` validator now supports videos
+- All error messages have been given an upgrade and new variables that you can use
 
 But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
 - Error messages
-  - The error messages have been completely rewritten to be more consistent and easier to understand.
+  - The error messages have been completely rewritten to be more consistent and easier to understand (not breaking but might be a good idea to update them with the new versions)
+  - Some validator errors have been totally changed:
+    - `limit` validator keys have been totally reworked
+    - `dimension` validator keys have been totally reworked
+    - `content_type` validator keys have been totally reworked
+  - Some keys have been changed:
+    - `image_metadata_missing` has been replaced by `media_metadata_missing`
+    - `aspect_ratio_is_not` has been replaced by `aspect_ratio_not_x_y`
   - Some error messages variables names have been changed to improve readability:
-    - `dimension` validator:
-      - `length` has been replaced by `exact`
+    - `aspect_ratio` validator:
+      - `aspect_ratio` has been replaced by `authorized_aspect_ratios`
+    - `content_type` validator:
+      - `authorized_types` has been replaced by `authorized_human_content_types`
+
 - `content_type` validator
   - The `:in` option now only accepts 'valid' content types (ie content types deemed by Marcel as valid).
     - The check was mistakenly only performed on the `:with` option previously. Therefore, invalid content types were accepted in the `:in` option, which is not the expected behavior.
@@ -551,7 +582,10 @@ Active Storage Validations uses I18n for error messages. Add these keys in your 
 en:
   errors:
     messages:
-      content_type_invalid: "has an invalid content type"
+      content_type_invalid:
+        one: "has an invalid content type (authorized content type is %{authorized_human_content_types})"
+        other: "has an invalid content type (authorized content types are %{authorized_human_content_types})"
+      spoofed_content_type: "has a content type that is not what it is declared through its content"
       file_size_not_less_than: "file size must be less than %{max_size} (current size is %{file_size})"
       file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max_size} (current size is %{file_size})"
       file_size_not_greater_than: "file size must be greater than %{min_size} (current size is %{file_size})"
@@ -562,24 +596,35 @@ en:
       total_file_size_not_greater_than: "total file size must be greater than %{min_size} (current size is %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min_size} (current size is %{total_file_size})"
       total_file_size_not_between: "total file size must be between %{min_size} and %{max_size} (current size is %{total_file_size})"
-      limit_out_of_range: "total number is out of range"
-      image_metadata_missing: "is not a valid image"
-      dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel"
-      dimension_max_inclusion: "must be less than or equal to %{width} x %{height} pixel"
-      dimension_width_inclusion: "width is not included between %{min} and %{max} pixel"
-      dimension_height_inclusion: "height is not included between %{min} and %{max} pixel"
-      dimension_width_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
-      dimension_height_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
-      dimension_width_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
-      dimension_height_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
-      dimension_width_equal_to: "width must be equal to %{length} pixel"
-      dimension_height_equal_to: "height must be equal to %{length} pixel"
-      aspect_ratio_not_square: "must be a square image"
-      aspect_ratio_not_portrait: "must be a portrait image"
-      aspect_ratio_not_landscape: "must be a landscape image"
-      aspect_ratio_is_not: "must have an aspect ratio of %{aspect_ratio}"
+      limit_out_of_range:
+        zero: "no files attached (must have between %{min} and %{max} files)"
+        one: "only 1 file attached (must have between %{min} and %{max} files)"
+        other: "total number of files must be between %{min} and %{max} files (there are %{count} files attached)"
+      limit_min_not_reached:
+        zero: "no files attached (must have at least %{min} files)"
+        one: "only 1 file attached (must have at least %{min} files)"
+        other: "%{count} files attached (must have at least %{min} files)"
+      limit_max_exceeded:
+        zero: "no files attached (maximum is %{max} files)"
+        one: "too many files attached (maximum is %{max} files, got %{count})"
+        other: "too many files attached (maximum is %{max} files, got %{count})"
+      media_metadata_missing: "is not a valid media file"
+      dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixel"
+      dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixel"
+      dimension_width_not_included_in: "width is not included between %{min} and %{max} pixel"
+      dimension_height_not_included_in: "height is not included between %{min} and %{max} pixel"
+      dimension_width_not_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
+      dimension_height_not_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
+      dimension_width_not_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
+      dimension_height_not_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
+      dimension_width_not_equal_to: "width must be equal to %{length} pixel"
+      dimension_height_not_equal_to: "height must be equal to %{length} pixel"
+      aspect_ratio_not_square: "must be square (current file is %{width}x%{height}px)"
+      aspect_ratio_not_portrait: "must be portrait (current file is %{width}x%{height}px)"
+      aspect_ratio_not_landscape: "must be landscape (current file is %{width}x%{height}px)"
+      aspect_ratio_not_x_y: "must be %{authorized_aspect_ratios} (current file is %{width}x%{height}px)"
+      aspect_ratio_invalid: "has an invalid aspect ratio (valid aspect ratios are %{authorized_aspect_ratios})"
       image_not_processable: "is not a valid image"
-      aspect_ratio_invalid: "has invalid aspect ratio"
 ```
 
 

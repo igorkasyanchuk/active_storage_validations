@@ -106,7 +106,7 @@ module ActiveStorageValidations
       return true unless enable_spoofing_protection?
 
       if ContentTypeSpoofDetector.new(record, attribute, attachable).spoofed?
-        errors_options = initialize_error_options(options, attachable)
+        errors_options = initialize_and_populate_error_options(options, attachable)
         add_error(record, attribute, ERROR_TYPES.second, **errors_options)
         false
       else
@@ -130,7 +130,8 @@ module ActiveStorageValidations
       errors_options = initialize_error_options(options, attachable)
       errors_options[:content_type] = @attachable_content_type
       errors_options[:human_content_type] = content_type_to_human_format(@attachable_content_type)
-      errors_options[:authorized_types] = content_type_to_human_format(@authorized_content_types)
+      errors_options[:authorized_human_content_types] = content_type_to_human_format(@authorized_content_types)
+      errors_options[:count] = @authorized_content_types.size
       errors_options
     end
 

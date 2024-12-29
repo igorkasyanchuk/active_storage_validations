@@ -31,7 +31,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_photos.attach(bad_dummy_file)
     u.video.attach(video_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Photos has an invalid content type', 'Proc photos has an invalid content type']
+    assert_equal u.errors.full_messages, ['Photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)', 'Proc photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)']
 
     u = User.new(name: 'John Smith')
     u.avatar.attach(bad_dummy_file)
@@ -42,23 +42,25 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_photos.attach(image_150x150_file)
     u.video.attach(video_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Proc avatar has an invalid content type']
+    assert_equal u.errors.full_messages, ['Avatar has an invalid content type (authorized content type is PNG)', 'Proc avatar has an invalid content type (authorized content type is PNG)']
     assert_equal u.errors.details, avatar: [
       {
         error: :content_type_invalid,
         validator_type: :content_type,
-        authorized_types: 'PNG',
+        authorized_human_content_types: 'PNG',
         content_type: 'text/plain',
         human_content_type: 'TXT',
+        count: 1,
         filename: 'apple-touch-icon.png'
       }
     ], proc_avatar: [
      {
        error: :content_type_invalid,
        validator_type: :content_type,
-       authorized_types: 'PNG',
+       authorized_human_content_types: 'PNG',
        content_type: 'text/plain',
        human_content_type: 'TXT',
+       count: 1,
        filename: 'apple-touch-icon.png'
      }
     ]
@@ -82,7 +84,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_photos.attach(image_150x150_file)
     u.video.attach(video_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Image regex has an invalid content type', 'Proc image regex has an invalid content type']
+    assert_equal u.errors.full_messages, ['Image regex has an invalid content type (authorized content type is \\Aimage/.*\\z)', 'Proc image regex has an invalid content type (authorized content type is \\Aimage/.*\\z)']
 
     u = User.new(name: 'John Smith')
     u.avatar.attach(bad_dummy_file)
@@ -93,7 +95,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.proc_photos.attach(bad_dummy_file)
     u.video.attach(video_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Image regex has an invalid content type', 'Proc avatar has an invalid content type', 'Proc photos has an invalid content type', 'Proc image regex has an invalid content type']
+    assert_equal u.errors.full_messages, ['Avatar has an invalid content type (authorized content type is PNG)', 'Photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)', 'Image regex has an invalid content type (authorized content type is \\Aimage/.*\\z)', 'Proc avatar has an invalid content type (authorized content type is PNG)', 'Proc photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)', 'Proc image regex has an invalid content type (authorized content type is \\Aimage/.*\\z)']
 
     u = User.new(name: 'Peter Griffin')
     u.avatar.attach(image_150x150_file)
@@ -113,7 +115,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.conditional_image_2.attach(bad_dummy_file)
     u.video.attach(video_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ["Avatar has an invalid content type", "Photos has an invalid content type", "Conditional image 2 has an invalid content type", "Proc avatar has an invalid content type"]
+    assert_equal u.errors.full_messages, ["Avatar has an invalid content type (authorized content type is PNG)", "Photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)", "Conditional image 2 has an invalid content type (authorized content type is \\Aimage/.*\\z)", "Proc avatar has an invalid content type (authorized content type is PNG)"]
   end
 
   # trying to attach webp file with PNG extension, but real content type is detected
@@ -126,7 +128,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     u.photos.attach(webp_file)
     u.proc_photos.attach(webp_file)
     assert !u.valid?
-    assert_equal u.errors.full_messages, ['Avatar has an invalid content type', 'Photos has an invalid content type', 'Proc avatar has an invalid content type', 'Proc photos has an invalid content type']
+    assert_equal u.errors.full_messages, ['Avatar has an invalid content type (authorized content type is PNG)', 'Photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)', 'Proc avatar has an invalid content type (authorized content type is PNG)', 'Proc photos has an invalid content type (authorized content types are PNG, JPG, \\A.*/pdf\\z)']
   end
 
   test 'validates microsoft office document' do
@@ -166,23 +168,17 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
 
   test 'validates maximum number of files' do
     e = Project.new(title: 'Death Star')
-    e.documents.attach(pdf_file)
-    e.proc_documents.attach(pdf_file)
-    e.documents.attach(pdf_file)
-    e.proc_documents.attach(pdf_file)
-    e.documents.attach(pdf_file)
-    e.proc_documents.attach(pdf_file)
-    e.documents.attach(pdf_file)
-    e.proc_documents.attach(pdf_file)
+    e.documents.attach([pdf_file, pdf_file, pdf_file, pdf_file])
+    e.proc_documents.attach([pdf_file, pdf_file, pdf_file, pdf_file])
     assert !e.valid?
-    assert_equal e.errors.full_messages, ['Documents total number is out of range', 'Proc documents total number is out of range']
+    assert_equal ['Documents total number of files must be between 1 and 3 files (there are 4 files attached)', 'Proc documents total number of files must be between 1 and 3 files (there are 4 files attached)'], e.errors.full_messages
   end
 
   test 'validates minimum number of files' do
     e = Project.new(title: 'Death Star')
     e.proc_documents.attach(pdf_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Documents total number is out of range"]
+    assert_equal ["Documents no files attached (must have between 1 and 3 files)"], e.errors.full_messages
   end
 
   test 'validates number of files' do
@@ -198,10 +194,10 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     assert_equal 0, la.files_blobs.count
     assert_equal 0, la.proc_files_blobs.count
 
-    assert_equal ['Files total number is out of range', 'Proc files total number is out of range'], la.errors.full_messages
+    assert_equal ['Files too many files attached (maximum is 4 files, got 6)', 'Proc files too many files attached (maximum is 4 files, got 6)'], la.errors.full_messages
 
     assert !la.valid?
-    assert_equal ['Files total number is out of range', 'Proc files total number is out of range'], la.errors.full_messages
+    assert_equal ['Files too many files attached (maximum is 4 files, got 6)', 'Proc files too many files attached (maximum is 4 files, got 6)'], la.errors.full_messages
   end
 
   test 'validates number of files v2' do
@@ -242,7 +238,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.image.attach(html_file)
     e.proc_image.attach(html_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Image is not a valid image", "Image is not a valid image", "Image has an invalid content type", "Proc image is not a valid image", "Proc image is not a valid image", "Proc image has an invalid content type"]
+    assert_equal ["Image is not a valid media file", "Image is not a valid media file", "Image has an invalid content type (authorized content types are PNG, JPG)", "Proc image is not a valid media file", "Proc image is not a valid media file", "Proc image has an invalid content type (authorized content types are PNG, JPG)"], e.errors.full_messages
 
     e = OnlyImage.new
     e.image.attach(image_1920x1080_file)
@@ -254,14 +250,14 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.image.attach(pdf_file)
     e.proc_image.attach(pdf_file)
     assert !e.valid?
-    assert e.errors.full_messages.include?("Image has an invalid content type")
+    assert e.errors.full_messages.include?("Image has an invalid content type (authorized content types are PNG, JPG)")
 
     e = OnlyImage.new
     e.image.attach(image_1920x1080_file)
     e.proc_image.attach(image_1920x1080_file)
     e.another_image.attach(tar_file_with_image_content_type)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Another image is not a valid image"]
+    assert_equal ["Another image is not a valid image"], e.errors.full_messages
 
     e = OnlyImage.new
     e.image.attach(image_1920x1080_file)
@@ -290,7 +286,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_documents.attach(pdf_file)
     e.proc_dimension_exact.attach(html_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ['Dimension exact is not a valid image', 'Proc dimension exact is not a valid image']
+    assert_equal ['Dimension exact is not a valid media file', 'Proc dimension exact is not a valid media file'], e.errors.full_messages
 
     e = Project.new(title: 'Death Star')
     e.documents.attach(pdf_file)
@@ -424,7 +420,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_ratio_in.attach(image_150x150_file)
     e.save
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Ratio many must be a portrait image", "Proc ratio many must be a portrait image"]
+    assert_equal ["Ratio many must be portrait (current file is 150x150px)", "Proc ratio many must be portrait (current file is 150x150px)"], e.errors.full_messages
 
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(image_150x150_file)
@@ -436,7 +432,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.ratio_in.attach(image_150x150_file)
     e.proc_ratio_in.attach(image_150x150_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Image1 must have an aspect ratio of 16:9", 'Proc image1 must have an aspect ratio of 16:9']
+    assert_equal ["Image1 must be 16:9 (current file is 150x150px)", 'Proc image1 must be 16:9 (current file is 150x150px)'], e.errors.full_messages
 
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(html_file)
@@ -448,7 +444,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.ratio_in.attach(image_150x150_file)
     e.proc_ratio_in.attach(image_150x150_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Ratio one is not a valid image", 'Proc ratio one is not a valid image']
+    assert_equal ["Ratio one is not a valid media file", 'Proc ratio one is not a valid media file'], e.errors.full_messages
 
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(image_150x150_file)
@@ -458,20 +454,24 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.ratio_in.attach(image_1920x1080_file)
     e.proc_ratio_in.attach(image_1920x1080_file)
     assert !e.valid?
-    assert_equal e.errors.details, ratio_in: [
+    assert_equal({ ratio_in: [
       {
         error: :aspect_ratio_invalid,
         validator_type: :aspect_ratio,
         filename: 'image_1920x1080_file.png',
-        aspect_ratio: 'square, portrait'
+        authorized_aspect_ratios: 'square, portrait',
+        width: 1920,
+        height: 1080
       }
     ], proc_ratio_in: [
      {
        error: :aspect_ratio_invalid,
        validator_type: :aspect_ratio,
        filename: 'image_1920x1080_file.png',
-       aspect_ratio: 'square, portrait'
+       authorized_aspect_ratios: 'square, portrait',
+       width: 1920,
+       height: 1080
      }
-    ] 
+    ]}, e.errors.details)
   end
 end

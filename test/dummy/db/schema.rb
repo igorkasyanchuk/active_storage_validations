@@ -115,7 +115,7 @@ ActiveRecord::Schema.define do
     end
   end
 
-  %w(min min_proc max max_proc).each do |check|
+  %w(min min_proc max max_proc range range_proc).each do |check|
     create_table :"limit_validator_check_#{check.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
