@@ -74,9 +74,9 @@ class Duration::Matcher < ApplicationRecord
   has_one_attached :greater_than_with_message
   has_one_attached :greater_than_or_equal_to_with_message
   has_one_attached :between_with_message
-  validates :less_than_with_message, duration: { less_than: 2.seconds, message: 'File is too big.' }
-  validates :less_than_or_equal_to_with_message, duration: { less_than_or_equal_to: 2.seconds, message: 'File is too big.' }
-  validates :greater_than_with_message, duration: { greater_than: 7.seconds, message: 'File is too small.' }
-  validates :greater_than_or_equal_to_with_message, duration: { greater_than_or_equal_to: 7.seconds, message: 'File is too small.' }
+  validates :less_than_with_message, duration: { less_than: 2.seconds, message: 'File is too long.' }
+  validates :less_than_or_equal_to_with_message, duration: { less_than_or_equal_to: 2.seconds, message: 'File is too long.' }
+  validates :greater_than_with_message, duration: { greater_than: 7.seconds, message: 'File is too short.' }
+  validates :greater_than_or_equal_to_with_message, duration: { greater_than_or_equal_to: 7.seconds, message: 'File is too short.' }
   validates :between_with_message, duration: { between: 2.seconds..7.seconds, message: 'File is not in accepted duration range.' }
 end

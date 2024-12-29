@@ -33,23 +33,23 @@ module ActiveStorageValidations
         @min = @max = nil
       end
 
-      def less_than(size)
-        @max = size - 1.byte
+      def less_than(value)
+        @max = value - smallest_measurement
         self
       end
 
-      def less_than_or_equal_to(size)
-        @max = size
+      def less_than_or_equal_to(value)
+        @max = value
         self
       end
 
-      def greater_than(size)
-        @min = size + 1.byte
+      def greater_than(value)
+        @min = value + smallest_measurement
         self
       end
 
-      def greater_than_or_equal_to(size)
-        @min = size
+      def greater_than_or_equal_to(value)
+        @min = value
         self
       end
 
@@ -78,45 +78,53 @@ module ActiveStorageValidations
 
         message << "  but there seem to have issues with the matcher methods you used, since:"
         @failure_message_artefacts.each do |error_case|
-          message << "  validation failed when provided with a #{error_case[:size]} bytes test file"
+          message << "  validation failed when provided with a #{error_case[:value]} #{failure_message_unit} test file"
         end
         message << "  whereas it should have passed"
       end
 
+      def failure_message_unit
+        raise NotImplementedError
+      end
+
       def not_lower_than_min?
-        @min.nil? || !passes_validation_with_size(@min - 1)
+        @min.nil? || !passes_validation_with_value(@min - 1)
       end
 
       def higher_than_min?
-        @min.nil? || passes_validation_with_size(@min + 1)
+        @min.nil? || passes_validation_with_value(@min + 1)
       end
 
       def lower_than_max?
-        @max.nil? || @max == Float::INFINITY || passes_validation_with_size(@max - 1)
+        @max.nil? || @max == Float::INFINITY || passes_validation_with_value(@max - 1)
       end
 
       def not_higher_than_max?
-        @max.nil? || @max == Float::INFINITY || !passes_validation_with_size(@max + 1)
+        @max.nil? || @max == Float::INFINITY || !passes_validation_with_value(@max + 1)
       end
 
-      def passes_validation_with_size(size)
-        mock_size_for(io, size) do
+      def smallest_measurement
+        raise NotImplementedError
+      end
+
+      def passes_validation_with_value(value)
+        mock_value_for(io, value) do
           attach_file
           validate
           detach_file
-          is_valid? || add_failure_message_artefact(size)
+          is_valid? || add_failure_message_artefact(value)
         end
       end
 
-      def add_failure_message_artefact(size)
-        @failure_message_artefacts << { size: size }
+      def add_failure_message_artefact(value)
+        @failure_message_artefacts << { value: value }
         false
       end
 
       def is_custom_message_valid?
         return true unless @custom_message
 
-        mock_size_for(io, -1.kilobytes) do
+        mock_value_for(io, -smallest_measurement) do
           attach_file
           validate
           detach_file
@@ -124,10 +132,8 @@ module ActiveStorageValidations
         end
       end
 
-      def mock_size_for(io, size)
-        Matchers.stub_method(io, :size, size) do
-          yield
-        end
+      def mock_value_for(io, size)
+        raise NotImplementedError
       end
     end
   end

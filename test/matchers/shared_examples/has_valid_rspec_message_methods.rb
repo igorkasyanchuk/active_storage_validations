@@ -11,6 +11,7 @@ module HasValidRspecMessageMethods
         when :limit then matcher.min(0).max(6)
         when :content_type then matcher.rejecting('image/png')
         when :dimension then matcher.width(75).height(75)
+        when :duration then matcher.less_than_or_equal_to(7.minutes)
         when :size then matcher.less_than_or_equal_to(7.megabytes)
         when :total_size then matcher.less_than_or_equal_to(7.megabytes)
         end
@@ -55,6 +56,13 @@ module HasValidRspecMessageMethods
               validation failed when provided with a 75x75px test image
               whereas it should have passed
           FAILURE_MESSAGE
+        when :duration
+          <<~FAILURE_MESSAGE
+            is expected to validate file duration of :#{model_attribute}
+              but there seem to have issues with the matcher methods you used, since:
+              validation failed when provided with a 419 seconds test file
+              whereas it should have passed
+          FAILURE_MESSAGE
         when :size
           <<~FAILURE_MESSAGE
             is expected to validate file size of :#{model_attribute}
@@ -84,6 +92,7 @@ module HasValidRspecMessageMethods
         when :limit then matcher.min(1).max(5)
         when :content_type then matcher.allowing('image/png')
         when :dimension then matcher.width(150).height(150)
+        when :duration then matcher.less_than_or_equal_to(5.minutes)
         when :size then matcher.less_than_or_equal_to(5.megabytes)
         when :total_size then matcher.less_than_or_equal_to(5.megabytes)
         end
@@ -128,6 +137,13 @@ module HasValidRspecMessageMethods
               validation failed when provided with a 150x151px test image
               whereas it should have passed
           MESSAGE
+        when :duration
+          <<~FAILURE_MESSAGE
+            is expected not to validate file duration of :#{model_attribute}
+              but there seem to have issues with the matcher methods you used, since:
+              validation failed when provided with a 301 seconds test file
+              whereas it should have passed
+          FAILURE_MESSAGE
         when :size
           <<~FAILURE_MESSAGE
             is expected not to validate file size of :#{model_attribute}
