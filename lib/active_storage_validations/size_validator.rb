@@ -24,7 +24,7 @@ module ActiveStorageValidations
 
         errors_options = initialize_error_options(options, file)
         populate_error_options(errors_options, flat_options)
-        errors_options[:file_size] = number_to_human_size(file.blob.byte_size)
+        errors_options[:file_size] = format_bound_value(file.blob.byte_size)
 
         keys = AVAILABLE_CHECKS & flat_options.keys
         error_type = "file_size_not_#{keys.first}".to_sym

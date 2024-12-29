@@ -10,6 +10,7 @@ module WorksWithUnlessOption
       when :attached then image_150x150_file
       when :content_type then webp_file
       when :dimension then image_150x150_file
+      when :duration then audio_1s
       when :limit then image_150x150_file
       when :processable_file then image_150x150_file
       when :size then file_1ko
@@ -22,6 +23,7 @@ module WorksWithUnlessOption
       when :attached then nil
       when :content_type then html_file
       when :dimension then image_700x500_file
+      when :duration then audio_5s
       when :limit then nil
       when :processable_file then tar_file_with_image_content_type
       when :size then file_5ko

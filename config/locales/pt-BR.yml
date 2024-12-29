@@ -15,6 +15,11 @@ pt-BR:
       total_file_size_not_greater_than: "o tamanho total do arquivo deve ser maior que %{min} (o tamanho atual é %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "o tamanho total do arquivo deve ser maior ou igual a %{min} (o tamanho atual é %{total_file_size})"
       total_file_size_not_between: "o tamanho total do arquivo deve estar entre %{min} e %{max} (o tamanho atual é %{total_file_size})"
+      duration_not_less_than: "a duração deve ser inferior a %{max} (a duração atual é %{duration})"
+      duration_not_less_than_or_equal_to: "a duração deve ser inferior ou igual a %{max} (a duração atual é %{duration})"
+      duration_not_greater_than: "a duração tem de ser superior a %{min} (a duração actual é %{duration})"
+      duration_not_greater_than_or_equal_to: "a duração deve ser maior ou igual a %{min} (a duração atual é %{duration})"
+      duration_not_between: "a duração deve estar entre %{min} e %{max} (a duração atual é %{duration})"
       limit_out_of_range:
         zero: "nenhum ficheiro anexado (deve ter entre %{min} e %{max})"
         one: "apenas 1 ficheiro anexado (deve ter entre %{min} e %{max})"

@@ -15,6 +15,11 @@ vi:
       total_file_size_not_greater_than: "tổng kích thước tệp phải lớn hơn %{min} (kích thước hiện tại là %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "tổng kích thước tệp phải lớn hơn hoặc bằng %{min} (kích thước hiện tại là %{total_file_size})"
       total_file_size_not_between: "tổng kích thước tệp phải nằm trong khoảng từ %{min} đến %{max} (kích thước hiện tại là %{total_file_size})"
+      duration_not_less_than: "thời lượng phải nhỏ hơn %{max} (thời lượng hiện tại là %{duration})"
+      duration_not_less_than_or_equal_to: "thời lượng phải nhỏ hơn hoặc bằng %{max} (thời lượng hiện tại là %{duration})"
+      duration_not_greater_than: "thời lượng phải lớn hơn %{min} (thời lượng hiện tại là %{duration})"
+      duration_not_greater_than_or_equal_to: "thời lượng phải lớn hơn hoặc bằng %{min} (thời lượng hiện tại là %{duration})"
+      duration_not_between: "thời lượng phải nằm trong khoảng từ %{min} và %{max} (thời lượng hiện tại là %{duration})"
       limit_out_of_range:
         zero: "không có tệp nào được đính kèm (phải có giữa các tệp %{min} và %{max})"
         one: "chỉ có 1 tệp được đính kèm (phải có giữa các tệp %{min} và %{max})"

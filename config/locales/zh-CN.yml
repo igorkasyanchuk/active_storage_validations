@@ -15,6 +15,11 @@ zh-CN:
       total_file_size_not_greater_than: "总文件大小必须大于 %{min}（当前大小为 %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "文件总大小必须大于或等于 %{min}（当前大小为 %{total_file_size})"
       total_file_size_not_between: "总文件大小必须介于 %{min} 和 %{max} 之间（当前大小为 %{total_file_size})"
+      duration_not_less_than: "持续时间必须小于%{max}（当前持续时间为%{duration})"
+      duration_not_less_than_or_equal_to: "持续时间必须小于或等于%{max}（当前持续时间为%{duration})"
+      duration_not_greater_than: "持续时间必须大于%{min}（当前持续时间为%{duration})"
+      duration_not_greater_than_or_equal_to: "持续时间必须大于或等于%{min}（当前持续时间为%{duration})"
+      duration_not_between: "持续时间必须在%{min}和%{max}之间（当前持续时间为%{duration})"
       limit_out_of_range:
         zero: "未附加文件（必须具有%{min}和%{max}文件之间)"
         one: "仅附加1个文件（必须具有%{min}和%{max}文件之间)"

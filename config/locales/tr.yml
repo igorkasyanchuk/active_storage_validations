@@ -15,6 +15,11 @@ tr:
       total_file_size_not_greater_than: "toplam dosya boyutu %{min} boyutundan büyük olmalıdır (geçerli boyut %{total_file_size}'dir)"
       total_file_size_not_greater_than_or_equal_to: "toplam dosya boyutu %{min} değerinden büyük veya eşit olmalıdır (geçerli boyut %{total_file_size}'dir)"
       total_file_size_not_between: "toplam dosya boyutu %{min} ile %{max} arasında olmalıdır (geçerli boyut %{total_file_size}'dir)"
+      duration_not_less_than: "süre %{max} değerinden az olmalıdır (geçerli süre %{duration})"
+      duration_not_less_than_or_equal_to: "süre %{max} değerine eşit veya daha düşük olmalıdır (geçerli süre %{duration})"
+      duration_not_greater_than: "süre %{min} değerinden büyük olmalıdır (geçerli süre %{duration})"
+      duration_not_greater_than_or_equal_to: "süre %{min} değerine eşit veya daha büyük olmalıdır (geçerli süre %{duration})"
+      duration_not_between: "süre %{min} ile %{max} arasında olmalıdır (geçerli süre %{duration})"
       limit_out_of_range:
         zero: "dosya eklenmedi ( %{min} ve %{max} dosyaları arasında olmalıdır)"
         one: "yalnızca 1 dosya eklenmiş ( %{min} ve %{max} dosyaları arasında olmalıdır)"

@@ -15,6 +15,11 @@ ru:
       total_file_size_not_greater_than: "общий размер файла должен быть больше %{min} (текущий размер %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "общий размер файла должен быть больше или равен %{min} (текущий размер %{total_file_size})"
       total_file_size_not_between: "общий размер файла должен быть между %{min} и %{max} (текущий размер %{total_file_size})"
+      duration_not_less_than: "длительность должна быть меньше %{max} (текущая продолжительность составляет %{duration})"
+      duration_not_less_than_or_equal_to: "длительность должна быть меньше или равна %{max} (текущая продолжительность составляет %{duration})"
+      duration_not_greater_than: "длительность должна быть больше %{min} (текущая продолжительность составляет %{duration})"
+      duration_not_greater_than_or_equal_to: "длительность должна быть больше или равна %{min} (текущая продолжительность составляет %{duration})"
+      duration_not_between: "длительность должна быть между %{min} и %{max} (текущая продолжительность составляет %{duration})"
       limit_out_of_range:
         zero: "никаких файлов не прилагается (должно иметь от %{min} до %{max} файлов)"
         one: "прилагается только 1 файл (должно иметь от %{min} до %{max} файлов)"

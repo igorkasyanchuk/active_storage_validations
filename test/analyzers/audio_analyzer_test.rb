@@ -12,7 +12,7 @@ describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
 
   let(:media_extension) { '.mp3' }
   let(:media_filename) { "audio#{media_extension}" }
-  let(:media_filename_over_10ko) { "audio_28ko#{media_extension}" }
+  let(:media_filename_over_10ko) { "audio_2s#{media_extension}" }
   let(:media_filename_rotated) { "audio#{media_extension}" }
   let(:media_filename_0ko) { "audio_0ko#{media_extension}" }
   let(:media_path) { Rails.root.join('public', media_filename) }

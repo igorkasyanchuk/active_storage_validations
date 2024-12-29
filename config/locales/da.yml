@@ -15,6 +15,11 @@ da:
       total_file_size_not_greater_than: "den samlede filstørrelse skal være større end %{min} (aktuel størrelse er %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "den samlede filstørrelse skal være større end eller lig med %{min} (aktuel størrelse er %{total_file_size})"
       total_file_size_not_between: "den samlede filstørrelse skal være mellem %{min} og %{max} (aktuel størrelse er %{total_file_size})"
+      duration_not_less_than: "varighed skal være mindre end %{max} (nuværende varighed er %{duration})"
+      duration_not_less_than_or_equal_to: "varighed skal være mindre end eller lig med %{max} (nuværende varighed er %{duration})"
+      duration_not_greater_than: "varigheden skal være større end %{min} (den aktuelle varighed er %{duration})"
+      duration_not_greater_than_or_equal_to: "varigheden skal være større end eller lig med %{min} (den aktuelle varighed er %{duration})"
+      duration_not_between: "varighed skal være mellem %{min} og %{max} (den aktuelle varighed er %{duration})"
       limit_out_of_range:
         zero: "ingen filer vedhæftet (skal have mellem %{min} og %{max} filer)"
         one: "kun 1 fil vedhæftet (skal have mellem %{min} og %{max} filer)"

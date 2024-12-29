@@ -15,6 +15,11 @@ ja:
       total_file_size_not_greater_than: "ファイルの合計サイズは %{min} より大きくなければなりません (現在のサイズは %{total_file_size} です)"
       total_file_size_not_greater_than_or_equal_to: "ファイルの合計サイズは %{min} 以上である必要があります (現在のサイズは %{total_file_size})"
       total_file_size_not_between: "ファイルの合計サイズは %{min} から %{max} までである必要があります (現在のサイズは %{total_file_size})"
+      duration_not_less_than: "期間は%{max}未満である必要があります（現在の期間は%{duration})"
+      duration_not_less_than_or_equal_to: "期間は%{max}以下でなければなりません（現在の期間は%{duration})"
+      duration_not_greater_than: "期間は%{min}より大きくなければなりません（現在の期間は%{duration}です）"
+      duration_not_greater_than_or_equal_to: "期間は%{min}以上である必要があります（現在の期間は%{duration})"
+      duration_not_between: "期間は%{min}と%{max}の間でなければなりません（現在の期間は%{duration})"
       limit_out_of_range:
         zero: "添付されたファイルはありません(%{min}と%{max}ファイルの間にある必要があります)"
         one: "1つのファイルのみが添付されています(%{min}と%{max}ファイルの間にある必要があります)"

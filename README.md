@@ -27,6 +27,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Size](#size)
   - [Total size](#total-size)
   - [Dimension](#dimension)
+  - [Duration](#duration)
   - [Aspect ratio](#aspect-ratio)
   - [Processable image](#processable-image)
 - [Upgrading from 1.x to 2.x](#upgrading-from-1x-to-2x)
@@ -80,9 +81,9 @@ List of validators:
 - [Size](#size): validates file size
 - [Total size](#total-size): validates total file size for several files
 - [Dimension](#dimension): validates image / video dimensions
+- [Duration](#duration): validates video / audio duration
 - [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
 - [Processable file](#processable-file): validates if a file can be processed
-🚧 TODO: Add `duration` validator
 
 **Proc usage**
 
@@ -454,6 +455,55 @@ The `dimension` validator error messages expose 6 values that you can use:
 
 ---
 
+### Duration
+
+Validates each attached audio / video file duration.
+
+#### Options
+
+The `duration` validator has several options:
+- `less_than`: defines the strict maximum allowed file duration
+- `less_than_or_equal_to`: defines the maximum allowed file duration
+- `greater_than`: defines the strict minimum allowed file duration
+- `greater_than_or_equal_to`: defines the minimum allowed file duration
+- `between`: defines the allowed file duration range
+
+#### Examples
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_one_attached :avatar
+
+  validates :avatar, duration: { less_than: 2.minutes } # restricts the file duration to < 2 minutes
+  validates :avatar, duration: { less_than_or_equal_to: 2.minutes } # restricts the file duration to <= 2 minutes
+  validates :avatar, duration: { greater_than: 1.second } # restricts the file duration to > 1 second
+  validates :avatar, duration: { greater_than_or_equal_to: 1.second } # restricts the file duration to >= 1 second
+  validates :avatar, duration: { between: 1.second..2.minutes } # restricts the file duration to between 1 second and 2 minutes
+end
+```
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      duration_not_less_than: "duration must be less than %{max} (current duration is %{duration})"
+      duration_not_less_than_or_equal_to: "duration must be less than or equal to %{max} (current duration is %{duration})"
+      duration_not_greater_than: "duration must be greater than %{min} (current duration is %{duration})"
+      duration_not_greater_than_or_equal_to: "duration must be greater than or equal to %{min} (current duration is %{duration})"
+      duration_not_between: "duration must be between %{min} and %{max} (current duration is %{duration})"
+```
+
+The `duration` validator error messages expose 4 values that you can use:
+- `duration` containing the current duration size (e.g. `2 minutes`)
+- `min` containing the minimum allowed duration size (e.g. `1 second`)
+- `max` containing the maximum allowed duration size (e.g. `2 minutes`)
+- `filename` containing the current file name
+
+---
+
 ### Aspect ratio
 
 Validates the aspect ratio of the attached files.
@@ -544,6 +594,7 @@ The `processable_file` validator error messages expose 1 value that you can use:
 If you are upgrading from 1.x to 2.x, you will be pleased to note that a lot of things have been added and improved!
 
 Added features:
+- `duration` validator has been added for audio / video files
 - `dimension` validator now supports videos
 - `aspect_ratio` validator now supports videos
 - `processable_image` validator is now `processable_file` validator and supports image/video/audio
@@ -583,9 +634,6 @@ But this major version bump also comes with some breaking changes. Below are the
   - The validator has been replaced by `processable_file` validator, be sure to replace `processable_image: true` to `processable_file: true`
   - The associated matcher has also been updated accordingly, be sure to replace `validate_processable_image_of` to `validate_processable_file_of`
 
-🚧 TODO: Add more details about the other changes when implemented
-
-
 ## Internationalization (I18n)
 
 Active Storage Validations uses I18n for error messages. Add these keys in your translation files to make them available:
@@ -608,6 +656,11 @@ en:
       total_file_size_not_greater_than: "total file size must be greater than %{min} (current size is %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min} (current size is %{total_file_size})"
       total_file_size_not_between: "total file size must be between %{min} and %{max} (current size is %{total_file_size})"
+      duration_not_less_than: "duration must be less than %{max} (current duration is %{duration})"
+      duration_not_less_than_or_equal_to: "duration must be less than or equal to %{max} (current duration is %{duration})"
+      duration_not_greater_than: "duration must be greater than %{min} (current duration is %{duration})"
+      duration_not_greater_than_or_equal_to: "duration must be greater than or equal to %{min} (current duration is %{duration})"
+      duration_not_between: "duration must be between %{min} and %{max} (current duration is %{duration})"
       limit_out_of_range:
         zero: "no files attached (must have between %{min} and %{max} files)"
         one: "only 1 file attached (must have between %{min} and %{max} files)"
@@ -639,6 +692,7 @@ en:
       file_not_processable: "is not identified as a valid media file"
 ```
 
+Other translation files are available (here)[https://github.com/igorkasyanchuk/active_storage_validations/tree/master/config/locales].
 
 ## Test matchers
 
@@ -713,6 +767,14 @@ describe User do
   it { is_expected.to validate_total_size_of(:avatar).greater_than(1.kilobyte) }
   it { is_expected.to validate_total_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
   it { is_expected.to validate_total_size_of(:avatar).between(100..500.kilobytes) }
+
+  # duration:
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between
+  it { is_expected.to validate_duration_of(:introduction).less_than(50.seconds) }
+  it { is_expected.to validate_duration_of(:introduction).less_than_or_equal_to(50.seconds) }
+  it { is_expected.to validate_duration_of(:introduction).greater_than(1.minute) }
+  it { is_expected.to validate_duration_of(:introduction).greater_than_or_equal_to(1.minute) }
+  it { is_expected.to validate_duration_of(:introduction).between(100..500.seconds) }
 end
 ```
 (Note that matcher methods are chainable)

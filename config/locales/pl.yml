@@ -15,6 +15,11 @@ pl:
       total_file_size_not_greater_than: "całkowity rozmiar pliku musi być większy niż %{min} (obecny rozmiar to %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "całkowity rozmiar pliku musi być większy lub równy %{min} (obecny rozmiar to %{total_file_size})"
       total_file_size_not_between: "całkowity rozmiar pliku musi mieścić się w przedziale od %{min} do %{max} (obecny rozmiar to %{total_file_size})"
+      duration_not_less_than: "czas trwania musi być mniejszy niż %{max} (obecny czas trwania wynosi %{duration})"
+      duration_not_less_than_or_equal_to: "czas trwania musi być mniejszy lub równy %{max} (obecny czas trwania wynosi %{duration})"
+      duration_not_greater_than: "czas trwania musi być większy niż %{min} (obecny czas trwania wynosi %{duration})"
+      duration_not_greater_than_or_equal_to: "czas trwania musi być większy lub równy %{min} (obecny czas trwania wynosi %{duration})"
+      duration_not_between: "czas trwania musi wynosić między %{min} a %{max} (obecny czas trwania wynosi %{duration})"
       limit_out_of_range:
         zero: "brak dołączonych plików (musi mieć między %{min} a %{max} pliki)"
         one: "załączony tylko 1 plik (musi mieć między %{min} a %{max} pliki)"
