@@ -18,16 +18,16 @@ module ActiveStorageValidations
 
     AVAILABLE_CHECKS = %i[width height min max].freeze
     ERROR_TYPES = %i[
-      dimension_min_inclusion
-      dimension_max_inclusion
-      dimension_width_inclusion
-      dimension_height_inclusion
-      dimension_width_greater_than_or_equal_to
-      dimension_height_greater_than_or_equal_to
-      dimension_width_less_than_or_equal_to
-      dimension_height_less_than_or_equal_to
-      dimension_width_equal_to
-      dimension_height_equal_to
+      dimension_min_not_included_in
+      dimension_max_not_included_in
+      dimension_width_not_included_in
+      dimension_height_not_included_in
+      dimension_width_not_greater_than_or_equal_to
+      dimension_height_not_greater_than_or_equal_to
+      dimension_width_not_less_than_or_equal_to
+      dimension_height_not_less_than_or_equal_to
+      dimension_width_not_equal_to
+      dimension_height_not_equal_to
       media_metadata_missing
     ].freeze
 
@@ -64,7 +64,7 @@ module ActiveStorageValidations
           errors_options[:width] = flat_options[:width][:min]
           errors_options[:height] = flat_options[:height][:min]
 
-          add_error(record, attribute, :dimension_min_inclusion, **errors_options)
+          add_error(record, attribute, :dimension_min_not_included_in, **errors_options)
           return false
         end
         if flat_options[:max] && (
@@ -74,7 +74,7 @@ module ActiveStorageValidations
           errors_options[:width] = flat_options[:width][:max]
           errors_options[:height] = flat_options[:height][:max]
 
-          add_error(record, attribute, :dimension_max_inclusion, **errors_options)
+          add_error(record, attribute, :dimension_max_not_included_in, **errors_options)
           return false
         end
 
@@ -86,7 +86,7 @@ module ActiveStorageValidations
           next unless flat_options[length]
           if flat_options[length].is_a?(Hash)
             if flat_options[length][:in] && (metadata[length] < flat_options[length][:min] || metadata[length] > flat_options[length][:max])
-              error_type = :"dimension_#{length}_inclusion"
+              error_type = :"dimension_#{length}_not_included_in"
               errors_options[:min] = flat_options[length][:min]
               errors_options[:max] = flat_options[length][:max]
 
@@ -94,13 +94,13 @@ module ActiveStorageValidations
               width_or_height_invalid = true
             else
               if flat_options[length][:min] && metadata[length] < flat_options[length][:min]
-                error_type = :"dimension_#{length}_greater_than_or_equal_to"
+                error_type = :"dimension_#{length}_not_greater_than_or_equal_to"
                 errors_options[:length] = flat_options[length][:min]
 
                 add_error(record, attribute, error_type, **errors_options)
                 width_or_height_invalid = true
               elsif flat_options[length][:max] && metadata[length] > flat_options[length][:max]
-                error_type = :"dimension_#{length}_less_than_or_equal_to"
+                error_type = :"dimension_#{length}_not_less_than_or_equal_to"
                 errors_options[:length] = flat_options[length][:max]
 
                 add_error(record, attribute, error_type, **errors_options)
@@ -109,7 +109,7 @@ module ActiveStorageValidations
             end
           else
             if metadata[length] != flat_options[length]
-              error_type = :"dimension_#{length}_equal_to"
+              error_type = :"dimension_#{length}_not_equal_to"
               errors_options[:length] = flat_options[length]
 
               add_error(record, attribute, error_type, **errors_options)

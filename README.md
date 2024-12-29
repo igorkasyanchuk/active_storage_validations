@@ -432,16 +432,16 @@ end
 en:
   errors:
     messages:
-      dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel"
-      dimension_max_inclusion: "must be less than or equal to %{width} x %{height} pixel"
-      dimension_width_inclusion: "width is not included between %{min} and %{max} pixel"
-      dimension_height_inclusion: "height is not included between %{min} and %{max} pixel"
-      dimension_width_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
-      dimension_height_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
-      dimension_width_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
-      dimension_height_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
-      dimension_width_equal_to: "width must be equal to %{length} pixel"
-      dimension_height_equal_to: "height must be equal to %{length} pixel"
+      dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixel"
+      dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixel"
+      dimension_width_not_included_in: "width is not included between %{min} and %{max} pixel"
+      dimension_height_not_included_in: "height is not included between %{min} and %{max} pixel"
+      dimension_width_not_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
+      dimension_height_not_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
+      dimension_width_not_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
+      dimension_height_not_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
+      dimension_width_not_equal_to: "width must be equal to %{length} pixel"
+      dimension_height_not_equal_to: "height must be equal to %{length} pixel"
       media_metadata_missing: "is not a valid media file"
 ```
 
@@ -560,8 +560,6 @@ But this major version bump also comes with some breaking changes. Below are the
     - `image_metadata_missing` has been replaced by `media_metadata_missing`
     - `aspect_ratio_is_not` has been replaced by `aspect_ratio_not_x_y`
   - Some error messages variables names have been changed to improve readability:
-    - `dimension` validator:
-      - `length` has been replaced by `exact`
     - `aspect_ratio` validator:
       - `aspect_ratio` has been replaced by `authorized_aspect_ratios`
     - `content_type` validator:
@@ -611,16 +609,16 @@ en:
         one: "too many files attached (maximum is %{max} files, got %{count})"
         other: "too many files attached (maximum is %{max} files, got %{count})"
       media_metadata_missing: "is not a valid media file"
-      dimension_min_inclusion: "must be greater than or equal to %{width} x %{height} pixel"
-      dimension_max_inclusion: "must be less than or equal to %{width} x %{height} pixel"
-      dimension_width_inclusion: "width is not included between %{min} and %{max} pixel"
-      dimension_height_inclusion: "height is not included between %{min} and %{max} pixel"
-      dimension_width_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
-      dimension_height_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
-      dimension_width_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
-      dimension_height_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
-      dimension_width_equal_to: "width must be equal to %{length} pixel"
-      dimension_height_equal_to: "height must be equal to %{length} pixel"
+      dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixel"
+      dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixel"
+      dimension_width_not_included_in: "width is not included between %{min} and %{max} pixel"
+      dimension_height_not_included_in: "height is not included between %{min} and %{max} pixel"
+      dimension_width_not_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
+      dimension_height_not_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
+      dimension_width_not_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
+      dimension_height_not_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
+      dimension_width_not_equal_to: "width must be equal to %{length} pixel"
+      dimension_height_not_equal_to: "height must be equal to %{length} pixel"
       aspect_ratio_not_square: "must be square (current file is %{width}x%{height}px)"
       aspect_ratio_not_portrait: "must be portrait (current file is %{width}x%{height}px)"
       aspect_ratio_not_landscape: "must be landscape (current file is %{width}x%{height}px)"
