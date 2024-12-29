@@ -168,23 +168,17 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
 
   test 'validates maximum number of files' do
     e = Project.new(title: 'Death Star')
-    e.documents.attach(pdf_file)
-    e.proc_documents.attach(pdf_file)
-    e.documents.attach(pdf_file)
-    e.proc_documents.attach(pdf_file)
-    e.documents.attach(pdf_file)
-    e.proc_documents.attach(pdf_file)
-    e.documents.attach(pdf_file)
-    e.proc_documents.attach(pdf_file)
+    e.documents.attach([pdf_file, pdf_file, pdf_file, pdf_file])
+    e.proc_documents.attach([pdf_file, pdf_file, pdf_file, pdf_file])
     assert !e.valid?
-    assert_equal e.errors.full_messages, ['Documents total number of files must be between 1 and 3 files (there are 4 files attached)', 'Proc documents total number of files must be between 1 and 3 files (there are 4 files attached)']
+    assert_equal ['Documents total number of files must be between 1 and 3 files (there are 4 files attached)', 'Proc documents total number of files must be between 1 and 3 files (there are 4 files attached)'], e.errors.full_messages
   end
 
   test 'validates minimum number of files' do
     e = Project.new(title: 'Death Star')
     e.proc_documents.attach(pdf_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Documents no files attached (must have between 1 and 3 files)"]
+    assert_equal ["Documents no files attached (must have between 1 and 3 files)"], e.errors.full_messages
   end
 
   test 'validates number of files' do
@@ -244,7 +238,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.image.attach(html_file)
     e.proc_image.attach(html_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Image is not a valid media file", "Image is not a valid media file", "Image has an invalid content type (authorized content types are PNG, JPG)", "Proc image is not a valid media file", "Proc image is not a valid media file", "Proc image has an invalid content type (authorized content types are PNG, JPG)"]
+    assert_equal ["Image is not a valid media file", "Image is not a valid media file", "Image has an invalid content type (authorized content types are PNG, JPG)", "Proc image is not a valid media file", "Proc image is not a valid media file", "Proc image has an invalid content type (authorized content types are PNG, JPG)"], e.errors.full_messages
 
     e = OnlyImage.new
     e.image.attach(image_1920x1080_file)
@@ -263,7 +257,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_image.attach(image_1920x1080_file)
     e.another_image.attach(tar_file_with_image_content_type)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Another image is not a valid image"]
+    assert_equal ["Another image is not a valid image"], e.errors.full_messages
 
     e = OnlyImage.new
     e.image.attach(image_1920x1080_file)
@@ -292,7 +286,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_documents.attach(pdf_file)
     e.proc_dimension_exact.attach(html_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ['Dimension exact is not a valid media file', 'Proc dimension exact is not a valid media file']
+    assert_equal ['Dimension exact is not a valid media file', 'Proc dimension exact is not a valid media file'], e.errors.full_messages
 
     e = Project.new(title: 'Death Star')
     e.documents.attach(pdf_file)
@@ -426,7 +420,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_ratio_in.attach(image_150x150_file)
     e.save
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Ratio many must be portrait (current file is 150x150px)", "Proc ratio many must be portrait (current file is 150x150px)"]
+    assert_equal ["Ratio many must be portrait (current file is 150x150px)", "Proc ratio many must be portrait (current file is 150x150px)"], e.errors.full_messages
 
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(image_150x150_file)
@@ -438,7 +432,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.ratio_in.attach(image_150x150_file)
     e.proc_ratio_in.attach(image_150x150_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Image1 must be 16:9 (current file is 150x150px)", 'Proc image1 must be 16:9 (current file is 150x150px)']
+    assert_equal ["Image1 must be 16:9 (current file is 150x150px)", 'Proc image1 must be 16:9 (current file is 150x150px)'], e.errors.full_messages
 
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(html_file)
@@ -450,7 +444,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.ratio_in.attach(image_150x150_file)
     e.proc_ratio_in.attach(image_150x150_file)
     assert !e.valid?
-    assert_equal e.errors.full_messages, ["Ratio one is not a valid media file", 'Proc ratio one is not a valid media file']
+    assert_equal ["Ratio one is not a valid media file", 'Proc ratio one is not a valid media file'], e.errors.full_messages
 
     e = RatioModel.new(name: 'Princess Leia')
     e.ratio_one.attach(image_150x150_file)
@@ -460,7 +454,7 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.ratio_in.attach(image_1920x1080_file)
     e.proc_ratio_in.attach(image_1920x1080_file)
     assert !e.valid?
-    assert_equal e.errors.details, ratio_in: [
+    assert_equal({ ratio_in: [
       {
         error: :aspect_ratio_invalid,
         validator_type: :aspect_ratio,
@@ -478,6 +472,6 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
        width: 1920,
        height: 1080
      }
-    ] 
+    ]}, e.errors.details)
   end
 end
