@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative 'base_size_validator'
+require_relative 'base_comparison_validator'
 
 module ActiveStorageValidations
-  class TotalSizeValidator < BaseSizeValidator
+  class TotalSizeValidator < BaseComparisonValidator
     ERROR_TYPES = %i[
       total_file_size_not_less_than
       total_file_size_not_less_than_or_equal_to
@@ -11,6 +11,8 @@ module ActiveStorageValidations
       total_file_size_not_greater_than_or_equal_to
       total_file_size_not_between
     ].freeze
+
+    delegate :number_to_human_size, to: ActiveSupport::NumberHelper
 
     def validate_each(record, attribute, _value)
       custom_check_validity!(record, attribute)
@@ -40,6 +42,10 @@ module ActiveStorageValidations
       unless record.send(attribute).is_a?(ActiveStorage::Attached::Many)
         raise ArgumentError, 'This validator is only available for has_many_attached relations'
       end
+    end
+
+    def format_bound_value(value)
+      number_to_human_size(value)
     end
   end
 end

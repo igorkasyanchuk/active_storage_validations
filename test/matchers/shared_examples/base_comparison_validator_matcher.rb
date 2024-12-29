@@ -1,4 +1,4 @@
-module BaseSizeValidatorMatcher
+module BaseComparisonValidatorMatcher
   module OnlyMatchWhenExactValue
     extend ActiveSupport::Concern
 

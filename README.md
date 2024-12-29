@@ -327,11 +327,11 @@ Plus, not setting a size limit inside your Rails app might lead into your server
 en:
   errors:
     messages:
-      file_size_not_less_than: "file size must be less than %{max_size} (current size is %{file_size})"
-      file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max_size} (current size is %{file_size})"
-      file_size_not_greater_than: "file size must be greater than %{min_size} (current size is %{file_size})"
-      file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min_size} (current size is %{file_size})"
-      file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
+      file_size_not_less_than: "file size must be less than %{max} (current size is %{file_size})"
+      file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max} (current size is %{file_size})"
+      file_size_not_greater_than: "file size must be greater than %{min} (current size is %{file_size})"
+      file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min} (current size is %{file_size})"
+      file_size_not_between: "file size must be between %{min} and %{max} (current size is %{file_size})"
 ```
 
 The `size` validator error messages expose 4 values that you can use:
@@ -376,11 +376,11 @@ end
 en:
   errors:
     messages:
-      total_file_size_not_less_than: "total file size must be less than %{max_size} (current size is %{total_file_size})"
-      total_file_size_not_less_than_or_equal_to: "total file size must be less than or equal to %{max_size} (current size is %{total_file_size})"
-      total_file_size_not_greater_than: "total file size must be greater than %{min_size} (current size is %{total_file_size})"
-      total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min_size} (current size is %{total_file_size})"
-      total_file_size_not_between: "total file size must be between %{min_size} and %{max_size} (current size is %{total_file_size})"
+      total_file_size_not_less_than: "total file size must be less than %{max} (current size is %{total_file_size})"
+      total_file_size_not_less_than_or_equal_to: "total file size must be less than or equal to %{max} (current size is %{total_file_size})"
+      total_file_size_not_greater_than: "total file size must be greater than %{min} (current size is %{total_file_size})"
+      total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min} (current size is %{total_file_size})"
+      total_file_size_not_between: "total file size must be between %{min} and %{max} (current size is %{total_file_size})"
 ```
 
 The `total_size` validator error messages expose 4 values that you can use:
@@ -551,6 +551,7 @@ Added features:
 
 But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
 - Error messages
+  - We advise you to replace all the v1 translations by the new v2 rather than changing them one by one
   - The error messages have been completely rewritten to be more consistent and easier to understand (not breaking but might be a good idea to update them with the new versions)
   - Some validator errors have been totally changed:
     - `limit` validator keys have been totally reworked
@@ -565,6 +566,12 @@ But this major version bump also comes with some breaking changes. Below are the
       - `aspect_ratio` has been replaced by `authorized_aspect_ratios`
     - `content_type` validator:
       - `authorized_types` has been replaced by `authorized_human_content_types`
+    - `size` validator:
+      - `min_size` has been replaced by `min`
+      - `max_size` has been replaced by `max`
+    - `total_size` validator:
+      - `min_size` has been replaced by `min`
+      - `max_size` has been replaced by `max`
 
 - `content_type` validator
   - The `:in` option now only accepts 'valid' content types (ie content types deemed by Marcel as valid).
@@ -591,16 +598,16 @@ en:
         one: "has an invalid content type (authorized content type is %{authorized_human_content_types})"
         other: "has an invalid content type (authorized content types are %{authorized_human_content_types})"
       spoofed_content_type: "has a content type that is not what it is declared through its content"
-      file_size_not_less_than: "file size must be less than %{max_size} (current size is %{file_size})"
-      file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max_size} (current size is %{file_size})"
-      file_size_not_greater_than: "file size must be greater than %{min_size} (current size is %{file_size})"
-      file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min_size} (current size is %{file_size})"
-      file_size_not_between: "file size must be between %{min_size} and %{max_size} (current size is %{file_size})"
-      total_file_size_not_less_than: "total file size must be less than %{max_size} (current size is %{total_file_size})"
-      total_file_size_not_less_than_or_equal_to: "total file size must be less than or equal to %{max_size} (current size is %{total_file_size})"
-      total_file_size_not_greater_than: "total file size must be greater than %{min_size} (current size is %{total_file_size})"
-      total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min_size} (current size is %{total_file_size})"
-      total_file_size_not_between: "total file size must be between %{min_size} and %{max_size} (current size is %{total_file_size})"
+      file_size_not_less_than: "file size must be less than %{max} (current size is %{file_size})"
+      file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max} (current size is %{file_size})"
+      file_size_not_greater_than: "file size must be greater than %{min} (current size is %{file_size})"
+      file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min} (current size is %{file_size})"
+      file_size_not_between: "file size must be between %{min} and %{max} (current size is %{file_size})"
+      total_file_size_not_less_than: "total file size must be less than %{max} (current size is %{total_file_size})"
+      total_file_size_not_less_than_or_equal_to: "total file size must be less than or equal to %{max} (current size is %{total_file_size})"
+      total_file_size_not_greater_than: "total file size must be greater than %{min} (current size is %{total_file_size})"
+      total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min} (current size is %{total_file_size})"
+      total_file_size_not_between: "total file size must be between %{min} and %{max} (current size is %{total_file_size})"
       limit_out_of_range:
         zero: "no files attached (must have between %{min} and %{max} files)"
         one: "only 1 file attached (must have between %{min} and %{max} files)"

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'base_size_validator_matcher'
+require_relative 'base_comparison_validator_matcher'
 
 module ActiveStorageValidations
   module Matchers
@@ -8,7 +8,7 @@ module ActiveStorageValidations
       TotalSizeValidatorMatcher.new(attribute_name)
     end
 
-    class TotalSizeValidatorMatcher < BaseSizeValidatorMatcher
+    class TotalSizeValidatorMatcher < BaseComparisonValidatorMatcher
       def description
         "validate total file size of :#{@attribute_name}"
       end

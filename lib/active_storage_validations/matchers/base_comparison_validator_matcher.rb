@@ -13,8 +13,8 @@ require_relative 'shared/asv_validatable'
 
 module ActiveStorageValidations
   module Matchers
-    class BaseSizeValidatorMatcher
-      # BaseSizeValidatorMatcher is an abstract class and shouldn't be instantiated directly.
+    class BaseComparisonValidatorMatcher
+      # BaseComparisonValidatorMatcher is an abstract class and shouldn't be instantiated directly.
 
       include ASVActiveStorageable
       include ASVAllowBlankable
