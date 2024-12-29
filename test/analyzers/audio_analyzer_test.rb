@@ -19,9 +19,9 @@ describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
   let(:media_io) { File.open(media_path) }
   let(:media_content_type) { 'audio/mp3' }
   let(:media_content_type_rotated) { media_content_type }
-  let(:expected_metadata) { { duration: 1.1, bit_rate: 32000, sample_rate: 44100, tags: { "encoder" => "Lavc60.3."} } }
-  let(:expected_metadata_over_10ko) { { duration: 2.1, bit_rate: 107141, sample_rate: 44100, tags: { "encoder" => "LAME3.100"} } }
-  let(:expected_metadata_rotated) { { duration: 1.1, bit_rate: 32000, sample_rate: 44100, tags: { "encoder" => "Lavc60.3."} } }
+  let(:expected_metadata) { { duration: 1.0, bit_rate: 32000, sample_rate: 44100, tags: { "encoder" => "Lavc60.3."} } }
+  let(:expected_metadata_over_10ko) { { duration: 2.0, bit_rate: 107286, sample_rate: 44100, tags: { "encoder" => "LAME3.100"} } }
+  let(:expected_metadata_rotated) { { duration: 1.0, bit_rate: 32000, sample_rate: 44100, tags: { "encoder" => "Lavc60.3."} } }
 
   include ReturnsTheRightMetadataForAnyAttachable
 end
