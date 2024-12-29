@@ -7,7 +7,7 @@ module HasValidRspecMessageMethods
         case validator_sym
         when :aspect_ratio then matcher.rejecting(:square)
         when :attached then matcher
-        when :processable_image then matcher
+        when :processable_file then matcher
         when :limit then matcher.min(0).max(6)
         when :content_type then matcher.rejecting('image/png')
         when :dimension then matcher.width(75).height(75)
@@ -29,7 +29,7 @@ module HasValidRspecMessageMethods
           <<~FAILURE_MESSAGE
             is expected to validate attachment of :#{model_attribute}
           FAILURE_MESSAGE
-        when :processable_image
+        when :processable_file
           <<~FAILURE_MESSAGE
             is expected to validate the processable image of :#{model_attribute}
           FAILURE_MESSAGE
@@ -80,7 +80,7 @@ module HasValidRspecMessageMethods
         case validator_sym
         when :aspect_ratio then matcher.allowing(:square)
         when :attached then matcher
-        when :processable_image then matcher
+        when :processable_file then matcher
         when :limit then matcher.min(1).max(5)
         when :content_type then matcher.allowing('image/png')
         when :dimension then matcher.width(150).height(150)
@@ -102,7 +102,7 @@ module HasValidRspecMessageMethods
           <<~FAILURE_MESSAGE
             is expected not to validate attachment of :#{model_attribute}
           FAILURE_MESSAGE
-        when :processable_image
+        when :processable_file
           <<~FAILURE_MESSAGE
             is expected not to validate the processable image of :#{model_attribute}
           FAILURE_MESSAGE

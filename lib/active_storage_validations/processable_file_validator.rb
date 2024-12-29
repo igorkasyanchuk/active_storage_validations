@@ -7,7 +7,7 @@ require_relative 'shared/asv_errorable'
 require_relative 'shared/asv_symbolizable'
 
 module ActiveStorageValidations
-  class ProcessableImageValidator < ActiveModel::EachValidator # :nodoc
+  class ProcessableFileValidator < ActiveModel::EachValidator # :nodoc
     include ASVActiveStorageable
     include ASVAnalyzable
     include ASVAttachable
@@ -15,7 +15,7 @@ module ActiveStorageValidations
     include ASVSymbolizable
 
     ERROR_TYPES = %i[
-      image_not_processable
+      file_not_processable
     ].freeze
 
     def validate_each(record, attribute, _value)

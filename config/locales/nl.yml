@@ -43,4 +43,4 @@ nl:
       aspect_ratio_not_landscape: "moet landschap zijn (huidig bestand is %{width}x%{height}px)"
       aspect_ratio_not_x_y: "moet %{authorized_aspect_ratios} zijn (huidig bestand is %{width}x%{height}px)"
       aspect_ratio_invalid: "heeft een ongeldige beeldverhouding (geldige beeldverhoudingen zijn %{authorized_aspect_ratios})"
-      image_not_processable: "is geen geldige afbeelding"
+      file_not_processable: "wordt niet geïdentificeerd als een geldig mediabestand"

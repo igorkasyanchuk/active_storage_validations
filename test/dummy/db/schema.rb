@@ -43,7 +43,7 @@ ActiveRecord::Schema.define do
     content_type
     dimension
     limit
-    processable_image
+    processable_file
     size
     total_size
   ).each do |validator|
@@ -86,7 +86,7 @@ ActiveRecord::Schema.define do
     aspect_ratio
     content_type
     dimension
-    processable_image
+    processable_file
   ).each do |validator|
     create_table :"#{validator}_validator_using_attachables", force: :cascade do |t|
       t.datetime :created_at, null: false

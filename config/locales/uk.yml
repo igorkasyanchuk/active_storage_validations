@@ -43,4 +43,4 @@ uk:
       aspect_ratio_not_landscape: "повинен бути пейзажним (поточний файл %{width}x%{height} пікселям)"
       aspect_ratio_not_x_y: "повинен бути %{authorized_aspect_ratios} (поточний файл становить %{width}x%{height} пікселям)"
       aspect_ratio_invalid: "має недійсне співвідношення сторін (дійсні співвідношення сторін %{authorized_aspect_ratios})"
-      image_not_processable: "не є допустимим зображенням"
+      file_not_processable: "не ідентифікується як дійсний медіа-файл"

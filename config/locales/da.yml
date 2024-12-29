@@ -43,4 +43,4 @@ da:
       aspect_ratio_not_landscape: "skal være landskab (nuværende fil er %{width}x%{height}px)"
       aspect_ratio_not_x_y: "skal være %{authorized_aspect_ratios} (nuværende fil er %{width}x%{height}px)"
       aspect_ratio_invalid: "har et ugyldigt aspektforhold (gyldige aspektforhold er %{authorized_aspect_ratios})"
-      image_not_processable: "er ikke et gyldigt billede"
+      file_not_processable: "identificeres ikke som en gyldig mediefil"

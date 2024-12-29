@@ -43,5 +43,4 @@ pl:
       aspect_ratio_not_landscape: "musi być krajobrazem (bieżący plik to %{width}x%{height}px)"
       aspect_ratio_not_x_y: "musi być %{authorized_aspect_ratios} (bieżący plik to %{width}x%{height}px)"
       aspect_ratio_invalid: "ma nieprawidłowy współczynnik kształtu (ważne współczynniki kształtu wynoszą %{authorized_aspect_ratios})"
-      image_not_processable: "nie jest prawidłowym obrazem"
-
+      file_not_processable: "nie jest identyfikowany jako prawidłowy plik multimedialny"

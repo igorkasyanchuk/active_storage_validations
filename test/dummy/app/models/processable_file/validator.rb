@@ -1,7 +1,7 @@
-module ProcessableImage
+module ProcessableFile
   module Validator
     def self.table_name_prefix
-      'processable_image_validator_'
+      'processable_file_validator_'
     end
   end
 end

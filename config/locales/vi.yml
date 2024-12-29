@@ -43,5 +43,4 @@ vi:
       aspect_ratio_not_landscape: "phải là ngang (tệp hiện tại là %{width}x%{height}px)"
       aspect_ratio_not_x_y: "phải là %{authorized_aspect_ratios} (tệp hiện tại là %{width}x%{height}px)"
       aspect_ratio_invalid: "có tỷ lệ khung hình không hợp lệ (tỷ lệ khung hình hợp lệ là %{authorized_aspect_ratios})"
-      image_not_processable: "không phải là ảnh"
-
+      file_not_processable: "không được xác định là tệp phương tiện hợp lệ"

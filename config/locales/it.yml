@@ -43,4 +43,4 @@ it:
       aspect_ratio_not_landscape: "deve essere orizzontale (il file corrente è %{width}x%{height}px)"
       aspect_ratio_not_x_y: "deve essere %{authorized_aspect_ratios} (il file corrente è %{width}x%{height}px)"
       aspect_ratio_invalid: "ha un formato non valido (i rapporti di aspetto validi sono %{authorized_aspect_ratios})"
-      image_not_processable: "non è un'immagine valida"
+      file_not_processable: "non è identificato come file multimediale valido"

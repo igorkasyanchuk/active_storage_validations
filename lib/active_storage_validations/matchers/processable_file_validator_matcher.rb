@@ -10,11 +10,11 @@ require_relative 'shared/asv_validatable'
 
 module ActiveStorageValidations
   module Matchers
-    def validate_processable_image_of(name)
-      ProcessableImageValidatorMatcher.new(name)
+    def validate_processable_file_of(name)
+      ProcessableFileValidatorMatcher.new(name)
     end
 
-    class ProcessableImageValidatorMatcher
+    class ProcessableFileValidatorMatcher
       include ASVActiveStorageable
       include ASVAllowBlankable
       include ASVAttachable
@@ -46,7 +46,7 @@ module ActiveStorageValidations
           is_context_valid? &&
           is_custom_message_valid? &&
           is_valid_when_image_processable? &&
-          is_invalid_when_image_not_processable?
+          is_invalid_when_file_not_processable?
       end
 
       private
@@ -58,7 +58,7 @@ module ActiveStorageValidations
         is_valid?
       end
 
-      def is_invalid_when_image_not_processable?
+      def is_invalid_when_file_not_processable?
         attach_file(not_processable_image)
         validate
         detach_file

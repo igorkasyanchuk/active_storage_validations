@@ -43,4 +43,4 @@ zh-CN:
       aspect_ratio_not_landscape: "必须是横向（当前文件为 %{width} x%{height} 像素)"
       expect_ratio_not_x_y: "必须为 %{authorized_aspect_ratios}（当前文件为 %{width} x%{height} 像素)"
       expect_ratio_not_in_list: "具有无效的长宽比（有效长宽比为 %{authorized_aspect_ratios})"
-      image_not_processable: "不是有效的图像"
+      file_not_processable: "未标识为有效的媒体文件"

@@ -13,5 +13,5 @@ class Integration::Validator::ZeroByteImage < ApplicationRecord
   has_one_attached :zero_byte_image
   validates :zero_byte_image, attached: true,
                               content_type: :png,
-                              processable_image: true
+                              processable_file: true
 end

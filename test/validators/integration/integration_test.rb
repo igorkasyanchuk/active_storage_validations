@@ -23,8 +23,8 @@ describe 'Integration tests' do
       end
 
       it { is_expected_not_to_be_valid }
-      it { is_expected_to_have_error_message("image_not_processable", error_options: error_options, validator: :processable_image) }
-      it { is_expected_to_have_error_options(error_options, validator: :processable_image) }
+      it { is_expected_to_have_error_message("file_not_processable", error_options: error_options, validator: :processable_file) }
+      it { is_expected_to_have_error_options(error_options, validator: :processable_file) }
     end
   end
 

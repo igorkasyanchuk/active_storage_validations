@@ -9,7 +9,7 @@ require 'matchers/shared_examples/works_with_both_instance_and_class'
 require 'matchers/shared_examples/works_with_context'
 require 'matchers/shared_examples/works_with_custom_message'
 
-describe ActiveStorageValidations::Matchers::ProcessableImageValidatorMatcher do
+describe ActiveStorageValidations::Matchers::ProcessableFileValidatorMatcher do
   include MatcherHelpers
 
   include ChecksIfIsAValidActiveStorageAttribute
@@ -18,10 +18,10 @@ describe ActiveStorageValidations::Matchers::ProcessableImageValidatorMatcher do
   include HasValidRspecMessageMethods
   include WorksWithBothInstanceAndClass
 
-  let(:matcher) { ActiveStorageValidations::Matchers::ProcessableImageValidatorMatcher.new(model_attribute) }
-  let(:klass) { ProcessableImage::Matcher }
+  let(:matcher) { ActiveStorageValidations::Matchers::ProcessableFileValidatorMatcher.new(model_attribute) }
+  let(:klass) { ProcessableFile::Matcher }
 
-  describe "#validate_processable_image_of" do
+  describe "#validate_processable_file_of" do
     include HasCustomMatcher
   end
 
