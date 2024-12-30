@@ -13,6 +13,7 @@ module ChecksValidatorValidity
       when :attached then not_applicable
       when :content_type then 'You must pass either :with or :in to the validator'
       when :dimension then 'You must pass either :width, :height, :min or :max to the validator'
+      when :duration then 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
       when :limit then 'You must pass either :max or :min to the validator'
       when :processable_file then not_applicable
       when :size then 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'

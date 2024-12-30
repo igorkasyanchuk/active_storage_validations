@@ -6,13 +6,11 @@ require_relative 'shared/asv_optionable'
 require_relative 'shared/asv_symbolizable'
 
 module ActiveStorageValidations
-  class BaseSizeValidator < ActiveModel::EachValidator # :nodoc:
+  class BaseComparisonValidator < ActiveModel::EachValidator # :nodoc:
     include ASVActiveStorageable
     include ASVErrorable
     include ASVOptionable
     include ASVSymbolizable
-
-    delegate :number_to_human_size, to: ActiveSupport::NumberHelper
 
     AVAILABLE_CHECKS = %i[
       less_than
@@ -23,8 +21,8 @@ module ActiveStorageValidations
     ].freeze
 
     def initialize(*args)
-      if self.class == BaseSizeValidator
-        raise NotImplementedError, 'BaseSizeValidator is an abstract class and cannot be instantiated directly.'
+      if self.class == BaseComparisonValidator
+        raise NotImplementedError, 'BaseComparisonValidator is an abstract class and cannot be instantiated directly.'
       end
       super
     end
@@ -37,32 +35,36 @@ module ActiveStorageValidations
 
     private
 
-    def is_valid?(size, flat_options)
-      return false if size < 0
+    def is_valid?(value, flat_options)
+      return false if value < 0
 
       if flat_options[:between].present?
-        flat_options[:between].include?(size)
+        flat_options[:between].include?(value)
       elsif flat_options[:less_than].present?
-        size < flat_options[:less_than]
+        value < flat_options[:less_than]
       elsif flat_options[:less_than_or_equal_to].present?
-        size <= flat_options[:less_than_or_equal_to]
+        value <= flat_options[:less_than_or_equal_to]
       elsif flat_options[:greater_than].present?
-        size > flat_options[:greater_than]
+        value > flat_options[:greater_than]
       elsif flat_options[:greater_than_or_equal_to].present?
-        size >= flat_options[:greater_than_or_equal_to]
+        value >= flat_options[:greater_than_or_equal_to]
       end
     end
 
     def populate_error_options(errors_options, flat_options)
-      errors_options[:min_size] = number_to_human_size(min_size(flat_options))
-      errors_options[:max_size] = number_to_human_size(max_size(flat_options))
+      errors_options[:min] = format_bound_value(min(flat_options))
+      errors_options[:max] = format_bound_value(max(flat_options))
     end
 
-    def min_size(flat_options)
+    def format_bound_value
+      raise NotImplementedError
+    end
+
+    def min(flat_options)
       flat_options[:between]&.min || flat_options[:greater_than] || flat_options[:greater_than_or_equal_to]
     end
 
-    def max_size(flat_options)
+    def max(flat_options)
       flat_options[:between]&.max || flat_options[:less_than] || flat_options[:less_than_or_equal_to]
     end
   end

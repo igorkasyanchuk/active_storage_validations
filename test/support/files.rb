@@ -208,6 +208,39 @@ def audio_file
     content_type: 'audio/mp3'
   }
 end
+alias :audio_1s :audio_file
+
+def audio_2s
+  {
+    io: File.open(Rails.root.join('public', 'audio_2s.mp3')),
+    filename: 'audio_2s',
+    content_type: 'audio/mp3'
+  }
+end
+
+def audio_5s
+  {
+    io: File.open(Rails.root.join('public', 'audio_5s.mp3')),
+    filename: 'audio_5s',
+    content_type: 'audio/mp3'
+  }
+end
+
+def audio_7s
+  {
+    io: File.open(Rails.root.join('public', 'audio_7s.mp3')),
+    filename: 'audio_7s',
+    content_type: 'audio/mp3'
+  }
+end
+
+def audio_10s
+  {
+    io: File.open(Rails.root.join('public', 'audio_10s.mp3')),
+    filename: 'audio_10s',
+    content_type: 'audio/mp3'
+  }
+end
 
 def video_file
   {

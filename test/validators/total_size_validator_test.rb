@@ -44,8 +44,8 @@ describe ActiveStorageValidations::TotalSizeValidator do
             let(:error_options) do
               {
                 total_file_size: '2 KB',
-                min_size: nil,
-                max_size: '2 KB'
+                min: nil,
+                max: '2 KB'
               }
             end
 
@@ -60,8 +60,8 @@ describe ActiveStorageValidations::TotalSizeValidator do
             let(:error_options) do
               {
                 total_file_size: '10 KB',
-                min_size: nil,
-                max_size: '2 KB'
+                min: nil,
+                max: '2 KB'
               }
             end
 
@@ -96,8 +96,8 @@ describe ActiveStorageValidations::TotalSizeValidator do
             let(:error_options) do
               {
                 total_file_size: '6 KB',
-                min_size: nil,
-                max_size: '2 KB'
+                min: nil,
+                max: '2 KB'
               }
             end
 
@@ -120,8 +120,8 @@ describe ActiveStorageValidations::TotalSizeValidator do
             let(:error_options) do
               {
                 total_file_size: '2 KB',
-                min_size: '7 KB',
-                max_size: nil
+                min: '7 KB',
+                max: nil
               }
             end
 
@@ -136,8 +136,8 @@ describe ActiveStorageValidations::TotalSizeValidator do
             let(:error_options) do
               {
                 total_file_size: '7 KB',
-                min_size: '7 KB',
-                max_size: nil
+                min: '7 KB',
+                max: nil
               }
             end
 
@@ -166,8 +166,8 @@ describe ActiveStorageValidations::TotalSizeValidator do
             let(:error_options) do
               {
                 total_file_size: '2 KB',
-                min_size: '7 KB',
-                max_size: nil
+                min: '7 KB',
+                max: nil
               }
             end
 
@@ -202,8 +202,8 @@ describe ActiveStorageValidations::TotalSizeValidator do
             let(:error_options) do
               {
                 total_file_size: '1.5 KB',
-                min_size: '2 KB',
-                max_size: '7 KB'
+                min: '2 KB',
+                max: '7 KB'
               }
             end
 
@@ -236,8 +236,8 @@ describe ActiveStorageValidations::TotalSizeValidator do
             let(:error_options) do
               {
                 total_file_size: '10 KB',
-                min_size: '2 KB',
-                max_size: '7 KB'
+                min: '2 KB',
+                max: '7 KB'
               }
             end
 

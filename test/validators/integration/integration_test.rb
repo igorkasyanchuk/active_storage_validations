@@ -45,8 +45,8 @@ describe 'Integration tests' do
           let(:error_options) do
             {
               file_size: '17 KB',
-              min_size: nil,
-              max_size: '15 KB'
+              min: nil,
+              max: '15 KB'
             }
           end
 
@@ -63,8 +63,8 @@ describe 'Integration tests' do
           let(:error_options) do
             {
               file_size: '7 KB',
-              min_size: nil,
-              max_size: '5 KB'
+              min: nil,
+              max: '5 KB'
             }
           end
 

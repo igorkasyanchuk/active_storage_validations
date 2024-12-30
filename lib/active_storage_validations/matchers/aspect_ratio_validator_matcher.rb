@@ -94,7 +94,7 @@ module ActiveStorageValidations
       end
 
       def mock_dimensions_for(attachment, width, height)
-        Matchers.mock_metadata(attachment, width, height) do
+        Matchers.mock_metadata(attachment, { width: width, height: height }) do
           yield
         end
       end

@@ -6,6 +6,7 @@ require 'active_storage_validations/matchers/processable_file_validator_matcher'
 require 'active_storage_validations/matchers/limit_validator_matcher'
 require 'active_storage_validations/matchers/content_type_validator_matcher'
 require 'active_storage_validations/matchers/dimension_validator_matcher'
+require 'active_storage_validations/matchers/duration_validator_matcher'
 require 'active_storage_validations/matchers/size_validator_matcher'
 require 'active_storage_validations/matchers/total_size_validator_matcher'
 
@@ -25,8 +26,8 @@ module ActiveStorageValidations
       end
     end
 
-    def self.mock_metadata(attachment, width, height)
-      mock = Struct.new(:metadata).new({ width: width, height: height })
+    def self.mock_metadata(attachment, metadata = {})
+      mock = Struct.new(:metadata).new(metadata)
 
       stub_method(ActiveStorageValidations::Analyzer, :new, mock) do
         yield

@@ -42,6 +42,7 @@ ActiveRecord::Schema.define do
     attached
     content_type
     dimension
+    duration
     limit
     processable_file
     size
@@ -60,7 +61,7 @@ ActiveRecord::Schema.define do
       end
     end
 
-    if %i(content_type size total_size).include? validator
+    if %i(content_type duration size total_size).include? validator
       create_table :"#{validator}_validator_check_validity_several_checks", force: :cascade do |t|
         t.datetime :created_at, null: false
         t.datetime :updated_at, null: false

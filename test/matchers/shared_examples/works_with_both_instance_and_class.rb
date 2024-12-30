@@ -11,6 +11,7 @@ module WorksWithBothInstanceAndClass
         when :limit then matcher.min(1).max(5)
         when :content_type then matcher.allowing('image/png')
         when :dimension then matcher.width(150).height(150)
+        when :duration then matcher.less_than_or_equal_to(5.minutes)
         when :size then matcher.less_than_or_equal_to(5.megabytes)
         when :total_size then matcher.less_than_or_equal_to(5.megabytes)
         end
