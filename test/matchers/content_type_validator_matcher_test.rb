@@ -117,6 +117,17 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     end
 
     describe 'Edge cases' do
+      describe "when the passed content_type is a symbol (e.g. :png)" do
+        let(:model_attribute) { :allowing_symbol }
+        let(:allowed_type) { :png }
+
+        describe 'when provided with the exact allowed type' do
+          subject { matcher.allowing(allowed_type) }
+
+          it { is_expected_to_match_for(klass) }
+        end
+      end
+
       describe "when the content_type specifier (e.g. 'svg+xml') is not strictly equal to the file extension (e.g. '.svg')" do
         let(:model_attribute) { :allowing_sneaky_edge_cases }
         let(:allowed_types) { ["image/svg+xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"] }
