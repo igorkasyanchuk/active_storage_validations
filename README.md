@@ -598,6 +598,7 @@ Added features:
 - `dimension` validator now supports videos
 - `aspect_ratio` validator now supports videos
 - `processable_image` validator is now `processable_file` validator and supports image/video/audio
+- Major performance improvment have been added: we now only perform the expensive io analysis operation on the newly attached files. For previously attached files, we validate them using Rails `ActiveStorage::Blob#metadata` internal mecanism ([more here](https://github.com/rails/rails/blob/main/activestorage/app/models/active_storage/blob/analyzable.rb)).
 - All error messages have been given an upgrade and new variables that you can use
 
 But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:

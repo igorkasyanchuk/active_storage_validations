@@ -21,7 +21,7 @@ module ActiveStorageValidations
       flat_options = set_flat_options(record)
 
       attachables_and_blobs(record, attribute).each do |attachable, blob|
-        duration = metadata_for(attachable)[:duration]
+        duration = metadata_for(blob, attachable)&.fetch(:duration, nil)
 
         if duration.to_i <= 0
           errors_options = initialize_error_options(options, attachable)

@@ -18,7 +18,7 @@ module ActiveStorageValidations
     # to perform file analyses.
     def validate_changed_files_from_metadata(record, attribute)
       attachables_and_blobs(record, attribute).each do |attachable, blob|
-        is_valid?(record, attribute, attachable, metadata_for(attachable))
+        is_valid?(record, attribute, attachable, metadata_for(blob, attachable))
       end
     end
 

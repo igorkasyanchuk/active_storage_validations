@@ -12,7 +12,17 @@ module ActiveStorageValidations
 
     private
 
-    def metadata_for(attachable)
+    # Retrieve the ASV metadata from the blob.
+    # If the blob has not been analyzed by our gem yet, the gem will analyze the
+    # attachable with the corresponding analyzer and set the metadata in the
+    # blob.
+    def metadata_for(blob, attachable)
+      return blob.active_storage_validations_metadata if blob.active_storage_validations_metadata.present?
+
+      blob.active_storage_validations_metadata = generate_metadata_for(attachable)
+    end
+
+    def generate_metadata_for(attachable)
       analyzer_for(attachable).metadata
     end
 
