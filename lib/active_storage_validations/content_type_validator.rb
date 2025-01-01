@@ -34,11 +34,9 @@ module ActiveStorageValidations
       @authorized_content_types = authorized_content_types_from_options(record)
       return if @authorized_content_types.empty?
 
-      checked_files = disable_spoofing_protection? ? attached_files(record, attribute) : attachables_from_changes(record, attribute)
-
-      checked_files.each do |file|
-        set_attachable_cached_values(file)
-        is_valid?(record, attribute, file)
+      attachables_and_blobs(record, attribute).each do |attachable, blob|
+        set_attachable_cached_values(blob)
+        is_valid?(record, attribute, attachable)
       end
     end
 
@@ -55,9 +53,9 @@ module ActiveStorageValidations
       end
     end
 
-    def set_attachable_cached_values(attachable)
-      @attachable_content_type = disable_spoofing_protection? ? attachable.blob.content_type : attachable_content_type_rails_like(attachable)
-      @attachable_filename = disable_spoofing_protection? ? attachable.blob.filename.to_s : attachable_filename(attachable).to_s
+    def set_attachable_cached_values(blob)
+      @attachable_content_type = blob.content_type
+      @attachable_filename = blob.filename.to_s
     end
 
     # Check if the provided content_type is authorized and not spoofed against

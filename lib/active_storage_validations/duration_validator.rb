@@ -20,7 +20,7 @@ module ActiveStorageValidations
 
       flat_options = set_flat_options(record)
 
-      attachables_from_changes(record, attribute).each do |attachable|
+      attachables_and_blobs(record, attribute).each do |attachable, blob|
         duration = metadata_for(attachable)[:duration]
 
         if duration.to_i <= 0
