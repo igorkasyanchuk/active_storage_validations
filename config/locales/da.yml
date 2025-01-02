@@ -4,7 +4,9 @@ da:
       content_type_invalid:
         one: "har en ugyldig indholdstype (autoriseret indholdstype er %{authorized_human_content_types})"
         other: "har en ugyldig indholdstype (autoriserede indholdstyper er %{authorized_human_content_types})"
-      spoofed_content_type: "har en indholdstype, der ikke er, hvad den erklæres gennem dens indhold"
+      content_type_spoofed:
+        one: "har en indholdstype, der ikke svarer til den, der registreres gennem dens indhold (autoriseret indholdstype er %{authorized_human_content_types})"
+        other: "har en indholdstype, der ikke svarer til den, der registreres gennem dens indhold (autoriserede indholdstyper er %{authorized_human_content_types})"
       file_size_not_less_than: "filstørrelsen skal være mindre end %{max} (den nuværende størrelse er %{file_size})"
       file_size_not_less_than_or_equal_to: "filstørrelsen skal være mindre end eller lig med %{max} (den nuværende størrelse er %{file_size})"
       file_size_not_greater_than: "filstørrelsen skal være større end %{min} (den nuværende størrelse er %{file_size})"

@@ -4,7 +4,9 @@ ja:
       content_type_invalid:
         one: "無効なコンテンツタイプがあります（許可されたコンテンツタイプは%{authorized_human_content_types}です)"
         other: "無効なコンテンツタイプがあります（許可されたコンテンツタイプは%{authorized_human_content_types}です)"
-      spoofed_content_type: "コンテンツを通じて宣言されていないコンテンツタイプがある"
+      content_type_spoofed:
+        one: "コンテンツを通じて検出されたものと同等ではないコンテンツタイプがあります（許可されたコンテンツタイプは%{authorized_human_content_types}です)"
+        other: "コンテンツを通じて検出されたものと同等ではないコンテンツタイプがあります（承認されたコンテンツタイプは%{authorized_human_content_types}です)"
       file_size_not_less_than: "ファイル サイズは %{max} 未満にする必要があります (現在のサイズは %{file_size})"
       file_size_not_less_than_or_equal_to: "ファイル サイズは %{max} 以下である必要があります (現在のサイズは %{file_size})"
       file_size_not_greater_than: "ファイル サイズは %{min} より大きい必要があります (現在のサイズは %{file_size} です)"

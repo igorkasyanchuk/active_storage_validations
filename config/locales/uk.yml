@@ -4,7 +4,9 @@ uk:
       content_type_invalid:
         one: "має недійсний тип вмісту (уповноважений тип вмісту становить %{autorized_human_content_types})"
         other: "має недійсний тип вмісту (дозволені типи вмісту %{autorized_human_content_types})"
-      spoofed_content_type: "має тип вмісту, який не є тим, що він оголошений через його вміст"
+      content_type_spoofed:
+        one: "має тип вмісту, який не еквівалентний тому, який виявляється через його вміст (уповноважений тип вмісту становить %{autorized_human_content_types})"
+        other: "має тип вмісту, який не еквівалентний тому, який виявляється через його вміст (дозволені типи вмісту %{autorized_human_content_types})"
       file_size_not_less_than: "розмір файлу має бути менше %{max} (поточний розмір %{file_size})"
       file_size_not_less_than_or_equal_to: "розмір файлу має бути меншим або дорівнювати %{max} (поточний розмір %{file_size})"
       file_size_not_greater_than: "розмір файлу має бути більшим ніж %{min} (поточний розмір %{file_size})"

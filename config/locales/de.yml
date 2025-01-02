@@ -4,7 +4,9 @@ de:
       content_type_invalid:
         one: "hat einen ungültigen Inhaltstyp (autorisierter Inhaltstyp ist %{authorized_human_content_types})"
         other: "hat einen ungültigen Inhaltstyp (autorisierte Inhaltstypen sind %{authorized_human_content_types})"
-      spoofed_content_type: "hat einen Inhaltstyp, der nicht durch seinen Inhalt deklariert ist"
+      content_type_spoofed:
+        one: "hat einen Inhaltstyp, der nicht dem entspricht, der durch seinen Inhalt erkannt wird (autorisierter Inhaltstyp ist %{authorized_human_content_types})"
+        other: "hat einen Inhaltstyp, der nicht dem entspricht, der durch seinen Inhalt erkannt wird (autorisierte Inhaltstypen sind %{authorized_human_content_types})"
       file_size_not_less_than: "Dateigröße muss kleiner als %{max} sein (aktuelle Dateigröße ist %{file_size})"
       file_size_not_less_than_or_equal_to: "Dateigröße muss kleiner oder gleich %{max} sein (aktuelle Dateigröße ist %{file_size})"
       file_size_not_greater_than: "Dateigröße muss größer als %{min} sein (aktuelle Dateigröße ist %{file_size})"

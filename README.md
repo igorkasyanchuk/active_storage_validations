@@ -277,12 +277,16 @@ en:
       content_type_invalid:
         one: "has an invalid content type (authorized content type is %{authorized_human_content_types})"
         other: "has an invalid content type (authorized content types are %{authorized_human_content_types})"
-      spoofed_content_type: "has a content type that is not what it is declared through its content"
+      content_type_spoofed:
+        one: "has a content type that is not equivalent to the one that is detected through its content (authorized content type is %{authorized_human_content_types})"
+        other: "has a content type that is not equivalent to the one that is detected through its content (authorized content types are %{authorized_human_content_types})"
 ```
 
-The `content_type` validator error messages expose 5 values that you can use:
-- `content_type` containing the exact content type of the sent file (e.g. `image/png`)
+The `content_type` validator error messages expose 7 values that you can use:
+- `content_type` containing the content type of the sent file (e.g. `image/png`)
 - `human_content_type` containing a more user-friendly version of the sent file content type (e.g. 'TXT' for 'text/plain')
+- `detected_content_type` containing the detected content type of the sent file using `spoofing_protection` option (e.g. `image/png`)
+- `detected_human_content_type` containing a more user-friendly version of the sent file detected content type using `spoofing_protection` option (e.g. 'TXT' for 'text/plain')
 - `authorized_human_content_types` containing the list of authorized content types (e.g. 'PNG, JPEG' for `['image/png', 'image/jpeg']`)
 - `count` containing the number of authorized content types (e.g. `2`)
 - `filename` containing the filename
@@ -646,7 +650,9 @@ en:
       content_type_invalid:
         one: "has an invalid content type (authorized content type is %{authorized_human_content_types})"
         other: "has an invalid content type (authorized content types are %{authorized_human_content_types})"
-      spoofed_content_type: "has a content type that is not what it is declared through its content"
+      content_type_spoofed:
+        one: "has a content type that is not equivalent to the one that is detected through its content (authorized content type is %{authorized_human_content_types})"
+        other: "has a content type that is not equivalent to the one that is detected through its content (authorized content types are %{authorized_human_content_types})"
       file_size_not_less_than: "file size must be less than %{max} (current size is %{file_size})"
       file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max} (current size is %{file_size})"
       file_size_not_greater_than: "file size must be greater than %{min} (current size is %{file_size})"

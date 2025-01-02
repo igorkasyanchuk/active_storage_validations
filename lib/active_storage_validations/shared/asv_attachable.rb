@@ -68,7 +68,13 @@ module ActiveStorageValidations
     # Retrieve the declared content_type from attachable without potential mime
     # type parameters (e.g. 'application/x-rar-compressed;version=5')
     def attachable_content_type(attachable)
-      full_attachable_content_type(attachable) && full_attachable_content_type(attachable).downcase.split(/[;,\s]/, 2).first
+      full_attachable_content_type(attachable) && content_type_without_parameters(full_attachable_content_type(attachable))
+    end
+
+    # Remove the potential mime type parameters from the content_type (e.g.
+    # 'application/x-rar-compressed;version=5')
+    def content_type_without_parameters(content_type)
+      content_type && content_type.downcase.split(/[;,\s]/, 2).first
     end
 
     # Retrieve the content_type from attachable using the same logic as Rails
