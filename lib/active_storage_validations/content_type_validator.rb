@@ -6,7 +6,7 @@ require_relative 'shared/asv_attachable'
 require_relative 'shared/asv_errorable'
 require_relative 'shared/asv_optionable'
 require_relative 'shared/asv_symbolizable'
-require_relative 'content_type_spoof_detector'
+require_relative 'analyzer/content_type_analyzer'
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
@@ -102,10 +102,16 @@ module ActiveStorageValidations
       false
     end
 
+    def marcel_attachable_content_type(attachable)
+      Marcel::MimeType.for(declared_type: @attachable_content_type, name: @attachable_filename)
+    end
+
     def not_spoofing_content_type?(record, attribute, attachable)
       return true unless enable_spoofing_protection?
 
-      if ContentTypeSpoofDetector.new(record, attribute, attachable).spoofed?
+      @detected_content_type = ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable).content_type[:content_type]
+
+      if attachable_content_type_vs_detected_content_type_mismatch?
         errors_options = initialize_and_populate_error_options(options, attachable)
         add_error(record, attribute, ERROR_TYPES.second, **errors_options)
         false
@@ -114,16 +120,32 @@ module ActiveStorageValidations
       end
     end
 
-    def marcel_attachable_content_type(attachable)
-      Marcel::MimeType.for(declared_type: @attachable_content_type, name: @attachable_filename)
-    end
-
     def disable_spoofing_protection?
       !enable_spoofing_protection?
     end
 
     def enable_spoofing_protection?
       options[:spoofing_protection] == true
+    end
+
+    def attachable_content_type_vs_detected_content_type_mismatch?
+      @attachable_content_type.present? &&
+        !attachable_content_type_intersects_detected_content_type?
+    end
+
+    def attachable_content_type_intersects_detected_content_type?
+      # Ruby intersects? method is only available from 3.1
+      enlarged_content_type(@attachable_content_type).any? do |item|
+        enlarged_content_type(@detected_content_type).include?(item)
+      end
+    end
+
+    def enlarged_content_type(content_type)
+      [content_type, *parent_content_types(content_type)].compact.uniq
+    end
+
+    def parent_content_types(content_type)
+      Marcel::TYPE_PARENTS[content_type] || []
     end
 
     def initialize_and_populate_error_options(options, attachable)

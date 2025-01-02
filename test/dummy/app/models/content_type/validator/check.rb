@@ -49,9 +49,14 @@ class ContentType::Validator::Check < ApplicationRecord
     has_one_attached :"#{content_type[:media]}_#{content_type[:type]}"
     validates :"#{content_type[:media]}_#{content_type[:type]}",
               content_type: content_type[:type]
+    has_one_attached :"#{content_type[:media]}_#{content_type[:type]}_spoof"
+    validates :"#{content_type[:media]}_#{content_type[:type]}_spoof",
+              content_type: { with: content_type[:type], spoofing_protection: true }
   end
   has_one_attached :video_ogv
   validates :video_ogv, content_type: ['video/theora']
+  has_one_attached :video_ogv_spoof
+  validates :video_ogv_spoof, content_type: { with: 'video/theora', spoofing_protection: true }
 
   has_one_attached :content_type_with_parameter
   validates :content_type_with_parameter, content_type: :rar
@@ -60,4 +65,6 @@ class ContentType::Validator::Check < ApplicationRecord
   has_one_attached :no_spoofing_protection
   validates :spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
   validates :no_spoofing_protection, content_type: :jpg
+  has_many_attached :many_spoofing_protection
+  validates :many_spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
 end

@@ -328,8 +328,102 @@ describe ActiveStorageValidations::ContentTypeValidator do
           subject { model.public_send(attribute).attach(spoofed_file) and model }
 
           let(:spoofed_file) { spoofed_jpeg }
+          let(:error_options) do
+            {
+              filename: spoofed_jpeg[:filename]
+            }
+          end
 
           it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_message("spoofed_content_type", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+        end
+
+        describe "when the file is empty" do
+          subject { model.public_send(attribute).attach(empty_file) and model }
+
+          let(:empty_file) { empty_io_file }
+
+          let(:error_options) do
+            {
+              filename: empty_file[:filename]
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_message("spoofed_content_type", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+        end
+
+        describe "when the file mime type is not identifiable" do
+          subject { model.public_send(attribute).attach(not_identifiable_type) and model }
+
+          let(:not_identifiable_type) { not_identifiable_io_file }
+
+          let(:error_options) do
+            {
+              filename: not_identifiable_type[:filename]
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_message("spoofed_content_type", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+        end
+
+        describe "working with most common mime types" do
+          most_common_mime_types.each do |common_mime_type|
+            describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
+              subject { model.public_send(attribute).attach(okay_file) and model }
+
+              let(:media) { common_mime_type[:mime_type].split('/').first }
+              let(:content) { common_mime_type[:extension].underscore }
+              let(:attribute) { [media, content, 'spoof'].join('_') } # e.g. image_jpeg_spoof
+              let(:okay_file) do
+                {
+                  io: File.open(Rails.root.join('public', "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
+                  filename: "example.#{common_mime_type[:extension]}",
+                  content_type: common_mime_type[:mime_type]
+                }
+              end
+
+              it "identifies the mime type correctly (ie it is valid, an invalid identification will make it invalid)" do
+                is_expected_to_be_valid
+              end
+            end
+          end
+        end
+
+        # validates :many_spoofing_protection, content_type: :jpg
+        describe 'with has_many_attached relationship' do
+          let(:attribute) { :many_spoofing_protection }
+
+          describe "when the files are okay" do
+            subject { model.public_send(attribute).attach(okay_files) and model }
+
+            let(:okay_files) { [okay_jpg_1, okay_jpg_2] }
+            let(:okay_jpg_1) { create_blob_from_file(jpeg_file) }
+            let(:okay_jpg_2) { create_blob_from_file(jpeg_file) }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe "when one of the file is spoofed" do
+            subject { model.public_send(attribute).attach(files) and model }
+
+            let(:files) { [okay_jpg, spoofed_jpeg_file] }
+            let(:okay_jpg) { create_blob_from_file(jpeg_file) }
+            let(:spoofed_jpeg_file) { create_blob_from_file(spoofed_jpeg) }
+            let(:error_options) do
+              {
+                filename: spoofed_jpeg[:filename]
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message("spoofed_content_type", error_options: error_options, validator: :content_type) }
+            it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+          end
         end
       end
 

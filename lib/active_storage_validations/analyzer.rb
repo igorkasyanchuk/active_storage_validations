@@ -20,6 +20,11 @@ module ActiveStorageValidations
       @attachable = attachable
     end
 
+    # Override this method in a concrete subclass. Have it return a String content type.
+    def content_type
+      raise NotImplementedError
+    end
+
     # Override this method in a concrete subclass. Have it return a Hash of metadata.
     def metadata
       raise NotImplementedError
