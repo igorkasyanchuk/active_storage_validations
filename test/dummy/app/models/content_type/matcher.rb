@@ -57,4 +57,13 @@ class ContentType::Matcher < ApplicationRecord
   # Combinations
   has_one_attached :allowing_one_with_message
   validates :allowing_one_with_message, content_type: { in: ['application/pdf'], message: 'Not authorized file type.' }
+
+  most_common_mime_types.reject { |common_mime_type| common_mime_type[:type] == :ogv } # issue with ogv
+                        .each do |content_type|
+    has_one_attached :"#{content_type[:media]}_#{content_type[:type]}"
+    validates :"#{content_type[:media]}_#{content_type[:type]}",
+              content_type: content_type[:type]
+  end
+  has_one_attached :video_ogv
+  validates :video_ogv, content_type: ['video/theora']
 end

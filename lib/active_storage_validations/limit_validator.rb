@@ -15,6 +15,8 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[max min].freeze
     ERROR_TYPES = %i[
       limit_out_of_range
+      limit_min_not_reached
+      limit_max_exceeded
     ].freeze
 
     def check_validity!
@@ -25,13 +27,23 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       files = attached_files(record, attribute).reject(&:blank?)
       flat_options = set_flat_options(record)
+      count = files.count
 
-      return if files_count_valid?(files.count, flat_options)
+      return if files_count_valid?(count, flat_options)
 
       errors_options = initialize_error_options(options)
       errors_options[:min] = flat_options[:min]
       errors_options[:max] = flat_options[:max]
-      add_error(record, attribute, ERROR_TYPES.first, **errors_options)
+      errors_options[:count] = count
+      error_type = if flat_options[:min] && flat_options[:max]
+        :limit_out_of_range
+      elsif flat_options[:min] && count < flat_options[:min]
+        :limit_min_not_reached
+      else
+        :limit_max_exceeded
+      end
+
+      add_error(record, attribute, error_type, **errors_options)
     end
 
     private

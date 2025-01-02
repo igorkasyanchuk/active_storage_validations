@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
-require 'matchers/shared_examples/base_size_validator_matcher'
+require 'matchers/shared_examples/base_comparison_validator_matcher'
 require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
 require 'matchers/shared_examples/checks_if_is_valid'
 require 'matchers/shared_examples/has_custom_matcher'
@@ -32,7 +32,7 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     let(:model_attribute) { matcher_method }
     let(:validator_value) { 2.kilobytes }
 
-    include BaseSizeValidatorMatcher::OnlyMatchWhenExactValue
+    include BaseComparisonValidatorMatcher::OnlyMatchWhenExactValue
   end
 
   describe '#less_than_or_equal_to' do
@@ -40,7 +40,7 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     let(:model_attribute) { matcher_method }
     let(:validator_value) { 2.kilobytes }
 
-    include BaseSizeValidatorMatcher::OnlyMatchWhenExactValue
+    include BaseComparisonValidatorMatcher::OnlyMatchWhenExactValue
   end
 
   describe '#greater_than' do
@@ -50,13 +50,13 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     describe 'with has_one_attached' do
       let(:model_attribute) { matcher_method }
 
-      include BaseSizeValidatorMatcher::OnlyMatchWhenExactValue
+      include BaseComparisonValidatorMatcher::OnlyMatchWhenExactValue
     end
 
     describe 'with has_many_attached' do
       let(:model_attribute) { :many_greater_than }
 
-      include BaseSizeValidatorMatcher::OnlyMatchWhenExactValue
+      include BaseComparisonValidatorMatcher::OnlyMatchWhenExactValue
     end
   end
 
@@ -65,7 +65,7 @@ describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     let(:model_attribute) { matcher_method }
     let(:validator_value) { 7.kilobytes }
 
-    include BaseSizeValidatorMatcher::OnlyMatchWhenExactValue
+    include BaseComparisonValidatorMatcher::OnlyMatchWhenExactValue
   end
 
   describe '#between' do

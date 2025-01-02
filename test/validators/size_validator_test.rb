@@ -35,8 +35,8 @@ describe ActiveStorageValidations::SizeValidator do
               {
                 file_size: '2 KB',
                 filename: 'file_2ko',
-                min_size: nil,
-                max_size: '2 KB'
+                min: nil,
+                max: '2 KB'
               }
             end
 
@@ -52,8 +52,8 @@ describe ActiveStorageValidations::SizeValidator do
               {
                 file_size: '5 KB',
                 filename: 'file_5ko',
-                min_size: nil,
-                max_size: '2 KB'
+                min: nil,
+                max: '2 KB'
               }
             end
 
@@ -89,8 +89,8 @@ describe ActiveStorageValidations::SizeValidator do
               {
                 file_size: '5 KB',
                 filename: 'file_5ko',
-                min_size: nil,
-                max_size: '2 KB'
+                min: nil,
+                max: '2 KB'
               }
             end
 
@@ -114,8 +114,8 @@ describe ActiveStorageValidations::SizeValidator do
               {
                 file_size: '1 KB',
                 filename: 'file_1ko.png',
-                min_size: '7 KB',
-                max_size: nil
+                min: '7 KB',
+                max: nil
               }
             end
 
@@ -131,8 +131,8 @@ describe ActiveStorageValidations::SizeValidator do
               {
                 file_size: '7 KB',
                 filename: 'file_7ko',
-                min_size: '7 KB',
-                max_size: nil
+                min: '7 KB',
+                max: nil
               }
             end
 
@@ -162,8 +162,8 @@ describe ActiveStorageValidations::SizeValidator do
               {
                 file_size: '1 KB',
                 filename: 'file_1ko.png',
-                min_size: '7 KB',
-                max_size: nil
+                min: '7 KB',
+                max: nil
               }
             end
 
@@ -199,8 +199,8 @@ describe ActiveStorageValidations::SizeValidator do
               {
                 file_size: '1 KB',
                 filename: 'file_1ko.png',
-                min_size: '2 KB',
-                max_size: '7 KB'
+                min: '2 KB',
+                max: '7 KB'
               }
             end
 
@@ -234,8 +234,8 @@ describe ActiveStorageValidations::SizeValidator do
               {
                 file_size: '10.2 KB',
                 filename: 'file_10ko',
-                min_size: '2 KB',
-                max_size: '7 KB'
+                min: '2 KB',
+                max: '7 KB'
               }
             end
 

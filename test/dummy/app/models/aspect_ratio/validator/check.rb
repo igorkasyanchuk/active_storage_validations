@@ -21,8 +21,8 @@ class AspectRatio::Validator::Check < ApplicationRecord
   validates :with_regex, aspect_ratio: :is_16_9
   validates :with_regex_proc, aspect_ratio: :is_16_9
 
-  has_one_attached :with_invalid_image_file
-  validates :with_invalid_image_file, aspect_ratio: :square
+  has_one_attached :with_invalid_media_file
+  validates :with_invalid_media_file, aspect_ratio: :square
 
   has_one_attached :in_aspect_ratios
   has_one_attached :in_aspect_ratios_proc

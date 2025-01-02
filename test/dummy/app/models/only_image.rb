@@ -10,6 +10,6 @@ class OnlyImage < ApplicationRecord
   validates :proc_image, dimension: { width: { min: -> (record) {100}, max: -> (record) {2000} }, height: { min: -> (record) {100}, max: -> (record) {1500} } },
             aspect_ratio: -> (record) {:is_16_9},
             content_type: -> (record) {['image/png', 'image/jpeg']}
-  validates :another_image, processable_image: true
-  validates :any_image, processable_image: false
+  validates :another_image, processable_file: true
+  validates :any_image, processable_file: false
 end

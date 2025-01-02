@@ -6,7 +6,7 @@ require_relative 'shared/asv_attachable'
 require_relative 'shared/asv_errorable'
 require_relative 'shared/asv_optionable'
 require_relative 'shared/asv_symbolizable'
-require_relative 'content_type_spoof_detector'
+require_relative 'analyzer/content_type_analyzer'
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
@@ -20,7 +20,7 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[with in].freeze
     ERROR_TYPES = %i[
       content_type_invalid
-      spoofed_content_type
+      content_type_spoofed
     ].freeze
 
     def check_validity!
@@ -102,20 +102,24 @@ module ActiveStorageValidations
       false
     end
 
+    def marcel_attachable_content_type(attachable)
+      Marcel::MimeType.for(declared_type: @attachable_content_type, name: @attachable_filename)
+    end
+
     def not_spoofing_content_type?(record, attribute, attachable)
       return true unless enable_spoofing_protection?
 
-      if ContentTypeSpoofDetector.new(record, attribute, attachable).spoofed?
-        errors_options = initialize_error_options(options, attachable)
+      @detected_content_type = ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable).content_type[:content_type]
+
+      if attachable_content_type_vs_detected_content_type_mismatch?
+        errors_options = initialize_and_populate_error_options(options, attachable)
+        errors_options[:detected_content_type] = @detected_content_type
+        errors_options[:detected_human_content_type] = content_type_to_human_format(@detected_content_type)
         add_error(record, attribute, ERROR_TYPES.second, **errors_options)
         false
       else
         true
       end
-    end
-
-    def marcel_attachable_content_type(attachable)
-      Marcel::MimeType.for(declared_type: @attachable_content_type, name: @attachable_filename)
     end
 
     def disable_spoofing_protection?
@@ -126,11 +130,32 @@ module ActiveStorageValidations
       options[:spoofing_protection] == true
     end
 
+    def attachable_content_type_vs_detected_content_type_mismatch?
+      @attachable_content_type.present? &&
+        !attachable_content_type_intersects_detected_content_type?
+    end
+
+    def attachable_content_type_intersects_detected_content_type?
+      # Ruby intersects? method is only available from 3.1
+      enlarged_content_type(content_type_without_parameters(@attachable_content_type)).any? do |item|
+        enlarged_content_type(content_type_without_parameters(@detected_content_type)).include?(item)
+      end
+    end
+
+    def enlarged_content_type(content_type)
+      [content_type, *parent_content_types(content_type)].compact.uniq
+    end
+
+    def parent_content_types(content_type)
+      Marcel::TYPE_PARENTS[content_type] || []
+    end
+
     def initialize_and_populate_error_options(options, attachable)
       errors_options = initialize_error_options(options, attachable)
       errors_options[:content_type] = @attachable_content_type
       errors_options[:human_content_type] = content_type_to_human_format(@attachable_content_type)
-      errors_options[:authorized_types] = content_type_to_human_format(@authorized_content_types)
+      errors_options[:authorized_human_content_types] = content_type_to_human_format(@authorized_content_types)
+      errors_options[:count] = @authorized_content_types.size
       errors_options
     end
 
@@ -158,7 +183,7 @@ module ActiveStorageValidations
     def ensure_content_types_validity
       return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
 
-      ([options[:with]] || options[:in]).each do |content_type|
+      (Array(options[:with]) + Array(options[:in])).each do |content_type|
         raise ArgumentError, invalid_content_type_option_message(content_type) if invalid_option?(content_type)
       end
     end
@@ -187,6 +212,10 @@ module ActiveStorageValidations
     end
 
     def invalid_content_type?(content_type)
+      if content_type == 'image/jpg'
+        raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
+      end
+
       Marcel::TYPE_EXTS[content_type.to_s] == nil
     end
 

@@ -139,7 +139,7 @@ module ActiveStorageValidations
       # (ie spoofed file basically), we need to ignore the error related to
       # content type spoofing in our matcher to pass the tests
       def validator_errors_for_attribute
-        super.reject { |hash| hash[:error] == :spoofed_content_type }
+        super.reject { |hash| hash[:error] == :content_type_spoofed }
       end
     end
   end

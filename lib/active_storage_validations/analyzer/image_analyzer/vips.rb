@@ -7,11 +7,11 @@ module ActiveStorageValidations
 
     private
 
-    def read_image
+    def read_media
       Tempfile.create(binmode: true) do |tempfile|
         begin
-          if image(tempfile)
-            yield image(tempfile)
+          if media(tempfile)
+            yield media(tempfile)
           else
             logger.info "Skipping image analysis because Vips doesn't support the file"
             {}
@@ -25,7 +25,7 @@ module ActiveStorageValidations
       {}
     end
 
-    def image_from_path(path)
+    def media_from_path(path)
       instrument("vips") do
         begin
           ::Vips::Image.new_from_file(path, access: :sequential)
@@ -34,10 +34,16 @@ module ActiveStorageValidations
           # supported attachable.
           # We stumbled upon this issue while reading 0 byte size attachable
           # https://github.com/janko/image_processing/issues/97
-          logger.info "Skipping image analysis because Vips doesn't support the file"
           nil
         end
       end
+    end
+
+    ROTATIONS = /Right-top|Left-bottom|Top-right|Bottom-left/
+    def rotated_image?(image)
+      ROTATIONS === image.get("exif-ifd0-Orientation")
+    rescue ::Vips::Error
+      false
     end
 
     def supported?
@@ -45,13 +51,6 @@ module ActiveStorageValidations
       true
     rescue LoadError
       logger.info "Skipping image analysis because the ruby-vips gem isn't installed"
-      false
-    end
-
-    ROTATIONS = /Right-top|Left-bottom|Top-right|Bottom-left/
-    def rotated_image?(image)
-      ROTATIONS === image.get("exif-ifd0-Orientation")
-    rescue ::Vips::Error
       false
     end
   end

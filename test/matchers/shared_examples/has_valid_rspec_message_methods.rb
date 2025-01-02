@@ -7,10 +7,11 @@ module HasValidRspecMessageMethods
         case validator_sym
         when :aspect_ratio then matcher.rejecting(:square)
         when :attached then matcher
-        when :processable_image then matcher
+        when :processable_file then matcher
         when :limit then matcher.min(0).max(6)
         when :content_type then matcher.rejecting('image/png')
         when :dimension then matcher.width(75).height(75)
+        when :duration then matcher.less_than_or_equal_to(7.minutes)
         when :size then matcher.less_than_or_equal_to(7.megabytes)
         when :total_size then matcher.less_than_or_equal_to(7.megabytes)
         end
@@ -29,7 +30,7 @@ module HasValidRspecMessageMethods
           <<~FAILURE_MESSAGE
             is expected to validate attachment of :#{model_attribute}
           FAILURE_MESSAGE
-        when :processable_image
+        when :processable_file
           <<~FAILURE_MESSAGE
             is expected to validate the processable image of :#{model_attribute}
           FAILURE_MESSAGE
@@ -53,6 +54,13 @@ module HasValidRspecMessageMethods
               validation failed when provided with a 74x75px test image
               validation failed when provided with a 76x75px test image
               validation failed when provided with a 75x75px test image
+              whereas it should have passed
+          FAILURE_MESSAGE
+        when :duration
+          <<~FAILURE_MESSAGE
+            is expected to validate file duration of :#{model_attribute}
+              but there seem to have issues with the matcher methods you used, since:
+              validation failed when provided with a 419 seconds test file
               whereas it should have passed
           FAILURE_MESSAGE
         when :size
@@ -80,10 +88,11 @@ module HasValidRspecMessageMethods
         case validator_sym
         when :aspect_ratio then matcher.allowing(:square)
         when :attached then matcher
-        when :processable_image then matcher
+        when :processable_file then matcher
         when :limit then matcher.min(1).max(5)
         when :content_type then matcher.allowing('image/png')
         when :dimension then matcher.width(150).height(150)
+        when :duration then matcher.less_than_or_equal_to(5.minutes)
         when :size then matcher.less_than_or_equal_to(5.megabytes)
         when :total_size then matcher.less_than_or_equal_to(5.megabytes)
         end
@@ -102,7 +111,7 @@ module HasValidRspecMessageMethods
           <<~FAILURE_MESSAGE
             is expected not to validate attachment of :#{model_attribute}
           FAILURE_MESSAGE
-        when :processable_image
+        when :processable_file
           <<~FAILURE_MESSAGE
             is expected not to validate the processable image of :#{model_attribute}
           FAILURE_MESSAGE
@@ -128,6 +137,13 @@ module HasValidRspecMessageMethods
               validation failed when provided with a 150x151px test image
               whereas it should have passed
           MESSAGE
+        when :duration
+          <<~FAILURE_MESSAGE
+            is expected not to validate file duration of :#{model_attribute}
+              but there seem to have issues with the matcher methods you used, since:
+              validation failed when provided with a 301 seconds test file
+              whereas it should have passed
+          FAILURE_MESSAGE
         when :size
           <<~FAILURE_MESSAGE
             is expected not to validate file size of :#{model_attribute}
