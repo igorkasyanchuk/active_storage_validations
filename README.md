@@ -29,7 +29,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Dimension](#dimension)
   - [Duration](#duration)
   - [Aspect ratio](#aspect-ratio)
-  - [Processable image](#processable-image)
+  - [Processable file](#processable-file)
 - [Upgrading from 1.x to 2.x](#upgrading-from-1x-to-2x)
 - [Internationalization (I18n)](#internationalization-i18n)
 - [Test matchers](#test-matchers)
@@ -72,9 +72,13 @@ Plus, you have to be sure to have the corresponding command-line tool installed 
 
 To use the video and audio metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
 
+### Using content type spoofing protection validator option
+
+To use the `spoofing_protection` option with the `content_type` validator, you only need to have the UNIX `file` command on your system.
+
 ## Validators
 
-List of validators:
+**List of validators:**
 - [Attached](#attached): validates if file(s) attached
 - [Limit](#limit): validates number of uploaded files
 - [Content type](#content-type): validates file content type
@@ -84,9 +88,10 @@ List of validators:
 - [Duration](#duration): validates video / audio duration
 - [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
 - [Processable file](#processable-file): validates if a file can be processed
+<br>
+<br>
 
-**Proc usage**
-
+**Proc usage**<br>
 Every validator can use procs instead of values in all the validator examples:
 ```ruby
 class User < ApplicationRecord
@@ -95,6 +100,11 @@ class User < ApplicationRecord
   validates :files, limit: { max: -> (record) { record.admin? ? 100 : 10 } }
 end
 ```
+
+**Performance optimization**<br>
+Some validators rely on an expensive operation (metadata analysis and content type analysis). To mitigate the performance cost, the gem leverages the `ActiveStorage::Blob.metadata` method to store retrieved metadata. Therefore, once the file has been analyzed by our gem, the expensive analysis operation will not be triggered again for new validations.
+
+As stated in the Rails documentation: "Blobs are intended to be immutable in so far as their reference to a specific file goes". We based our performance optimization on the same assumption, so if you do not follow it, the gem will not work as expected.
 
 ---
 
@@ -113,7 +123,7 @@ Use it like this:
 class User < ApplicationRecord
   has_one_attached :avatar
 
-  validates :avatar, attached: true
+  validates :avatar, attached: true # ensures that avatar has an attached file
 end
 ```
 
@@ -136,7 +146,7 @@ Validates the number of uploaded files.
 
 #### Options
 
-The `limit` validator has several options:
+The `limit` validator has 2 possible options:
 - `min`: defines the minimum allowed number of files
 - `max`: defines the maximum allowed number of files
 
@@ -171,7 +181,7 @@ en:
         other: "too many files attached (maximum is %{max} files, got %{count})"
 ```
 
-The `limit` validator error messages expose 2 values that you can use:
+The `limit` validator error messages expose 3 values that you can use:
 - `min` containing the minimum allowed number of files (e.g. `1`)
 - `max` containing the maximum allowed number of files (e.g. `10`)
 - `count` containing the current number of files (e.g. `5`)
@@ -184,7 +194,7 @@ Validates if the attachment has an allowed content type.
 
 #### Options
 
-The `content_type` validator has several options:
+The `content_type` validator has 3 possible options:
 - `with`: defines the exact allowed content type (string, symbol or regex)
 - `in`: defines the allowed content types (array of strings or symbols)
 - `spoofing_protection`: enables content type spoofing protection (boolean, defaults to `false`)
@@ -202,7 +212,7 @@ class User < ApplicationRecord
   has_one_attached :avatar
 
   validates :avatar, content_type: 'image/png' # only allows PNG images
-  validates :avatar, content_type: :png # only allows PNG images
+  validates :avatar, content_type: :png # only allows PNG images, same as { with: :png }
   validates :avatar, content_type: /\Avideo\/.*\z/ # only allows video files
   validates :avatar, content_type: ['image/png', 'image/jpeg'] # only allows PNG and JPEG images
   validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true } # only allows PNG, JPEG and their variants, with spoofing protection enabled
@@ -211,9 +221,9 @@ end
 
 #### Best practices
 
-When using the `content_type` validator, it is recommended to reflect the allowed content types in the html [`accept` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) in the corresponding file fields in your views. This will prevent users from trying to upload files with not allowed content types (however it is only an UX improvement, a malicious user can still try to upload files with not allowed content types therefore the backend validation).
+When using the `content_type` validator, it is recommended to reflect the allowed content types in the html [`accept` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) in the corresponding file field in your views. This will prevent users from trying to upload files with not allowed content types (however it is only an UX improvement, a malicious user can still try to upload files with not allowed content types therefore the backend validation).
 
-For example, if you want to only allow PNG and JPEG images, you can do this:
+For example, if you want to allow PNG and JPEG images only, you can do this:
 ```ruby
 class User < ApplicationRecord
   ACCEPTED_CONTENT_TYPES = ['image/png', 'image/jpeg'].freeze
@@ -253,9 +263,9 @@ File content type spoofing happens when an ill-intentioned user uploads a file w
 <summary>
 ##### How do we prevent it?
 </summary>
-The spoofing protection relies on both the linux `file` command and `Marcel` gem. Be careful, since it needs to load the whole file io to perform the analysis, it will use a lot of RAM for very large files. Therefore it could be a wise decision not to enable it in this case.
+The spoofing protection relies on both the UNIX `file` command and `Marcel` gem. Be careful, since it needs to load the whole file io to perform the analysis, it will use a lot of RAM for very large files. Therefore it could be a wise decision not to enable it in this case.
 
-Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (ActiveStorage content type detection relies on a different logic using content+filename+extension). To handle this issue, we consider a close parent content type to be a match. For example, for an ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content types are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS`.
+Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (ActiveStorage content type detection relies on a different logic using first 4kb of content + filename + extension). To handle this issue, we consider a close parent content type to be a match. For example, for an ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content types are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS` table.
 </details>
 
 <details>
@@ -299,7 +309,7 @@ Validates each attached file size.
 
 #### Options
 
-The `size` validator has several options:
+The `size` validator has 5 possible options:
 - `less_than`: defines the strict maximum allowed file size
 - `less_than_or_equal_to`: defines the maximum allowed file size
 - `greater_than`: defines the strict minimum allowed file size
@@ -353,7 +363,7 @@ Validates the total file size for several files.
 
 #### Options
 
-The `total_size` validator has several options:
+The `total_size` validator has 5 possible options:
 - `less_than`: defines the strict maximum allowed total file size
 - `less_than_or_equal_to`: defines the maximum allowed total file size
 - `greater_than`: defines the strict minimum allowed total file size
@@ -389,7 +399,7 @@ en:
 ```
 
 The `total_size` validator error messages expose 4 values that you can use:
-- `file_size` containing the current file size (e.g. `1.5MB`)
+- `total_file_size` containing the current total file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed total file size (e.g. `1KB`)
 - `max` containing the maximum allowed total file size (e.g. `2MB`)
 
@@ -397,11 +407,11 @@ The `total_size` validator error messages expose 4 values that you can use:
 
 ### Dimension
 
-Validates the dimension of the attached files.
+Validates the dimension of the attached image / video files.
 
 #### Options
 
-The `dimension` validator has several options:
+The `dimension` validator has several possible options:
 - `width`: defines the exact allowed width (integer)
   - `min`: defines the minimum allowed width (integer)
   - `max`: defines the maximum allowed width (integer)
@@ -461,11 +471,11 @@ The `dimension` validator error messages expose 6 values that you can use:
 
 ### Duration
 
-Validates each attached audio / video file duration.
+Validates the duration of the attached audio / video files.
 
 #### Options
 
-The `duration` validator has several options:
+The `duration` validator has 5 possible options:
 - `less_than`: defines the strict maximum allowed file duration
 - `less_than_or_equal_to`: defines the maximum allowed file duration
 - `greater_than`: defines the strict minimum allowed file duration
@@ -515,8 +525,8 @@ Validates the aspect ratio of the attached files.
 #### Options
 
 The `aspect_ratio` validator has several options:
-- `with`: defines the exact allowed aspect ratio (e.g. `16/9`)
-- `in`: defines the allowed aspect ratios (e.g. `16/9..16/10`)
+- `with`: defines the exact allowed aspect ratio (e.g. `:is_16/9`)
+- `in`: defines the allowed aspect ratios (e.g. `%i[square landscape]`)
 
 This validator can define aspect ratios in several ways:
 - Symbols:
@@ -602,31 +612,32 @@ Added features:
 - `dimension` validator now supports videos
 - `aspect_ratio` validator now supports videos
 - `processable_image` validator is now `processable_file` validator and supports image/video/audio
+- Major performance improvement have been added: we now only perform the expensive io analysis operation on the newly attached files. For previously attached files, we validate them using Rails `ActiveStorage::Blob#metadata` internal mecanism ([more here](https://github.com/rails/rails/blob/main/activestorage/app/models/active_storage/blob/analyzable.rb)).
 - All error messages have been given an upgrade and new variables that you can use
 
 But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
 - Error messages
-  - We advise you to replace all the v1 translations by the new v2 rather than changing them one by one
-  - The error messages have been completely rewritten to be more consistent and easier to understand (not breaking but might be a good idea to update them with the new versions)
-  - Some validator errors have been totally changed:
-    - `limit` validator keys have been totally reworked
-    - `dimension` validator keys have been totally reworked
-    - `content_type` validator keys have been totally reworked
-    - `processable_image` validator keys have been totally reworked
-  - Some keys have been changed:
-    - `image_metadata_missing` has been replaced by `media_metadata_missing`
-    - `aspect_ratio_is_not` has been replaced by `aspect_ratio_not_x_y`
-  - Some error messages variables names have been changed to improve readability:
-    - `aspect_ratio` validator:
-      - `aspect_ratio` has been replaced by `authorized_aspect_ratios`
-    - `content_type` validator:
-      - `authorized_types` has been replaced by `authorized_human_content_types`
-    - `size` validator:
-      - `min_size` has been replaced by `min`
-      - `max_size` has been replaced by `max`
-    - `total_size` validator:
-      - `min_size` has been replaced by `min`
-      - `max_size` has been replaced by `max`
+  - We advise you to replace all the v1 translations by the new v2 rather than changing them one by one. A majority of messages have been completely rewritten to be more consistent and easier to understand.
+  - If you wish to change them one by one, here is the list of changes to make:
+    - Some validator errors have been totally changed:
+      - `limit` validator keys have been totally reworked
+      - `dimension` validator keys have been totally reworked
+      - `content_type` validator keys have been totally reworked
+      - `processable_image` validator keys have been totally reworked
+    - Some keys have been changed:
+      - `image_metadata_missing` has been replaced by `media_metadata_missing`
+      - `aspect_ratio_is_not` has been replaced by `aspect_ratio_not_x_y`
+    - Some error messages variables names have been changed to improve readability:
+      - `aspect_ratio` validator:
+        - `aspect_ratio` has been replaced by `authorized_aspect_ratios`
+      - `content_type` validator:
+        - `authorized_types` has been replaced by `authorized_human_content_types`
+      - `size` validator:
+        - `min_size` has been replaced by `min`
+        - `max_size` has been replaced by `max`
+      - `total_size` validator:
+        - `min_size` has been replaced by `min`
+        - `max_size` has been replaced by `max`
 
 - `content_type` validator
   - The `:in` option now only accepts 'valid' content types (ie content types deemed by Marcel as valid).

@@ -284,6 +284,23 @@ module WorksFineWithAttachables
         end
       end
 
+      describe "when an invalid file has been attached on a `has_one_attached` relation without validation" do
+        before do
+          subject.using_attachable.attach(attachable_not_passing_validations)
+          subject.save(validate: false)
+        end
+
+        let(:attachable_not_passing_validations) do
+          tar_file_with_image_content_type
+        end
+
+        describe "when we try to validate the record afterwards" do
+          it "is invalid" do
+            assert_equal false, subject.valid?
+          end
+        end
+      end
+
       describe "when using `file_fixture_upload` (or its alias `fixture_file_upload`)" do
         let(:attachable) { fixture_file_upload('image_150x150.png', 'image/png') }
 

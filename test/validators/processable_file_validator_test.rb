@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'validators/shared_examples/is_performance_optimized'
 require 'validators/shared_examples/works_fine_with_attachables'
 require 'validators/shared_examples/works_with_all_rails_common_validation_options'
 
@@ -53,6 +54,18 @@ describe ActiveStorageValidations::ProcessableFileValidator do
 
       it { is_expected_to_be_valid }
     end
+  end
+
+  describe 'Blob Metadata' do
+    let(:attachable) do
+      {
+        io: File.open(Rails.root.join('public', 'audio.mp3')),
+        filename: 'audio.mp3',
+        content_type: 'audio/mp3'
+      }
+    end
+
+    include IsPerformanceOptimized
   end
 
   describe 'Rails options' do

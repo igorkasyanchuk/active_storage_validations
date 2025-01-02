@@ -17,11 +17,12 @@ module ActiveStorageValidations
     ERROR_TYPES = %i[
       file_not_processable
     ].freeze
+    METADATA_KEYS = %i[].freeze
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      validate_changed_files_from_metadata(record, attribute)
+      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
     end
 
     private

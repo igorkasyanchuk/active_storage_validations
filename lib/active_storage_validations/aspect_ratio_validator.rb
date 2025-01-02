@@ -28,6 +28,7 @@ module ActiveStorageValidations
       media_metadata_missing
     ].freeze
     PRECISION = 3.freeze
+    METADATA_KEYS = %i[width height].freeze
 
     def check_validity!
       ensure_at_least_one_validator_option
@@ -41,7 +42,7 @@ module ActiveStorageValidations
       @authorized_aspect_ratios = authorized_aspect_ratios_from_options(flat_options).compact
       return if @authorized_aspect_ratios.empty?
 
-      validate_changed_files_from_metadata(record, attribute)
+      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
     end
 
     private
