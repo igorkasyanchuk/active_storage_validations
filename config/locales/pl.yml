@@ -4,7 +4,9 @@ pl:
       content_type_invalid:
         one: "ma nieprawidłowy typ zawartości (autoryzowany typ zawartości to %{authorized_human_content_types})"
         other: "ma nieprawidłowy typ zawartości (autoryzowane typy treści to %{authorized_human_content_types})"
-      spoofed_content_type: "ma typ zawartości, który nie jest tym, co deklaruje się poprzez swoją treść"
+      content_type_spoofed:
+        one: "ma typ zawartości, który nie jest równoważny z tym, który jest wykrywany przez jego zawartość (autoryzowany typ zawartości to %{authorized_human_content_types})"
+        other: "ma typ zawartości, który nie jest równoważny z tym, który jest wykrywany przez jego zawartość (autoryzowane typy treści to %{authorized_human_content_types})"
       file_size_not_less_than: "rozmiar pliku musi być mniejszy niż %{max} (obecny rozmiar to %{file_size})"
       file_size_not_less_than_or_equal_to: "rozmiar pliku musi być mniejszy lub równy %{max} (obecny rozmiar to %{file_size})"
       file_size_not_greater_than: "rozmiar pliku musi być większy niż %{min} (obecny rozmiar to %{file_size})"

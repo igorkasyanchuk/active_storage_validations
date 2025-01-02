@@ -4,7 +4,9 @@ zh-CN:
       content_type_invalid:
         one: "具有无效的内容类型（授权的内容类型为%{authorized_human_content_types})"
         other: "具有无效的内容类型（授权的内容类型为%{authorized_human_content_types})"
-      spoofed_content_type: "具有的内容类型不是通过其内容声明的内容类型"
+      content_type_spoofed:
+        one: "其内容类型不等于通过其内容检测到的内容类型（授权内容类型为%{authorized_human_content_types})"
+        other: "其内容类型与通过其内容检测到的内容类型不等效（授权内容类型为%{authorized_human_content_types})"
       file_size_not_less_than: "文件大小必须小于 %{max}（当前大小为 %{file_size})"
       file_size_not_less_than_or_equal_to: "文件大小必须小于或等于 %{max}（当前大小为 %{file_size})"
       file_size_not_greater_than: "文件大小必须大于 %{min}（当前大小为 %{file_size})"
