@@ -10,13 +10,13 @@
 #
 
 class Integration::Validator::Performance < ApplicationRecord
-  has_one_attached :picture
-  validates :picture,
+  has_many_attached :pictures
+  validates :pictures,
             aspect_ratio: :square,
-            dimension: { min: 80..600, max: 80..600 }
+            dimension: { min: 80..80, max: 600..600 }
 
-  has_one_attached :video
-  validates :video,
-            dimension: { min: 80..600, max: 80..600 },
-            duration: { less_than: 10.seconds }
+  has_many_attached :videos
+  validates :videos,
+            dimension: { min: 80..80, max: 600..600 },
+            content_type: { with: :mp4, spoofing_protection: true }
 end

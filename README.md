@@ -211,7 +211,7 @@ class User < ApplicationRecord
   has_one_attached :avatar
 
   validates :avatar, content_type: 'image/png' # only allows PNG images
-  validates :avatar, content_type: :png # only allows PNG images
+  validates :avatar, content_type: :png # only allows PNG images, same as { with: :png }
   validates :avatar, content_type: /\Avideo\/.*\z/ # only allows video files
   validates :avatar, content_type: ['image/png', 'image/jpeg'] # only allows PNG and JPEG images
   validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true } # only allows PNG, JPEG and their variants, with spoofing protection enabled

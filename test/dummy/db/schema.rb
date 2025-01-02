@@ -97,6 +97,7 @@ ActiveRecord::Schema.define do
 
   %i(
     aspect_ratio
+    content_type
     dimension
     duration
     processable_file

@@ -22,6 +22,7 @@ module ActiveStorageValidations
       content_type_invalid
       content_type_spoofed
     ].freeze
+    METADATA_KEYS = %i[content_type].freeze
 
     def check_validity!
       ensure_exactly_one_validator_option
@@ -36,7 +37,7 @@ module ActiveStorageValidations
 
       attachables_and_blobs(record, attribute).each do |attachable, blob|
         set_attachable_cached_values(blob)
-        is_valid?(record, attribute, attachable)
+        is_valid?(record, attribute, attachable, blob)
       end
     end
 
@@ -60,9 +61,9 @@ module ActiveStorageValidations
 
     # Check if the provided content_type is authorized and not spoofed against
     # the file io.
-    def is_valid?(record, attribute, attachable)
+    def is_valid?(record, attribute, attachable, blob)
       authorized_content_type?(record, attribute, attachable) &&
-        not_spoofing_content_type?(record, attribute, attachable)
+        not_spoofing_content_type?(record, attribute, attachable, blob)
     end
 
     # Dead code that we keep here for some time, maybe we will find a solution
@@ -104,10 +105,10 @@ module ActiveStorageValidations
       Marcel::MimeType.for(declared_type: @attachable_content_type, name: @attachable_filename)
     end
 
-    def not_spoofing_content_type?(record, attribute, attachable)
+    def not_spoofing_content_type?(record, attribute, attachable, blob)
       return true unless enable_spoofing_protection?
 
-      @detected_content_type = ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable).content_type[:content_type]
+      @detected_content_type = metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:content_type, nil)
 
       if attachable_content_type_vs_detected_content_type_mismatch?
         errors_options = initialize_and_populate_error_options(options, attachable)
