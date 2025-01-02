@@ -24,13 +24,20 @@ module ActiveStorageValidations
 
     # Retrieve an array-like of attachables and blobs. Unlike its name suggests,
     # getting attachables from attachment_changes is not getting the changed
-    # attachables but all attachables from the has_many_attached relation.
+    # attachables but all attachables from the `has_many_attached` relation.
+    # For the `has_one_attached` relation, it only yields the new attachable,
+    # but if we are validating previously attached file, we need to use the blob
     # See #attach at: https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/attached/many.rb
     #
     # Some file could be passed several times, we just need to perform the
     # analysis once on the file, therefore the use of #uniq.
     def attachables_and_blobs(record, attribute)
-      changes = record.attachment_changes[attribute.to_s]
+      changes = if record.public_send(attribute).is_a?(ActiveStorage::Attached::One)
+        record.attachment_changes[attribute.to_s].presence || record.public_send(attribute)
+      else
+        record.attachment_changes[attribute.to_s]
+      end
+
       return to_enum(:attachables_and_blobs, record, attribute) if changes.blank? || !block_given?
 
       if changes.is_a?(ActiveStorage::Attached::Changes::CreateMany)
@@ -38,7 +45,7 @@ module ActiveStorageValidations
           yield attachable, blob
         end
       else
-        yield changes.attachable, changes.blob
+        yield changes.is_a?(ActiveStorage::Attached::Changes::CreateOne) ? changes.attachable : changes.blob, changes.blob
       end
     end
 
