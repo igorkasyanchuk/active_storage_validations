@@ -4,7 +4,9 @@ tr:
       content_type_invalid:
         one: "geçersiz içerik türüne sahip (yetkili içerik türü %{authorized_human_content_types})"
         other: "geçersiz içerik türüne sahip (yetkili içerik türleri %{authorized_human_content_types})"
-      spoofed_content_type: "içeriği ile bildirildiği içerik olmayan bir içerik türüne sahiptir"
+      content_type_spoofed:
+        one: "içeriği aracılığıyla algılanan içerik türüne eşdeğer olmayan bir içerik türüne sahiptir (yetkili içerik türü %{authorized_human_content_types})"
+        other: "içeriği aracılığıyla algılanan içerik türüne eşdeğer olmayan bir içerik türüne sahiptir (yetkili içerik türleri %{authorized_human_content_types})"
       file_size_not_less_than: "dosya boyutu %{max} boyutundan küçük olmalıdır (geçerli boyut %{file_size}'dir)"
       file_size_not_less_than_or_equal_to: "dosya boyutu %{max} değerinden küçük veya ona eşit olmalıdır (geçerli boyut %{file_size}'dir)"
       file_size_not_greater_than: "dosya boyutu %{min} boyutundan büyük olmalıdır (geçerli boyut %{file_size}'dir)"

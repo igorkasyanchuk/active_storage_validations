@@ -20,7 +20,7 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[with in].freeze
     ERROR_TYPES = %i[
       content_type_invalid
-      spoofed_content_type
+      content_type_spoofed
     ].freeze
 
     def check_validity!
@@ -113,6 +113,8 @@ module ActiveStorageValidations
 
       if attachable_content_type_vs_detected_content_type_mismatch?
         errors_options = initialize_and_populate_error_options(options, attachable)
+        errors_options[:detected_content_type] = @detected_content_type
+        errors_options[:detected_human_content_type] = content_type_to_human_format(@detected_content_type)
         add_error(record, attribute, ERROR_TYPES.second, **errors_options)
         false
       else

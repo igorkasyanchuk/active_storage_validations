@@ -330,12 +330,18 @@ describe ActiveStorageValidations::ContentTypeValidator do
           let(:spoofed_file) { spoofed_jpeg }
           let(:error_options) do
             {
-              filename: spoofed_jpeg[:filename]
+              authorized_human_content_types: "JPG",
+              content_type: "image/jpeg",
+              human_content_type: "JPG",
+              count: 1,
+              detected_content_type: "text/plain",
+              detected_human_content_type: "TXT",
+              filename: spoofed_jpeg[:filename],
             }
           end
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_have_error_message("spoofed_content_type", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
           it { is_expected_to_have_error_options(error_options, validator: :content_type) }
         end
 
@@ -346,12 +352,18 @@ describe ActiveStorageValidations::ContentTypeValidator do
 
           let(:error_options) do
             {
-              filename: empty_file[:filename]
+              authorized_human_content_types: "JPG",
+              content_type: "image/jpeg",
+              human_content_type: "JPG",
+              count: 1,
+              detected_content_type: "inode/x-empty",
+              detected_human_content_type: "EMPTY",
+              filename: empty_file[:filename],
             }
           end
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_have_error_message("spoofed_content_type", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
           it { is_expected_to_have_error_options(error_options, validator: :content_type) }
         end
 
@@ -362,12 +374,18 @@ describe ActiveStorageValidations::ContentTypeValidator do
 
           let(:error_options) do
             {
+              authorized_human_content_types: "JPG",
+              content_type: "image/jpeg",
+              human_content_type: "JPG",
+              count: 1,
+              detected_content_type: "text/plain",
+              detected_human_content_type: "TXT",
               filename: not_identifiable_type[:filename]
             }
           end
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_have_error_message("spoofed_content_type", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
           it { is_expected_to_have_error_options(error_options, validator: :content_type) }
         end
 
@@ -416,12 +434,18 @@ describe ActiveStorageValidations::ContentTypeValidator do
             let(:spoofed_jpeg_file) { create_blob_from_file(spoofed_jpeg) }
             let(:error_options) do
               {
-                filename: spoofed_jpeg[:filename]
+                authorized_human_content_types: "JPG",
+                content_type: "image/jpeg",
+                human_content_type: "JPG",
+                count: 1,
+                detected_content_type: "text/plain",
+                detected_human_content_type: "TXT",
+                filename: spoofed_jpeg[:filename],
               }
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("spoofed_content_type", error_options: error_options, validator: :content_type) }
+            it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
             it { is_expected_to_have_error_options(error_options, validator: :content_type) }
           end
         end

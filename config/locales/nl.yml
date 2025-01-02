@@ -4,7 +4,9 @@ nl:
       content_type_invalid:
         one: "heeft een ongeldig inhoudstype (toegestaan inhoudstype is %{authorized_human_content_types})"
         other: "heeft een ongeldig inhoudstype (toegestane inhoudstypen zijn %{authorized_human_content_types})"
-      spoofed_content_type: "heeft een inhoudstype dat niet is wat het via zijn inhoud wordt verklaard"
+      content_type_spoofed:
+        one: "heeft een inhoudstype dat niet gelijk is aan het type dat wordt gedetecteerd door de inhoud (geautoriseerd inhoudstype is %{authorized_human_content_types})"
+        other: "heeft een inhoudstype dat niet gelijk is aan het type dat wordt gedetecteerd door de inhoud (geautoriseerde inhoudstypen zijn %{authorized_human_content_types})"
       file_size_not_less_than: "bestandsgrootte moet kleiner zijn dan %{max} (huidige grootte is %{file_size})"
       file_size_not_less_than_or_equal_to: "bestandsgrootte moet kleiner zijn dan of gelijk zijn aan %{max} (huidige grootte is %{file_size})"
       file_size_not_greater_than: "bestandsgrootte moet groter zijn dan %{min} (huidige grootte is %{file_size})"
