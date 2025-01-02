@@ -16,7 +16,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
     end
 
     def is_expected_to_return_empty_content_type
-      assert_equal("inode/x-empty", subject)
+      assert_equal({ content_type: 'inode/x-empty' }, subject)
     end
 
     subject { analyzer.content_type }
@@ -38,8 +38,8 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
       let(:media_path) { Rails.root.join('public', media_filename) }
       let(:media_io) { File.open(media_path) }
       let(:media_content_type) { 'image/png' }
-      let(:expected_content_type) { 'image/png' }
-      let(:expected_content_type_over_10ko) { 'image/png' }
+      let(:expected_content_type) { { content_type: 'image/png' } }
+      let(:expected_content_type_over_10ko) { { content_type: 'image/png' } }
 
       describe "ActiveStorage::Blob object" do
         let(:attachable) do
