@@ -152,6 +152,7 @@ ActiveRecord::Schema.define do
 
   %w(
     based_on_a_file_property
+    performance
     zero_byte_image
   ).each do |integration_test|
     create_table :"integration_validator_#{integration_test.pluralize}", force: :cascade do |t|

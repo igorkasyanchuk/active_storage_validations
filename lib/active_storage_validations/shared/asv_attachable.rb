@@ -16,9 +16,9 @@ module ActiveStorageValidations
     # Loop through the newly submitted attachables to validate them. Using
     # attachables is the only way to get the attached file io that is necessary
     # to perform file analyses.
-    def validate_changed_files_from_metadata(record, attribute)
+    def validate_changed_files_from_metadata(record, attribute, metadata_keys)
       attachables_and_blobs(record, attribute).each do |attachable, blob|
-        is_valid?(record, attribute, attachable, metadata_for(blob, attachable))
+        is_valid?(record, attribute, attachable, metadata_for(blob, attachable, metadata_keys))
       end
     end
 

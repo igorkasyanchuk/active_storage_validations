@@ -75,4 +75,64 @@ describe 'Integration tests' do
       end
     end
   end
+
+  describe "Performance" do
+    describe "when the attachable blob has been analyzed by another metadata validator of our gem" do
+      subject { integration_test_class::Performance.new(params) }
+
+      describe "which uses the same metadata keys (e.g. width & height)" do
+        let(:attachable) do
+          {
+            io: File.open(Rails.root.join('public', 'image_150x150.png')),
+            filename: 'image_150x150.png',
+            content_type: 'image/png'
+          }
+        end
+
+        before do
+          subject.picture.attach(attachable)
+        end
+
+        it "only calls once a media analyzer (expensive operation) on the new attachable" do
+          assert_called_on_instance_of(ActiveStorageValidations::Analyzer::ImageAnalyzer, :metadata, times: 1, returns: { width: 150, height: 150 }) do
+            subject.valid?
+          end
+        end
+      end
+
+      describe "which uses different metadata keys (e.g. width & height + duration)" do
+        let(:attachable) do
+          {
+            io: File.open(Rails.root.join('public', 'video_150x150.mp4')),
+            filename: 'video_150x150.mp4',
+            content_type: 'video/mp4'
+          }
+        end
+        let(:expected_saved_metadata) do
+          {
+            "width" => 150,
+            "height" => 150,
+            "duration" => 1.7,
+            "audio" => false,
+            "video" => true
+          }
+        end
+
+        before do
+          subject.video.attach(attachable)
+        end
+
+        it "calls twice the corresponding media analyzer (expensive operation) on the new attachable" do
+          assert_called_on_instance_of(ActiveStorageValidations::Analyzer::VideoAnalyzer, :metadata, times: 2, returns: { width: 150, height: 150 }) do
+            subject.valid?
+          end
+        end
+
+        it "save metadata keys from both analyses on the new attachable" do
+          subject.valid?
+          assert_equal expected_saved_metadata, subject.video.blob.active_storage_validations_metadata
+        end
+      end
+    end
+  end
 end

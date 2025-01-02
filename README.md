@@ -72,6 +72,10 @@ Plus, you have to be sure to have the corresponding command-line tool installed 
 
 To use the video and audio metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
 
+### Using content type spoofing protection validator option
+
+To use the `spoofing_protection` option with the `content_type` validator, you only need to have the UNIX `file` command on your system.
+
 ## Validators
 
 List of validators:
@@ -95,6 +99,11 @@ class User < ApplicationRecord
   validates :files, limit: { max: -> (record) { record.admin? ? 100 : 10 } }
 end
 ```
+
+**Performance optimization**
+Every validator relying on an expensive operation (metadata analysis and content type analysis) leverages the `ActiveStorage::Blob.metadata` method to store retrieved metadata. Therefore, once the file has been analyzed by our gem, the expensive analysis operation will not be triggered again for new validations.
+
+As stated in the Rails documentation: "Blobs are intended to be immutable in so far as their reference to a specific file goes". We based our performance optimization on the same assumption, so if you do not follow it, the gem will not work as expected.
 
 ---
 

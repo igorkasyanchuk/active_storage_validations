@@ -14,6 +14,7 @@ module ActiveStorageValidations
       duration_not_greater_than_or_equal_to
       duration_not_between
     ].freeze
+    METADATA_KEYS = %i[duration].freeze
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
@@ -21,7 +22,7 @@ module ActiveStorageValidations
       flat_options = set_flat_options(record)
 
       attachables_and_blobs(record, attribute).each do |attachable, blob|
-        duration = metadata_for(blob, attachable)&.fetch(:duration, nil)
+        duration = metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:duration, nil)
 
         if duration.to_i <= 0
           errors_options = initialize_error_options(options, attachable)

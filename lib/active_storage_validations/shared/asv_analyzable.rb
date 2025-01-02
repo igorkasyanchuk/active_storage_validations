@@ -16,10 +16,17 @@ module ActiveStorageValidations
     # If the blob has not been analyzed by our gem yet, the gem will analyze the
     # attachable with the corresponding analyzer and set the metadata in the
     # blob.
-    def metadata_for(blob, attachable)
-      return blob.active_storage_validations_metadata if blob.active_storage_validations_metadata.present?
+    def metadata_for(blob, attachable, metadata_keys)
+      return blob.active_storage_validations_metadata if blob_has_asv_metadata?(blob, metadata_keys)
 
-      blob.active_storage_validations_metadata = generate_metadata_for(attachable)
+      new_metadata = generate_metadata_for(attachable)
+      blob.merge_into_active_storage_validations_metadata(new_metadata)
+    end
+
+    def blob_has_asv_metadata?(blob, metadata_keys)
+      return false unless blob.active_storage_validations_metadata.present?
+
+      metadata_keys.all? { |key| blob.active_storage_validations_metadata.key?(key) }
     end
 
     def generate_metadata_for(attachable)
