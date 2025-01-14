@@ -29,7 +29,7 @@ module ActiveStorageValidations
 
     def media_from_path(path)
       instrument(File.basename(ffprobe_path)) do
-        stdout, stderr, status = Open3.capture3(
+        stdout, _stderr, status = Open3.capture3(
           ffprobe_path,
           "-print_format", "json",
           "-show_streams",
