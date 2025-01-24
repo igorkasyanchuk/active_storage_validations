@@ -8,11 +8,11 @@ module ActiveStorageValidations
 
     private
 
-    def read_image
+    def read_media
       Tempfile.create(binmode: true) do |tempfile|
         begin
-          if image(tempfile).valid?
-            yield image(tempfile)
+          if media(tempfile).valid?
+            yield media(tempfile)
           else
             logger.info "Skipping image analysis because ImageMagick doesn't support the file"
             {}
@@ -26,7 +26,7 @@ module ActiveStorageValidations
       {}
     end
 
-    def image_from_path(path)
+    def media_from_path(path)
       instrument("mini_magick") do
         MiniMagick::Image.new(path)
       end

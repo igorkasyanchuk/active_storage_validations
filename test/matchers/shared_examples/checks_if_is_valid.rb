@@ -10,7 +10,7 @@ module ChecksIfIsValid
             when :aspect_ratio then matcher.allowing(:square)
             when :attached then matcher
             when :content_type then matcher.rejecting('image/jpg')
-            when :processable_image then matcher
+            when :processable_file then matcher
             when :limit then matcher.min(1)
             when :dimension then matcher.width(150)
             when :size then matcher.less_than(10.megabytes)

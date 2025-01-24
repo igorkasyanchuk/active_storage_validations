@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'validators/shared_examples/checks_validator_validity'
+require 'validators/shared_examples/is_performance_optimized'
 require 'validators/shared_examples/works_fine_with_attachables'
 require 'validators/shared_examples/works_with_all_rails_common_validation_options'
 
@@ -16,18 +17,48 @@ describe ActiveStorageValidations::ContentTypeValidator do
 
     describe 'content type validity' do
       describe 'when the passed option is an invalid content type' do
-        subject { validator_test_class::CheckValidityInvalidContentType.new(params) }
+        describe ":with" do
+          subject { validator_test_class::CheckValidityInvalidContentTypeWith.new(params) }
 
-        let(:error_message) do
-          <<~ERROR_MESSAGE
-            You must pass valid content types to the validator
-            '#{invalid_content_type}' is not found in Marcel::TYPE_EXTS
-          ERROR_MESSAGE
+          let(:error_message) do
+            <<~ERROR_MESSAGE
+              You must pass valid content types to the validator
+              '#{invalid_content_type}' is not found in Marcel::TYPE_EXTS
+            ERROR_MESSAGE
+          end
+          let(:invalid_content_type) { "xxx/invalid" }
+
+          it 'raises an error at model initialization' do
+            assert_raises(ArgumentError, error_message) { subject }
+          end
         end
-        let(:invalid_content_type) { "xxx/invalid" }
 
-        it 'raises an error at model initialization' do
-          assert_raises(ArgumentError, error_message) { subject }
+        describe ":in" do
+          subject { validator_test_class::CheckValidityInvalidContentTypeIn.new(params) }
+
+          let(:error_message) do
+            <<~ERROR_MESSAGE
+              You must pass valid content types to the validator
+              '#{invalid_content_type}' is not found in Marcel::TYPE_EXTS
+            ERROR_MESSAGE
+          end
+          let(:invalid_content_type) { "xxx/invalid1" }
+
+          it 'raises an error at model initialization' do
+            assert_raises(ArgumentError, error_message) { subject }
+          end
+        end
+
+        describe "when the passed option is 'image/jpg'" do
+          subject { validator_test_class::CheckValidityInvalidContentTypeJpg.new(params) }
+
+          let(:error_message) do
+            "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
+          end
+
+          it 'raises an error at model initialization' do
+            assert_raises(ArgumentError, error_message) { subject }
+          end
         end
       end
 
@@ -81,7 +112,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
     #     let(:file_with_issue) { extension_content_type_mismatch_file }
     #     let(:error_options) do
     #       {
-    #         authorized_types: "PNG",
+    #         authorized_human_content_types: "PNG",
     #         content_type: file_with_issue[:content_type],
     #         filename: file_with_issue[:filename]
     #       }
@@ -104,7 +135,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
     #       end
     #       let(:error_options) do
     #         {
-    #           authorized_types: "DOCX",
+    #           authorized_human_content_types: "DOCX",
     #           content_type: docx_file_with_two_extensions[:content_type],
     #           filename: docx_file_with_two_extensions[:filename]
     #         }
@@ -154,7 +185,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
     #     end
     #     let(:error_options) do
     #       {
-    #         authorized_types: "PDF",
+    #         authorized_human_content_types: "PDF",
     #         content_type: pdf_file_without_extension[:content_type],
     #         filename: pdf_file_without_extension[:filename]
     #       }
@@ -191,11 +222,12 @@ describe ActiveStorageValidations::ContentTypeValidator do
                 subject { model.public_send(attribute).attach(not_allowed_file) and model }
 
                 let(:not_allowed_file) { numbers_file }
-                let(:authorized_types) { type == 'regex' ? '\\Aimage/.*\\z' : 'PNG' }
+                let(:authorized_human_content_types) { type == 'regex' ? '\\Aimage/.*\\z' : 'PNG' }
                 let(:error_options) do
                   {
-                    authorized_types: authorized_types,
+                    authorized_human_content_types: authorized_human_content_types,
                     content_type: not_allowed_file[:content_type],
+                    count: 1,
                     filename: not_allowed_file[:filename]
                   }
                 end
@@ -235,11 +267,12 @@ describe ActiveStorageValidations::ContentTypeValidator do
                 subject { model.public_send(attribute).attach(not_allowed_file) and model }
 
                 let(:not_allowed_file) { numbers_file }
-                let(:authorized_types) { type == 'regex' ? '\\Aimage/.*\\z, \\Afile/.*\\z' : 'PNG, GIF' }
+                let(:authorized_human_content_types) { type == 'regex' ? '\\Aimage/.*\\z, \\Afile/.*\\z' : 'PNG, GIF' }
                 let(:error_options) do
                   {
-                    authorized_types: authorized_types,
+                    authorized_human_content_types: authorized_human_content_types,
                     content_type: not_allowed_file[:content_type],
+                    count: 2,
                     filename: not_allowed_file[:filename]
                   }
                 end
@@ -250,6 +283,27 @@ describe ActiveStorageValidations::ContentTypeValidator do
               end
             end
           end
+        end
+      end
+    end
+
+    describe "working with most common mime types" do
+      most_common_mime_types.each do |common_mime_type|
+        describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
+          subject { model.public_send(attribute).attach(allowed_file) and model }
+
+          let(:media) { common_mime_type[:mime_type].split('/').first }
+          let(:content) { common_mime_type[:extension].underscore }
+          let(:attribute) { [media, content].join('_') } # e.g. image_jpeg
+          let(:allowed_file) do
+            {
+              io: File.open(Rails.root.join('public', "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
+              filename: "example.#{common_mime_type[:extension]}",
+              content_type: common_mime_type[:mime_type]
+            }
+          end
+
+          it { is_expected_to_be_valid }
         end
       end
     end
@@ -275,8 +329,126 @@ describe ActiveStorageValidations::ContentTypeValidator do
           subject { model.public_send(attribute).attach(spoofed_file) and model }
 
           let(:spoofed_file) { spoofed_jpeg }
+          let(:error_options) do
+            {
+              authorized_human_content_types: "JPG",
+              content_type: "image/jpeg",
+              human_content_type: "JPG",
+              count: 1,
+              detected_content_type: "text/plain",
+              detected_human_content_type: "TXT",
+              filename: spoofed_jpeg[:filename],
+            }
+          end
 
           it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+        end
+
+        describe "when the file is empty" do
+          subject { model.public_send(attribute).attach(empty_file) and model }
+
+          let(:empty_file) { empty_io_file }
+
+          let(:error_options) do
+            {
+              authorized_human_content_types: "JPG",
+              content_type: "image/jpeg",
+              human_content_type: "JPG",
+              count: 1,
+              detected_content_type: "inode/x-empty",
+              detected_human_content_type: "EMPTY",
+              filename: empty_file[:filename],
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+        end
+
+        describe "when the file mime type is not identifiable" do
+          subject { model.public_send(attribute).attach(not_identifiable_type) and model }
+
+          let(:not_identifiable_type) { not_identifiable_io_file }
+
+          let(:error_options) do
+            {
+              authorized_human_content_types: "JPG",
+              content_type: "image/jpeg",
+              human_content_type: "JPG",
+              count: 1,
+              detected_content_type: "text/plain",
+              detected_human_content_type: "TXT",
+              filename: not_identifiable_type[:filename]
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+        end
+
+        describe "working with most common mime types" do
+          most_common_mime_types.each do |common_mime_type|
+            describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
+              subject { model.public_send(attribute).attach(okay_file) and model }
+
+              let(:media) { common_mime_type[:mime_type].split('/').first }
+              let(:content) { common_mime_type[:extension].underscore }
+              let(:attribute) { [media, content, 'spoof'].join('_') } # e.g. image_jpeg_spoof
+              let(:okay_file) do
+                {
+                  io: File.open(Rails.root.join('public', "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
+                  filename: "example.#{common_mime_type[:extension]}",
+                  content_type: common_mime_type[:mime_type]
+                }
+              end
+
+              it "identifies the mime type correctly (ie it is valid, an invalid identification will make it invalid)" do
+                is_expected_to_be_valid
+              end
+            end
+          end
+        end
+
+        # validates :many_spoofing_protection, content_type: :jpg
+        describe 'with has_many_attached relationship' do
+          let(:attribute) { :many_spoofing_protection }
+
+          describe "when the files are okay" do
+            subject { model.public_send(attribute).attach(okay_files) and model }
+
+            let(:okay_files) { [okay_jpg_1, okay_jpg_2] }
+            let(:okay_jpg_1) { create_blob_from_file(jpeg_file) }
+            let(:okay_jpg_2) { create_blob_from_file(jpeg_file) }
+
+            it { is_expected_to_be_valid }
+          end
+
+          describe "when one of the file is spoofed" do
+            subject { model.public_send(attribute).attach(files) and model }
+
+            let(:files) { [okay_jpg, spoofed_jpeg_file] }
+            let(:okay_jpg) { create_blob_from_file(jpeg_file) }
+            let(:spoofed_jpeg_file) { create_blob_from_file(spoofed_jpeg) }
+            let(:error_options) do
+              {
+                authorized_human_content_types: "JPG",
+                content_type: "image/jpeg",
+                human_content_type: "JPG",
+                count: 1,
+                detected_content_type: "text/plain",
+                detected_human_content_type: "TXT",
+                filename: spoofed_jpeg[:filename],
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
+            it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+          end
         end
       end
 
@@ -292,6 +464,18 @@ describe ActiveStorageValidations::ContentTypeValidator do
         end
       end
     end
+  end
+
+  describe 'Blob Metadata' do
+    let(:attachable) do
+      {
+        io: File.open(Rails.root.join('public', 'image_150x150.png')),
+        filename: 'image_150x150.png',
+        content_type: 'image/png'
+      }
+    end
+
+    include IsPerformanceOptimized
   end
 
   describe 'Rails options' do

@@ -2,6 +2,7 @@
 
 require 'test_helper'
 require 'validators/shared_examples/checks_validator_validity'
+require 'validators/shared_examples/is_performance_optimized'
 require 'validators/shared_examples/works_fine_with_attachables'
 require 'validators/shared_examples/works_with_all_rails_common_validation_options'
 
@@ -126,9 +127,25 @@ describe ActiveStorageValidations::AspectRatioValidator do
                   when :landscape then square_image_file
                   end
                 end
+                let(:width) do
+                  case named_aspect_ratio
+                  when :square then 600
+                  when :portrait then 700
+                  when :landscape then 150
+                  end
+                end
+                let(:height) do
+                  case named_aspect_ratio
+                  when :square then 800
+                  when :portrait then 500
+                  when :landscape then 150
+                  end
+                end
                 let(:error_options) do
                   {
-                    aspect_ratio: named_aspect_ratio.to_s,
+                    authorized_aspect_ratios: named_aspect_ratio.to_s,
+                    width: width,
+                    height: height,
                     filename: not_allowed_file[:filename]
                   }
                 end
@@ -158,13 +175,15 @@ describe ActiveStorageValidations::AspectRatioValidator do
             let(:not_allowed_file) { is_4_3_image_file }
             let(:error_options) do
               {
-                aspect_ratio: "16:9",
+                authorized_aspect_ratios: "16:9",
+                width: 1200,
+                height: 900,
                 filename: not_allowed_file[:filename]
               }
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("aspect_ratio_is_not", error_options: error_options) }
+            it { is_expected_to_have_error_message("aspect_ratio_not_x_y", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
@@ -191,7 +210,9 @@ describe ActiveStorageValidations::AspectRatioValidator do
 
             let(:error_options) do
               {
-                aspect_ratio: 'square, portrait, 16:9',
+                authorized_aspect_ratios: 'square, portrait, 16:9',
+                width: 1200,
+                height: 900,
                 filename: not_allowed_file[:filename]
               }
             end
@@ -205,10 +226,10 @@ describe ActiveStorageValidations::AspectRatioValidator do
     end
 
     describe "Edge cases" do
-      describe "when the passed file is not a valid image" do
+      describe "when the passed file is not a valid media" do
         subject { model.public_send(attribute).attach(empty_io_file) and model }
 
-        let(:attribute) { :with_invalid_image_file }
+        let(:attribute) { :with_invalid_media_file }
         let(:error_options) do
           {
             filename: empty_io_file[:filename]
@@ -216,10 +237,22 @@ describe ActiveStorageValidations::AspectRatioValidator do
         end
 
         it { is_expected_not_to_be_valid }
-        it { is_expected_to_have_error_message("image_metadata_missing", error_options: error_options) }
+        it { is_expected_to_have_error_message("media_metadata_missing", error_options: error_options) }
         it { is_expected_to_have_error_options(error_options) }
       end
     end
+  end
+
+  describe 'Blob Metadata' do
+    let(:attachable) do
+      {
+        io: File.open(Rails.root.join('public', 'image_150x150.png')),
+        filename: 'image_150x150.png',
+        content_type: 'image/png'
+      }
+    end
+
+    include IsPerformanceOptimized
   end
 
   describe 'Rails options' do

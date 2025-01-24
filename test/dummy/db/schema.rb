@@ -42,8 +42,9 @@ ActiveRecord::Schema.define do
     attached
     content_type
     dimension
+    duration
     limit
-    processable_image
+    processable_file
     size
     total_size
   ).each do |validator|
@@ -60,7 +61,7 @@ ActiveRecord::Schema.define do
       end
     end
 
-    if %i(content_type size total_size).include? validator
+    if %i(content_type duration size total_size).include? validator
       create_table :"#{validator}_validator_check_validity_several_checks", force: :cascade do |t|
         t.datetime :created_at, null: false
         t.datetime :updated_at, null: false
@@ -86,9 +87,22 @@ ActiveRecord::Schema.define do
     aspect_ratio
     content_type
     dimension
-    processable_image
+    processable_file
   ).each do |validator|
     create_table :"#{validator}_validator_using_attachables", force: :cascade do |t|
+      t.datetime :created_at, null: false
+      t.datetime :updated_at, null: false
+    end
+  end
+
+  %i(
+    aspect_ratio
+    content_type
+    dimension
+    duration
+    processable_file
+  ).each do |validator|
+    create_table :"#{validator}_validator_is_performance_optimizeds", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
     end
@@ -101,7 +115,7 @@ ActiveRecord::Schema.define do
     end
   end
 
-  %w(proc_option invalid_content_type invalid_extension regex_option).each do |invalid_case|
+  %w(proc_option invalid_content_type_with invalid_content_type_in invalid_content_type_jpg invalid_extension regex_option).each do |invalid_case|
     create_table :"content_type_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
@@ -115,7 +129,7 @@ ActiveRecord::Schema.define do
     end
   end
 
-  %w(min min_proc max max_proc).each do |check|
+  %w(min min_proc max max_proc range range_proc).each do |check|
     create_table :"limit_validator_check_#{check.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
@@ -139,6 +153,7 @@ ActiveRecord::Schema.define do
 
   %w(
     based_on_a_file_property
+    performance
     zero_byte_image
   ).each do |integration_test|
     create_table :"integration_validator_#{integration_test.pluralize}", force: :cascade do |t|

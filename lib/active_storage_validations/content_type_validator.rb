@@ -6,7 +6,7 @@ require_relative 'shared/asv_attachable'
 require_relative 'shared/asv_errorable'
 require_relative 'shared/asv_optionable'
 require_relative 'shared/asv_symbolizable'
-require_relative 'content_type_spoof_detector'
+require_relative 'analyzer/content_type_analyzer'
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
@@ -20,8 +20,9 @@ module ActiveStorageValidations
     AVAILABLE_CHECKS = %i[with in].freeze
     ERROR_TYPES = %i[
       content_type_invalid
-      spoofed_content_type
+      content_type_spoofed
     ].freeze
+    METADATA_KEYS = %i[content_type].freeze
 
     def check_validity!
       ensure_exactly_one_validator_option
@@ -34,11 +35,9 @@ module ActiveStorageValidations
       @authorized_content_types = authorized_content_types_from_options(record)
       return if @authorized_content_types.empty?
 
-      checked_files = disable_spoofing_protection? ? attached_files(record, attribute) : attachables_from_changes(record, attribute)
-
-      checked_files.each do |file|
-        set_attachable_cached_values(file)
-        is_valid?(record, attribute, file)
+      attachables_and_blobs(record, attribute).each do |attachable, blob|
+        set_attachable_cached_values(blob)
+        is_valid?(record, attribute, attachable, blob)
       end
     end
 
@@ -55,16 +54,16 @@ module ActiveStorageValidations
       end
     end
 
-    def set_attachable_cached_values(attachable)
-      @attachable_content_type = disable_spoofing_protection? ? attachable.blob.content_type : attachable_content_type_rails_like(attachable)
-      @attachable_filename = disable_spoofing_protection? ? attachable.blob.filename.to_s : attachable_filename(attachable).to_s
+    def set_attachable_cached_values(blob)
+      @attachable_content_type = blob.content_type
+      @attachable_filename = blob.filename.to_s
     end
 
     # Check if the provided content_type is authorized and not spoofed against
     # the file io.
-    def is_valid?(record, attribute, attachable)
+    def is_valid?(record, attribute, attachable, blob)
       authorized_content_type?(record, attribute, attachable) &&
-        not_spoofing_content_type?(record, attribute, attachable)
+        not_spoofing_content_type?(record, attribute, attachable, blob)
     end
 
     # Dead code that we keep here for some time, maybe we will find a solution
@@ -102,20 +101,24 @@ module ActiveStorageValidations
       false
     end
 
-    def not_spoofing_content_type?(record, attribute, attachable)
+    def marcel_attachable_content_type(attachable)
+      Marcel::MimeType.for(declared_type: @attachable_content_type, name: @attachable_filename)
+    end
+
+    def not_spoofing_content_type?(record, attribute, attachable, blob)
       return true unless enable_spoofing_protection?
 
-      if ContentTypeSpoofDetector.new(record, attribute, attachable).spoofed?
-        errors_options = initialize_error_options(options, attachable)
+      @detected_content_type = metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:content_type, nil)
+
+      if attachable_content_type_vs_detected_content_type_mismatch?
+        errors_options = initialize_and_populate_error_options(options, attachable)
+        errors_options[:detected_content_type] = @detected_content_type
+        errors_options[:detected_human_content_type] = content_type_to_human_format(@detected_content_type)
         add_error(record, attribute, ERROR_TYPES.second, **errors_options)
         false
       else
         true
       end
-    end
-
-    def marcel_attachable_content_type(attachable)
-      Marcel::MimeType.for(declared_type: @attachable_content_type, name: @attachable_filename)
     end
 
     def disable_spoofing_protection?
@@ -126,11 +129,32 @@ module ActiveStorageValidations
       options[:spoofing_protection] == true
     end
 
+    def attachable_content_type_vs_detected_content_type_mismatch?
+      @attachable_content_type.present? &&
+        !attachable_content_type_intersects_detected_content_type?
+    end
+
+    def attachable_content_type_intersects_detected_content_type?
+      # Ruby intersects? method is only available from 3.1
+      enlarged_content_type(content_type_without_parameters(@attachable_content_type)).any? do |item|
+        enlarged_content_type(content_type_without_parameters(@detected_content_type)).include?(item)
+      end
+    end
+
+    def enlarged_content_type(content_type)
+      [content_type, *parent_content_types(content_type)].compact.uniq
+    end
+
+    def parent_content_types(content_type)
+      Marcel::TYPE_PARENTS[content_type] || []
+    end
+
     def initialize_and_populate_error_options(options, attachable)
       errors_options = initialize_error_options(options, attachable)
       errors_options[:content_type] = @attachable_content_type
       errors_options[:human_content_type] = content_type_to_human_format(@attachable_content_type)
-      errors_options[:authorized_types] = content_type_to_human_format(@authorized_content_types)
+      errors_options[:authorized_human_content_types] = content_type_to_human_format(@authorized_content_types)
+      errors_options[:count] = @authorized_content_types.size
       errors_options
     end
 
@@ -158,7 +182,7 @@ module ActiveStorageValidations
     def ensure_content_types_validity
       return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
 
-      ([options[:with]] || options[:in]).each do |content_type|
+      (Array(options[:with]) + Array(options[:in])).each do |content_type|
         raise ArgumentError, invalid_content_type_option_message(content_type) if invalid_option?(content_type)
       end
     end
@@ -187,6 +211,10 @@ module ActiveStorageValidations
     end
 
     def invalid_content_type?(content_type)
+      if content_type == 'image/jpg'
+        raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
+      end
+
       Marcel::TYPE_EXTS[content_type.to_s] == nil
     end
 
