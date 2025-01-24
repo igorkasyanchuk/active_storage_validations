@@ -30,6 +30,7 @@ module ActiveStorageValidations
       dimension_height_not_equal_to
       media_metadata_missing
     ].freeze
+    METADATA_KEYS = %i[width height].freeze
 
     def check_validity!
       unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
@@ -40,7 +41,7 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      validate_changed_files_from_metadata(record, attribute)
+      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
     end
 
     private

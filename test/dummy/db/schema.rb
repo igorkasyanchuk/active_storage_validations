@@ -95,6 +95,19 @@ ActiveRecord::Schema.define do
     end
   end
 
+  %i(
+    aspect_ratio
+    content_type
+    dimension
+    duration
+    processable_file
+  ).each do |validator|
+    create_table :"#{validator}_validator_is_performance_optimizeds", force: :cascade do |t|
+      t.datetime :created_at, null: false
+      t.datetime :updated_at, null: false
+    end
+  end
+
   %w(proc_option invalid_named_argument invalid_is_xy_argument).each do |invalid_case|
     create_table :"aspect_ratio_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false
@@ -140,6 +153,7 @@ ActiveRecord::Schema.define do
 
   %w(
     based_on_a_file_property
+    performance
     zero_byte_image
   ).each do |integration_test|
     create_table :"integration_validator_#{integration_test.pluralize}", force: :cascade do |t|

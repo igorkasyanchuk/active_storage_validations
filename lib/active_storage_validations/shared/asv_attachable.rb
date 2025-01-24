@@ -16,22 +16,37 @@ module ActiveStorageValidations
     # Loop through the newly submitted attachables to validate them. Using
     # attachables is the only way to get the attached file io that is necessary
     # to perform file analyses.
-    def validate_changed_files_from_metadata(record, attribute)
-      attachables_from_changes(record, attribute).each do |attachable|
-        is_valid?(record, attribute, attachable, metadata_for(attachable))
+    def validate_changed_files_from_metadata(record, attribute, metadata_keys)
+      attachables_and_blobs(record, attribute).each do |attachable, blob|
+        is_valid?(record, attribute, attachable, metadata_for(blob, attachable, metadata_keys))
       end
     end
 
-    # Retrieve an array of newly submitted attachables. Some file could be passed
-    # several times, we just need to perform the analysis once on the file,
-    # therefore the use of #uniq.
-    def attachables_from_changes(record, attribute)
-      changes = record.attachment_changes[attribute.to_s]
-      return [] if changes.blank?
+    # Retrieve an array-like of attachables and blobs. Unlike its name suggests,
+    # getting attachables from attachment_changes is not getting the changed
+    # attachables but all attachables from the `has_many_attached` relation.
+    # For the `has_one_attached` relation, it only yields the new attachable,
+    # but if we are validating previously attached file, we need to use the blob
+    # See #attach at: https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/attached/many.rb
+    #
+    # Some file could be passed several times, we just need to perform the
+    # analysis once on the file, therefore the use of #uniq.
+    def attachables_and_blobs(record, attribute)
+      changes = if record.public_send(attribute).is_a?(ActiveStorage::Attached::One)
+        record.attachment_changes[attribute.to_s].presence || record.public_send(attribute)
+      else
+        record.attachment_changes[attribute.to_s]
+      end
 
-      Array.wrap(
-        changes.is_a?(ActiveStorage::Attached::Changes::CreateMany) ? changes.attachables : changes.attachable
-      ).uniq
+      return to_enum(:attachables_and_blobs, record, attribute) if changes.blank? || !block_given?
+
+      if changes.is_a?(ActiveStorage::Attached::Changes::CreateMany)
+        changes.attachables.uniq.zip(changes.blobs.uniq).each do |attachable, blob|
+          yield attachable, blob
+        end
+      else
+        yield changes.is_a?(ActiveStorage::Attached::Changes::CreateOne) ? changes.attachable : changes.blob, changes.blob
+      end
     end
 
     # Retrieve the full declared content_type from attachable.

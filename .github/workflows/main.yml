@@ -1,7 +1,10 @@
-name: MiniTest
+name: CI
 on: [push, pull_request]
+
 jobs:
-  minitest:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -29,8 +32,15 @@ jobs:
           - ruby: '3.0'
             gemfile: rails_6_1_4
             image_processor: mini_magick
-    runs-on: ubuntu-latest
     steps:
+      - name: Install imagemagick
+        uses: mfinelli/setup-imagemagick@v6
+        with:
+          cache: true
+
+      - name: Verify imagemagick
+        run: magick -version
+
       - name: Install libvips
         run: sudo apt-get update && sudo apt-get -y install libvips
 

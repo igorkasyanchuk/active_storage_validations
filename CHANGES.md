@@ -1,5 +1,21 @@
 - master
 
+- 2.0.0
+  - We are happy to release the `active_storage_validations` version 2! This major version add several features such as:
+    - Add support for video & audio files
+      - `dimension` validator now supports video files
+      - `aspect_ratio` validator now supports video files
+      - `processable_image` validator is now `processable_file` validator and supports image/video/audio
+    - New validator added:
+      -  `duration` validator has been added for audio / video files
+    - Major performance improvement have been added: we now only perform the expensive io analysis operation on the newly attached files
+    - All error messages have been given an upgrade and new variables that you can use
+    - Complete rewrite of gem README
+  - To upgrade from version 1.x to 2.x, please read the [upgrade guide](https://github.com/igorkasyanchuk/active_storage_validations#upgrading-from-1x-to-2x) in the readme
+  - Find the associated PRs here:
+    - https://github.com/igorkasyanchuk/active_storage_validations/pull/310
+    - https://github.com/igorkasyanchuk/active_storage_validations/pull/341
+
 - 1.4.0
   - https://github.com/igorkasyanchuk/active_storage_validations/pull/324
   - https://github.com/igorkasyanchuk/active_storage_validations/pull/326
