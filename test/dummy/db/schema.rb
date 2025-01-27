@@ -115,7 +115,7 @@ ActiveRecord::Schema.define do
     end
   end
 
-  %w(proc_option invalid_content_type_with invalid_content_type_in invalid_content_type_jpg invalid_extension regex_option).each do |invalid_case|
+  %w(proc_option invalid_content_type_with invalid_content_type_in invalid_content_type_jpg valid_ct_ole_storage invalid_extension regex_option).each do |invalid_case|
     create_table :"content_type_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false

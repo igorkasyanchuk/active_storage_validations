@@ -191,7 +191,7 @@ module ActiveStorageValidations
       if content_type.to_s.match?(/\//)
         <<~ERROR_MESSAGE
           You must pass valid content types to the validator
-          '#{content_type}' is not found in Marcel::TYPE_EXTS
+          '#{content_type}' is not found in Marcel content types (Marcel::TYPE_EXTS + Marcel::MAGIC)
         ERROR_MESSAGE
       else
         <<~ERROR_MESSAGE
@@ -215,7 +215,12 @@ module ActiveStorageValidations
         raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
       end
 
-      Marcel::TYPE_EXTS[content_type.to_s] == nil
+      all_available_marcel_content_types.keys.exclude?(content_type.to_s)
+    end
+
+    def all_available_marcel_content_types
+      Marcel::MAGIC.map {|dd| dd.first }
+                   .each_with_object(Marcel::TYPE_EXTS) { |(k,v), h| h[k] = v unless h.key?(k) }
     end
 
     def invalid_extension?(content_type)

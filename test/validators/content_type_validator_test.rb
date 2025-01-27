@@ -49,15 +49,26 @@ describe ActiveStorageValidations::ContentTypeValidator do
           end
         end
 
-        describe "when the passed option is 'image/jpg'" do
-          subject { validator_test_class::CheckValidityInvalidContentTypeJpg.new(params) }
+        describe "Edge cases" do
+          describe "when the passed option is 'image/jpg'" do
+            subject { validator_test_class::CheckValidityInvalidContentTypeJpg.new(params) }
 
-          let(:error_message) do
-            "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
+            let(:error_message) do
+              "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
+            end
+
+            it 'raises an error at model initialization' do
+              error = assert_raises(ArgumentError) { subject }
+              assert_equal(error_message, error.message)
+            end
           end
 
-          it 'raises an error at model initialization' do
-            assert_raises(ArgumentError, error_message) { subject }
+          describe "when the passed option is in Marcel::MAGIC (e.g. 'application/x-ole-storage')" do
+            subject { validator_test_class::CheckValidityValidContentTypeOleStorage.new(params) }
+
+            it 'does not raise an error at model initialization' do
+              assert_nothing_raised { subject }
+            end
           end
         end
       end
