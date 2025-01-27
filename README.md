@@ -220,7 +220,7 @@ end
 
 #### Best practices
 
-When using the `content_type` validator, it is recommended to reflect the allowed content types in the html [`accept` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) in the corresponding file field in your views. This will prevent users from trying to upload files with not allowed content types (however it is only an UX improvement, a malicious user can still try to upload files with not allowed content types therefore the backend validation).
+When using the `content_type` validator, it is recommended to reflect the allowed content types in the html [`accept`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) attribute in the corresponding file field in your views. This will prevent users from trying to upload files with not allowed content types (however it is only an UX improvement, a malicious user can still try to upload files with not allowed content types therefore the backend validation).
 
 For example, if you want to allow PNG and JPEG images only, you can do this:
 ```ruby
@@ -253,15 +253,17 @@ By default, the gem does not prevent content type spoofing. You can enable it by
 
 <details>
 <summary>
-##### What is content type spoofing?
+What is content type spoofing?
 </summary>
+
 File content type spoofing happens when an ill-intentioned user uploads a file which hides its true content type by faking its extension and its declared content type value. For example, a user may try to upload a `.exe` file (application/x-msdownload content type) dissimulated as a `.jpg` file (image/jpeg content type).
 </details>
 
 <details>
 <summary>
-##### How do we prevent it?
+How do we prevent it?
 </summary>
+
 The spoofing protection relies on both the UNIX `file` command and `Marcel` gem. Be careful, since it needs to load the whole file io to perform the analysis, it will use a lot of RAM for very large files. Therefore it could be a wise decision not to enable it in this case.
 
 Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (ActiveStorage content type detection relies on a different logic using first 4kb of content + filename + extension). To handle this issue, we consider a close parent content type to be a match. For example, for an ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content types are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS` table.
@@ -269,8 +271,9 @@ Take note that the `file` analyzer will not find the exactly same content type a
 
 <details>
 <summary>
-##### Edge cases
+Edge cases
 </summary>
+
 The difficulty to accurately predict a mime type may generate false positives, if so there are two solutions available:
 - If the ActiveStorage blob content type is closely related to the detected content type using the `file` analyzer, you can enhance `Marcel::TYPE_PARENTS` mapping using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `config/initializers/mime_types.rb` file. (Please drop an issue so we can add it to the gem for everyone!)
 - If the ActiveStorage blob content type is not closely related, you still can disable the content type spoofing protection in the validator, if so, please drop us an issue so we can fix it for everyone!
@@ -708,7 +711,7 @@ en:
       file_not_processable: "is not identified as a valid media file"
 ```
 
-Other translation files are available (here)[https://github.com/igorkasyanchuk/active_storage_validations/tree/master/config/locales].
+Other translation files are available [here](https://github.com/igorkasyanchuk/active_storage_validations/tree/master/config/locales).
 
 ## Test matchers
 
