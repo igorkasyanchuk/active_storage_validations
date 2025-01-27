@@ -50,4 +50,4 @@ ja:
       aspect_ratio_not_landscape: "は横長である必要があります（現在のファイルは%{width}x%{height})"
       aspect_ratio_not_x_y: "は%{authorized_aspect_ratios}である必要があります（現在のファイルは%{width}x%{height})"
       aspect_ratio_invalid: "は無効なアスペクト比です（有効なアスペクト比は%{authorized_aspect_ratios}です）"
-      file_not_processable: "有効なメディアファイルとして識別されない"
+      file_not_processable: "は無効なメディアファイルです"
