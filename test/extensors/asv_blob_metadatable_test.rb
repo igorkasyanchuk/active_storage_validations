@@ -14,19 +14,19 @@ describe ActiveStorageValidations::ASVBlobMetadatable do
   describe "#merge_into_active_storage_validations_metadata" do
     it "adds our gem's setter method to ActiveStorage::Blob custom metadata" do
       if Rails.gem_version >= Gem::Version.new('7.0.0.rc1')
-        blob.custom_metadata = { 'asv_duration' => '1.0' }
+        blob.custom_metadata = { 'asv_duration' => '1.0', 'asv_width' => '100' }
       else
-        blob.metadata[:custom] = { 'asv_duration' => '1.0' }
+        blob.metadata[:custom] = { 'asv_duration' => '1.0', 'asv_width' => '100' }
       end
 
-      blob.merge_into_active_storage_validations_metadata({ 'duration' => '2.0', 'audio' => false })
+      blob.merge_into_active_storage_validations_metadata({ 'duration' => 2.0, 'audio' => false })
 
-      assert blob.active_storage_validations_metadata == { 'duration' => '2.0', 'audio' => false }
+      assert blob.active_storage_validations_metadata == { 'duration' => 2.0, 'audio' => false, 'width' => 100 }
 
       if Rails.gem_version >= Gem::Version.new('7.0.0.rc1')
-        assert blob.custom_metadata == { 'asv_duration' => '2.0', 'asv_audio' => false }
+        assert blob.custom_metadata == { 'asv_duration' => '2.0', 'asv_audio' => 'false', 'asv_width' => '100' }
       else
-        assert blob.metadata[:custom] == { 'asv_duration' => '2.0', 'asv_audio' => false }
+        assert blob.metadata[:custom] == { 'asv_duration' => '2.0', 'asv_audio' => 'false', 'asv_width' => '100' }
       end
     end
   end
