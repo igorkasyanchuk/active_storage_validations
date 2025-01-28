@@ -1,5 +1,6 @@
 - 2.0.1
   - Fix for invalid content type validation ([PR #347](https://github.com/igorkasyanchuk/active_storage_validations/pull/347))
+  - Fix issue with custom_metadata not working with external services such as S3 ([PR #349](https://github.com/igorkasyanchuk/active_storage_validations/pull/349))
 
 - 2.0.0
   - We are happy to release the `active_storage_validations` version 2! This major version add several features such as:
