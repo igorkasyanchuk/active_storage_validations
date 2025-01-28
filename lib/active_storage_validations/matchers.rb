@@ -27,7 +27,8 @@ module ActiveStorageValidations
     end
 
     def self.mock_metadata(attachment, metadata = {})
-      mock = Struct.new(:metadata).new(metadata)
+      asv_metadata_available_keys = { width: nil, height: nil, duration: nil, content_type: nil }
+      mock = Struct.new(:metadata).new(asv_metadata_available_keys.merge(metadata)) # ensure all keys are present, and it does not raise while trying to access them
 
       stub_method(ActiveStorageValidations::Analyzer, :new, mock) do
         yield

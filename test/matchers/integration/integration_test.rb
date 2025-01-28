@@ -39,4 +39,56 @@ describe 'Integration tests' do
       end
     end
   end
+
+  describe "example_2" do
+    let(:model_attribute) { :example_2 }
+
+    describe 'aspect_ratio matcher' do
+      let(:matcher_type) { :aspect_ratio }
+
+      describe 'when provided with the aspect_ratio value specified in the model validations' do
+        subject do
+          matcher.allowing(:square)
+        end
+
+        it { is_expected_to_match_for(klass) }
+      end
+    end
+
+    describe 'size matcher' do
+      let(:matcher_type) { :size }
+
+      describe 'when provided with the size value specified in the model validations' do
+        subject do
+          matcher.less_than_or_equal_to(2.megabytes)
+        end
+
+        it { is_expected_to_match_for(klass) }
+      end
+    end
+
+    describe 'content_type matcher' do
+      let(:matcher_type) { :content_type }
+
+      describe 'when provided with the content_type value specified in the model validations' do
+        subject do
+          matcher.allowing('image/png', 'image/jpeg')
+        end
+
+        it { is_expected_to_match_for(klass) }
+      end
+    end
+
+    describe 'processable_file matcher' do
+      let(:matcher_type) { :processable_file }
+
+      describe 'when provided with the processable_file value specified in the model validations' do
+        subject do
+          matcher
+        end
+
+        it { is_expected_to_match_for(klass) }
+      end
+    end
+  end
 end
