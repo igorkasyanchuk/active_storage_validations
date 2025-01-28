@@ -219,8 +219,8 @@ module ActiveStorageValidations
     end
 
     def all_available_marcel_content_types
-      Marcel::MAGIC.map {|dd| dd.first }
-                   .each_with_object(Marcel::TYPE_EXTS) { |(k,v), h| h[k] = v unless h.key?(k) }
+      @all_available_marcel_content_types ||= Marcel::MAGIC.map {|dd| dd.first }
+                                                           .each_with_object(Marcel::TYPE_EXTS) { |(k,v), h| h[k] = v unless h.key?(k) }
     end
 
     def invalid_extension?(content_type)
