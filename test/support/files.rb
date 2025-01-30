@@ -16,6 +16,14 @@ def image_150x150_file
 end
 alias :square_image_file :image_150x150_file
 
+def image_500x500_file
+  {
+    io: File.open(Rails.root.join('public', 'image_500x500.png')),
+    filename: 'image_500x500_file.png',
+    content_type: 'image/png'
+  }
+end
+
 def image_700x500_file
   {
     io: File.open(Rails.root.join('public', 'image_700x500.png')),
