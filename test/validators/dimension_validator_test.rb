@@ -14,6 +14,64 @@ describe ActiveStorageValidations::DimensionValidator do
 
   describe '#check_validity!' do
     include ChecksValidatorValidity
+
+    describe '#ensure_dimension_in_option_validity' do
+      describe 'when the passed option is a Range' do
+        subject { validator_test_class::CheckValidityDimensionInRange.new(params) }
+
+        it 'does not perform a check, and therefore is valid' do
+          assert_nothing_raised { subject }
+        end
+      end
+
+      describe 'when the passed option is a Proc' do
+        subject { validator_test_class::CheckValidityDimensionInProc.new(params) }
+
+        it 'does not perform a check, and therefore is valid' do
+          assert_nothing_raised { subject }
+        end
+      end
+
+      describe 'when the passed option is neither a Range nor a Proc' do
+        subject { validator_test_class::CheckValidityInvalidDimensionIn.new(params) }
+
+        let(:error_message) { "{ width: { in: value } } value must be a Range (min..max)" }
+
+        it 'raises an error at model initialization' do
+          assert_raises(ArgumentError, error_message) { subject }
+        end
+      end
+    end
+
+    describe '#ensure_min_max_option_validity' do
+      %i[min max].each do |bound|
+        describe 'when the passed option is a Range' do
+          subject { "#{validator_test_class}::CheckValidity#{bound.to_s.capitalize}Range".constantize.new(params) }
+
+          it 'does not perform a check, and therefore is valid' do
+            assert_nothing_raised { subject }
+          end
+        end
+
+        describe 'when the passed option is a Proc' do
+          subject { "#{validator_test_class}::CheckValidity#{bound.to_s.capitalize}Proc".constantize.new(params) }
+
+          it 'does not perform a check, and therefore is valid' do
+            assert_nothing_raised { subject }
+          end
+        end
+
+        describe 'when the passed option is neither a Range nor a Proc' do
+          subject { "#{validator_test_class}::CheckValidityInvalid#{bound.to_s.capitalize}".constantize.new(params) }
+
+          let(:error_message) { "{ #{bound}: value } value must be a Range (#{bound}_width..#{bound}_height)" }
+
+          it 'raises an error at model initialization' do
+            assert_raises(ArgumentError, error_message) { subject }
+          end
+        end
+      end
+    end
   end
 
   describe 'Validator checks' do
