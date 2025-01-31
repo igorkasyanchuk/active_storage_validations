@@ -15,4 +15,9 @@ class ActiveStorageValidations::Check < ApplicationRecord
   # This include is related to a test to ensure that the gem's module do not
   # override the clien'ts concerns
   include Attachable
+
+  # This validator is related to a test to ensure that the developer can define
+  # its own custom mime types
+  has_one_attached :asv_test
+  validates :asv_test, content_type: 'application/asv_test'
 end

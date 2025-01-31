@@ -243,9 +243,12 @@ end
 #### Content type shorthands
 
 If you choose to use a content_type 'shorthand' (like `png`), note that it will be converted to a full content type using `Marcel::MimeType.for` under the hood. Therefore, you should check if the content_type is registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb). If it's not, you can register it by adding the following code to your `config/initializers/mime_types.rb` file:
+
 ```ruby
 Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files
 ```
+
+Be sure to at least include one the the `extensions`, `parents` or `magic` option, otherwise the content type will not be registered.
 
 #### Content type spoofing protection
 
