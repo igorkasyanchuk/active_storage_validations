@@ -20,4 +20,14 @@ describe ActiveStorageValidations do
       assert_equal(subject, expected_clients_method_returned_value)
     end
   end
+
+  describe "mime_type initializers" do
+    # This test is linked with:
+    # validates :asv_test, content_type: 'application/asv_test'
+    # If not working, it would throw an error at the app initialization because
+    # of our validator check_validity! method.
+    it "allows the developer to define its own custom marcel mime types" do
+      assert_equal(Marcel::MimeType.for(declared_type: 'application/asv_test'), 'application/asv_test')
+    end
+  end
 end
