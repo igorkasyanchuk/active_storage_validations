@@ -215,12 +215,14 @@ module ActiveStorageValidations
         raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
       end
 
-      all_available_marcel_content_types.keys.exclude?(content_type.to_s)
+      all_available_marcel_content_types.exclude?(content_type.to_s)
     end
 
     def all_available_marcel_content_types
-      @all_available_marcel_content_types ||= Marcel::MAGIC.map {|dd| dd.first }
-                                                           .each_with_object(Marcel::TYPE_EXTS) { |(k,v), h| h[k] = v unless h.key?(k) }
+      @all_available_marcel_content_types ||= Marcel::TYPE_EXTS
+        .keys
+        .push(*Marcel::MAGIC.map(&:first))
+        .tap(&:uniq!)
     end
 
     def invalid_extension?(content_type)
