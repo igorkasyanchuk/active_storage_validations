@@ -1,3 +1,7 @@
+- 2.0.2
+  - Fix undesirable mutation of Marcel::TYPE_EXTS (https://github.com/igorkasyanchuk/active_storage_validations/issues/356)
+  - Fix gem loading issue with Marcel custo initialisers (https://github.com/igorkasyanchuk/active_storage_validations/issues/355)
+
 - 2.0.1
   - Fix for invalid content type validation ([PR #347](https://github.com/igorkasyanchuk/active_storage_validations/pull/347))
   - Fix issue with custom_metadata not working with external services such as S3 ([PR #349](https://github.com/igorkasyanchuk/active_storage_validations/pull/349))
