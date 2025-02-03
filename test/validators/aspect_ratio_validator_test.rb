@@ -151,7 +151,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("aspect_ratio_not_#{named_aspect_ratio}", error_options: error_options) }
+                it { is_expected_to_include_error_message("aspect_ratio_not_#{named_aspect_ratio}", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
             end
@@ -183,7 +183,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("aspect_ratio_not_x_y", error_options: error_options) }
+            it { is_expected_to_include_error_message("aspect_ratio_not_x_y", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
@@ -218,7 +218,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message('aspect_ratio_invalid', error_options: error_options) }
+            it { is_expected_to_include_error_message('aspect_ratio_invalid', error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
@@ -237,7 +237,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
         end
 
         it { is_expected_not_to_be_valid }
-        it { is_expected_to_have_error_message("media_metadata_missing", error_options: error_options) }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
         it { is_expected_to_have_error_options(error_options) }
       end
     end

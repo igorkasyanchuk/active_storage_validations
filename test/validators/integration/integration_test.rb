@@ -23,7 +23,7 @@ describe 'Integration tests' do
       end
 
       it { is_expected_not_to_be_valid }
-      it { is_expected_to_have_error_message("file_not_processable", error_options: error_options, validator: :processable_file) }
+      it { is_expected_to_include_error_message("file_not_processable", error_options: error_options, validator: :processable_file) }
       it { is_expected_to_have_error_options(error_options, validator: :processable_file) }
     end
   end
@@ -51,7 +51,7 @@ describe 'Integration tests' do
           end
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_have_error_message("file_size_not_less_than", error_options: error_options, validator: :size) }
+          it { is_expected_to_include_error_message("file_size_not_less_than", error_options: error_options, validator: :size) }
           it { is_expected_to_have_error_options(error_options, validator: :size) }
         end
       end
@@ -69,7 +69,7 @@ describe 'Integration tests' do
           end
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_have_error_message("file_size_not_less_than", error_options: error_options, validator: :size) }
+          it { is_expected_to_include_error_message("file_size_not_less_than", error_options: error_options, validator: :size) }
           it { is_expected_to_have_error_options(error_options, validator: :size) }
         end
       end

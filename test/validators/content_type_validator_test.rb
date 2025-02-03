@@ -130,7 +130,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
     #     end
 
     #     it { is_expected_not_to_be_valid }
-    #     it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+    #     it { is_expected_to_include_error_message("content_type_invalid", error_options: error_options) }
     #     it { is_expected_to_have_error_options(error_options) }
     #   end
 
@@ -153,7 +153,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
     #       end
 
     #       it { is_expected_not_to_be_valid }
-    #       it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+    #       it { is_expected_to_include_error_message("content_type_invalid", error_options: error_options) }
     #       it { is_expected_to_have_error_options(error_options) }
     #     end
 
@@ -203,7 +203,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
     #     end
 
     #     it { is_expected_not_to_be_valid }
-    #     it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+    #     it { is_expected_to_include_error_message("content_type_invalid", error_options: error_options) }
     #     it { is_expected_to_have_error_options(error_options) }
     #   end
     # end
@@ -244,7 +244,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+                it { is_expected_to_include_error_message("content_type_invalid", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
             end
@@ -289,7 +289,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("content_type_invalid", error_options: error_options) }
+                it { is_expected_to_include_error_message("content_type_invalid", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
             end
@@ -353,7 +353,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
           end
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_include_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
           it { is_expected_to_have_error_options(error_options, validator: :content_type) }
         end
 
@@ -375,7 +375,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
           end
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_include_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
           it { is_expected_to_have_error_options(error_options, validator: :content_type) }
         end
 
@@ -397,7 +397,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
           end
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
+          it { is_expected_to_include_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
           it { is_expected_to_have_error_options(error_options, validator: :content_type) }
         end
 
@@ -457,7 +457,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
+            it { is_expected_to_include_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
             it { is_expected_to_have_error_options(error_options, validator: :content_type) }
           end
         end

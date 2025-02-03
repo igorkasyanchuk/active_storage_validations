@@ -15,27 +15,34 @@ module ValidatorHelpers
     validator_error_options =
       subject.errors.find do |error|
         error.options[:validator_type] == kwargs[:validator] || validator_sym
-      end.options
+      end&.options
+
+    raise Minitest::Assertion, "Expected validator error options to be present but got nil" if validator_error_options.nil?
 
     assert(
       error_options.all? do |key, _value|
         validator_error_options.has_key?(key) &&
           value_is_equal_or_both_are_procs?(error_options[key], validator_error_options[key])
-      end
+      end,
+      "Expected validator error options to include #{error_options.inspect}\nbut got #{validator_error_options.inspect}"
     )
   end
 
-  def is_expected_to_have_error_message(message_key, **kwargs)
+  def is_expected_to_include_error_message(message_key, **kwargs)
     subject.valid?(kwargs[:context])
 
-    validator_error_message =
-      subject.errors.find do |error|
+    validator_error_messages =
+      subject.errors.select do |error|
         error.options[:validator_type] == kwargs[:validator] || validator_sym
-      end.message
+      end.map(&:message)
 
     message = kwargs[:error_options][:custom_message] || I18n.t("errors.messages.#{message_key}", **kwargs[:error_options])
 
-    assert_equal(message, validator_error_message)
+    assert_includes(
+      validator_error_messages,
+      message,
+      "Expected error messages to include '#{message.inspect}'\nbut got #{validator_error_messages.inspect}"
+    )
   end
 
   def is_expected_to_raise_error(error_class, message)
@@ -72,6 +79,8 @@ module ValidatorHelpers
     # Comparing Procs is tricky, let's just ensure that both values are procs
     # for now to check equality, if necessary we will investigate a better
     # solution
-    (value_1 == value_2) || (value_1.is_a?(Proc) && value_2.is_a?(Proc))
+    (value_1 == value_2) || 
+      (value_1.is_a?(Proc) && value_2.is_a?(Proc)) ||
+      (value_1.is_a?(Hash) && value_2.is_a?(Hash) && value_1.values.all?(Proc) && value_2.values.all?(Proc)) # e.g. { width: { min: -> (record) { 500 } } }
   end
 end

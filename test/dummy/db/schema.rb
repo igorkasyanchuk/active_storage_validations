@@ -122,6 +122,13 @@ ActiveRecord::Schema.define do
     end
   end
 
+  %w(dimension_in_range dimension_in_proc invalid_dimension_in min_range min_proc invalid_min max_range max_proc invalid_max).each do |invalid_case|
+    create_table :"dimension_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
+      t.datetime :created_at, null: false
+      t.datetime :updated_at, null: false
+    end
+  end
+
   %w(proc_option invalid_argument max_higher_than_min).each do |invalid_case|
     create_table :"limit_validator_check_validity_#{invalid_case.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false

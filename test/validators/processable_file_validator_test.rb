@@ -44,7 +44,7 @@ describe ActiveStorageValidations::ProcessableFileValidator do
       end
 
       it { is_expected_not_to_be_valid }
-      it { is_expected_to_have_error_message("file_not_processable", error_options: error_options) }
+      it { is_expected_to_include_error_message("file_not_processable", error_options: error_options) }
       it { is_expected_to_have_error_options(error_options) }
     end
 

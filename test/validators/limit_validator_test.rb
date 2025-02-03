@@ -75,7 +75,7 @@ describe ActiveStorageValidations::LimitValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("limit_min_not_reached", error_options: error_options) }
+            it { is_expected_to_include_error_message("limit_min_not_reached", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
@@ -112,7 +112,7 @@ describe ActiveStorageValidations::LimitValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("limit_max_exceeded", error_options: error_options) }
+            it { is_expected_to_include_error_message("limit_max_exceeded", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
@@ -151,7 +151,7 @@ describe ActiveStorageValidations::LimitValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("limit_out_of_range", error_options: error_options) }
+                it { is_expected_to_include_error_message("limit_out_of_range", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
 
@@ -168,7 +168,7 @@ describe ActiveStorageValidations::LimitValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("limit_out_of_range", error_options: error_options) }
+                it { is_expected_to_include_error_message("limit_out_of_range", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
             end
