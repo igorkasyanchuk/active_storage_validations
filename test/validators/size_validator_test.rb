@@ -41,7 +41,7 @@ describe ActiveStorageValidations::SizeValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("file_size_not_less_than", error_options: error_options) }
+            it { is_expected_to_include_error_message("file_size_not_less_than", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
 
@@ -58,7 +58,7 @@ describe ActiveStorageValidations::SizeValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("file_size_not_less_than", error_options: error_options) }
+            it { is_expected_to_include_error_message("file_size_not_less_than", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
@@ -95,7 +95,7 @@ describe ActiveStorageValidations::SizeValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("file_size_not_less_than_or_equal_to", error_options: error_options) }
+            it { is_expected_to_include_error_message("file_size_not_less_than_or_equal_to", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
@@ -120,7 +120,7 @@ describe ActiveStorageValidations::SizeValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("file_size_not_greater_than", error_options: error_options) }
+            it { is_expected_to_include_error_message("file_size_not_greater_than", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
 
@@ -137,7 +137,7 @@ describe ActiveStorageValidations::SizeValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("file_size_not_greater_than", error_options: error_options) }
+            it { is_expected_to_include_error_message("file_size_not_greater_than", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
 
@@ -168,7 +168,7 @@ describe ActiveStorageValidations::SizeValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("file_size_not_greater_than_or_equal_to", error_options: error_options) }
+            it { is_expected_to_include_error_message("file_size_not_greater_than_or_equal_to", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
 
@@ -205,7 +205,7 @@ describe ActiveStorageValidations::SizeValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("file_size_not_between", error_options: error_options) }
+            it { is_expected_to_include_error_message("file_size_not_between", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
 
@@ -240,7 +240,7 @@ describe ActiveStorageValidations::SizeValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_have_error_message("file_size_not_between", error_options: error_options) }
+            it { is_expected_to_include_error_message("file_size_not_between", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end

@@ -42,6 +42,13 @@ class Dimension::Validator::Check < ApplicationRecord
     validates :"#{bound}_proc", dimension: { "#{bound}": -> (record) { 500..500 } }
   end
 
+  # Integration tests
+  has_one_attached :width_height_exact
+  validates :width_height_exact, dimension: { width: 600, height: 600 }
+  has_one_attached :width_height_in
+  validates :width_height_in, dimension: { width: { in: 550..750 }, height: { in: 550..750 } }
+
+  # Edge cases
   has_one_attached :with_invalid_media_file
   validates :with_invalid_media_file, dimension: { width: 150, height: 150 }
 end

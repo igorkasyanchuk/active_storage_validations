@@ -102,7 +102,7 @@ describe ActiveStorageValidations::DimensionValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("dimension_#{dimension}_not_equal_to", error_options: error_options) }
+                it { is_expected_to_include_error_message("dimension_#{dimension}_not_equal_to", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
 
@@ -124,7 +124,7 @@ describe ActiveStorageValidations::DimensionValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("dimension_#{dimension}_not_equal_to", error_options: error_options) }
+                it { is_expected_to_include_error_message("dimension_#{dimension}_not_equal_to", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
             end
@@ -148,7 +148,7 @@ describe ActiveStorageValidations::DimensionValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("dimension_#{dimension}_not_greater_than_or_equal_to", error_options: error_options) }
+                it { is_expected_to_include_error_message("dimension_#{dimension}_not_greater_than_or_equal_to", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
 
@@ -196,7 +196,7 @@ describe ActiveStorageValidations::DimensionValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("dimension_#{dimension}_not_less_than_or_equal_to", error_options: error_options) }
+                it { is_expected_to_include_error_message("dimension_#{dimension}_not_less_than_or_equal_to", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
             end
@@ -220,7 +220,7 @@ describe ActiveStorageValidations::DimensionValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("dimension_#{dimension}_not_greater_than_or_equal_to", error_options: error_options) }
+                it { is_expected_to_include_error_message("dimension_#{dimension}_not_greater_than_or_equal_to", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
 
@@ -242,7 +242,7 @@ describe ActiveStorageValidations::DimensionValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("dimension_#{dimension}_not_less_than_or_equal_to", error_options: error_options) }
+                it { is_expected_to_include_error_message("dimension_#{dimension}_not_less_than_or_equal_to", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
             end
@@ -267,7 +267,7 @@ describe ActiveStorageValidations::DimensionValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("dimension_#{dimension}_not_included_in", error_options: error_options) }
+                it { is_expected_to_include_error_message("dimension_#{dimension}_not_included_in", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
 
@@ -290,7 +290,7 @@ describe ActiveStorageValidations::DimensionValidator do
                 end
 
                 it { is_expected_not_to_be_valid }
-                it { is_expected_to_have_error_message("dimension_#{dimension}_not_included_in", error_options: error_options) }
+                it { is_expected_to_include_error_message("dimension_#{dimension}_not_included_in", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
               end
             end
@@ -319,7 +319,7 @@ describe ActiveStorageValidations::DimensionValidator do
               end
 
               it { is_expected_not_to_be_valid }
-              it { is_expected_to_have_error_message("dimension_min_not_included_in", error_options: error_options) }
+              it { is_expected_to_include_error_message("dimension_min_not_included_in", error_options: error_options) }
               it { is_expected_to_have_error_options(error_options) }
             end
 
@@ -371,10 +371,139 @@ describe ActiveStorageValidations::DimensionValidator do
               end
 
               it { is_expected_not_to_be_valid }
-              it { is_expected_to_have_error_message("dimension_max_not_included_in", error_options: error_options) }
+              it { is_expected_to_include_error_message("dimension_max_not_included_in", error_options: error_options) }
               it { is_expected_to_have_error_options(error_options) }
             end
           end
+        end
+      end
+    end
+
+    describe "Integration tests" do
+      describe ":width exact + :height exact" do
+        let(:attribute) { :width_height_exact }
+
+        describe "when provided with an image that has the same width and height as specified in the model validations" do
+          subject { model.public_send(attribute).attach(image_600x600_file) and model }
+
+          it { is_expected_to_be_valid }
+        end
+
+        describe "when provided with an image that has a different width than specified in the model validations" do
+          subject { model.public_send(attribute).attach(image_800x600_file) and model }
+
+          let(:error_options) do
+            {
+              width: 600,
+              height: 600,
+              length: 600,
+              filename: 'image_800x600_file.png'
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("dimension_width_not_equal_to", error_options: error_options) }
+          it { is_expected_to_have_error_options(error_options) }
+        end
+
+        describe "when provided with an image that has a different height than specified in the model validations" do
+          subject { model.public_send(attribute).attach(image_600x800_file) and model }
+
+          let(:error_options) do
+            {
+              width: 600,
+              height: 600,
+              length: 600,
+              filename: 'image_600x800_file.png'
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("dimension_height_not_equal_to", error_options: error_options) }
+          it { is_expected_to_have_error_options(error_options) }
+        end
+
+        describe "when provided with an image that has a different height and a different width than specified in the model validations" do
+          subject { model.public_send(attribute).attach(image_1200x900_file) and model }
+
+          let(:error_options) do
+            {
+              width: 600,
+              height: 600,
+              length: 600,
+              filename: 'image_1200x900_file.png'
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("dimension_width_not_equal_to", error_options: error_options) }
+          it { is_expected_to_include_error_message("dimension_height_not_equal_to", error_options: error_options) }
+          it { is_expected_to_have_error_options(error_options) }
+        end
+      end
+
+      describe ":width in + :height in" do
+        let(:attribute) { :width_height_in }
+
+        describe "when provided with an image that has a valid width and height as specified in the model validations" do
+          subject { model.public_send(attribute).attach(image_600x600_file) and model }
+
+          it { is_expected_to_be_valid }
+        end
+
+        describe "when provided with an image that has lower width than the min specified in the model validations" do
+          subject { model.public_send(attribute).attach(image_500x700_file) and model }
+
+          let(:error_options) do
+            {
+              width: { in: 550..750},
+              height: { in: 550..750 },
+              min: 550,
+              max: 750,
+              filename: 'image_500x700_file.png'
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("dimension_width_not_included_in", error_options: error_options) }
+          it { is_expected_to_have_error_options(error_options) }
+        end
+
+        describe "when provided with an image that has lower height than the min specified in the model validations" do
+          subject { model.public_send(attribute).attach(image_700x500_file) and model }
+
+          let(:error_options) do
+            {
+              width: { in: 550..750},
+              height: { in: 550..750 },
+              min: 550,
+              max: 750,
+              filename: 'image_700x500_file.png'
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("dimension_height_not_included_in", error_options: error_options) }
+          it { is_expected_to_have_error_options(error_options) }
+        end
+
+        describe "when provided with an image that has lower width and height than the mins specified in the model validations" do
+          subject { model.public_send(attribute).attach(image_500x500_file) and model }
+
+          let(:error_options) do
+            {
+              width: { in: 550..750},
+              height: { in: 550..750 },
+              min: 550,
+              max: 750,
+              filename: 'image_500x500_file.png'
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("dimension_width_not_included_in", error_options: error_options) }
+          it { is_expected_to_include_error_message("dimension_height_not_included_in", error_options: error_options) }
+          it { is_expected_to_have_error_options(error_options) }
         end
       end
     end
@@ -391,7 +520,7 @@ describe ActiveStorageValidations::DimensionValidator do
         end
 
         it { is_expected_not_to_be_valid }
-        it { is_expected_to_have_error_message("media_metadata_missing", error_options: error_options) }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
         it { is_expected_to_have_error_options(error_options) }
       end
     end

@@ -24,6 +24,22 @@ def image_500x500_file
   }
 end
 
+def image_600x600_file
+  {
+    io: File.open(Rails.root.join('public', 'image_600x600.png')),
+    filename: 'image_600x600_file.png',
+    content_type: 'image/png'
+  }
+end
+
+def image_500x700_file
+  {
+    io: File.open(Rails.root.join('public', 'image_500x700.png')),
+    filename: 'image_500x700_file.png',
+    content_type: 'image/png'
+  }
+end
+
 def image_700x500_file
   {
     io: File.open(Rails.root.join('public', 'image_700x500.png')),

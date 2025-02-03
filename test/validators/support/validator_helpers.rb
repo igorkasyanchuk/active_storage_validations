@@ -28,20 +28,20 @@ module ValidatorHelpers
     )
   end
 
-  def is_expected_to_have_error_message(message_key, **kwargs)
+  def is_expected_to_include_error_message(message_key, **kwargs)
     subject.valid?(kwargs[:context])
 
-    validator_error_message =
-      subject.errors.find do |error|
+    validator_error_messages =
+      subject.errors.select do |error|
         error.options[:validator_type] == kwargs[:validator] || validator_sym
-      end&.message
+      end.map(&:message)
 
     message = kwargs[:error_options][:custom_message] || I18n.t("errors.messages.#{message_key}", **kwargs[:error_options])
 
-    assert_equal(
+    assert_includes(
+      validator_error_messages,
       message,
-      validator_error_message,
-      "Expected error message to be '#{message.inspect}'\nbut got '#{validator_error_message.inspect}'"
+      "Expected error messages to include '#{message.inspect}'\nbut got #{validator_error_messages.inspect}"
     )
   end
 
