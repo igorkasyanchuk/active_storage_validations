@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'active_support/concern'
+require "active_support/concern"
 
 module ActiveStorageValidations
   module Matchers
@@ -21,14 +21,22 @@ module ActiveStorageValidations
       def is_context_valid?
         return true if !@context && attribute_validators.none? { |validator| validator.options[:on] }
 
-        raise ArgumentError, "This validator matcher needs the #on option to work since its validator has one" if !@context && attribute_validators.all? { |validator| validator.options[:on] }
-        raise ArgumentError, "This validator matcher option only allows a symbol or an array" if !(@context.is_a?(Symbol) || @context.is_a?(Array))
+        ensure_context_present!
+        ensure_context_valid!
 
         if @context.is_a?(Array)
           (validator_contexts & @context.map(&:to_s)) == validator_contexts || raise_context_not_listed_error
         elsif @context.is_a?(Symbol)
           validator_contexts.include?(@context.to_s) || raise_context_not_listed_error
         end
+      end
+
+      def ensure_context_present!
+        raise ArgumentError, "This validator matcher needs the #on option to work since its validator has one" if !@context && attribute_validators.all? { |validator| validator.options[:on] }
+      end
+
+      def ensure_context_valid!
+        raise ArgumentError, "This validator matcher option only allows a symbol or an array" if !(@context.is_a?(Symbol) || @context.is_a?(Array))
       end
 
       def validator_contexts

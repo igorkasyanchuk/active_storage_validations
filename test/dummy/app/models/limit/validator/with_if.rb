@@ -14,9 +14,9 @@ class Limit::Validator::WithIf < ApplicationRecord
   has_one_attached :with_if
   has_one_attached :with_if_proc
   validates :with_if, limit: { min: 1 }, if: :title_is_image?
-  validates :with_if_proc, limit: { min: 1 }, if: -> { self.title == 'Right title' }
+  validates :with_if_proc, limit: { min: 1 }, if: -> { self.title == "Right title" }
 
   def title_is_image?
-    title == 'image'
+    title == "image"
   end
 end

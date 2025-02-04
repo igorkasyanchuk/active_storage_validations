@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'base_comparison_validator_matcher'
+require_relative "base_comparison_validator_matcher"
 
 module ActiveStorageValidations
   module Matchers
@@ -14,7 +14,7 @@ module ActiveStorageValidations
       end
 
       def failure_message
-        message = ["is expected to validate total file size of :#{@attribute_name}"]
+        message = [ "is expected to validate total file size of :#{@attribute_name}" ]
         build_failure_message(message)
         message.join("\n")
       end
@@ -23,7 +23,7 @@ module ActiveStorageValidations
 
       def attach_file
         # has_many_attached relation
-        @subject.public_send(@attribute_name).attach([dummy_blob])
+        @subject.public_send(@attribute_name).attach([ dummy_blob ])
         @subject.public_send(@attribute_name)
       end
 

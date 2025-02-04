@@ -11,5 +11,5 @@
 
 class ContentType::Validator::CheckValidityInvalidContentTypeIn < ApplicationRecord
   has_one_attached :invalid
-  validates :invalid, content_type: ["xxx/invalid1", "xxx/invalid2"]
+  validates :invalid, content_type: [ "xxx/invalid1", "xxx/invalid2" ]
 end

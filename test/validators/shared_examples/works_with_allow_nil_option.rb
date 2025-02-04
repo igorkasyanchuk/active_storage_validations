@@ -14,7 +14,7 @@ module WorksWithAllowNilOption
       when :limit then nil
       when :processable_file then image_150x150_file
       when :size then file_1ko
-      when :total_size then [blob_file_0_5ko, blob_file_0_5ko]
+      when :total_size then [ blob_file_0_5ko, blob_file_0_5ko ]
       end
     end
     let(:file_not_matching_requirements) do
@@ -27,17 +27,17 @@ module WorksWithAllowNilOption
       when :limit then file_5ko
       when :processable_file then tar_file_with_image_content_type
       when :size then file_5ko
-      when :total_size then [blob_file_5ko, blob_file_5ko]
+      when :total_size then [ blob_file_5ko, blob_file_5ko ]
       end
     end
 
-    describe 'when passed a file matching the requirements' do
+    describe "when passed a file matching the requirements" do
       before { subject.with_allow_nil.attach(file_matching_requirements) }
 
       it { is_expected_to_be_valid }
     end
 
-    describe 'when passed a file not matching the requirements' do
+    describe "when passed a file not matching the requirements" do
       let(:error_options) { { allow_nil: true } }
 
       before { subject.with_allow_nil.attach(file_not_matching_requirements) }

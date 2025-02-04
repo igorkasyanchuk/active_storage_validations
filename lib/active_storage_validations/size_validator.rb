@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'base_comparison_validator'
+require_relative "base_comparison_validator"
 
 module ActiveStorageValidations
   class SizeValidator < BaseComparisonValidator

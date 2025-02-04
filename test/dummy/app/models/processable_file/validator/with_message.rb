@@ -11,5 +11,5 @@
 
 class ProcessableFile::Validator::WithMessage < ApplicationRecord
   has_one_attached :with_message
-  validates :with_message, processable_file: { message: 'Custom message' }
+  validates :with_message, processable_file: { message: "Custom message" }
 end

@@ -11,5 +11,5 @@
 
 class Attached::Validator::WithMessage < ApplicationRecord
   has_one_attached :with_message
-  validates :with_message, attached: { message: 'Custom message' }
+  validates :with_message, attached: { message: "Custom message" }
 end

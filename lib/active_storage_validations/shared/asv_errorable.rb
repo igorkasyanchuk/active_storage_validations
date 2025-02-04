@@ -5,7 +5,7 @@ module ActiveStorageValidations
     extend ActiveSupport::Concern
 
     def initialize_error_options(options, file = nil)
-      not_explicitly_written_options = %i(with in)
+      not_explicitly_written_options = %i[with in]
       curated_options = options.except(*not_explicitly_written_options)
 
       active_storage_validations_options = {

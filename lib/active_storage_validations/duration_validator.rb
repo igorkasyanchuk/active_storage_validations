@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'base_comparison_validator'
+require_relative "base_comparison_validator"
 
 module ActiveStorageValidations
   class DurationValidator < BaseComparisonValidator
@@ -33,11 +33,9 @@ module ActiveStorageValidations
         next if is_valid?(duration, flat_options)
 
         errors_options = initialize_error_options(options, attachable)
-        populate_error_options(errors_options, flat_options)
-        errors_options[:duration] = format_bound_value(duration)
+        populate_error_options(errors_options, flat_options, duration)
 
-        keys = AVAILABLE_CHECKS & flat_options.keys
-        error_type = "duration_not_#{keys.first}".to_sym
+        error_type = set_error_type(flat_options)
 
         add_error(record, attribute, error_type, **errors_options)
       end
@@ -50,6 +48,16 @@ module ActiveStorageValidations
 
       custom_value = value == value.to_i ? value.to_i : value
       ActiveSupport::Duration.build(custom_value).inspect
+    end
+
+    def populate_error_options(errors_options, flat_options, duration)
+      super(errors_options, flat_options)
+      errors_options[:duration] = format_bound_value(duration)
+    end
+
+    def set_error_type(flat_options)
+      keys = AVAILABLE_CHECKS & flat_options.keys
+      "duration_not_#{keys.first}".to_sym
     end
   end
 end

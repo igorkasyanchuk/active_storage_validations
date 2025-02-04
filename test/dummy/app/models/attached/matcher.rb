@@ -20,7 +20,7 @@ class Attached::Matcher < ApplicationRecord
   validates :required, attached: true
 
   has_one_attached :with_message
-  validates :with_message, attached: { message: 'Custom message' }
+  validates :with_message, attached: { message: "Custom message" }
 
   has_one_attached :with_context_symbol
   validates :with_context_symbol, attached: true, on: :update
@@ -34,8 +34,8 @@ class Attached::Matcher < ApplicationRecord
   validates :as_instance, attached: true
 
   has_one_attached :validatable_different_error_messages
-  validates :validatable_different_error_messages, attached: { message: 'Custom message 1' }, if: :title_is_quo_vadis?
-  validates :validatable_different_error_messages, attached: { message: 'Custom message 2' }, if: :title_is_american_psycho?
+  validates :validatable_different_error_messages, attached: { message: "Custom message 1" }, if: :title_is_quo_vadis?
+  validates :validatable_different_error_messages, attached: { message: "Custom message 2" }, if: :title_is_american_psycho?
 
   has_one_attached :failure_message
   validates :failure_message, attached: true

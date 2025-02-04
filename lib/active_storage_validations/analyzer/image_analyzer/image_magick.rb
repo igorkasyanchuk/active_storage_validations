@@ -5,7 +5,6 @@ module ActiveStorageValidations
   # MiniMagick requires the {ImageMagick}[http://www.imagemagick.org] system library.
   # This is the default Rails image analyzer.
   class Analyzer::ImageAnalyzer::ImageMagick < Analyzer::ImageAnalyzer
-
     private
 
     def read_media

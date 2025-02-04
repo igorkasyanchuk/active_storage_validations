@@ -2,14 +2,14 @@ module HasValidRspecMessageMethods
   extend ActiveSupport::Concern
 
   included do
-    describe 'when the matcher returns a failure message to the dev' do
+    describe "when the matcher returns a failure message to the dev" do
       before do
         case validator_sym
         when :aspect_ratio then matcher.rejecting(:square)
         when :attached then matcher
         when :processable_file then matcher
         when :limit then matcher.min(0).max(6)
-        when :content_type then matcher.rejecting('image/png')
+        when :content_type then matcher.rejecting("image/png")
         when :dimension then matcher.width(75).height(75)
         when :duration then matcher.less_than_or_equal_to(7.minutes)
         when :size then matcher.less_than_or_equal_to(7.megabytes)
@@ -83,14 +83,14 @@ module HasValidRspecMessageMethods
       it { is_expected_to_have_failure_message(expected_failure_message) }
     end
 
-    describe 'when the matcher returns a negated failure message to the dev' do
+    describe "when the matcher returns a negated failure message to the dev" do
       before do
         case validator_sym
         when :aspect_ratio then matcher.allowing(:square)
         when :attached then matcher
         when :processable_file then matcher
         when :limit then matcher.min(1).max(5)
-        when :content_type then matcher.allowing('image/png')
+        when :content_type then matcher.allowing("image/png")
         when :dimension then matcher.width(150).height(150)
         when :duration then matcher.less_than_or_equal_to(5.minutes)
         when :size then matcher.less_than_or_equal_to(5.megabytes)
@@ -164,7 +164,7 @@ module HasValidRspecMessageMethods
       it { is_expected_to_have_failure_message_when_negated(expected_failure_message) }
     end
 
-    describe 'when the dev asks for a description of the matcher' do
+    describe "when the dev asks for a description of the matcher" do
       subject { matcher.description }
 
       let(:model_attribute) { :failure_message_when_negated }

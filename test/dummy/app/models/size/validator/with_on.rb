@@ -11,5 +11,5 @@
 
 class Size::Validator::WithOn < ApplicationRecord
   has_one_attached :with_on
-  validates :with_on, size: { less_than: 2.kilobytes }, on: %i(create update destroy custom)
+  validates :with_on, size: { less_than: 2.kilobytes }, on: %i[create update destroy custom]
 end

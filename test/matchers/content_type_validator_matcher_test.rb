@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require 'test_helper'
-require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
-require 'matchers/shared_examples/checks_if_is_valid'
-require 'matchers/shared_examples/has_custom_matcher'
-require 'matchers/shared_examples/has_valid_rspec_message_methods'
-require 'matchers/shared_examples/works_with_allow_blank'
-require 'matchers/shared_examples/works_with_both_instance_and_class'
-require 'matchers/shared_examples/works_with_context'
-require 'matchers/shared_examples/works_with_custom_message'
+require "test_helper"
+require "matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute"
+require "matchers/shared_examples/checks_if_is_valid"
+require "matchers/shared_examples/has_custom_matcher"
+require "matchers/shared_examples/has_valid_rspec_message_methods"
+require "matchers/shared_examples/works_with_allow_blank"
+require "matchers/shared_examples/works_with_both_instance_and_class"
+require "matchers/shared_examples/works_with_context"
+require "matchers/shared_examples/works_with_custom_message"
 
 describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
   include MatcherHelpers
@@ -26,102 +26,102 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     include HasCustomMatcher
   end
 
-  describe '#allowing' do
-    describe 'one' do
+  describe "#allowing" do
+    describe "one" do
       let(:model_attribute) { :allowing_one }
-      let(:allowed_type) { 'image/png' }
+      let(:allowed_type) { "image/png" }
 
-      describe 'when provided with the exact allowed type' do
+      describe "when provided with the exact allowed type" do
         subject { matcher.allowing(allowed_type) }
 
         it { is_expected_to_match_for(klass) }
       end
 
-      describe 'when provided with something that is not a valid type' do
+      describe "when provided with something that is not a valid type" do
         subject { matcher.allowing(not_valid_type) }
 
-        let(:not_valid_type) { 'not_valid' }
+        let(:not_valid_type) { "not_valid" }
 
         it { is_expected_not_to_match_for(klass) }
       end
     end
 
-    describe 'several' do
+    describe "several" do
       let(:model_attribute) { :allowing_several }
-      let(:allowed_types) { ['image/png', 'image/gif'] }
-      let(:not_allowed_types) { ['video/x-matroska', 'application/pdf'] }
+      let(:allowed_types) { [ "image/png", "image/gif" ] }
+      let(:not_allowed_types) { [ "video/x-matroska", "application/pdf" ] }
 
-      describe 'when provided with the exact allowed types' do
+      describe "when provided with the exact allowed types" do
         subject { matcher.allowing(*allowed_types) }
 
         it { is_expected_to_match_for(klass) }
       end
 
-      describe 'when provided with only allowed types but not all types' do
+      describe "when provided with only allowed types but not all types" do
         subject { matcher.allowing(allowed_types.sample) }
 
         it { is_expected_to_match_for(klass) }
       end
 
-      describe 'when provided with allowed and not allowed types' do
+      describe "when provided with allowed and not allowed types" do
         subject { matcher.allowing(allowed_types.sample, not_allowed_types.sample) }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
-      describe 'when provided with only not allowed types' do
+      describe "when provided with only not allowed types" do
         subject { matcher.allowing(*not_allowed_types) }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
-      describe 'when provided with something that is not a valid type' do
+      describe "when provided with something that is not a valid type" do
         subject { matcher.allowing(not_valid_type) }
 
-        let(:not_valid_type) { 'not_valid' }
+        let(:not_valid_type) { "not_valid" }
 
         it { is_expected_not_to_match_for(klass) }
       end
     end
 
-    describe 'several through regex' do
+    describe "several through regex" do
       let(:model_attribute) { :allowing_several_through_regex }
-      let(:some_allowed_types) { ['image/png', 'image/gif'] }
-      let(:not_allowed_types) { ['video/x-matroska', 'application/pdf'] }
+      let(:some_allowed_types) { [ "image/png", "image/gif" ] }
+      let(:not_allowed_types) { [ "video/x-matroska", "application/pdf" ] }
 
-      describe 'when provided with only allowed types but not all types' do
+      describe "when provided with only allowed types but not all types" do
         subject { matcher.allowing(*some_allowed_types) }
 
         it { is_expected_to_match_for(klass) }
       end
 
-      describe 'when provided with allowed and not allowed types' do
+      describe "when provided with allowed and not allowed types" do
         subject { matcher.allowing(some_allowed_types.sample, not_allowed_types.sample) }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
-      describe 'when provided with only not allowed types' do
+      describe "when provided with only not allowed types" do
         subject { matcher.allowing(*not_allowed_types) }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
-      describe 'when provided with something that is not a valid type' do
+      describe "when provided with something that is not a valid type" do
         subject { matcher.allowing(not_valid_type) }
 
-        let(:not_valid_type) { 'not_valid' }
+        let(:not_valid_type) { "not_valid" }
 
         it { is_expected_not_to_match_for(klass) }
       end
     end
 
-    describe 'Edge cases' do
+    describe "Edge cases" do
       describe "when the passed content_type is a symbol (e.g. :png)" do
         let(:model_attribute) { :allowing_symbol }
         let(:allowed_type) { :png }
 
-        describe 'when provided with the exact allowed type' do
+        describe "when provided with the exact allowed type" do
           subject { matcher.allowing(allowed_type) }
 
           it { is_expected_to_match_for(klass) }
@@ -130,9 +130,9 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
 
       describe "when the content_type specifier (e.g. 'svg+xml') is not strictly equal to the file extension (e.g. '.svg')" do
         let(:model_attribute) { :allowing_sneaky_edge_cases }
-        let(:allowed_types) { ["image/svg+xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"] }
+        let(:allowed_types) { [ "image/svg+xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ] }
 
-        describe 'when provided with the exact allowed types' do
+        describe "when provided with the exact allowed types" do
           subject { matcher.allowing(*allowed_types) }
 
           it { is_expected_to_match_for(klass) }
@@ -141,48 +141,48 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     end
   end
 
-  describe '#rejecting' do
+  describe "#rejecting" do
     let(:model_attribute) { :allowing_one }
-    let(:allowed_type) { 'image/png' }
+    let(:allowed_type) { "image/png" }
 
-    describe 'one' do
-      describe 'when provided with the exact allowed type' do
+    describe "one" do
+      describe "when provided with the exact allowed type" do
         subject { matcher.rejecting(allowed_type) }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
-      describe 'when provided with any type but the allowed type' do
+      describe "when provided with any type but the allowed type" do
         subject { matcher.rejecting(any_type) }
 
-        let(:any_type) { 'video/x-matroska' }
+        let(:any_type) { "video/x-matroska" }
 
         it { is_expected_to_match_for(klass) }
       end
 
-      describe 'when provided with something that is not a valid type' do
+      describe "when provided with something that is not a valid type" do
         subject { matcher.rejecting(not_valid_type) }
 
-        let(:not_valid_type) { 'not_valid' }
+        let(:not_valid_type) { "not_valid" }
 
         it { is_expected_to_match_for(klass) }
       end
     end
 
-    describe 'several' do
-      describe 'when provided with any types but the allowed type' do
+    describe "several" do
+      describe "when provided with any types but the allowed type" do
         subject { matcher.rejecting(*any_types) }
 
-        let(:any_types) { ['video/x-matroska', 'image/gif'] }
+        let(:any_types) { [ "video/x-matroska", "image/gif" ] }
 
         it { is_expected_to_match_for(klass) }
       end
 
-      describe 'when provided with any types and the allowed type' do
+      describe "when provided with any types and the allowed type" do
         subject { matcher.rejecting(*types) }
 
-        let(:any_types) { ['video/x-matroska', 'image/gif'] }
-        let(:types) { any_types + [allowed_type] }
+        let(:any_types) { [ "video/x-matroska", "image/gif" ] }
+        let(:types) { any_types + [ allowed_type ] }
 
         it { is_expected_not_to_match_for(klass) }
       end
@@ -193,7 +193,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     include WorksWithAllowBlank
   end
 
-  describe '#with_message' do
+  describe "#with_message" do
     include WorksWithCustomMessage
   end
 
@@ -201,16 +201,16 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     include WorksWithContext
   end
 
-  describe 'Combinations' do
-    describe '#allowing + #with_message' do
+  describe "Combinations" do
+    describe "#allowing + #with_message" do
       let(:model_attribute) { :allowing_one_with_message }
-      let(:allowed_type) { 'application/pdf' }
+      let(:allowed_type) { "application/pdf" }
 
-      describe 'when provided with the exact allowed type' do
-        describe 'and when provided with the message specified in the model validations' do
+      describe "when provided with the exact allowed type" do
+        describe "and when provided with the message specified in the model validations" do
           subject do
             matcher.allowing(allowed_type)
-            matcher.with_message('Not authorized file type.')
+            matcher.with_message("Not authorized file type.")
           end
 
           it { is_expected_to_match_for(klass) }
@@ -218,15 +218,15 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       end
     end
 
-    describe '#rejecting + #with_message' do
+    describe "#rejecting + #with_message" do
       let(:model_attribute) { :allowing_one_with_message }
-      let(:not_allowed_type) { 'video/x-matroska' }
+      let(:not_allowed_type) { "video/x-matroska" }
 
-      describe 'when provided with a not allowed type' do
-        describe 'and when provided with the message specified in the model validations' do
+      describe "when provided with a not allowed type" do
+        describe "and when provided with the message specified in the model validations" do
           subject do
             matcher.rejecting(not_allowed_type)
-            matcher.with_message('Not authorized file type.')
+            matcher.with_message("Not authorized file type.")
           end
 
           it { is_expected_to_match_for(klass) }
@@ -234,13 +234,13 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       end
     end
 
-    describe '#allowing + #rejecting' do
+    describe "#allowing + #rejecting" do
       let(:model_attribute) { :allowing_one }
-      let(:allowed_type) { 'image/png' }
-      let(:not_allowed_type) { 'video/x-matroska' }
+      let(:allowed_type) { "image/png" }
+      let(:not_allowed_type) { "video/x-matroska" }
 
-      describe 'when provided with the exact allowed type' do
-        describe 'and when provided with a not allowed type specified in the model validations' do
+      describe "when provided with the exact allowed type" do
+        describe "and when provided with a not allowed type specified in the model validations" do
           subject do
             matcher.allowing(allowed_type)
             matcher.rejecting(not_allowed_type)
@@ -251,18 +251,18 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       end
     end
 
-    describe '#allowing + #rejecting + #with_message' do
+    describe "#allowing + #rejecting + #with_message" do
       let(:model_attribute) { :allowing_one_with_message }
-      let(:allowed_type) { 'application/pdf' }
-      let(:not_allowed_type) { 'video/x-matroska' }
+      let(:allowed_type) { "application/pdf" }
+      let(:not_allowed_type) { "video/x-matroska" }
 
-      describe 'when provided with the exact allowed type' do
-        describe 'and when provided with a not allowed type' do
-          describe 'and when provided with the message specified in the model validations' do
+      describe "when provided with the exact allowed type" do
+        describe "and when provided with a not allowed type" do
+          describe "and when provided with the message specified in the model validations" do
             subject do
               matcher.allowing(allowed_type)
               matcher.rejecting(not_allowed_type)
-              matcher.with_message('Not authorized file type.')
+              matcher.with_message("Not authorized file type.")
             end
 
             it { is_expected_to_match_for(klass) }
@@ -278,10 +278,10 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
         subject { matcher.allowing(allowed_type) }
 
         let(:allowed_type) { common_mime_type[:mime_type] }
-        let(:media) { common_mime_type[:mime_type].split('/').first }
+        let(:media) { common_mime_type[:mime_type].split("/").first }
         let(:content) { common_mime_type[:extension].underscore }
 
-        let(:model_attribute) { [media, content].join('_') } # e.g. image_jpeg
+        let(:model_attribute) { [ media, content ].join("_") } # e.g. image_jpeg
 
         it { is_expected_to_match_for(klass) }
       end

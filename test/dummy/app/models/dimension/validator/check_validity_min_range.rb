@@ -13,4 +13,3 @@ class Dimension::Validator::CheckValidityMinRange < ApplicationRecord
   has_one_attached :invalid
   validates :invalid, dimension: { min: 15..100 }
 end
-

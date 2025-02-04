@@ -11,5 +11,5 @@
 
 class Limit::Validator::CheckValidityInvalidArgument < ApplicationRecord
   has_one_attached :invalid
-  validates :invalid, limit: { min: '1' }
+  validates :invalid, limit: { min: "1" }
 end

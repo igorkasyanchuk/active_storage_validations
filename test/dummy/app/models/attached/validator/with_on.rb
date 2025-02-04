@@ -11,5 +11,5 @@
 
 class Attached::Validator::WithOn < ApplicationRecord
   has_one_attached :with_on
-  validates :with_on, attached: true, on: %i(create update destroy custom)
+  validates :with_on, attached: true, on: %i[create update destroy custom]
 end

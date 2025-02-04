@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'active_support/concern'
+require "active_support/concern"
 
 module ActiveStorageValidations
   module Matchers
@@ -38,29 +38,29 @@ module ActiveStorageValidations
       def dummy_file
         {
           io: io,
-          filename: 'test.png',
-          content_type: 'image/png'
+          filename: "test.png",
+          content_type: "image/png"
         }
       end
 
       def processable_image
         {
           io: StringIO.new(image_data),
-          filename: 'processable_image.png',
-          content_type: 'image/png'
+          filename: "processable_image.png",
+          content_type: "image/png"
         }
       end
 
       def not_processable_image
         {
-          io: Tempfile.new('.'),
-          filename: 'not_processable_image.txt',
-          content_type: 'text/plain'
+          io: Tempfile.new("."),
+          filename: "not_processable_image.txt",
+          content_type: "text/plain"
         }
       end
 
       def io
-        @io ||= Tempfile.new('Hello world!')
+        @io ||= Tempfile.new("Hello world!")
       end
 
       def image_data

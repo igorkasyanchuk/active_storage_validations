@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require 'test_helper'
-require 'matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute'
-require 'matchers/shared_examples/checks_if_is_valid'
-require 'matchers/shared_examples/has_custom_matcher'
-require 'matchers/shared_examples/has_valid_rspec_message_methods'
-require 'matchers/shared_examples/works_with_allow_blank'
-require 'matchers/shared_examples/works_with_both_instance_and_class'
-require 'matchers/shared_examples/works_with_context'
-require 'matchers/shared_examples/works_with_custom_message'
+require "test_helper"
+require "matchers/shared_examples/checks_if_is_a_valid_active_storage_attribute"
+require "matchers/shared_examples/checks_if_is_valid"
+require "matchers/shared_examples/has_custom_matcher"
+require "matchers/shared_examples/has_valid_rspec_message_methods"
+require "matchers/shared_examples/works_with_allow_blank"
+require "matchers/shared_examples/works_with_both_instance_and_class"
+require "matchers/shared_examples/works_with_context"
+require "matchers/shared_examples/works_with_custom_message"
 
 module DimensionValidatorMatcherTest
   module DoesNotMatchWithAnyValues
@@ -28,7 +28,7 @@ module DimensionValidatorMatcherTest
     included do
       let(:lower_than_lower_range_bound_value) { matcher_method.match?(/_between/) ? 150..200 : 150 }
 
-      describe 'when provided with a lower width than the lower range bound width specified in the model validations' do
+      describe "when provided with a lower width than the lower range bound width specified in the model validations" do
         subject { matcher.public_send(matcher_method, lower_than_lower_range_bound_value) }
 
         it { is_expected_not_to_match_for(klass) }
@@ -42,7 +42,7 @@ module DimensionValidatorMatcherTest
     included do
       let(:lower_range_bound_value) { matcher_method.match?(/_between/) ? 800..1000 : 800 }
 
-      describe 'when provided with the exact lower range bound width specified in the model validations' do
+      describe "when provided with the exact lower range bound width specified in the model validations" do
         subject { matcher.public_send(matcher_method, lower_range_bound_value) }
 
         it { is_expected_not_to_match_for(klass) }
@@ -56,7 +56,7 @@ module DimensionValidatorMatcherTest
     included do
       let(:higher_range_bound_value) { matcher_method.match?(/_between/) ? 1200..1500 : 1200 }
 
-      describe 'when provided with the exact higher range bound width specified in the model validations' do
+      describe "when provided with the exact higher range bound width specified in the model validations" do
         subject { matcher.public_send(matcher_method, higher_range_bound_value) }
 
         it { is_expected_not_to_match_for(klass) }
@@ -70,7 +70,7 @@ module DimensionValidatorMatcherTest
     included do
       let(:higher_than_higher_range_bound_value) { matcher_method.match?(/_between/) ? 9999..10000 : 9999 }
 
-      describe 'when provided with a higher width than the higher range bound width specified in the model validations' do
+      describe "when provided with a higher width than the higher range bound width specified in the model validations" do
         subject { matcher.public_send(matcher_method, higher_than_higher_range_bound_value) }
 
         it { is_expected_not_to_match_for(klass) }
@@ -82,19 +82,19 @@ module DimensionValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      describe 'when provided with a lower width than the width specified in the model validations' do
+      describe "when provided with a lower width than the width specified in the model validations" do
         subject { matcher.public_send(matcher_method, 1) }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
-      describe 'when provided with the exact width specified in the model validations' do
+      describe "when provided with the exact width specified in the model validations" do
         subject { matcher.public_send(matcher_method, validator_value) }
 
         it { is_expected_to_match_for(klass) }
       end
 
-      describe 'when provided with a higher width than the width specified in the model validations' do
+      describe "when provided with a higher width than the width specified in the model validations" do
         subject { matcher.public_send(matcher_method, 9999) }
 
         it { is_expected_not_to_match_for(klass) }
@@ -106,7 +106,7 @@ module DimensionValidatorMatcherTest
     extend ActiveSupport::Concern
 
     included do
-      %i(width height).each do |dimension|
+      %i[width height].each do |dimension|
         describe "when provided with a lower #{dimension} than the #{dimension} specified in the model validations" do
           subject do
             matcher.width(dimension == :width ? 1 : 150)
@@ -117,7 +117,7 @@ module DimensionValidatorMatcherTest
         end
       end
 
-      describe 'when provided with the exact width and height specified in the model validations' do
+      describe "when provided with the exact width and height specified in the model validations" do
         subject do
           matcher.width(150)
           matcher.height(150)
@@ -126,7 +126,7 @@ module DimensionValidatorMatcherTest
         it { is_expected_to_match_for(klass) }
       end
 
-      %i(width height).each do |dimension|
+      %i[width height].each do |dimension|
         describe "when provided with a higher #{dimension} than the #{dimension} specified in the model validations" do
           subject do
             matcher.width(dimension == :width ? 9999 : 150)
@@ -156,7 +156,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
     include HasCustomMatcher
   end
 
-  %i(width height).each do |dimension|
+  %i[width height].each do |dimension|
     describe "##{dimension}" do
       let(:matcher_method) { dimension }
 
@@ -336,7 +336,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
     include WorksWithAllowBlank
   end
 
-  describe '#with_message' do
+  describe "#with_message" do
     include WorksWithCustomMessage
   end
 
@@ -345,7 +345,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
   end
 
   describe "Combinations" do
-    %i(width height).each do |dimension|
+    %i[width height].each do |dimension|
       describe "##{dimension} + #with_message" do
         let(:dimension_matcher_method) { dimension }
         let(:model_attribute) { :"#{dimension}_exact_with_message" }
@@ -354,7 +354,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
           describe "and when provided with the exact #{dimension} and message specified in the model validations" do
             subject do
               matcher.public_send(dimension_matcher_method, 150)
-              matcher.with_message('Invalid dimensions.')
+              matcher.with_message("Invalid dimensions.")
             end
 
             it { is_expected_to_match_for(klass) }
@@ -370,7 +370,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
           describe "and when provided with the exact #{dimension} range and message specified in the model validations" do
             subject do
               matcher.public_send(dimension_matcher_method, 800..1200)
-              matcher.with_message('Invalid dimensions.')
+              matcher.with_message("Invalid dimensions.")
             end
 
             it { is_expected_to_match_for(klass) }
@@ -386,7 +386,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
           describe "and when provided with the min #{dimension} and message specified in the model validations" do
             subject do
               matcher.public_send(dimension_matcher_method, 800)
-              matcher.with_message('Invalid dimensions.')
+              matcher.with_message("Invalid dimensions.")
             end
 
             it { is_expected_to_match_for(klass) }
@@ -402,7 +402,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
           describe "and when provided with the max #{dimension} and message specified in the model validations" do
             subject do
               matcher.public_send(dimension_matcher_method, 1200)
-              matcher.with_message('Invalid dimensions.')
+              matcher.with_message("Invalid dimensions.")
             end
 
             it { is_expected_to_match_for(klass) }
@@ -411,7 +411,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
       end
     end
 
-    %i(min max).each do |bound|
+    %i[min max].each do |bound|
       describe "#width_#{bound} + #height_#{bound}" do
         let(:model_attribute) { :"#{bound}" }
 
@@ -424,7 +424,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
           it { is_expected_not_to_match_for(klass) }
         end
 
-        %i(width height).each do |dimension|
+        %i[width height].each do |dimension|
           describe "when provided with a lower #{dimension} than the #{dimension} specified in the model validations" do
             subject do
               matcher.public_send(:"width_#{bound}", dimension == :width ? 1 : 800)
@@ -444,7 +444,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
           it { is_expected_to_match_for(klass) }
         end
 
-        %i(width height).each do |dimension|
+        %i[width height].each do |dimension|
           describe "when provided with a higher #{dimension} than the #{dimension} specified in the model validations" do
             subject do
               matcher.public_send(:"width_#{bound}", dimension == :width ? 9999 : 800)
@@ -473,7 +473,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
             subject do
               matcher.public_send(:"width_#{bound}", 800)
               matcher.public_send(:"height_#{bound}", 600)
-              matcher.with_message('Invalid dimensions.')
+              matcher.with_message("Invalid dimensions.")
             end
 
             it { is_expected_to_match_for(klass) }
@@ -482,23 +482,23 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
       end
     end
 
-    describe '#width + #height' do
-      describe 'when used on a width exact and height exact validator (e.g. dimension: { width: 150, height: 150 })' do
+    describe "#width + #height" do
+      describe "when used on a width exact and height exact validator (e.g. dimension: { width: 150, height: 150 })" do
         let(:model_attribute) { :width_and_height_exact }
 
         include DimensionValidatorMatcherTest::OnlyMatchWhenExactValues
       end
     end
 
-    describe '#width + #height + #with_message' do
+    describe "#width + #height + #with_message" do
       let(:model_attribute) { :width_and_height_exact_with_message }
 
       describe "when used on a width exact and height exact with message validator (e.g. dimension: { width: 150, height: 150, message: 'Invalid dimensions.' })" do
-        describe 'and when provided with the exact width, height and message specified in the model validations' do
+        describe "and when provided with the exact width, height and message specified in the model validations" do
           subject do
             matcher.width(150)
             matcher.height(150)
-            matcher.with_message('Invalid dimensions.')
+            matcher.with_message("Invalid dimensions.")
           end
 
           it { is_expected_to_match_for(klass) }
@@ -533,7 +533,7 @@ describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
           subject do
             matcher.width_between(800..1200)
             matcher.height_between(600..900)
-            matcher.with_message('Invalid dimensions.')
+            matcher.with_message("Invalid dimensions.")
           end
 
           it { is_expected_to_match_for(klass) }

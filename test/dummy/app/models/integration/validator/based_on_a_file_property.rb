@@ -12,6 +12,6 @@
 class Integration::Validator::BasedOnAFileProperty < ApplicationRecord
   has_one_attached :picture
   validates :picture,
-            content_type: ['image/png', 'image/jpeg', 'image/gif'],
-            size: { less_than: -> (record) { record.picture.blob.content_type == "image/png" ? 15.kilobytes : 5.kilobytes} }
+            content_type: [ "image/png", "image/jpeg", "image/gif" ],
+            size: { less_than: ->(record) { record.picture.blob.content_type == "image/png" ? 15.kilobytes : 5.kilobytes } }
 end

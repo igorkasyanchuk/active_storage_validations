@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'open3'
+require "open3"
 
 module ActiveStorageValidations
   # = ActiveStorageValidations ContentType \Analyzer
@@ -41,15 +41,15 @@ module ActiveStorageValidations
         end
       end
     rescue Errno::ENOENT
-      raise FileCommandLineToolNotInstalledError, 'file command-line tool is not installed'
+      raise FileCommandLineToolNotInstalledError, "file command-line tool is not installed"
     end
 
     def media_from_path(path)
       instrument("file") do
         stdout, status = Open3.capture2(
-          'file',
-          '-b',
-          '--mime-type',
+          "file",
+          "-b",
+          "--mime-type",
           path
         )
 

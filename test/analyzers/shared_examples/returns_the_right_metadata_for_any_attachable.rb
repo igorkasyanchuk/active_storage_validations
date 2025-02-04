@@ -33,7 +33,7 @@ module ReturnsTheRightMetadataForAnyAttachable
               io: media_io,
               filename: media_filename,
               content_type: media_content_type,
-              service_name: 'test'
+              service_name: "test"
             )
           end
 
@@ -42,7 +42,7 @@ module ReturnsTheRightMetadataForAnyAttachable
 
         describe "ActionDispatch::Http::UploadedFile object" do
           let(:attachable) do
-            tempfile = Tempfile.new([media_filename, media_extension])
+            tempfile = Tempfile.new([ media_filename, media_extension ])
             tempfile.write(File.read(media_path))
             tempfile.rewind
 
@@ -87,7 +87,7 @@ module ReturnsTheRightMetadataForAnyAttachable
           describe "Remote file" do
             before do
               stub_request(:get, url)
-                .to_return(body: File.open(Rails.root.join('public', fetched_file)), status: 200)
+                .to_return(body: File.open(Rails.root.join("public", fetched_file)), status: 200)
             end
 
             let(:url) { "https://example_image.jpg" }
@@ -133,7 +133,7 @@ module ReturnsTheRightMetadataForAnyAttachable
               io: media_io,
               filename: media_filename,
               content_type: media_content_type,
-              service_name: 'test'
+              service_name: "test"
             )
             blob.signed_id
           end
@@ -144,7 +144,7 @@ module ReturnsTheRightMetadataForAnyAttachable
         describe "File object" do
           let(:attachable) { media_io }
 
-          if Rails.gem_version >= Gem::Version.new('7.1.0.rc1')
+          if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
             it { is_expected_to_return_the_right_metadata }
           else
             it { is_expected_to_raise_error(ArgumentError, "Could not find or build blob: expected attachable, got #{attachable.inspect}") }
@@ -154,7 +154,7 @@ module ReturnsTheRightMetadataForAnyAttachable
         describe "Pathname object" do
           let(:attachable) { Pathname.new(media_path) }
 
-          if Rails.gem_version >= Gem::Version.new('7.1.0.rc1')
+          if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
             it { is_expected_to_return_the_right_metadata }
           else
             it { is_expected_to_raise_error(ArgumentError, "Could not find or build blob: expected attachable, got #{attachable.inspect}") }
@@ -172,10 +172,10 @@ module ReturnsTheRightMetadataForAnyAttachable
         describe "rotated media" do
           let(:attachable) do
             ActiveStorage::Blob.create_and_upload!(
-              io: File.open(Rails.root.join('public', media_filename_rotated)),
+              io: File.open(Rails.root.join("public", media_filename_rotated)),
               filename: media_filename_rotated,
               content_type: media_content_type_rotated,
-              service_name: 'test'
+              service_name: "test"
             )
           end
           let(:expected_metadata) { expected_metadata_rotated }
@@ -186,10 +186,10 @@ module ReturnsTheRightMetadataForAnyAttachable
         describe "0 byte size file" do
           let(:attachable) do
             ActiveStorage::Blob.create_and_upload!(
-              io: File.open(Rails.root.join('public', media_filename_0ko)),
+              io: File.open(Rails.root.join("public", media_filename_0ko)),
               filename: media_filename_0ko,
               content_type: media_content_type,
-              service_name: 'test'
+              service_name: "test"
             )
           end
 

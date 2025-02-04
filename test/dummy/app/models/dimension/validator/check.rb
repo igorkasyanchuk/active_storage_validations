@@ -10,7 +10,7 @@
 #
 
 class Dimension::Validator::Check < ApplicationRecord
-  %w(width height).each do |dimension|
+  %w[width height].each do |dimension|
     has_one_attached :"#{dimension}"
     has_one_attached :"#{dimension}_min"
     has_one_attached :"#{dimension}_max"
@@ -27,19 +27,19 @@ class Dimension::Validator::Check < ApplicationRecord
     has_one_attached :"#{dimension}_max_proc"
     has_one_attached :"#{dimension}_min_max_proc"
     has_one_attached :"#{dimension}_in_proc"
-    validates :"#{dimension}_proc", dimension: { "#{dimension}": -> (record) { 500 } }
-    validates :"#{dimension}_min_proc", dimension: { "#{dimension}": { min: -> (record) { 500 } } }
-    validates :"#{dimension}_max_proc", dimension: { "#{dimension}": { max: -> (record) { 500 } } }
-    validates :"#{dimension}_min_max_proc", dimension: { "#{dimension}": { min: -> (record) { 400 }, max: -> (record) { 600 } } }
-    validates :"#{dimension}_in_proc", dimension: { "#{dimension}": { in: -> (record) { 400..600 } } }
+    validates :"#{dimension}_proc", dimension: { "#{dimension}": ->(record) { 500 } }
+    validates :"#{dimension}_min_proc", dimension: { "#{dimension}": { min: ->(record) { 500 } } }
+    validates :"#{dimension}_max_proc", dimension: { "#{dimension}": { max: ->(record) { 500 } } }
+    validates :"#{dimension}_min_max_proc", dimension: { "#{dimension}": { min: ->(record) { 400 }, max: ->(record) { 600 } } }
+    validates :"#{dimension}_in_proc", dimension: { "#{dimension}": { in: ->(record) { 400..600 } } }
   end
 
-  %w(min max).each do |bound|
+  %w[min max].each do |bound|
     has_one_attached :"#{bound}"
     validates :"#{bound}", dimension: { "#{bound}": 500..500 }
 
     has_one_attached :"#{bound}_proc"
-    validates :"#{bound}_proc", dimension: { "#{bound}": -> (record) { 500..500 } }
+    validates :"#{bound}_proc", dimension: { "#{bound}": ->(record) { 500..500 } }
   end
 
   # Integration tests

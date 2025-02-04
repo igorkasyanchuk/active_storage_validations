@@ -11,5 +11,5 @@
 
 class AspectRatio::Validator::CheckValidityProcOption < ApplicationRecord
   has_one_attached :invalid
-  validates :invalid, aspect_ratio: -> (record) { :invalid }
+  validates :invalid, aspect_ratio: ->(record) { :invalid }
 end

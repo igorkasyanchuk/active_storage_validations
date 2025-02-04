@@ -35,18 +35,18 @@ class Duration::Matcher < ApplicationRecord
   has_one_attached :proc_greater_than_or_equal_to
   has_one_attached :proc_between
   has_many_attached :proc_many_greater_than
-  validates :proc_less_than, duration: { less_than: -> (record) { 2.seconds } }
-  validates :proc_less_than_or_equal_to, duration: { less_than_or_equal_to: -> (record) { 2.seconds } }
-  validates :proc_greater_than, duration: { greater_than: -> (record) { 7.seconds } }
-  validates :proc_greater_than_or_equal_to, duration: { greater_than_or_equal_to: -> (record) { 7.seconds } }
+  validates :proc_less_than, duration: { less_than: ->(record) { 2.seconds } }
+  validates :proc_less_than_or_equal_to, duration: { less_than_or_equal_to: ->(record) { 2.seconds } }
+  validates :proc_greater_than, duration: { greater_than: ->(record) { 7.seconds } }
+  validates :proc_greater_than_or_equal_to, duration: { greater_than_or_equal_to: ->(record) { 7.seconds } }
   validates :proc_between, duration: { between: -> { 2.seconds..7.seconds } }
-  validates :proc_many_greater_than, duration: { greater_than: -> (record) { 7.seconds } }
+  validates :proc_many_greater_than, duration: { greater_than: ->(record) { 7.seconds } }
 
   has_one_attached :allow_blank
   validates :allow_blank, duration: { less_than_or_equal_to: 5.minutes }, allow_blank: true
 
   has_one_attached :with_message
-  validates :with_message, duration: { less_than_or_equal_to: 5.minutes, message: 'Custom message' }
+  validates :with_message, duration: { less_than_or_equal_to: 5.minutes, message: "Custom message" }
 
   has_one_attached :with_context_symbol
   validates :with_context_symbol, duration: { less_than_or_equal_to: 5.minutes }, on: :update
@@ -60,8 +60,8 @@ class Duration::Matcher < ApplicationRecord
   validates :as_instance, duration: { less_than_or_equal_to: 5.minutes }
 
   has_one_attached :validatable_different_error_messages
-  validates :validatable_different_error_messages, duration: { less_than: 20.minutes, message: 'Custom message 1' }, if: :title_is_quo_vadis?
-  validates :validatable_different_error_messages, duration: { less_than: 10.minutes, message: 'Custom message 2' }, if: :title_is_american_psycho?
+  validates :validatable_different_error_messages, duration: { less_than: 20.minutes, message: "Custom message 1" }, if: :title_is_quo_vadis?
+  validates :validatable_different_error_messages, duration: { less_than: 10.minutes, message: "Custom message 2" }, if: :title_is_american_psycho?
 
   has_one_attached :failure_message
   validates :failure_message, duration: { less_than_or_equal_to: 5.minutes }
@@ -74,9 +74,9 @@ class Duration::Matcher < ApplicationRecord
   has_one_attached :greater_than_with_message
   has_one_attached :greater_than_or_equal_to_with_message
   has_one_attached :between_with_message
-  validates :less_than_with_message, duration: { less_than: 2.seconds, message: 'File is too long.' }
-  validates :less_than_or_equal_to_with_message, duration: { less_than_or_equal_to: 2.seconds, message: 'File is too long.' }
-  validates :greater_than_with_message, duration: { greater_than: 7.seconds, message: 'File is too short.' }
-  validates :greater_than_or_equal_to_with_message, duration: { greater_than_or_equal_to: 7.seconds, message: 'File is too short.' }
-  validates :between_with_message, duration: { between: 2.seconds..7.seconds, message: 'File is not in accepted duration range.' }
+  validates :less_than_with_message, duration: { less_than: 2.seconds, message: "File is too long." }
+  validates :less_than_or_equal_to_with_message, duration: { less_than_or_equal_to: 2.seconds, message: "File is too long." }
+  validates :greater_than_with_message, duration: { greater_than: 7.seconds, message: "File is too short." }
+  validates :greater_than_or_equal_to_with_message, duration: { greater_than_or_equal_to: 7.seconds, message: "File is too short." }
+  validates :between_with_message, duration: { between: 2.seconds..7.seconds, message: "File is not in accepted duration range." }
 end

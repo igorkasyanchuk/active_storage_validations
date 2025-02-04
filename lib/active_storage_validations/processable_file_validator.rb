@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_analyzable'
-require_relative 'shared/asv_attachable'
-require_relative 'shared/asv_errorable'
-require_relative 'shared/asv_symbolizable'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_analyzable"
+require_relative "shared/asv_attachable"
+require_relative "shared/asv_errorable"
+require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
   class ProcessableFileValidator < ActiveModel::EachValidator # :nodoc
@@ -31,7 +31,7 @@ module ActiveStorageValidations
       return if !metadata.empty?
 
       errors_options = initialize_error_options(options, attachable)
-      add_error(record, attribute, ERROR_TYPES.first , **errors_options)
+      add_error(record, attribute, ERROR_TYPES.first, **errors_options)
     end
   end
 end

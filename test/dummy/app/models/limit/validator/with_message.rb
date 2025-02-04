@@ -11,5 +11,5 @@
 
 class Limit::Validator::WithMessage < ApplicationRecord
   has_one_attached :with_message
-  validates :with_message, limit: { max: 0, message: 'Custom message' }
+  validates :with_message, limit: { max: 0, message: "Custom message" }
 end

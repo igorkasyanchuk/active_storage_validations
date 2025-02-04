@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_attachable'
-require_relative 'shared/asv_contextable'
-require_relative 'shared/asv_messageable'
-require_relative 'shared/asv_rspecable'
-require_relative 'shared/asv_validatable'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_attachable"
+require_relative "shared/asv_contextable"
+require_relative "shared/asv_messageable"
+require_relative "shared/asv_rspecable"
+require_relative "shared/asv_validatable"
 
 module ActiveStorageValidations
   module Matchers

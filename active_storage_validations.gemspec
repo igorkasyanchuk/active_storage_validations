@@ -9,8 +9,8 @@ require 'active_storage_validations/version'
 Gem::Specification.new do |s|
   s.name        = 'active_storage_validations'
   s.version     = ActiveStorageValidations::VERSION
-  s.authors     = ['Igor Kasyanchuk']
-  s.email       = ['igorkasyanchuk@gmail.com']
+  s.authors     = [ 'Igor Kasyanchuk' ]
+  s.email       = [ 'igorkasyanchuk@gmail.com' ]
   s.homepage    = 'https://github.com/igorkasyanchuk/active_storage_validations'
   s.summary     = 'Validations for Active Storage'
   s.description = 'Validations for Active Storage (presence)'

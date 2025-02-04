@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_errorable'
-require_relative 'shared/asv_optionable'
-require_relative 'shared/asv_symbolizable'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_errorable"
+require_relative "shared/asv_optionable"
+require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
   class BaseComparisonValidator < ActiveModel::EachValidator # :nodoc:
@@ -22,14 +22,14 @@ module ActiveStorageValidations
 
     def initialize(*args)
       if self.class == BaseComparisonValidator
-        raise NotImplementedError, 'BaseComparisonValidator is an abstract class and cannot be instantiated directly.'
+        raise NotImplementedError, "BaseComparisonValidator is an abstract class and cannot be instantiated directly."
       end
       super
     end
 
     def check_validity!
       unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
-        raise ArgumentError, 'You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator'
+        raise ArgumentError, "You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator"
       end
     end
 

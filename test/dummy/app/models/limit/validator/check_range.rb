@@ -13,4 +13,3 @@ class Limit::Validator::CheckRange < ApplicationRecord
   has_many_attached :range
   validates :range, limit: { min: 1, max: 3 }
 end
-

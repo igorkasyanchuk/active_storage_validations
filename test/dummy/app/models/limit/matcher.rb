@@ -16,7 +16,7 @@ class Limit::Matcher < ApplicationRecord
   has_many_attached :custom_matcher
   validates :custom_matcher, limit: { min: 1, max: 5 }
 
-  %i(min max).each do |bound|
+  %i[min max].each do |bound|
     has_many_attached bound
     validates bound, limit: { "#{bound}": 3 }
   end
@@ -26,7 +26,7 @@ class Limit::Matcher < ApplicationRecord
 
   has_many_attached :with_message
   has_many_attached :without_message
-  validates :with_message, limit: { min: 1, max: 5, message: 'Custom message' }
+  validates :with_message, limit: { min: 1, max: 5, message: "Custom message" }
   validates :without_message, limit: { min: 1, max: 5 }
 
   has_many_attached :with_context_symbol
@@ -41,8 +41,8 @@ class Limit::Matcher < ApplicationRecord
   validates :as_instance, limit: { min: 1, max: 5 }
 
   has_many_attached :validatable_different_error_messages
-  validates :validatable_different_error_messages, limit: { min: 1, message: 'Custom message 1' }, if: :title_is_quo_vadis?
-  validates :validatable_different_error_messages, limit: { min: 1, message: 'Custom message 2' }, if: :title_is_american_psycho?
+  validates :validatable_different_error_messages, limit: { min: 1, message: "Custom message 1" }, if: :title_is_quo_vadis?
+  validates :validatable_different_error_messages, limit: { min: 1, message: "Custom message 2" }, if: :title_is_american_psycho?
 
   has_many_attached :failure_message
   validates :failure_message, limit: { min: 1, max: 5 }
@@ -53,7 +53,7 @@ class Limit::Matcher < ApplicationRecord
   has_many_attached :min_max
   validates :min_max, limit: { min: 1, max: 5 }
   has_many_attached :min_with_message
-  validates :min_with_message, limit: { min: 1, message: 'Invalid limits.' }
+  validates :min_with_message, limit: { min: 1, message: "Invalid limits." }
   has_many_attached :max_with_message
-  validates :max_with_message, limit: { max: 5, message: 'Invalid limits.' }
+  validates :max_with_message, limit: { max: 5, message: "Invalid limits." }
 end

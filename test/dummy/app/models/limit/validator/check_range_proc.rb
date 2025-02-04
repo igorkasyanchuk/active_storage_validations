@@ -11,6 +11,5 @@
 
 class Limit::Validator::CheckRangeProc < ApplicationRecord
   has_many_attached :range_proc
-  validates :range_proc, limit: { min: -> (record) { 1 }, max: -> (record) { 3 } }
+  validates :range_proc, limit: { min: ->(record) { 1 }, max: ->(record) { 3 } }
 end
-

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_allow_blankable'
-require_relative 'shared/asv_attachable'
-require_relative 'shared/asv_contextable'
-require_relative 'shared/asv_messageable'
-require_relative 'shared/asv_rspecable'
-require_relative 'shared/asv_validatable'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_allow_blankable"
+require_relative "shared/asv_attachable"
+require_relative "shared/asv_contextable"
+require_relative "shared/asv_messageable"
+require_relative "shared/asv_rspecable"
+require_relative "shared/asv_validatable"
 
 module ActiveStorageValidations
   module Matchers
@@ -37,7 +37,7 @@ module ActiveStorageValidations
       end
 
       def failure_message
-        message = ["is expected to validate dimensions of :#{@attribute_name}"]
+        message = [ "is expected to validate dimensions of :#{@attribute_name}" ]
         build_failure_message(message)
         message.join("\n")
       end

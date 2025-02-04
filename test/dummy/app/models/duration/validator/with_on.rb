@@ -11,5 +11,5 @@
 
 class Duration::Validator::WithOn < ApplicationRecord
   has_one_attached :with_on
-  validates :with_on, duration: { less_than: 2.seconds }, on: %i(create update destroy custom)
+  validates :with_on, duration: { less_than: 2.seconds }, on: %i[create update destroy custom]
 end

@@ -12,36 +12,36 @@
 class ContentType::Validator::Check < ApplicationRecord
   def self.example_for(type, several: false)
     case type
-    when 'symbol'
-      several ? [:png, :gif] : :png
-    when 'string'
-      several ? ['png', 'image/gif'] : 'png'
-    when 'regex'
-      several ? [/\Aimage\/.*\z/, /\Afile\/.*\z/] : /\Aimage\/.*\z/
+    when "symbol"
+      several ? [ :png, :gif ] : :png
+    when "string"
+      several ? [ "png", "image/gif" ] : "png"
+    when "regex"
+      several ? [ /\Aimage\/.*\z/, /\Afile\/.*\z/ ] : /\Aimage\/.*\z/
     end
   end
 
   has_one_attached :extension_content_type_mismatch
   validates :extension_content_type_mismatch, content_type: :png
   has_one_attached :extension_two_extensions_docx
-  validates :extension_two_extensions_docx, content_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  validates :extension_two_extensions_docx, content_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   has_one_attached :extension_two_extensions_pdf
-  validates :extension_two_extensions_pdf, content_type: 'application/pdf'
+  validates :extension_two_extensions_pdf, content_type: "application/pdf"
   has_one_attached :extension_upcase_extension
-  validates :extension_upcase_extension, content_type: 'application/pdf'
+  validates :extension_upcase_extension, content_type: "application/pdf"
   has_one_attached :extension_missing_extension
-  validates :extension_missing_extension, content_type: 'application/pdf'
+  validates :extension_missing_extension, content_type: "application/pdf"
 
-  %w(symbol string regex).each do |type|
+  %w[symbol string regex].each do |type|
     has_one_attached :"with_#{type}"
     has_one_attached :"with_#{type}_proc"
     validates :"with_#{type}", content_type: self.example_for(type)
-    validates :"with_#{type}_proc", content_type: -> (record) { self.example_for(type) }
+    validates :"with_#{type}_proc", content_type: ->(record) { self.example_for(type) }
 
     has_one_attached :"in_#{type.pluralize}"
     has_one_attached :"in_#{type.pluralize}_proc"
     validates :"in_#{type.pluralize}", content_type: example_for(type, several: true)
-    validates :"in_#{type.pluralize}_proc", content_type: -> (record) { example_for(type, several: true) }
+    validates :"in_#{type.pluralize}_proc", content_type: ->(record) { example_for(type, several: true) }
   end
 
   most_common_mime_types.reject { |common_mime_type| common_mime_type[:type] == :ogv } # issue with ogv
@@ -54,9 +54,9 @@ class ContentType::Validator::Check < ApplicationRecord
               content_type: { with: content_type[:type], spoofing_protection: true }
   end
   has_one_attached :video_ogv
-  validates :video_ogv, content_type: ['video/theora']
+  validates :video_ogv, content_type: [ "video/theora" ]
   has_one_attached :video_ogv_spoof
-  validates :video_ogv_spoof, content_type: { with: 'video/theora', spoofing_protection: true }
+  validates :video_ogv_spoof, content_type: { with: "video/theora", spoofing_protection: true }
 
   has_one_attached :content_type_with_parameter
   validates :content_type_with_parameter, content_type: :rar

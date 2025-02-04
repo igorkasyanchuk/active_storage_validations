@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'test_helper'
-require 'validators/shared_examples/checks_validator_validity'
-require 'validators/shared_examples/is_performance_optimized'
-require 'validators/shared_examples/works_fine_with_attachables'
-require 'validators/shared_examples/works_with_all_rails_common_validation_options'
+require "test_helper"
+require "validators/shared_examples/checks_validator_validity"
+require "validators/shared_examples/is_performance_optimized"
+require "validators/shared_examples/works_fine_with_attachables"
+require "validators/shared_examples/works_with_all_rails_common_validation_options"
 
 describe ActiveStorageValidations::AspectRatioValidator do
   include ValidatorHelpers
@@ -12,11 +12,11 @@ describe ActiveStorageValidations::AspectRatioValidator do
   let(:validator_test_class) { AspectRatio::Validator }
   let(:params) { {} }
 
-  describe '#check_validity!' do
+  describe "#check_validity!" do
     include ChecksValidatorValidity
 
-    describe 'aspect ratio validity' do
-      describe 'when the passed option is an invalid' do
+    describe "aspect ratio validity" do
+      describe "when the passed option is an invalid" do
         let(:error_message) do
           <<~ERROR_MESSAGE
             You must pass a valid aspect ratio to the validator
@@ -25,34 +25,34 @@ describe ActiveStorageValidations::AspectRatioValidator do
           ERROR_MESSAGE
         end
 
-        describe 'named aspect ratio' do
+        describe "named aspect ratio" do
           subject { validator_test_class::CheckValidityInvalidNamedArgument.new(params) }
 
-          it 'raises an error at model initialization' do
+          it "raises an error at model initialization" do
             assert_raises(ArgumentError, error_message) { subject }
           end
         end
 
-        describe 'is_x_y aspect ratio' do
+        describe "is_x_y aspect ratio" do
           subject { validator_test_class::CheckValidityInvalidIsXyArgument.new(params) }
 
-          it 'raises an error at model initialization' do
+          it "raises an error at model initialization" do
             assert_raises(ArgumentError, error_message) { subject }
           end
         end
       end
 
-      describe 'when the passed option is a Proc' do
+      describe "when the passed option is a Proc" do
         subject { validator_test_class::CheckValidityProcOption.new(params) }
 
-        it 'does not perform a check, and therefore is valid' do
+        it "does not perform a check, and therefore is valid" do
           assert_nothing_raised { subject }
         end
       end
     end
   end
 
-  describe 'ASPECT_RATIO_REGEX' do
+  describe "ASPECT_RATIO_REGEX" do
     let(:aspect_ratio_regex) { ActiveStorageValidations::AspectRatioValidator::ASPECT_RATIO_REGEX }
     let(:accepted_is_x_y_strings) do
       %w[
@@ -85,7 +85,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
     end
   end
 
-  describe 'Validator checks' do
+  describe "Validator checks" do
     include WorksFineWithAttachables
 
     let(:model) { validator_test_class::Check.new(params) }
@@ -97,13 +97,13 @@ describe ActiveStorageValidations::AspectRatioValidator do
       # validates :with_named_square_proc, aspect_ratio: -> (record) { :square }
       # validates :with_named_portrait_proc, aspect_ratio: -> (record) { :portrait }
       # validates :with_named_landscape_proc, aspect_ratio: -> (record) { :landscape }
-      %w(value proc).each do |value_type|
+      %w[value proc].each do |value_type|
         describe "named aspect_ratio" do
-          %i(square portrait landscape).each do |named_aspect_ratio|
+          %i[square portrait landscape].each do |named_aspect_ratio|
             describe ":#{named_aspect_ratio}" do
               let(:attribute) { :"with_#{named_aspect_ratio}#{'_proc' if value_type == 'proc'}" }
 
-              describe 'when provided with an allowed aspect_ratio file' do
+              describe "when provided with an allowed aspect_ratio file" do
                 subject { model.public_send(attribute).attach(allowed_file) and model }
 
                 let(:allowed_file) do
@@ -117,7 +117,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
                 it { is_expected_to_be_valid }
               end
 
-              describe 'when provided with a not allowed aspect_ratio file' do
+              describe "when provided with a not allowed aspect_ratio file" do
                 subject { model.public_send(attribute).attach(not_allowed_file) and model }
 
                 let(:not_allowed_file) do
@@ -161,7 +161,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
         describe "regex aspect_ratio" do
           let(:attribute) { :"with_regex#{'_proc' if value_type == 'proc'}" }
 
-          describe 'when provided with an allowed aspect_ratio file' do
+          describe "when provided with an allowed aspect_ratio file" do
             subject { model.public_send(attribute).attach(allowed_file) and model }
 
             let(:allowed_file) { is_16_9_image_file }
@@ -169,7 +169,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
             it { is_expected_to_be_valid }
           end
 
-          describe 'when provided with a not allowed aspect_ratio file' do
+          describe "when provided with a not allowed aspect_ratio file" do
             subject { model.public_send(attribute).attach(not_allowed_file) and model }
 
             let(:not_allowed_file) { is_4_3_image_file }
@@ -190,27 +190,27 @@ describe ActiveStorageValidations::AspectRatioValidator do
       end
     end
 
-    describe ':in' do
+    describe ":in" do
       %w[value proc].each do |value_type|
         describe value_type do
           let(:attribute) { :"in_aspect_ratios#{'_proc' if value_type == 'proc'}" }
 
-          describe 'when provided with an allowed aspect_ratio file' do
+          describe "when provided with an allowed aspect_ratio file" do
             subject { model.public_send(attribute).attach(allowed_file) and model }
 
-            let(:allowed_file) { [square_image_file, portrait_image_file, is_16_9_image_file].sample }
+            let(:allowed_file) { [ square_image_file, portrait_image_file, is_16_9_image_file ].sample }
 
             it { is_expected_to_be_valid }
           end
 
-          describe 'when provided with a not allowed aspect_ratio file' do
+          describe "when provided with a not allowed aspect_ratio file" do
             subject { model.public_send(attribute).attach(not_allowed_file) and model }
 
             let(:not_allowed_file) { is_4_3_image_file }
 
             let(:error_options) do
               {
-                authorized_aspect_ratios: 'square, portrait, 16:9',
+                authorized_aspect_ratios: "square, portrait, 16:9",
                 width: 1200,
                 height: 900,
                 filename: not_allowed_file[:filename]
@@ -218,7 +218,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
             end
 
             it { is_expected_not_to_be_valid }
-            it { is_expected_to_include_error_message('aspect_ratio_invalid', error_options: error_options) }
+            it { is_expected_to_include_error_message("aspect_ratio_invalid", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
         end
@@ -243,19 +243,19 @@ describe ActiveStorageValidations::AspectRatioValidator do
     end
   end
 
-  describe 'Blob Metadata' do
+  describe "Blob Metadata" do
     let(:attachable) do
       {
-        io: File.open(Rails.root.join('public', 'image_150x150.png')),
-        filename: 'image_150x150.png',
-        content_type: 'image/png'
+        io: File.open(Rails.root.join("public", "image_150x150.png")),
+        filename: "image_150x150.png",
+        content_type: "image/png"
       }
     end
 
     include IsPerformanceOptimized
   end
 
-  describe 'Rails options' do
+  describe "Rails options" do
     include WorksWithAllRailsCommonValidationOptions
   end
 end

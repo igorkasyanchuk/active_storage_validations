@@ -4,14 +4,14 @@ module WorksWithCustomMessage
   included do
     let(:model_attribute) { :with_message }
 
-    describe 'when provided with the other validator requirements' do
+    describe "when provided with the other validator requirements" do
       before do
         case validator_sym
         when :aspect_ratio then matcher.allowing(:square)
         when :attached then nil
         when :processable_file then nil
         when :limit then matcher.min(1).max(5)
-        when :content_type then matcher.allowing('image/png')
+        when :content_type then matcher.allowing("image/png")
         when :dimension then matcher.width(150).height(150)
         when :duration then matcher.less_than_or_equal_to(5.minutes)
         when :size then matcher.less_than_or_equal_to(5.megabytes)
@@ -19,19 +19,19 @@ module WorksWithCustomMessage
         end
       end
 
-      describe 'and when provided with the model validation message' do
-        subject { matcher.with_message('Custom message') }
+      describe "and when provided with the model validation message" do
+        subject { matcher.with_message("Custom message") }
 
         it { is_expected_to_match_for(klass) }
       end
 
-      describe 'and when provided with a different message than the model validation message' do
-        subject { matcher.with_message('<wrong message>') }
+      describe "and when provided with a different message than the model validation message" do
+        subject { matcher.with_message("<wrong message>") }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
-      describe 'and when not provided with the #with_message matcher method' do
+      describe "and when not provided with the #with_message matcher method" do
         subject { matcher }
 
         it { is_expected_to_match_for(klass) }

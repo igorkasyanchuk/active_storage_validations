@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require 'active_storage_validations/matchers/aspect_ratio_validator_matcher'
-require 'active_storage_validations/matchers/attached_validator_matcher'
-require 'active_storage_validations/matchers/processable_file_validator_matcher'
-require 'active_storage_validations/matchers/limit_validator_matcher'
-require 'active_storage_validations/matchers/content_type_validator_matcher'
-require 'active_storage_validations/matchers/dimension_validator_matcher'
-require 'active_storage_validations/matchers/duration_validator_matcher'
-require 'active_storage_validations/matchers/size_validator_matcher'
-require 'active_storage_validations/matchers/total_size_validator_matcher'
+require "active_storage_validations/matchers/aspect_ratio_validator_matcher"
+require "active_storage_validations/matchers/attached_validator_matcher"
+require "active_storage_validations/matchers/processable_file_validator_matcher"
+require "active_storage_validations/matchers/limit_validator_matcher"
+require "active_storage_validations/matchers/content_type_validator_matcher"
+require "active_storage_validations/matchers/dimension_validator_matcher"
+require "active_storage_validations/matchers/duration_validator_matcher"
+require "active_storage_validations/matchers/size_validator_matcher"
+require "active_storage_validations/matchers/total_size_validator_matcher"
 
 module ActiveStorageValidations
   module Matchers
@@ -22,7 +22,7 @@ module ActiveStorageValidations
         RSpec::Mocks.allow_message(object, method) { result }
         yield
       else
-        raise 'Need either Minitest::Mock or RSpec::Mocks to run this validator matcher'
+        raise "Need either Minitest::Mock or RSpec::Mocks to run this validator matcher"
       end
     end
 

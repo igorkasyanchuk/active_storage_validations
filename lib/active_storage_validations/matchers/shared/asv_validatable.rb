@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'active_support/concern'
+require "active_support/concern"
 
 module ActiveStorageValidations
   module Matchers
@@ -33,7 +33,7 @@ module ActiveStorageValidations
       end
 
       def validator_class
-        self.class.name.gsub(/::Matchers|Matcher/, '').constantize
+        self.class.name.gsub(/::Matchers|Matcher/, "").constantize
       end
 
       def attribute_validator

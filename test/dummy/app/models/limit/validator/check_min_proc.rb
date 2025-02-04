@@ -11,5 +11,5 @@
 
 class Limit::Validator::CheckMinProc < ApplicationRecord
   has_many_attached :min_proc
-  validates :min_proc, limit: { min: -> (record) { 2 } }
+  validates :min_proc, limit: { min: ->(record) { 2 } }
 end

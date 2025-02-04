@@ -1,5 +1,5 @@
 module Size
   def self.table_name_prefix
-    'size_'
+    "size_"
   end
 end

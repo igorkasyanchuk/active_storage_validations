@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'test_helper'
-require 'validators/shared_examples/checks_validator_validity'
-require 'validators/shared_examples/is_performance_optimized'
-require 'validators/shared_examples/works_fine_with_attachables'
-require 'validators/shared_examples/works_with_all_rails_common_validation_options'
+require "test_helper"
+require "validators/shared_examples/checks_validator_validity"
+require "validators/shared_examples/is_performance_optimized"
+require "validators/shared_examples/works_fine_with_attachables"
+require "validators/shared_examples/works_with_all_rails_common_validation_options"
 
 describe ActiveStorageValidations::DimensionValidator do
   include ValidatorHelpers
@@ -12,61 +12,61 @@ describe ActiveStorageValidations::DimensionValidator do
   let(:validator_test_class) { Dimension::Validator }
   let(:params) { {} }
 
-  describe '#check_validity!' do
+  describe "#check_validity!" do
     include ChecksValidatorValidity
 
-    describe '#ensure_dimension_in_option_validity' do
-      describe 'when the passed option is a Range' do
+    describe "#ensure_dimension_in_option_validity" do
+      describe "when the passed option is a Range" do
         subject { validator_test_class::CheckValidityDimensionInRange.new(params) }
 
-        it 'does not perform a check, and therefore is valid' do
+        it "does not perform a check, and therefore is valid" do
           assert_nothing_raised { subject }
         end
       end
 
-      describe 'when the passed option is a Proc' do
+      describe "when the passed option is a Proc" do
         subject { validator_test_class::CheckValidityDimensionInProc.new(params) }
 
-        it 'does not perform a check, and therefore is valid' do
+        it "does not perform a check, and therefore is valid" do
           assert_nothing_raised { subject }
         end
       end
 
-      describe 'when the passed option is neither a Range nor a Proc' do
+      describe "when the passed option is neither a Range nor a Proc" do
         subject { validator_test_class::CheckValidityInvalidDimensionIn.new(params) }
 
         let(:error_message) { "{ width: { in: value } } value must be a Range (min..max)" }
 
-        it 'raises an error at model initialization' do
+        it "raises an error at model initialization" do
           assert_raises(ArgumentError, error_message) { subject }
         end
       end
     end
 
-    describe '#ensure_min_max_option_validity' do
+    describe "#ensure_min_max_option_validity" do
       %i[min max].each do |bound|
-        describe 'when the passed option is a Range' do
+        describe "when the passed option is a Range" do
           subject { "#{validator_test_class}::CheckValidity#{bound.to_s.capitalize}Range".constantize.new(params) }
 
-          it 'does not perform a check, and therefore is valid' do
+          it "does not perform a check, and therefore is valid" do
             assert_nothing_raised { subject }
           end
         end
 
-        describe 'when the passed option is a Proc' do
+        describe "when the passed option is a Proc" do
           subject { "#{validator_test_class}::CheckValidity#{bound.to_s.capitalize}Proc".constantize.new(params) }
 
-          it 'does not perform a check, and therefore is valid' do
+          it "does not perform a check, and therefore is valid" do
             assert_nothing_raised { subject }
           end
         end
 
-        describe 'when the passed option is neither a Range nor a Proc' do
+        describe "when the passed option is neither a Range nor a Proc" do
           subject { "#{validator_test_class}::CheckValidityInvalid#{bound.to_s.capitalize}".constantize.new(params) }
 
           let(:error_message) { "{ #{bound}: value } value must be a Range (#{bound}_width..#{bound}_height)" }
 
-          it 'raises an error at model initialization' do
+          it "raises an error at model initialization" do
             assert_raises(ArgumentError, error_message) { subject }
           end
         end
@@ -74,14 +74,14 @@ describe ActiveStorageValidations::DimensionValidator do
     end
   end
 
-  describe 'Validator checks' do
+  describe "Validator checks" do
     include WorksFineWithAttachables
 
     let(:model) { validator_test_class::Check.new(params) }
 
-    %w(width height).each do |dimension|
+    %w[width height].each do |dimension|
       describe ":#{dimension} option" do
-        %w(value proc).each do |value_type|
+        %w[value proc].each do |value_type|
           describe value_type do
             describe ":#{dimension} (e.g { #{dimension}: 500 })" do
               # validates :width, dimension: { width: 500 }
@@ -96,8 +96,8 @@ describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": value_type == 'value' ? 500 : -> (record) { 500 },
-                    filename: 'image_150x150_file.png'
+                    "#{dimension}": value_type == "value" ? 500 : ->(record) { 500 },
+                    filename: "image_150x150_file.png"
                   }
                 end
 
@@ -118,8 +118,8 @@ describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": value_type == 'value' ? 500 : -> (record) { 500 },
-                    filename: 'image_600x800_file.png'
+                    "#{dimension}": value_type == "value" ? 500 : ->(record) { 500 },
+                    filename: "image_600x800_file.png"
                   }
                 end
 
@@ -142,8 +142,8 @@ describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": { min: value_type == 'value' ? 500 : -> (record) { 500 } },
-                    filename: 'image_150x150_file.png'
+                    "#{dimension}": { min: value_type == "value" ? 500 : ->(record) { 500 } },
+                    filename: "image_150x150_file.png"
                   }
                 end
 
@@ -190,8 +190,8 @@ describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": { max: value_type == 'value' ? 500 : -> (record) { 500 } },
-                    filename: 'image_600x800_file.png'
+                    "#{dimension}": { max: value_type == "value" ? 500 : ->(record) { 500 } },
+                    filename: "image_600x800_file.png"
                   }
                 end
 
@@ -214,8 +214,8 @@ describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 400,
-                    "#{dimension}": { min: value_type == 'value' ? 400 : -> (record) { 400 }, max: value_type == 'value' ? 600 : -> (record) { 600 } },
-                    filename: 'image_150x150_file.png'
+                    "#{dimension}": { min: value_type == "value" ? 400 : ->(record) { 400 }, max: value_type == "value" ? 600 : ->(record) { 600 } },
+                    filename: "image_150x150_file.png"
                   }
                 end
 
@@ -236,8 +236,8 @@ describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 600,
-                    "#{dimension}": { min: value_type == 'value' ? 400 : -> (record) { 400 }, max: value_type == 'value' ? 600 : -> (record) { 600 } },
-                    filename: 'image_1200x900_file.png'
+                    "#{dimension}": { min: value_type == "value" ? 400 : ->(record) { 400 }, max: value_type == "value" ? 600 : ->(record) { 600 } },
+                    filename: "image_1200x900_file.png"
                   }
                 end
 
@@ -259,10 +259,10 @@ describe ActiveStorageValidations::DimensionValidator do
 
                 let(:error_options) do
                   {
-                    "#{dimension}": { in: value_type == 'value' ? 400..600 : -> (record) { 400..600 } },
+                    "#{dimension}": { in: value_type == "value" ? 400..600 : ->(record) { 400..600 } },
                     min: 400,
                     max: 600,
-                    filename: 'image_150x150_file.png'
+                    filename: "image_150x150_file.png"
                   }
                 end
 
@@ -282,10 +282,10 @@ describe ActiveStorageValidations::DimensionValidator do
 
                 let(:error_options) do
                   {
-                    "#{dimension}": { in: value_type == 'value' ? 400..600 : -> (record) { 400..600 } },
+                    "#{dimension}": { in: value_type == "value" ? 400..600 : ->(record) { 400..600 } },
                     min: 400,
                     max: 600,
-                    filename: 'image_1200x900_file.png'
+                    filename: "image_1200x900_file.png"
                   }
                 end
 
@@ -300,7 +300,7 @@ describe ActiveStorageValidations::DimensionValidator do
     end
 
     describe ":min option" do
-      %w(value proc).each do |value_type|
+      %w[value proc].each do |value_type|
         describe value_type do
           describe ":min (e.g { min: 500..500 })" do
             # validates :min, dimension: { min: 500..500   }
@@ -314,7 +314,7 @@ describe ActiveStorageValidations::DimensionValidator do
                 {
                   width: 500,
                   height: 500,
-                  filename: 'image_150x150_file.png'
+                  filename: "image_150x150_file.png"
                 }
               end
 
@@ -340,7 +340,7 @@ describe ActiveStorageValidations::DimensionValidator do
     end
 
     describe ":max option" do
-      %w(value proc).each do |value_type|
+      %w[value proc].each do |value_type|
         describe value_type do
           describe ":max (e.g { max: 500..500 })" do
             # validates :max, dimension: { max: 500..500   }
@@ -366,7 +366,7 @@ describe ActiveStorageValidations::DimensionValidator do
                 {
                   width: 500,
                   height: 500,
-                  filename: 'image_600x800_file.png'
+                  filename: "image_600x800_file.png"
                 }
               end
 
@@ -397,7 +397,7 @@ describe ActiveStorageValidations::DimensionValidator do
               width: 600,
               height: 600,
               length: 600,
-              filename: 'image_800x600_file.png'
+              filename: "image_800x600_file.png"
             }
           end
 
@@ -414,7 +414,7 @@ describe ActiveStorageValidations::DimensionValidator do
               width: 600,
               height: 600,
               length: 600,
-              filename: 'image_600x800_file.png'
+              filename: "image_600x800_file.png"
             }
           end
 
@@ -431,7 +431,7 @@ describe ActiveStorageValidations::DimensionValidator do
               width: 600,
               height: 600,
               length: 600,
-              filename: 'image_1200x900_file.png'
+              filename: "image_1200x900_file.png"
             }
           end
 
@@ -456,11 +456,11 @@ describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: { in: 550..750},
+              width: { in: 550..750 },
               height: { in: 550..750 },
               min: 550,
               max: 750,
-              filename: 'image_500x700_file.png'
+              filename: "image_500x700_file.png"
             }
           end
 
@@ -474,11 +474,11 @@ describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: { in: 550..750},
+              width: { in: 550..750 },
               height: { in: 550..750 },
               min: 550,
               max: 750,
-              filename: 'image_700x500_file.png'
+              filename: "image_700x500_file.png"
             }
           end
 
@@ -492,11 +492,11 @@ describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: { in: 550..750},
+              width: { in: 550..750 },
               height: { in: 550..750 },
               min: 550,
               max: 750,
-              filename: 'image_500x500_file.png'
+              filename: "image_500x500_file.png"
             }
           end
 
@@ -526,19 +526,19 @@ describe ActiveStorageValidations::DimensionValidator do
     end
   end
 
-  describe 'Blob Metadata' do
+  describe "Blob Metadata" do
     let(:attachable) do
       {
-        io: File.open(Rails.root.join('public', 'image_150x150.png')),
-        filename: 'image_150x150.png',
-        content_type: 'image/png'
+        io: File.open(Rails.root.join("public", "image_150x150.png")),
+        filename: "image_150x150.png",
+        content_type: "image/png"
       }
     end
 
     include IsPerformanceOptimized
   end
 
-  describe 'Rails options' do
+  describe "Rails options" do
     include WorksWithAllRailsCommonValidationOptions
   end
 end

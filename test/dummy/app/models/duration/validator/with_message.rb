@@ -11,5 +11,5 @@
 
 class Duration::Validator::WithMessage < ApplicationRecord
   has_one_attached :with_message
-  validates :with_message, duration: { less_than: 2.seconds , message: 'Custom message' }
+  validates :with_message, duration: { less_than: 2.seconds, message: "Custom message" }
 end

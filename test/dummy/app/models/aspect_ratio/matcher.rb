@@ -27,7 +27,7 @@ class AspectRatio::Matcher < ApplicationRecord
   validates :allow_blank, aspect_ratio: :square, allow_blank: true
 
   has_one_attached :with_message
-  validates :with_message, aspect_ratio: { with: :square, message: 'Custom message' }
+  validates :with_message, aspect_ratio: { with: :square, message: "Custom message" }
 
   has_one_attached :with_context_symbol
   validates :with_context_symbol, aspect_ratio: :square, on: :update
@@ -41,8 +41,8 @@ class AspectRatio::Matcher < ApplicationRecord
   validates :as_instance, aspect_ratio: :square
 
   has_one_attached :validatable_different_error_messages
-  validates :validatable_different_error_messages, aspect_ratio: { with: :portrait, message: 'Custom message 1' }, if: :title_is_quo_vadis?
-  validates :validatable_different_error_messages, aspect_ratio: { with: :square, message: 'Custom message 2' }, if: :title_is_american_psycho?
+  validates :validatable_different_error_messages, aspect_ratio: { with: :portrait, message: "Custom message 1" }, if: :title_is_quo_vadis?
+  validates :validatable_different_error_messages, aspect_ratio: { with: :square, message: "Custom message 2" }, if: :title_is_american_psycho?
 
   has_one_attached :failure_message
   validates :failure_message, aspect_ratio: :square
@@ -51,5 +51,5 @@ class AspectRatio::Matcher < ApplicationRecord
 
   # Combinations
   has_one_attached :allowing_one_with_message
-  validates :allowing_one_with_message, aspect_ratio: { with: :portrait, message: 'Not authorized aspect ratio.' }
+  validates :allowing_one_with_message, aspect_ratio: { with: :portrait, message: "Not authorized aspect ratio." }
 end

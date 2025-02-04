@@ -13,4 +13,3 @@ class Dimension::Validator::CheckValidityInvalidDimensionIn < ApplicationRecord
   has_one_attached :invalid
   validates :invalid, dimension: { width: { in: 15 } }
 end
-

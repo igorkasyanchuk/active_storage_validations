@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'test_helper'
-require 'validators/shared_examples/checks_validator_validity'
-require 'validators/shared_examples/is_performance_optimized'
-require 'validators/shared_examples/works_fine_with_attachables'
-require 'validators/shared_examples/works_with_all_rails_common_validation_options'
+require "test_helper"
+require "validators/shared_examples/checks_validator_validity"
+require "validators/shared_examples/is_performance_optimized"
+require "validators/shared_examples/works_fine_with_attachables"
+require "validators/shared_examples/works_with_all_rails_common_validation_options"
 
 describe ActiveStorageValidations::ContentTypeValidator do
   include ValidatorHelpers
@@ -12,11 +12,11 @@ describe ActiveStorageValidations::ContentTypeValidator do
   let(:validator_test_class) { ContentType::Validator }
   let(:params) { {} }
 
-  describe '#check_validity!' do
+  describe "#check_validity!" do
     include ChecksValidatorValidity
 
-    describe 'content type validity' do
-      describe 'when the passed option is an invalid content type' do
+    describe "content type validity" do
+      describe "when the passed option is an invalid content type" do
         describe ":with" do
           subject { validator_test_class::CheckValidityInvalidContentTypeWith.new(params) }
 
@@ -28,7 +28,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
           end
           let(:invalid_content_type) { "xxx/invalid" }
 
-          it 'raises an error at model initialization' do
+          it "raises an error at model initialization" do
             assert_raises(ArgumentError, error_message) { subject }
           end
         end
@@ -44,7 +44,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
           end
           let(:invalid_content_type) { "xxx/invalid1" }
 
-          it 'raises an error at model initialization' do
+          it "raises an error at model initialization" do
             assert_raises(ArgumentError, error_message) { subject }
           end
         end
@@ -57,7 +57,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
               "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
             end
 
-            it 'raises an error at model initialization' do
+            it "raises an error at model initialization" do
               error = assert_raises(ArgumentError) { subject }
               assert_equal(error_message, error.message)
             end
@@ -66,48 +66,48 @@ describe ActiveStorageValidations::ContentTypeValidator do
           describe "when the passed option is in Marcel::MAGIC (e.g. 'application/x-ole-storage')" do
             subject { validator_test_class::CheckValidityValidContentTypeOleStorage.new(params) }
 
-            it 'does not raise an error at model initialization' do
+            it "does not raise an error at model initialization" do
               assert_nothing_raised { subject }
             end
           end
         end
       end
 
-      describe 'when the passed option is an invalid extension' do
+      describe "when the passed option is an invalid extension" do
         subject { validator_test_class::CheckValidityInvalidExtension.new(params) }
 
         let(:error_message) do
           <<~ERROR_MESSAGE
             You must pass valid content types extensions to the validator
-            '#{invalid_extension.to_s}' is not found in Marcel::EXTENSIONS
+            '#{invalid_extension}' is not found in Marcel::EXTENSIONS
           ERROR_MESSAGE
         end
         let(:invalid_extension) { :invalid }
 
-        it 'raises an error at model initialization' do
+        it "raises an error at model initialization" do
           assert_raises(ArgumentError, error_message) { subject }
         end
       end
 
-      describe 'when the passed option is a Regex' do
+      describe "when the passed option is a Regex" do
         subject { validator_test_class::CheckValidityRegexOption.new(params) }
 
-        it 'does not perform a check, and therefore is valid' do
+        it "does not perform a check, and therefore is valid" do
           assert_nothing_raised { subject }
         end
       end
 
-      describe 'when the passed option is a Proc' do
+      describe "when the passed option is a Proc" do
         subject { validator_test_class::CheckValidityProcOption.new(params) }
 
-        it 'does not perform a check, and therefore is valid' do
+        it "does not perform a check, and therefore is valid" do
           assert_nothing_raised { subject }
         end
       end
     end
   end
 
-  describe 'Validator checks' do
+  describe "Validator checks" do
     include WorksFineWithAttachables # when using spoofing_protection
 
     let(:model) { validator_test_class::Check.new(params) }
@@ -215,13 +215,13 @@ describe ActiveStorageValidations::ContentTypeValidator do
       # validates :with_string_proc, content_type: -> (record) { 'png' }
       # validates :with_symbol_proc, content_type: -> (record) { :png }
       # validates :with_regex_proc, content_type: -> (record) { /\Aimage\/.*\z/ }
-      %w(value proc).each do |value_type|
+      %w[value proc].each do |value_type|
         describe value_type do
-          %w(string symbol regex).each do |type|
+          %w[string symbol regex].each do |type|
             describe type do
               let(:attribute) { :"with_#{type}#{'_proc' if value_type == 'proc'}" }
 
-              describe 'when provided with an allowed type file' do
+              describe "when provided with an allowed type file" do
                 subject { model.public_send(attribute).attach(allowed_file) and model }
 
                 let(:allowed_file) { png_file }
@@ -229,11 +229,11 @@ describe ActiveStorageValidations::ContentTypeValidator do
                 it { is_expected_to_be_valid }
               end
 
-              describe 'when provided with a not allowed type file' do
+              describe "when provided with a not allowed type file" do
                 subject { model.public_send(attribute).attach(not_allowed_file) and model }
 
                 let(:not_allowed_file) { numbers_file }
-                let(:authorized_human_content_types) { type == 'regex' ? '\\Aimage/.*\\z' : 'PNG' }
+                let(:authorized_human_content_types) { type == "regex" ? '\\Aimage/.*\\z' : "PNG" }
                 let(:error_options) do
                   {
                     authorized_human_content_types: authorized_human_content_types,
@@ -260,25 +260,25 @@ describe ActiveStorageValidations::ContentTypeValidator do
       # validates :in_strings_proc, content_type: -> (record) { ['png', 'gif'] }
       # validates :in_symbols_proc, content_type: -> (record) { [:png, :gif] }
       # validates :in_regexes_proc, content_type: -> (record) { [/\Aimage\/.*\z/, /\Afile\/.*\z/] }
-      %w(value proc).each do |value_type|
+      %w[value proc].each do |value_type|
         describe value_type do
-          %w(string symbol regex).each do |type|
+          %w[string symbol regex].each do |type|
             describe type do
               let(:attribute) { :"in_#{type.pluralize}#{'_proc' if value_type == 'proc'}" }
 
-              describe 'when provided with an allowed type file' do
+              describe "when provided with an allowed type file" do
                 subject { model.public_send(attribute).attach(allowed_file) and model }
 
-                let(:allowed_file) { [png_file, gif_file].sample }
+                let(:allowed_file) { [ png_file, gif_file ].sample }
 
                 it { is_expected_to_be_valid }
               end
 
-              describe 'when provided with a not allowed type file' do
+              describe "when provided with a not allowed type file" do
                 subject { model.public_send(attribute).attach(not_allowed_file) and model }
 
                 let(:not_allowed_file) { numbers_file }
-                let(:authorized_human_content_types) { type == 'regex' ? '\\Aimage/.*\\z, \\Afile/.*\\z' : 'PNG, GIF' }
+                let(:authorized_human_content_types) { type == "regex" ? '\\Aimage/.*\\z, \\Afile/.*\\z' : "PNG, GIF" }
                 let(:error_options) do
                   {
                     authorized_human_content_types: authorized_human_content_types,
@@ -303,12 +303,12 @@ describe ActiveStorageValidations::ContentTypeValidator do
         describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
           subject { model.public_send(attribute).attach(allowed_file) and model }
 
-          let(:media) { common_mime_type[:mime_type].split('/').first }
+          let(:media) { common_mime_type[:mime_type].split("/").first }
           let(:content) { common_mime_type[:extension].underscore }
-          let(:attribute) { [media, content].join('_') } # e.g. image_jpeg
+          let(:attribute) { [ media, content ].join("_") } # e.g. image_jpeg
           let(:allowed_file) do
             {
-              io: File.open(Rails.root.join('public', "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
+              io: File.open(Rails.root.join("public", "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
               filename: "example.#{common_mime_type[:extension]}",
               content_type: common_mime_type[:mime_type]
             }
@@ -330,7 +330,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
       end
     end
 
-    describe ':spoofing_protection' do
+    describe ":spoofing_protection" do
       # Further testing performed by content_type_spoof_detector_test.rb
 
       describe "when the protection is enabled (spoofing_protection: true option)" do
@@ -348,7 +348,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
               count: 1,
               detected_content_type: "text/plain",
               detected_human_content_type: "TXT",
-              filename: spoofed_jpeg[:filename],
+              filename: spoofed_jpeg[:filename]
             }
           end
 
@@ -370,7 +370,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
               count: 1,
               detected_content_type: "inode/x-empty",
               detected_human_content_type: "EMPTY",
-              filename: empty_file[:filename],
+              filename: empty_file[:filename]
             }
           end
 
@@ -406,12 +406,12 @@ describe ActiveStorageValidations::ContentTypeValidator do
             describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
               subject { model.public_send(attribute).attach(okay_file) and model }
 
-              let(:media) { common_mime_type[:mime_type].split('/').first }
+              let(:media) { common_mime_type[:mime_type].split("/").first }
               let(:content) { common_mime_type[:extension].underscore }
-              let(:attribute) { [media, content, 'spoof'].join('_') } # e.g. image_jpeg_spoof
+              let(:attribute) { [ media, content, "spoof" ].join("_") } # e.g. image_jpeg_spoof
               let(:okay_file) do
                 {
-                  io: File.open(Rails.root.join('public', "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
+                  io: File.open(Rails.root.join("public", "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
                   filename: "example.#{common_mime_type[:extension]}",
                   content_type: common_mime_type[:mime_type]
                 }
@@ -425,13 +425,13 @@ describe ActiveStorageValidations::ContentTypeValidator do
         end
 
         # validates :many_spoofing_protection, content_type: :jpg
-        describe 'with has_many_attached relationship' do
+        describe "with has_many_attached relationship" do
           let(:attribute) { :many_spoofing_protection }
 
           describe "when the files are okay" do
             subject { model.public_send(attribute).attach(okay_files) and model }
 
-            let(:okay_files) { [okay_jpg_1, okay_jpg_2] }
+            let(:okay_files) { [ okay_jpg_1, okay_jpg_2 ] }
             let(:okay_jpg_1) { create_blob_from_file(jpeg_file) }
             let(:okay_jpg_2) { create_blob_from_file(jpeg_file) }
 
@@ -441,7 +441,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
           describe "when one of the file is spoofed" do
             subject { model.public_send(attribute).attach(files) and model }
 
-            let(:files) { [okay_jpg, spoofed_jpeg_file] }
+            let(:files) { [ okay_jpg, spoofed_jpeg_file ] }
             let(:okay_jpg) { create_blob_from_file(jpeg_file) }
             let(:spoofed_jpeg_file) { create_blob_from_file(spoofed_jpeg) }
             let(:error_options) do
@@ -452,7 +452,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
                 count: 1,
                 detected_content_type: "text/plain",
                 detected_human_content_type: "TXT",
-                filename: spoofed_jpeg[:filename],
+                filename: spoofed_jpeg[:filename]
               }
             end
 
@@ -477,19 +477,19 @@ describe ActiveStorageValidations::ContentTypeValidator do
     end
   end
 
-  describe 'Blob Metadata' do
+  describe "Blob Metadata" do
     let(:attachable) do
       {
-        io: File.open(Rails.root.join('public', 'image_150x150.png')),
-        filename: 'image_150x150.png',
-        content_type: 'image/png'
+        io: File.open(Rails.root.join("public", "image_150x150.png")),
+        filename: "image_150x150.png",
+        content_type: "image/png"
       }
     end
 
     include IsPerformanceOptimized
   end
 
-  describe 'Rails options' do
+  describe "Rails options" do
     include WorksWithAllRailsCommonValidationOptions
   end
 end

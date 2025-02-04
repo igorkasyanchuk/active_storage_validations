@@ -11,5 +11,5 @@
 
 class ContentType::Validator::CheckValidityProcOption < ApplicationRecord
   has_one_attached :invalid
-  validates :invalid, content_type: -> (record) { :invalid }
+  validates :invalid, content_type: ->(record) { :invalid }
 end

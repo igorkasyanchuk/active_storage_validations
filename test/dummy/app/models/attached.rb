@@ -1,5 +1,5 @@
 module Attached
   def self.table_name_prefix
-    'attached_'
+    "attached_"
   end
 end

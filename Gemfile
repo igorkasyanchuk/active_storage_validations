@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-source 'https://rubygems.org'
+source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 # Declare your gem's dependencies in active_storage_validations.gemspec.
@@ -22,4 +22,9 @@ gemspec
 group :development, :test do
   # To use a debugger:
   # gem 'byebug'
+
+  # Linters
+  gem "rubocop", "~> 1.71", ">= 1.71.1", require: false
+  gem "rubocop-performance", "~> 1.23", ">= 1.23.1", require: false
+  gem "rubocop-rails-omakase", "~> 1.0", ">= 1.0.0", require: false
 end

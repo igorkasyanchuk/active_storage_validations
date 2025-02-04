@@ -11,5 +11,5 @@
 
 class Limit::Validator::WithOn < ApplicationRecord
   has_one_attached :with_on
-  validates :with_on, limit: { min: 1 }, on: %i(create update destroy custom)
+  validates :with_on, limit: { min: 1 }, on: %i[create update destroy custom]
 end

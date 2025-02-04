@@ -11,5 +11,5 @@
 
 class AspectRatio::Validator::WithOn < ApplicationRecord
   has_one_attached :with_on
-  validates :with_on, aspect_ratio: :square, on: %i(create update destroy custom)
+  validates :with_on, aspect_ratio: :square, on: %i[create update destroy custom]
 end
