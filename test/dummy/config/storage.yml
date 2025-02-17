@@ -1,3 +1,7 @@
 test:
   service: Disk
   root: <%= Rails.root.join('tmp/storage') %>
+
+test_fixtures:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage_fixtures") %>

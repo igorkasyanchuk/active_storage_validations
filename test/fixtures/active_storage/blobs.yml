@@ -1,0 +1,1 @@
+first_active_storage_validations_check_working_with_fixture_blob: <%= ActiveStorage::FixtureSet.blob filename: "image_150x150.png", service_name: "test_fixtures" %>
