@@ -31,24 +31,26 @@ describe ActiveStorageValidations do
     end
   end
 
-  describe "working with active_storage fixtures" do
-    subject { instance.public_send(attribute) && instance }
+  if Rails.gem_version >= Gem::Version.new("7.0.0.rc1")
+    describe "working with active_storage fixtures" do
+      subject { instance.public_send(attribute) && instance }
 
-    let(:attachable) { png_file }
+      let(:attachable) { png_file }
 
-    describe "base case" do
-      let(:attribute) { :working_with_fixture }
+      describe "base case" do
+        let(:attribute) { :working_with_fixture }
 
-      it "works fine" do
-        subject && assert(subject.valid?)
+        it "works fine" do
+          subject && assert(subject.valid?)
+        end
       end
-    end
 
-    describe "with variant" do
-      let(:attribute) { :working_with_fixture_and_variant }
+      describe "with variant" do
+        let(:attribute) { :working_with_fixture_and_variant }
 
-      it "works fine" do
-        subject && assert(subject.valid?)
+        it "works fine" do
+          subject && assert(subject.valid?)
+        end
       end
     end
   end
