@@ -32,11 +32,7 @@ module ActiveStorageValidations
     # Some file could be passed several times, we just need to perform the
     # analysis once on the file, therefore the use of #uniq.
     def attachables_and_blobs(record, attribute)
-      changes = if record.public_send(attribute).is_a?(ActiveStorage::Attached::One)
-        record.attachment_changes[attribute.to_s].presence || record.public_send(attribute)
-      else
-        record.attachment_changes[attribute.to_s]
-      end
+      changes = changes_for(record, attribute)
 
       return to_enum(:attachables_and_blobs, record, attribute) if changes.blank? || !block_given?
 
@@ -49,7 +45,16 @@ module ActiveStorageValidations
       end
     end
 
+    def changes_for(record, attribute)
+      if record.public_send(attribute).is_a?(ActiveStorage::Attached::One)
+        record.attachment_changes[attribute.to_s].presence || record.public_send(attribute)
+      else
+        record.attachment_changes[attribute.to_s]
+      end
+    end
+
     # Retrieve the full declared content_type from attachable.
+    # rubocop:disable Metrics/MethodLength
     def full_attachable_content_type(attachable)
       case attachable
       when ActiveStorage::Blob
@@ -102,28 +107,30 @@ module ActiveStorageValidations
     end
 
     # Retrieve the io from attachable.
+    # rubocop:disable Metrics/MethodLength
+    # rubocop:disable Metrics/AbcSize
     def attachable_io(attachable, max_byte_size: nil)
       io = case attachable
-           when ActiveStorage::Blob
-             (max_byte_size && supports_blob_download_chunk?) ? attachable.download_chunk(0...max_byte_size) : attachable.download
-           when ActionDispatch::Http::UploadedFile
-             max_byte_size ? attachable.read(max_byte_size) : attachable.read
-           when Rack::Test::UploadedFile
-             max_byte_size ? attachable.read(max_byte_size) : attachable.read
-           when String
-             blob = ActiveStorage::Blob.find_signed!(attachable)
-             (max_byte_size && supports_blob_download_chunk?) ? blob.download_chunk(0...max_byte_size) : blob.download
-           when Hash
-             max_byte_size ? attachable[:io].read(max_byte_size) : attachable[:io].read
-           when File
-             raise_rails_like_error(attachable) unless supports_file_attachment?
-             max_byte_size ? attachable.read(max_byte_size) : attachable.read
-           when Pathname
-             raise_rails_like_error(attachable) unless supports_pathname_attachment?
-             max_byte_size ? attachable.read(max_byte_size) : attachable.read
-           else
-             raise_rails_like_error(attachable)
-           end
+      when ActiveStorage::Blob
+        (max_byte_size && supports_blob_download_chunk?) ? attachable.download_chunk(0...max_byte_size) : attachable.download
+      when ActionDispatch::Http::UploadedFile
+        max_byte_size ? attachable.read(max_byte_size) : attachable.read
+      when Rack::Test::UploadedFile
+        max_byte_size ? attachable.read(max_byte_size) : attachable.read
+      when String
+        blob = ActiveStorage::Blob.find_signed!(attachable)
+        (max_byte_size && supports_blob_download_chunk?) ? blob.download_chunk(0...max_byte_size) : blob.download
+      when Hash
+        max_byte_size ? attachable[:io].read(max_byte_size) : attachable[:io].read
+      when File
+        raise_rails_like_error(attachable) unless supports_file_attachment?
+        max_byte_size ? attachable.read(max_byte_size) : attachable.read
+      when Pathname
+        raise_rails_like_error(attachable) unless supports_pathname_attachment?
+        max_byte_size ? attachable.read(max_byte_size) : attachable.read
+      else
+        raise_rails_like_error(attachable)
+      end
 
       rewind_attachable_io(attachable)
       io
@@ -150,6 +157,7 @@ module ActiveStorageValidations
     end
 
     # Retrieve the declared filename from attachable.
+    # rubocop:disable Metrics/MethodLength
     def attachable_filename(attachable)
       case attachable
       when ActiveStorage::Blob
@@ -185,7 +193,7 @@ module ActiveStorageValidations
     #
     # https://github.com/rails/rails/blob/7-1-stable/activestorage/CHANGELOG.md#rails-710rc1-september-27-2023
     def supports_file_attachment?
-      Rails.gem_version >= Gem::Version.new('7.1.0.rc1')
+      Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
     end
     alias :supports_pathname_attachment? :supports_file_attachment?
 
@@ -193,7 +201,7 @@ module ActiveStorageValidations
     #
     # https://github.com/rails/rails/blob/7-0-stable/activestorage/CHANGELOG.md#rails-700alpha1-september-15-2021
     def supports_blob_download_chunk?
-      Rails.gem_version >= Gem::Version.new('7.0.0.alpha1')
+      Rails.gem_version >= Gem::Version.new("7.0.0.alpha1")
     end
 
     # Retrieve the content_type from the file name only

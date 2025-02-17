@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'base_comparison_validator'
+require_relative "base_comparison_validator"
 
 module ActiveStorageValidations
   class TotalSizeValidator < BaseComparisonValidator
@@ -40,7 +40,7 @@ module ActiveStorageValidations
       # We can't perform this check in the #check_validity! hook because we do not
       # have enough data (only options & attributes are accessible)
       unless record.send(attribute).is_a?(ActiveStorage::Attached::Many)
-        raise ArgumentError, 'This validator is only available for has_many_attached relations'
+        raise ArgumentError, "This validator is only available for has_many_attached relations"
       end
     end
 

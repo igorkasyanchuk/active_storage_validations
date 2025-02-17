@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_analyzable'
-require_relative 'shared/asv_attachable'
-require_relative 'shared/asv_errorable'
-require_relative 'shared/asv_optionable'
-require_relative 'shared/asv_symbolizable'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_analyzable"
+require_relative "shared/asv_attachable"
+require_relative "shared/asv_errorable"
+require_relative "shared/asv_optionable"
+require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
   class AspectRatioValidator < ActiveModel::EachValidator # :nodoc
@@ -48,7 +48,7 @@ module ActiveStorageValidations
     private
 
     def is_valid?(record, attribute, attachable, metadata)
-      !media_metadata_missing?(record, attribute, attachable, metadata) &&
+      media_metadata_present?(record, attribute, attachable, metadata) &&
         authorized_aspect_ratio?(record, attribute, attachable, metadata)
     end
 
@@ -64,11 +64,10 @@ module ActiveStorageValidations
 
       return true if attachable_aspect_ratio_is_authorized
 
-      errors_options = initialize_error_options(options, attachable)
-      error_type = aspect_ratio_error_mapping
-      errors_options[:authorized_aspect_ratios] = string_aspect_ratios
+      errors_options = initialize_and_populate_error_options(options, attachable)
       errors_options[:width] = metadata[:width]
       errors_options[:height] = metadata[:height]
+      error_type = aspect_ratio_error_mapping
       add_error(record, attribute, error_type, **errors_options)
       false
     end
@@ -80,13 +79,18 @@ module ActiveStorageValidations
       NAMED_ASPECT_RATIOS.include?(aspect_ratio) ? :"aspect_ratio_not_#{aspect_ratio}" : :aspect_ratio_not_x_y
     end
 
-    def media_metadata_missing?(record, attribute, attachable, metadata)
-      return false if metadata[:width].to_i > 0 && metadata[:height].to_i > 0
+    def media_metadata_present?(record, attribute, attachable, metadata)
+      return true if metadata[:width].to_i > 0 && metadata[:height].to_i > 0
 
+      errors_options = initialize_and_populate_error_options(options, attachable)
+      add_error(record, attribute, :media_metadata_missing, **errors_options)
+      false
+    end
+
+    def initialize_and_populate_error_options(options, attachable)
       errors_options = initialize_error_options(options, attachable)
       errors_options[:authorized_aspect_ratios] = string_aspect_ratios
-      add_error(record, attribute, :media_metadata_missing, **errors_options)
-      true
+      errors_options
     end
 
     def valid_square_aspect_ratio?(metadata)
@@ -112,7 +116,7 @@ module ActiveStorageValidations
     def ensure_at_least_one_validator_option
       return if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
 
-      raise ArgumentError, 'You must pass either :with or :in to the validator'
+      raise ArgumentError, "You must pass either :with or :in to the validator"
     end
 
     def ensure_aspect_ratio_validity
@@ -148,7 +152,7 @@ module ActiveStorageValidations
 
           "#{x}:#{y}"
         end
-      end.join(', ')
+      end.join(", ")
     end
   end
 end

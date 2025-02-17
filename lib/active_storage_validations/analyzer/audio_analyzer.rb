@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'open3'
-require_relative 'shared/asv_ff_probable'
+require "open3"
+require_relative "shared/asv_ff_probable"
 
 module ActiveStorageValidations
   # = ActiveStorageValidations Audio \Analyzer

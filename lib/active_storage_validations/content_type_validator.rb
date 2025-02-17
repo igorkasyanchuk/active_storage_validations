@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_analyzable'
-require_relative 'shared/asv_attachable'
-require_relative 'shared/asv_errorable'
-require_relative 'shared/asv_optionable'
-require_relative 'shared/asv_symbolizable'
-require_relative 'analyzer/content_type_analyzer'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_analyzable"
+require_relative "shared/asv_attachable"
+require_relative "shared/asv_errorable"
+require_relative "shared/asv_optionable"
+require_relative "shared/asv_symbolizable"
+require_relative "analyzer/content_type_analyzer"
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
@@ -142,7 +142,7 @@ module ActiveStorageValidations
     end
 
     def enlarged_content_type(content_type)
-      [content_type, *parent_content_types(content_type)].compact.uniq
+      [ content_type, *parent_content_types(content_type) ].compact.uniq
     end
 
     def parent_content_types(content_type)
@@ -170,12 +170,12 @@ module ActiveStorageValidations
         end
         .flatten
         .compact
-        .join(', ')
+        .join(", ")
     end
 
     def ensure_exactly_one_validator_option
       unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
-        raise ArgumentError, 'You must pass either :with or :in to the validator'
+        raise ArgumentError, "You must pass either :with or :in to the validator"
       end
     end
 
@@ -211,7 +211,7 @@ module ActiveStorageValidations
     end
 
     def invalid_content_type?(content_type)
-      if content_type == 'image/jpg'
+      if content_type == "image/jpg"
         raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
       end
 
@@ -226,7 +226,7 @@ module ActiveStorageValidations
     end
 
     def invalid_extension?(content_type)
-      Marcel::MimeType.for(extension: content_type.to_s) == 'application/octet-stream'
+      Marcel::MimeType.for(extension: content_type.to_s) == "application/octet-stream"
     end
   end
 end

@@ -14,7 +14,7 @@ module WorksWithUnlessOption
       when :limit then image_150x150_file
       when :processable_file then image_150x150_file
       when :size then file_1ko
-      when :total_size then [blob_file_0_5ko, blob_file_0_5ko]
+      when :total_size then [ blob_file_0_5ko, blob_file_0_5ko ]
       end
     end
     let(:file_not_matching_requirements) do
@@ -27,22 +27,22 @@ module WorksWithUnlessOption
       when :limit then nil
       when :processable_file then tar_file_with_image_content_type
       when :size then file_5ko
-      when :total_size then [blob_file_5ko, blob_file_5ko]
+      when :total_size then [ blob_file_5ko, blob_file_5ko ]
       end
     end
 
-    describe 'when the :unless condition is a method' do
-      describe 'and the condition is not met' do
+    describe "when the :unless condition is a method" do
+      describe "and the condition is not met" do
         # Here 0 is important to only trigger the #with_unless attribute
         let(:params) { { rating: 0 } }
 
-        describe 'and when passed a file matching the requirements' do
+        describe "and when passed a file matching the requirements" do
           before { subject.with_unless.attach(file_matching_requirements) }
 
           it { is_expected_to_be_valid }
         end
 
-        describe 'and when passed a file not matching the requirements' do
+        describe "and when passed a file not matching the requirements" do
           let(:error_options) { { unless: :rating_is_good? } }
 
           before { subject.with_unless.attach(file_not_matching_requirements) }
@@ -53,18 +53,18 @@ module WorksWithUnlessOption
       end
     end
 
-    describe 'when the :unless condition is a Proc' do
-      describe 'and the condition is not met' do
-         # Here 4 is important to only trigger the #with_unless_proc attribute
+    describe "when the :unless condition is a Proc" do
+      describe "and the condition is not met" do
+        # Here 4 is important to only trigger the #with_unless_proc attribute
         let(:params) { { rating: 4 } }
 
-        describe 'and when passed a file matching the requirements' do
+        describe "and when passed a file matching the requirements" do
           before { subject.with_unless_proc.attach(file_matching_requirements) }
 
           it { is_expected_to_be_valid }
         end
 
-        describe 'and when passed a file not matching the requirements' do
+        describe "and when passed a file not matching the requirements" do
           let(:error_options) { { unless: -> { self.rating == 0 } } }
 
           before { subject.with_unless_proc.attach(file_not_matching_requirements) }

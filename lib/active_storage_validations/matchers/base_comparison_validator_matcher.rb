@@ -3,13 +3,13 @@
 # Big thank you to the paperclip validation matchers:
 # https://github.com/thoughtbot/paperclip/blob/v6.1.0/lib/paperclip/matchers/validate_attachment_size_matcher.rb
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_allow_blankable'
-require_relative 'shared/asv_attachable'
-require_relative 'shared/asv_contextable'
-require_relative 'shared/asv_messageable'
-require_relative 'shared/asv_rspecable'
-require_relative 'shared/asv_validatable'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_allow_blankable"
+require_relative "shared/asv_attachable"
+require_relative "shared/asv_contextable"
+require_relative "shared/asv_messageable"
+require_relative "shared/asv_rspecable"
+require_relative "shared/asv_validatable"
 
 module ActiveStorageValidations
   module Matchers

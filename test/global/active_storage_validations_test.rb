@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require "test_helper"
 
 describe ActiveStorageValidations do
   let(:instance) { ActiveStorageValidations::Check.new }
@@ -27,7 +27,7 @@ describe ActiveStorageValidations do
     # If not working, it would throw an error at the app initialization because
     # of our validator check_validity! method.
     it "allows the developer to define its own custom marcel mime types" do
-      assert_equal(Marcel::MimeType.for(declared_type: 'application/asv_test'), 'application/asv_test')
+      assert_equal(Marcel::MimeType.for(declared_type: "application/asv_test"), "application/asv_test")
     end
   end
 end

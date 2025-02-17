@@ -6,7 +6,7 @@ module DoesNotWorkWithAllowNilOption
   included do
     subject { validator_test_class::WithAllowNil.new(params) }
 
-    describe 'when used with :allow_nil option' do
+    describe "when used with :allow_nil option" do
       it do
         is_expected_to_raise_error(
           ArgumentError,

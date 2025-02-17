@@ -3,13 +3,13 @@
 # Big thank you to the paperclip validation matchers:
 # https://github.com/thoughtbot/paperclip/blob/v6.1.0/lib/paperclip/matchers/validate_attachment_content_type_matcher.rb
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_allow_blankable'
-require_relative 'shared/asv_attachable'
-require_relative 'shared/asv_contextable'
-require_relative 'shared/asv_messageable'
-require_relative 'shared/asv_rspecable'
-require_relative 'shared/asv_validatable'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_allow_blankable"
+require_relative "shared/asv_attachable"
+require_relative "shared/asv_contextable"
+require_relative "shared/asv_messageable"
+require_relative "shared/asv_rspecable"
+require_relative "shared/asv_validatable"
 
 module ActiveStorageValidations
   module Matchers
@@ -40,7 +40,7 @@ module ActiveStorageValidations
       end
 
       def failure_message
-        message = ["is expected to validate the content types of :#{@attribute_name}"]
+        message = [ "is expected to validate the content types of :#{@attribute_name}" ]
         build_failure_message(message)
         message.join("\n")
       end
@@ -122,14 +122,14 @@ module ActiveStorageValidations
       end
 
       def attach_invalid_content_type_file
-        @subject.public_send(@attribute_name).attach(attachment_for('fake/fake'))
+        @subject.public_send(@attribute_name).attach(attachment_for("fake/fake"))
       end
 
       def attachment_for(content_type)
-        suffix = Marcel::TYPE_EXTS[content_type.to_s]&.first || 'fake'
+        suffix = Marcel::TYPE_EXTS[content_type.to_s]&.first || "fake"
 
         {
-          io: Tempfile.new('.'),
+          io: Tempfile.new("."),
           filename: "test.#{suffix}",
           content_type: content_type
         }

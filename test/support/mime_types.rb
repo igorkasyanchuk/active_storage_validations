@@ -1,6 +1,7 @@
 # Lists partially based on
 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
 
+# rubocop:disable Metrics/MethodLength
 def most_common_mime_types
   [
     # Image
@@ -63,7 +64,7 @@ def most_common_mime_types
     { mime_type: "application/x-7z-compressed", extension: "7z" },
     { mime_type: "application/x-rar-compressed", extension: "rar" },
     { mime_type: "application/gzip", extension: "gz" },
-    { mime_type: "application/x-tar", extension: "tar" },
+    { mime_type: "application/x-tar", extension: "tar" }
   ]
 end
 
@@ -119,7 +120,7 @@ end
 most_common_mime_types.each do |mime_type|
   define_method(:"#{mime_type[:extension]}_file") do
     {
-      io: File.open(Rails.root.join('public', 'most_common_mime_types', "example.#{mime_type[:extension]}")),
+      io: File.open(Rails.root.join("public", "most_common_mime_types", "example.#{mime_type[:extension]}")),
       filename: "example.#{mime_type[:extension]}",
       content_type: mime_type[:mime_type]
     }

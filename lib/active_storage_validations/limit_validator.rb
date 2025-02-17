@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_errorable'
-require_relative 'shared/asv_optionable'
-require_relative 'shared/asv_symbolizable'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_errorable"
+require_relative "shared/asv_optionable"
+require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
   class LimitValidator < ActiveModel::EachValidator # :nodoc:
@@ -31,18 +31,8 @@ module ActiveStorageValidations
 
       return if files_count_valid?(count, flat_options)
 
-      errors_options = initialize_error_options(options)
-      errors_options[:min] = flat_options[:min]
-      errors_options[:max] = flat_options[:max]
-      errors_options[:count] = count
-      error_type = if flat_options[:min] && flat_options[:max]
-        :limit_out_of_range
-      elsif flat_options[:min] && count < flat_options[:min]
-        :limit_min_not_reached
-      else
-        :limit_max_exceeded
-      end
-
+      errors_options = initialize_and_populate_error_options(options, flat_options, count)
+      error_type = set_error_type(flat_options, count)
       add_error(record, attribute, error_type, **errors_options)
     end
 
@@ -60,15 +50,15 @@ module ActiveStorageValidations
 
     def ensure_at_least_one_validator_option
       unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-        raise ArgumentError, 'You must pass either :max or :min to the validator'
+        raise ArgumentError, "You must pass either :max or :min to the validator"
       end
     end
 
     def ensure_arguments_validity
       return true if min_max_are_proc? || min_or_max_is_proc_and_other_not_present?
 
-      raise ArgumentError, 'You must pass integers to :min and :max' if min_or_max_defined_and_not_integer?
-      raise ArgumentError, 'You must pass a higher value to :max than to :min' if min_higher_than_max?
+      raise ArgumentError, "You must pass integers to :min and :max" if min_or_max_defined_and_not_integer?
+      raise ArgumentError, "You must pass a higher value to :max than to :min" if min_higher_than_max?
     end
 
     def min_max_are_proc?
@@ -87,6 +77,24 @@ module ActiveStorageValidations
 
     def min_higher_than_max?
       options[:min] > options[:max] if options[:min].is_a?(Integer) && options[:max].is_a?(Integer)
+    end
+
+    def initialize_and_populate_error_options(options, flat_options, count)
+      errors_options = initialize_error_options(options)
+      errors_options[:min] = flat_options[:min]
+      errors_options[:max] = flat_options[:max]
+      errors_options[:count] = count
+      errors_options
+    end
+
+    def set_error_type(flat_options, count)
+      if flat_options[:min] && flat_options[:max]
+        :limit_out_of_range
+      elsif flat_options[:min] && count < flat_options[:min]
+        :limit_min_not_reached
+      else
+        :limit_max_exceeded
+      end
     end
   end
 end

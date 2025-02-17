@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_allow_blankable'
-require_relative 'shared/asv_attachable'
-require_relative 'shared/asv_contextable'
-require_relative 'shared/asv_messageable'
-require_relative 'shared/asv_rspecable'
-require_relative 'shared/asv_validatable'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_allow_blankable"
+require_relative "shared/asv_attachable"
+require_relative "shared/asv_contextable"
+require_relative "shared/asv_messageable"
+require_relative "shared/asv_rspecable"
+require_relative "shared/asv_validatable"
 
 module ActiveStorageValidations
   module Matchers
@@ -101,17 +101,17 @@ module ActiveStorageValidations
 
       def valid_width_and_height_for(aspect_ratio)
         case aspect_ratio
-        when :square then [100, 100]
-        when :portrait then [100, 200]
-        when :landscape then [200, 100]
+        when :square then [ 100, 100 ]
+        when :portrait then [ 100, 200 ]
+        when :landscape then [ 200, 100 ]
         when validator_class::ASPECT_RATIO_REGEX
           aspect_ratio =~ validator_class::ASPECT_RATIO_REGEX
           x = Regexp.last_match(1).to_i
           y = Regexp.last_match(2).to_i
 
-          [100 * x, 100 * y]
+          [ 100 * x, 100 * y ]
         else
-          [-1, -1]
+          [ -1, -1 ]
         end
       end
     end

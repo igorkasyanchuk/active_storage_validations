@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'shared/asv_active_storageable'
-require_relative 'shared/asv_analyzable'
-require_relative 'shared/asv_attachable'
-require_relative 'shared/asv_errorable'
-require_relative 'shared/asv_optionable'
-require_relative 'shared/asv_symbolizable'
+require_relative "shared/asv_active_storageable"
+require_relative "shared/asv_analyzable"
+require_relative "shared/asv_attachable"
+require_relative "shared/asv_errorable"
+require_relative "shared/asv_optionable"
+require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
   class DimensionValidator < ActiveModel::EachValidator # :nodoc
@@ -48,7 +48,7 @@ module ActiveStorageValidations
 
     def ensure_at_least_one_validator_option
       unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-        raise ArgumentError, 'You must pass either :width, :height, :min or :max to the validator'
+        raise ArgumentError, "You must pass either :width, :height, :min or :max to the validator"
       end
     end
 
@@ -113,6 +113,7 @@ module ActiveStorageValidations
       end
     end
 
+    # rubocop:disable Metrics/BlockLength
     %i[min max].each do |bound|
       define_method("validate_#{bound}") do |record, attribute, metadata, flat_options, errors_options|
         if send(:"invalid_#{bound}?", flat_options, metadata)

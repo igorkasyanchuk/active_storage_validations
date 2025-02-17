@@ -11,5 +11,5 @@
 
 class ContentType::Validator::WithMessage < ApplicationRecord
   has_one_attached :with_message
-  validates :with_message, content_type: { with: :webp, message: 'Custom message' }
+  validates :with_message, content_type: { with: :webp, message: "Custom message" }
 end

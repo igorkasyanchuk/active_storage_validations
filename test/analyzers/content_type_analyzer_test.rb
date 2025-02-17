@@ -2,7 +2,7 @@
 
 require "open-uri"
 require "test_helper"
-require 'analyzers/support/analyzer_helpers'
+require "analyzers/support/analyzer_helpers"
 
 describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
   include AnalyzerHelpers
@@ -16,7 +16,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
     end
 
     def is_expected_to_return_empty_content_type
-      assert_equal({ content_type: 'inode/x-empty' }, subject)
+      assert_equal({ content_type: "inode/x-empty" }, subject)
     end
 
     subject { analyzer.content_type }
@@ -31,15 +31,15 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
       #   File object
       #   Pathname object
 
-      let(:media_extension) { '.png' }
-      let(:media_extension_rotated) { '.jpg' }
+      let(:media_extension) { ".png" }
+      let(:media_extension_rotated) { ".jpg" }
       let(:media_filename) { "image_150x150#{media_extension}" }
       let(:media_filename_over_10ko) { "image_150x150_28ko#{media_extension}" }
-      let(:media_path) { Rails.root.join('public', media_filename) }
+      let(:media_path) { Rails.root.join("public", media_filename) }
       let(:media_io) { File.open(media_path) }
-      let(:media_content_type) { 'image/png' }
-      let(:expected_content_type) { { content_type: 'image/png' } }
-      let(:expected_content_type_over_10ko) { { content_type: 'image/png' } }
+      let(:media_content_type) { "image/png" }
+      let(:expected_content_type) { { content_type: "image/png" } }
+      let(:expected_content_type_over_10ko) { { content_type: "image/png" } }
 
       describe "ActiveStorage::Blob object" do
         let(:attachable) do
@@ -47,7 +47,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
             io: media_io,
             filename: media_filename,
             content_type: media_content_type,
-            service_name: 'test'
+            service_name: "test"
           )
         end
 
@@ -56,7 +56,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
 
       describe "ActionDispatch::Http::UploadedFile object" do
         let(:attachable) do
-          tempfile = Tempfile.new([media_filename, media_extension])
+          tempfile = Tempfile.new([ media_filename, media_extension ])
           tempfile.write(File.read(media_path))
           tempfile.rewind
 
@@ -101,7 +101,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
         describe "Remote file" do
           before do
             stub_request(:get, url)
-              .to_return(body: File.open(Rails.root.join('public', fetched_file)), status: 200)
+              .to_return(body: File.open(Rails.root.join("public", fetched_file)), status: 200)
           end
 
           let(:url) { "https://example_image.jpg" }
@@ -147,7 +147,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
             io: media_io,
             filename: media_filename,
             content_type: media_content_type,
-            service_name: 'test'
+            service_name: "test"
           )
           blob.signed_id
         end
@@ -158,7 +158,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
       describe "File object" do
         let(:attachable) { media_io }
 
-        if Rails.gem_version >= Gem::Version.new('7.1.0.rc1')
+        if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
           it { is_expected_to_return_the_right_content_type }
         else
           it { is_expected_to_raise_error(ArgumentError, "Could not find or build blob: expected attachable, got #{attachable.inspect}") }
@@ -168,7 +168,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
       describe "Pathname object" do
         let(:attachable) { Pathname.new(media_path) }
 
-        if Rails.gem_version >= Gem::Version.new('7.1.0.rc1')
+        if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
           it { is_expected_to_return_the_right_content_type }
         else
           it { is_expected_to_raise_error(ArgumentError, "Could not find or build blob: expected attachable, got #{attachable.inspect}") }
@@ -185,10 +185,10 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
     describe "0 byte size file" do
       let(:attachable) do
         ActiveStorage::Blob.create_and_upload!(
-          io: File.open(Rails.root.join('public', "image_file_0ko.png")),
+          io: File.open(Rails.root.join("public", "image_file_0ko.png")),
           filename: "image_file_0ko.png",
-          content_type: 'image/png',
-          service_name: 'test'
+          content_type: "image/png",
+          service_name: "test"
         )
       end
 
@@ -198,7 +198,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
     describe "when the file command-line tool is not found" do
       let(:attachable) do
         {
-          io: File.open(Rails.root.join('public', "image_150x150.png")),
+          io: File.open(Rails.root.join("public", "image_150x150.png")),
           filename: "image_150x150.png",
           content_type: "image/png"
         }
@@ -208,7 +208,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
       it "raises an explicit error" do
         Open3.stub(:capture2, proc { raise Errno::ENOENT }) do
           error = assert_raises(analyzer_error) { subject }
-          assert_equal('file command-line tool is not installed', error.message)
+          assert_equal("file command-line tool is not installed", error.message)
         end
       end
     end

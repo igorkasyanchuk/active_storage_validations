@@ -19,5 +19,5 @@ class ActiveStorageValidations::Check < ApplicationRecord
   # This validator is related to a test to ensure that the developer can define
   # its own custom mime types
   has_one_attached :asv_test
-  validates :asv_test, content_type: 'application/asv_test'
+  validates :asv_test, content_type: "application/asv_test"
 end

@@ -11,5 +11,5 @@
 
 class Size::Validator::WithMessage < ApplicationRecord
   has_one_attached :with_message
-  validates :with_message, size: { less_than: 2.kilobytes , message: 'Custom message' }
+  validates :with_message, size: { less_than: 2.kilobytes, message: "Custom message" }
 end

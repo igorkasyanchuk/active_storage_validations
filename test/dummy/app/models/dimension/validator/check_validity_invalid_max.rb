@@ -13,4 +13,3 @@ class Dimension::Validator::CheckValidityInvalidMax < ApplicationRecord
   has_one_attached :invalid
   validates :invalid, dimension: { max: 15 }
 end
-

@@ -9,4 +9,4 @@ Marcel::MimeType.extend "text/xml", parents: %(application/xml) # alias
 Marcel::MimeType.extend "video/theora", parents: %(video/ogg)
 
 # Add empty content type
-Marcel::MimeType.extend "inode/x-empty", extensions: %w(empty)
+Marcel::MimeType.extend "inode/x-empty", extensions: %w[empty]

@@ -11,5 +11,5 @@
 
 class Dimension::Validator::WithMessage < ApplicationRecord
   has_one_attached :with_message
-  validates :with_message, dimension: { width: 150, height: 150, message: 'Custom message' }
+  validates :with_message, dimension: { width: 150, height: 150, message: "Custom message" }
 end

@@ -14,25 +14,25 @@ class ContentType::Matcher < ApplicationRecord
   include Validatable
 
   has_one_attached :custom_matcher
-  validates :custom_matcher, content_type: ['image/png']
+  validates :custom_matcher, content_type: [ "image/png" ]
 
   has_one_attached :allowing_one
   validates :allowing_one, content_type: :png
   has_one_attached :allowing_several
-  validates :allowing_several, content_type: ['image/png', 'image/gif']
+  validates :allowing_several, content_type: [ "image/png", "image/gif" ]
   has_one_attached :allowing_several_through_regex
-  validates :allowing_several_through_regex, content_type: [/\Aimage\/.*\z/]
+  validates :allowing_several_through_regex, content_type: [ /\Aimage\/.*\z/ ]
 
   has_one_attached :allowing_symbol
   validates :allowing_symbol, content_type: :png
   has_one_attached :allowing_sneaky_edge_cases
-  validates :allowing_sneaky_edge_cases, content_type: ["image/svg+xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
+  validates :allowing_sneaky_edge_cases, content_type: [ "image/svg+xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ]
 
   has_one_attached :allow_blank
-  validates :allow_blank, content_type: ['image/png'], allow_blank: true
+  validates :allow_blank, content_type: [ "image/png" ], allow_blank: true
 
   has_one_attached :with_message
-  validates :with_message, content_type: { in: ['image/png'], message: 'Custom message' }
+  validates :with_message, content_type: { in: [ "image/png" ], message: "Custom message" }
 
   has_one_attached :with_context_symbol
   validates :with_context_symbol, content_type: :png, on: :update
@@ -46,8 +46,8 @@ class ContentType::Matcher < ApplicationRecord
   validates :as_instance, content_type: :png
 
   has_one_attached :validatable_different_error_messages
-  validates :validatable_different_error_messages, content_type: { with: :pdf, message: 'Custom message 1' }, if: :title_is_quo_vadis?
-  validates :validatable_different_error_messages, content_type: { with: :png, message: 'Custom message 2' }, if: :title_is_american_psycho?
+  validates :validatable_different_error_messages, content_type: { with: :pdf, message: "Custom message 1" }, if: :title_is_quo_vadis?
+  validates :validatable_different_error_messages, content_type: { with: :png, message: "Custom message 2" }, if: :title_is_american_psycho?
 
   has_one_attached :failure_message
   validates :failure_message, content_type: :png
@@ -56,7 +56,7 @@ class ContentType::Matcher < ApplicationRecord
 
   # Combinations
   has_one_attached :allowing_one_with_message
-  validates :allowing_one_with_message, content_type: { in: ['application/pdf'], message: 'Not authorized file type.' }
+  validates :allowing_one_with_message, content_type: { in: [ "application/pdf" ], message: "Not authorized file type." }
 
   most_common_mime_types.reject { |common_mime_type| common_mime_type[:type] == :ogv } # issue with ogv
                         .each do |content_type|
@@ -65,5 +65,5 @@ class ContentType::Matcher < ApplicationRecord
               content_type: content_type[:type]
   end
   has_one_attached :video_ogv
-  validates :video_ogv, content_type: ['video/theora']
+  validates :video_ogv, content_type: [ "video/theora" ]
 end

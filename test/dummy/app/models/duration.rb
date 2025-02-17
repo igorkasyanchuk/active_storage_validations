@@ -1,5 +1,5 @@
 module Duration
   def self.table_name_prefix
-    'duration_'
+    "duration_"
   end
 end

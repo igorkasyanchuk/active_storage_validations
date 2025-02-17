@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require "test_helper"
 
-describe 'Integration tests' do
+describe "Integration tests" do
   include ValidatorHelpers
 
   let(:integration_test_class) { Integration::Validator }
   let(:params) { {} }
 
-  describe 'zero byte image' do
+  describe "zero byte image" do
     let(:model) { integration_test_class::ZeroByteImage.new(params) }
 
-    describe 'when provided with a zero byte image' do
+    describe "when provided with a zero byte image" do
       subject { model.zero_byte_image.attach(zero_byte_image_file) and model }
 
       let(:zero_byte_image_file) { image_file_0ko }
@@ -28,10 +28,10 @@ describe 'Integration tests' do
     end
   end
 
-  describe 'based on a file property' do
+  describe "based on a file property" do
     let(:model) { integration_test_class::BasedOnAFileProperty.new(params) }
 
-    describe 'when setting size constraints based on the content type' do
+    describe "when setting size constraints based on the content type" do
       describe "when passed a file with the right size and content content type" do
         subject { model.picture.attach(file_1ko_and_png) and model }
 
@@ -44,9 +44,9 @@ describe 'Integration tests' do
 
           let(:error_options) do
             {
-              file_size: '17 KB',
+              file_size: "17 KB",
               min: nil,
-              max: '15 KB'
+              max: "15 KB"
             }
           end
 
@@ -62,9 +62,9 @@ describe 'Integration tests' do
 
           let(:error_options) do
             {
-              file_size: '7 KB',
+              file_size: "7 KB",
               min: nil,
-              max: '5 KB'
+              max: "5 KB"
             }
           end
 
@@ -83,16 +83,16 @@ describe 'Integration tests' do
       describe "which uses the same metadata keys (e.g. width & height)" do
         let(:attachable_1) do
           {
-            io: File.open(Rails.root.join('public', 'image_150x150.png')),
-            filename: 'image_150x150.png',
-            content_type: 'image/png'
+            io: File.open(Rails.root.join("public", "image_150x150.png")),
+            filename: "image_150x150.png",
+            content_type: "image/png"
           }
         end
         let(:attachable_2) do
           {
-            io: File.open(Rails.root.join('public', 'image_150x150.png')),
-            filename: 'image_150x150_2.png',
-            content_type: 'image/png'
+            io: File.open(Rails.root.join("public", "image_150x150.png")),
+            filename: "image_150x150_2.png",
+            content_type: "image/png"
           }
         end
 
@@ -111,16 +111,16 @@ describe 'Integration tests' do
       describe "which uses different metadata keys (e.g. width & height + duration)" do
         let(:attachable_1) do
           {
-            io: File.open(Rails.root.join('public', 'video_150x150.mp4')),
-            filename: 'video_150x150.mp4',
-            content_type: 'video/mp4'
+            io: File.open(Rails.root.join("public", "video_150x150.mp4")),
+            filename: "video_150x150.mp4",
+            content_type: "video/mp4"
           }
         end
         let(:attachable_2) do
           {
-            io: File.open(Rails.root.join('public', 'video_150x150.mp4')),
-            filename: 'video_150x150_2.mp4',
-            content_type: 'video/mp4'
+            io: File.open(Rails.root.join("public", "video_150x150.mp4")),
+            filename: "video_150x150_2.mp4",
+            content_type: "video/mp4"
           }
         end
         let(:expected_saved_metadata) do

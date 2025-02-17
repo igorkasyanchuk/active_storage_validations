@@ -14,7 +14,7 @@ module WorksWithIfOption
       when :limit then image_150x150_file
       when :processable_file then image_150x150_file
       when :size then file_1ko
-      when :total_size then [blob_file_0_5ko, blob_file_0_5ko]
+      when :total_size then [ blob_file_0_5ko, blob_file_0_5ko ]
       end
     end
     let(:file_not_matching_requirements) do
@@ -27,21 +27,21 @@ module WorksWithIfOption
       when :limit then nil
       when :processable_file then tar_file_with_image_content_type
       when :size then file_5ko
-      when :total_size then [blob_file_5ko, blob_file_5ko]
+      when :total_size then [ blob_file_5ko, blob_file_5ko ]
       end
     end
 
-    describe 'when the :if condition is a method' do
-      describe 'and the condition is met' do
-        let(:params) { { title: 'image' } }
+    describe "when the :if condition is a method" do
+      describe "and the condition is met" do
+        let(:params) { { title: "image" } }
 
-        describe 'and when passed a file matching the requirements' do
+        describe "and when passed a file matching the requirements" do
           before { subject.with_if.attach(file_matching_requirements) }
 
           it { is_expected_to_be_valid }
         end
 
-        describe 'and when passed a file not matching the requirements' do
+        describe "and when passed a file not matching the requirements" do
           let(:error_options) { { if: :title_is_image? } }
 
           before { subject.with_if.attach(file_not_matching_requirements) }
@@ -52,18 +52,18 @@ module WorksWithIfOption
       end
     end
 
-    describe 'when the :if condition is a Proc' do
-      describe 'and the condition is met' do
-        let(:params) { { title: 'Right title' } }
+    describe "when the :if condition is a Proc" do
+      describe "and the condition is met" do
+        let(:params) { { title: "Right title" } }
 
-        describe 'and when passed a file matching the requirements' do
+        describe "and when passed a file matching the requirements" do
           before { subject.with_if_proc.attach(file_matching_requirements) }
 
           it { is_expected_to_be_valid }
         end
 
-        describe 'and when passed a file not matching the requirements' do
-          let(:error_options) { { if: -> { self.title == 'Right title' } } }
+        describe "and when passed a file not matching the requirements" do
+          let(:error_options) { { if: -> { self.title == "Right title" } } }
 
           before { subject.with_if_proc.attach(file_not_matching_requirements) }
 

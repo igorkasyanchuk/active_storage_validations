@@ -15,4 +15,3 @@ class ContentType::Validator::CheckValidityValidContentTypeOleStorage < Applicat
   has_one_attached :valid
   validates :valid, content_type: "application/x-ole-storage"
 end
-

@@ -14,9 +14,9 @@ class TotalSize::Validator::WithIf < ApplicationRecord
   has_many_attached :with_if
   has_many_attached :with_if_proc
   validates :with_if, total_size: { less_than: 2.kilobytes }, if: :title_is_image?
-  validates :with_if_proc, total_size: { less_than: 2.kilobytes }, if: -> { self.title == 'Right title' }
+  validates :with_if_proc, total_size: { less_than: 2.kilobytes }, if: -> { self.title == "Right title" }
 
   def title_is_image?
-    title == 'image'
+    title == "image"
   end
 end

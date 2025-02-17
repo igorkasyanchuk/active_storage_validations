@@ -26,9 +26,9 @@ class Size::Validator::Check < ApplicationRecord
   has_one_attached :greater_than_proc
   has_one_attached :greater_than_or_equal_to_proc
   has_one_attached :between_proc
-  validates :less_than_proc, size: { less_than: -> (record) { 2.kilobytes } }
-  validates :less_than_or_equal_to_proc, size: { less_than_or_equal_to: -> (record) { 2.kilobytes } }
-  validates :greater_than_proc, size: { greater_than: -> (record) { 7.kilobytes } }
-  validates :greater_than_or_equal_to_proc, size: { greater_than_or_equal_to: -> (record) { 7.kilobytes } }
+  validates :less_than_proc, size: { less_than: ->(record) { 2.kilobytes } }
+  validates :less_than_or_equal_to_proc, size: { less_than_or_equal_to: ->(record) { 2.kilobytes } }
+  validates :greater_than_proc, size: { greater_than: ->(record) { 7.kilobytes } }
+  validates :greater_than_or_equal_to_proc, size: { greater_than_or_equal_to: ->(record) { 7.kilobytes } }
   validates :between_proc, size: { between: -> { 2.kilobytes..7.kilobytes } }
 end

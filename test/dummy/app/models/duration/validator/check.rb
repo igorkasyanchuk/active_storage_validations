@@ -26,9 +26,9 @@ class Duration::Validator::Check < ApplicationRecord
   has_one_attached :greater_than_proc
   has_one_attached :greater_than_or_equal_to_proc
   has_one_attached :between_proc
-  validates :less_than_proc, duration: { less_than: -> (record) { 2.seconds } }
-  validates :less_than_or_equal_to_proc, duration: { less_than_or_equal_to: -> (record) { 2.seconds } }
-  validates :greater_than_proc, duration: { greater_than: -> (record) { 7.seconds } }
-  validates :greater_than_or_equal_to_proc, duration: { greater_than_or_equal_to: -> (record) { 7.seconds } }
+  validates :less_than_proc, duration: { less_than: ->(record) { 2.seconds } }
+  validates :less_than_or_equal_to_proc, duration: { less_than_or_equal_to: ->(record) { 2.seconds } }
+  validates :greater_than_proc, duration: { greater_than: ->(record) { 7.seconds } }
+  validates :greater_than_or_equal_to_proc, duration: { greater_than_or_equal_to: ->(record) { 7.seconds } }
   validates :between_proc, duration: { between: -> { 2.seconds..7.seconds } }
 end

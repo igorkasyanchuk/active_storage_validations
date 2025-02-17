@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'open3'
-require_relative 'shared/asv_ff_probable'
+require "open3"
+require_relative "shared/asv_ff_probable"
 
 module ActiveStorageValidations
   # = ActiveStorageValidations Video \Analyzer
@@ -80,7 +80,7 @@ module ActiveStorageValidations
           numerator   = Integer(terms[0])
           denominator = Integer(terms[1])
 
-          [numerator, denominator] unless numerator == 0
+          [ numerator, denominator ] unless numerator == 0
         end
       end
     end

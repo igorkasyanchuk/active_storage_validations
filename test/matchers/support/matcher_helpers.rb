@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module MatcherHelpers
-  require 'active_storage_validations/matchers'
+  require "active_storage_validations/matchers"
 
   def is_expected_to_match_for(klass)
     subject && assert(subject.matches?(klass))
@@ -33,7 +33,7 @@ module MatcherHelpers
   end
 
   def validator_class
-    subject.class.name.sub(/::Matchers/, '').sub(/Matcher/, '').constantize
+    subject.class.name.sub(/::Matchers/, "").sub(/Matcher/, "").constantize
   end
 
   def validator_sym

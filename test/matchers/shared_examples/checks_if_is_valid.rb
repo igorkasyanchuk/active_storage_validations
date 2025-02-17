@@ -2,14 +2,14 @@ module ChecksIfIsValid
   extend ActiveSupport::Concern
 
   included do
-    describe 'Edge cases' do
-      describe 'when the validator is used several times on the same attributes' do
-        describe 'and is provided with different error messages' do
+    describe "Edge cases" do
+      describe "when the validator is used several times on the same attributes" do
+        describe "and is provided with different error messages" do
           before do
             case validator_sym
             when :aspect_ratio then matcher.allowing(:square)
             when :attached then matcher
-            when :content_type then matcher.rejecting('image/jpg')
+            when :content_type then matcher.rejecting("image/jpg")
             when :processable_file then matcher
             when :limit then matcher.min(1)
             when :dimension then matcher.width(150)
