@@ -31,7 +31,7 @@ describe ActiveStorageValidations do
     end
   end
 
-  describe "working with fixtures" do
+  describe "working with active_storage fixtures" do
     subject { instance.public_send(attribute) && instance }
 
     let(:attachable) { png_file }
