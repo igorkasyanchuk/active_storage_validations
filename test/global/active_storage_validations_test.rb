@@ -30,28 +30,18 @@ describe ActiveStorageValidations do
       assert_equal(Marcel::MimeType.for(declared_type: "application/asv_test"), "application/asv_test")
     end
   end
+end
 
-  if Rails.gem_version >= Gem::Version.new("7.0.0.rc1")
-    describe "working with active_storage fixtures" do
-      subject { instance.public_send(attribute) && instance }
+if Rails.gem_version >= Gem::Version.new("7.0.0.rc1")
+  # This test is to ensure that the gem is properly working with ActiveStorage
+  # fixtures. These feature is available since Rails 7.0.
+  class ActiveStorageValidations::FixtureTest < ActiveSupport::TestCase
+    setup do
+      @check = active_storage_validations_checks(:one)
+    end
 
-      let(:attachable) { png_file }
-
-      describe "base case" do
-        let(:attribute) { :working_with_fixture }
-
-        it "works fine" do
-          subject && assert(subject.valid?)
-        end
-      end
-
-      describe "with variant" do
-        let(:attribute) { :working_with_fixture_and_variant }
-
-        it "works fine" do
-          subject && assert(subject.valid?)
-        end
-      end
+    test "working with active_storage fixtures" do
+      assert(@check.valid?)
     end
   end
 end
