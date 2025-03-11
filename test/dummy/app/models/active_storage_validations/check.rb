@@ -20,4 +20,9 @@ class ActiveStorageValidations::Check < ApplicationRecord
   # its own custom mime types
   has_one_attached :asv_test
   validates :asv_test, content_type: "application/asv_test"
+
+  # This validator is related to a test that we can download files from a
+  # service
+  has_one_attached :digitalocean
+  validates :digitalocean, content_type: "image/png"
 end
