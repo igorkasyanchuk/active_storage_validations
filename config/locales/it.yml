@@ -19,7 +19,7 @@ it:
       total_file_size_not_between: "la dimensione totale dei file deve essere compresa tra %{min} e %{max} (la dimensione attuale è %{total_file_size})"
       duration_not_less_than: "la durata deve essere inferiore a %{max} (la durata corrente è %{duration})"
       duration_not_less_than_or_equal_to: "la durata deve essere inferiore o uguale a %{max} (la durata corrente è %{duration})"
-      duration_not_greader_than: "la durata deve essere superiore a %{min} (la durata corrente è %{duration})"
+      duration_not_greater_than: "la durata deve essere superiore a %{min} (la durata corrente è %{duration})"
       duration_not_greater_than_or_equal_to: "la durata deve essere maggiore o uguale a %{min} (la durata corrente è %{duration})"
       duration_not_between: "la durata deve essere compresa tra %{min} e %{max} (la durata corrente è %{duration})"
       limit_out_of_range:
