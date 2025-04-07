@@ -656,65 +656,11 @@ But this major version bump also comes with some breaking changes. Below are the
 
 ## Internationalization (I18n)
 
-Active Storage Validations uses I18n for error messages. Add these keys in your translation files to make them available:
+Active Storage Validations uses I18n for error messages. The error messages are automatically loaded in your Rails app if your language translations are present in the gem.
 
-```yml
-en:
-  errors:
-    messages:
-      content_type_invalid:
-        one: "has an invalid content type (authorized content type is %{authorized_human_content_types})"
-        other: "has an invalid content type (authorized content types are %{authorized_human_content_types})"
-      content_type_spoofed:
-        one: "has a content type that is not equivalent to the one that is detected through its content (authorized content type is %{authorized_human_content_types})"
-        other: "has a content type that is not equivalent to the one that is detected through its content (authorized content types are %{authorized_human_content_types})"
-      file_size_not_less_than: "file size must be less than %{max} (current size is %{file_size})"
-      file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max} (current size is %{file_size})"
-      file_size_not_greater_than: "file size must be greater than %{min} (current size is %{file_size})"
-      file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min} (current size is %{file_size})"
-      file_size_not_between: "file size must be between %{min} and %{max} (current size is %{file_size})"
-      total_file_size_not_less_than: "total file size must be less than %{max} (current size is %{total_file_size})"
-      total_file_size_not_less_than_or_equal_to: "total file size must be less than or equal to %{max} (current size is %{total_file_size})"
-      total_file_size_not_greater_than: "total file size must be greater than %{min} (current size is %{total_file_size})"
-      total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min} (current size is %{total_file_size})"
-      total_file_size_not_between: "total file size must be between %{min} and %{max} (current size is %{total_file_size})"
-      duration_not_less_than: "duration must be less than %{max} (current duration is %{duration})"
-      duration_not_less_than_or_equal_to: "duration must be less than or equal to %{max} (current duration is %{duration})"
-      duration_not_greater_than: "duration must be greater than %{min} (current duration is %{duration})"
-      duration_not_greater_than_or_equal_to: "duration must be greater than or equal to %{min} (current duration is %{duration})"
-      duration_not_between: "duration must be between %{min} and %{max} (current duration is %{duration})"
-      limit_out_of_range:
-        zero: "no files attached (must have between %{min} and %{max} files)"
-        one: "only 1 file attached (must have between %{min} and %{max} files)"
-        other: "total number of files must be between %{min} and %{max} files (there are %{count} files attached)"
-      limit_min_not_reached:
-        zero: "no files attached (must have at least %{min} files)"
-        one: "only 1 file attached (must have at least %{min} files)"
-        other: "%{count} files attached (must have at least %{min} files)"
-      limit_max_exceeded:
-        zero: "no files attached (maximum is %{max} files)"
-        one: "too many files attached (maximum is %{max} files, got %{count})"
-        other: "too many files attached (maximum is %{max} files, got %{count})"
-      media_metadata_missing: "is not a valid media file"
-      dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixel"
-      dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixel"
-      dimension_width_not_included_in: "width is not included between %{min} and %{max} pixel"
-      dimension_height_not_included_in: "height is not included between %{min} and %{max} pixel"
-      dimension_width_not_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
-      dimension_height_not_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
-      dimension_width_not_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
-      dimension_height_not_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
-      dimension_width_not_equal_to: "width must be equal to %{length} pixel"
-      dimension_height_not_equal_to: "height must be equal to %{length} pixel"
-      aspect_ratio_not_square: "must be square (current file is %{width}x%{height}px)"
-      aspect_ratio_not_portrait: "must be portrait (current file is %{width}x%{height}px)"
-      aspect_ratio_not_landscape: "must be landscape (current file is %{width}x%{height}px)"
-      aspect_ratio_not_x_y: "must be %{authorized_aspect_ratios} (current file is %{width}x%{height}px)"
-      aspect_ratio_invalid: "has an invalid aspect ratio (valid aspect ratios are %{authorized_aspect_ratios})"
-      file_not_processable: "is not identified as a valid media file"
-```
+Translation files are available [here](https://github.com/igorkasyanchuk/active_storage_validations/tree/master/config/locales). We currently have translations for `da`, `de`, `en`, `en-GB`, `es`, `fr`, `it`, `ja`, `nl`, `pl`, `pt-BR`, `ru`, `sv`, `tr`, `uk`, `vi` and `zh-CN`. Feel free to drop a PR to add your language ✌️.
 
-Other translation files are available [here](https://github.com/igorkasyanchuk/active_storage_validations/tree/master/config/locales).
+If you wish to customize the error messages, just copy, paste and update the translation files into your application locales.
 
 ## Test matchers
 
