@@ -16,12 +16,12 @@ gemspec
 # This Rails version will be the one used when running `bundle exec rake test` locally
 # Uncomment the line then run `bundle install`
 # gem "rails", "7.1.2"
-# gem 'sqlite3', '~> 1.7'
-# gem 'nokogiri', '~> 1.16', '>= 1.16.7'
+# gem "sqlite3", "~> 1.7"
+# gem "nokogiri", "~> 1.16", ">= 1.16.7"
 
 group :development, :test do
   # To use a debugger:
-  # gem 'byebug'
+  # gem "byebug"
 
   # Linters
   gem "rubocop", "~> 1.71", ">= 1.71.1", require: false
