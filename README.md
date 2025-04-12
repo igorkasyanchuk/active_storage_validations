@@ -71,6 +71,8 @@ Plus, you have to be sure to have the corresponding command-line tool installed 
 
 To use the video and audio metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
 
+If you want some inspiration about how to add `imagemagick`, `libvips` or `ffmpeg` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+
 ### Using content type spoofing protection validator option
 
 To use the `spoofing_protection` option with the `content_type` validator, you only need to have the UNIX `file` command on your system.
