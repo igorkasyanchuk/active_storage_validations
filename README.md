@@ -53,7 +53,7 @@ $ bundle
 
 ### Error messages (I18n)
 
-Once you have installed the gem, you need to add the gem I18n error messages to your app. See [Internationalization (I18n)](#internationalization-i18n) section for more details.
+Once you have installed the gem, I18n error messages will be added automatically to your app. See [Internationalization (I18n)](#internationalization-i18n) section for more details.
 
 ### Using image metadata validators
 
