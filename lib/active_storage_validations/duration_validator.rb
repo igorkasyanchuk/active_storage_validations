@@ -22,26 +22,32 @@ module ActiveStorageValidations
       flat_options = set_flat_options(record)
 
       attachables_and_blobs(record, attribute).each do |attachable, blob|
-        duration = metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:duration, nil)
-
-        if duration.to_i <= 0
-          errors_options = initialize_error_options(options, attachable)
-          add_error(record, attribute, :media_metadata_missing, **errors_options)
+        duration = begin
+          metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:duration, nil)
+        rescue ActiveStorage::FileNotFoundError
+          add_attachment_missing_error(record, attribute, attachable)
           next
         end
 
-        next if is_valid?(duration, flat_options)
+        if duration.to_i <= 0
+          add_media_metadata_missing_error(record, attribute, attachable)
+          next
+        end
 
-        errors_options = initialize_error_options(options, attachable)
-        populate_error_options(errors_options, flat_options, duration)
-
-        error_type = set_error_type(flat_options)
-
-        add_error(record, attribute, error_type, **errors_options)
+        is_valid?(duration, flat_options) || populate_error_options_and_add_error(record, attribute, attachable, flat_options, duration)
       end
     end
 
     private
+
+    def populate_error_options_and_add_error(record, attribute, attachable, flat_options, duration)
+      errors_options = initialize_error_options(options, attachable)
+      populate_error_options(errors_options, flat_options, duration)
+
+      error_type = set_error_type(flat_options)
+
+      add_error(record, attribute, error_type, **errors_options)
+    end
 
     def format_bound_value(value)
       return nil unless value

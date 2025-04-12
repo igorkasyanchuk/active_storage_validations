@@ -34,6 +34,7 @@ ja:
         zero: "添付されたファイルはありません(最大は%{max}ファイル)"
         one: "添付されているファイルが多すぎます(最大は%{max}ファイル、%{count})"
         other: "添付されているファイルが多すぎます(最大は%{max}ファイル、%{count})"
+      attachment_missing: "添付ファイルがありません"
       media_metadata_missing: "有効なメディアファイルではありません"
       dimension_min_not_included_in: "は %{width} x %{height} ピクセル以上の大きさにしてください"
       dimension_max_not_included_in: "は %{width} x %{height} ピクセル以下の大きさにしてください"

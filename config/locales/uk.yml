@@ -34,6 +34,7 @@ uk:
         zero: "не додано файлів (максимум -%{max} файли)"
         one: "занадто багато доданих файлів (максимум -%{max} файлів, отримав %{count})"
         other: "занадто багато доданих файлів (максимум -%{max} файлів, отримав %{count})"
+      attachment_missing: "не має доданого файлу"
       media_metadata_missing: "не є допустимим зображенням"
       dimension_min_not_included_in: "мусить бути більше або дорівнювати %{width} x %{height} пікселям"
       dimension_max_not_included_in: "мусить бути менше або дорівнювати %{width} x %{height} пікселям"

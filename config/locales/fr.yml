@@ -34,6 +34,7 @@ fr:
         zero: "pas de fichiers joints (le maximum autorisé est %{max} fichiers)"
         one: "trop de fichiers joints (le maximum autorisé est %{max} fichiers, obtenu %{count})"
         other: "trop de fichiers joints (le maximum autorisé est %{max} fichiers, obtenu %{count})"
+      attachment_missing: "n'a pas de fichier joint"
       media_metadata_missing: "n'est pas un fichier média valide"
       dimension_min_not_included_in: "doit être supérieur ou égal à %{width} x %{height} pixels"
       dimension_max_not_included_in: "doit être inférieur ou égal à %{width} x %{height} pixels"

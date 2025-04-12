@@ -34,6 +34,7 @@ it:
         zero: "nessun file allegato (massimo è %{max} file)"
         one: "troppi file allegati (massimo è %{max} file, ottenuto %{count})"
         other: "troppi file allegati (massimo è %{max} file, ottenuto %{count})"
+      attachment_missing: "non ha un file allegato"
       media_metadata_missing: "non è un file multimediale valido"
       dimension_min_not_included_in: "deve essere maggiore o uguale a %{width} x %{height} pixel"
       dimension_max_not_included_in: "deve essere minore o uguale a %{width} x %{height} pixel"

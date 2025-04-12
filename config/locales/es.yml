@@ -34,6 +34,7 @@ es:
         zero: "no hay archivos adjuntos (máximo es %{max} archivos)"
         one: "demasiados archivos adjuntos (máximo es %{max} archivos, got %{count})"
         other: "demasiados archivos adjuntos (máximo es %{max} archivos, got %{count})"
+      attachment_missing: "no tiene archivo adjunto"
       media_metadata_missing: "no es un archivo multimedia válido"
       dimension_min_not_included_in: "debe ser mayor o igual a %{width} x %{height} pixel"
       dimension_max_not_included_in: "debe ser menor o igual a %{width} x %{height} pixel"
