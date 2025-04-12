@@ -34,6 +34,7 @@ zh-CN:
         zero: "未附加文件（最大为%{max}文件)"
         one: "附加的文件太多（最大为%{max}文件,得到%{count})"
         other: "附加的文件太多（最大为%{max}文件,得到%{count})"
+      attachment_missing: "没有附件"
       media_metadata_missing: "不是有效的媒体文件"
       dimension_min_not_included_in: "必须大于或等于 %{width} x %{height} 像素"
       dimension_max_not_included_in: "必须小于或等于 %{width} x %{height} 像素"

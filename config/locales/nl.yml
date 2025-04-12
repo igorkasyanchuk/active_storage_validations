@@ -34,6 +34,7 @@ nl:
         zero: "geen bestanden bijgevoegd (maximaal is %{max} bestanden)"
         one: "te veel bijgevoegde bestanden (maximaal is %{max} bestanden, kreeg %{count})"
         other: "te veel bijgevoegde bestanden (maximum is %{max} bestanden, kreeg %{count})"
+      attachment_missing: "heeft geen bijgevoegd bestand"
       media_metadata_missing: "is geen geldig mediabestand"
       dimension_min_not_included_in: "moet groter of gelijk zijn aan %{width} x %{height} pixels"
       dimension_max_not_included_in: "moet kleiner of gelijk zijn aan %{width} x %{height} pixels"

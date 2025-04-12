@@ -34,6 +34,7 @@ tr:
         zero: "dosya eklenmedi (maksimum %{max} dosyaları)"
         one: "çok fazla dosya eklendi (maksimum %{max} dosyaları, %{count})"
         other: "çok fazla dosya eklendi (maksimum %{max} dosyaları, %{count} var)"
+      attachment_missing: "ekli dosya yok"
       media_metadata_missing: "geçerli bir medya dosyası değil"
       dimension_min_not_included_in: "%{width} x %{height} piksele eşit ya da büyük olmalı"
       dimension_max_not_included_in: "%{width} x %{height} piksele eşit ya da küçük olmalı"

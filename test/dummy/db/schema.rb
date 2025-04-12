@@ -88,6 +88,7 @@ ActiveRecord::Schema.define do
     aspect_ratio
     content_type
     dimension
+    duration
     processable_file
   ].each do |validator|
     create_table :"#{validator}_validator_using_attachables", force: :cascade do |t|

@@ -46,12 +46,14 @@ module ActiveStorageValidations
       end
 
       def allowing(*content_types)
-        @allowed_content_types = content_types.map { |content_type| normalize_content_type(content_type) }.flatten
+        types = content_types.flatten
+        @allowed_content_types = types.map { |content_type| normalize_content_type(content_type) }.flatten
         self
       end
 
       def rejecting(*content_types)
-        @rejected_content_types = content_types.map { |content_type| normalize_content_type(content_type) }.flatten
+        types = content_types.flatten
+        @rejected_content_types = types.map { |content_type| normalize_content_type(content_type) }.flatten
         self
       end
 

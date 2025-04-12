@@ -34,6 +34,7 @@ pt-BR:
         zero: "sem arquivos anexados (o máximo é %{max})"
         one: "muitos arquivos anexados (o máximo é %{max}, obteve %{count})"
         other: "muitos arquivos anexados (o máximo é %{max}, obteve %{count})"
+      attachment_missing: "não tem nenhum arquivo anexado"
       media_metadata_missing: "não é um arquivo de mídia válido"
       dimension_min_not_included_in: "deve ser maior ou igual a %{width} x %{height} pixels"
       dimension_max_not_included_in: "deve ser menor ou igual a %{width} x %{height} pixels"

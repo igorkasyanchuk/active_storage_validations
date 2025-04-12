@@ -72,7 +72,7 @@ module ActiveStorageValidations
       flat_options = process_options(record)
       errors_options = initialize_error_options(options, file)
 
-      return invalid_metadata_error(record, attribute, errors_options) unless valid_metadata?(metadata)
+      return add_media_metadata_missing_error(record, attribute, file, errors_options) unless valid_metadata?(metadata)
 
       if min_max_validation?(flat_options)
         validate_min_max(record, attribute, metadata, flat_options, errors_options)
@@ -83,11 +83,6 @@ module ActiveStorageValidations
 
     def valid_metadata?(metadata)
       metadata[:width].to_i > 0 && metadata[:height].to_i > 0
-    end
-
-    def invalid_metadata_error(record, attribute, errors_options)
-      add_error(record, attribute, :media_metadata_missing, **errors_options)
-      false
     end
 
     def min_max_validation?(flat_options)
@@ -156,6 +151,7 @@ module ActiveStorageValidations
         add_error(record, attribute, :"dimension_#{dimension}_#{error_type}", **errors_options)
       end
     end
+    # rubocop:enable Metrics/BlockLength
 
     def validate_range(record, attribute, dimension, metadata, flat_options, errors_options)
       if in_option_used?(flat_options, dimension)

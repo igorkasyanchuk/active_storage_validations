@@ -4,6 +4,7 @@ require "test_helper"
 require "validators/shared_examples/checks_validator_validity"
 require "validators/shared_examples/is_performance_optimized"
 require "validators/shared_examples/works_with_all_rails_common_validation_options"
+require "validators/shared_examples/works_fine_with_attachables"
 
 describe ActiveStorageValidations::DurationValidator do
   include ValidatorHelpers
@@ -16,6 +17,8 @@ describe ActiveStorageValidations::DurationValidator do
   end
 
   describe "Validator checks" do
+    include WorksFineWithAttachables
+
     let(:model) { validator_test_class::Check.new(params) }
 
     describe ":less_than" do

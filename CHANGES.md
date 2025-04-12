@@ -1,6 +1,10 @@
+- 2.0.3
+  - Allow to pass an Array, a splatted Array, or a single string for allowing / rejecting content_type matcher methods (https://github.com/igorkasyanchuk/active_storage_validations/pull/372)
+  - Fix issue when an attachment was missing on a blob (https://github.com/igorkasyanchuk/active_storage_validations/pull/373)
+
 - 2.0.2
   - Fix undesirable mutation of Marcel::TYPE_EXTS (https://github.com/igorkasyanchuk/active_storage_validations/issues/356)
-  - Fix gem loading issue with Marcel custo initialisers (https://github.com/igorkasyanchuk/active_storage_validations/issues/355)
+  - Fix gem loading issue with Marcel custom initialisers (https://github.com/igorkasyanchuk/active_storage_validations/issues/355)
 
 - 2.0.1
   - Fix for invalid content type validation ([PR #347](https://github.com/igorkasyanchuk/active_storage_validations/pull/347))
