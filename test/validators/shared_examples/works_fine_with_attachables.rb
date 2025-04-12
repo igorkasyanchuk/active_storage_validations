@@ -29,6 +29,7 @@ module WorksFineWithAttachables
       let(:validator_class) { "ActiveStorageValidations::#{validator_test_class.name.delete('::')}".constantize }
 
       let(:png_image) { Rails.root.join("public", "image_150x150.png") }
+      let(:mp3_audio) { Rails.root.join("public", "audio_2s.mp3") }
 
       describe "working with all attachable formats" do
         # As stated in ActiveStorage documentation, attachables can either be a:
@@ -51,12 +52,21 @@ module WorksFineWithAttachables
               subject { model.public_send(attribute).attach(attachables) and model }
 
               let(:attachable) do
-                ActiveStorage::Blob.create_and_upload!(
-                  io: File.open(png_image),
-                  filename: "image_150x150.png",
-                  content_type: "image/png",
-                  service_name: "test"
-                )
+                if validator_test_class.name == "Duration::Validator"
+                  ActiveStorage::Blob.create_and_upload!(
+                    io: File.open(mp3_audio),
+                    filename: "audio_2s.mp3",
+                    content_type: "audio/mpeg",
+                    service_name: "test"
+                  )
+                else
+                  ActiveStorage::Blob.create_and_upload!(
+                    io: File.open(png_image),
+                    filename: "image_150x150.png",
+                    content_type: "image/png",
+                    service_name: "test"
+                  )
+                end
               end
 
               it { is_expected_to_be_valid }
@@ -66,15 +76,27 @@ module WorksFineWithAttachables
               subject { model.public_send(attribute).attach(attachables) and model }
 
               let(:attachable) do
-                tempfile = Tempfile.new([ "image_150x150", ".png" ])
-                tempfile.write(File.read(png_image))
-                tempfile.rewind
+                if validator_test_class.name == "Duration::Validator"
+                  tempfile = Tempfile.new([ "audio_2s", ".mp3" ])
+                  tempfile.write(File.read(mp3_audio))
+                  tempfile.rewind
 
-                ActionDispatch::Http::UploadedFile.new({
-                  tempfile: tempfile,
-                  filename: "image_150x150.png",
-                  type: "image/png"
-                })
+                  ActionDispatch::Http::UploadedFile.new({
+                    tempfile: tempfile,
+                    filename: "audio_2s.mp3",
+                    type: "audio/mpeg"
+                  })
+                else
+                  tempfile = Tempfile.new([ "image_150x150", ".png" ])
+                  tempfile.write(File.read(png_image))
+                  tempfile.rewind
+
+                  ActionDispatch::Http::UploadedFile.new({
+                    tempfile: tempfile,
+                    filename: "image_150x150.png",
+                    type: "image/png"
+                  })
+                end
               end
 
               it { is_expected_to_be_valid }
@@ -83,7 +105,13 @@ module WorksFineWithAttachables
             describe "Rack::Test::UploadedFile object" do
               subject { model.public_send(attribute).attach(attachables) and model }
 
-              let(:attachable) { Rack::Test::UploadedFile.new(png_image, "image/png") }
+              let(:attachable) do
+                if validator_test_class.name == "Duration::Validator"
+                  Rack::Test::UploadedFile.new(mp3_audio, "audio/mpeg")
+                else
+                  Rack::Test::UploadedFile.new(png_image, "image/png")
+                end
+              end
 
               it { is_expected_to_be_valid }
             end
@@ -92,21 +120,36 @@ module WorksFineWithAttachables
               subject { model.public_send(attribute).attach(attachables) and model }
 
               let(:attachable) do
-                {
-                  io: File.open(png_image),
-                  filename: "image_150x150.png",
-                  content_type: "image/png"
-                }
+                if validator_test_class.name == "Duration::Validator"
+                  {
+                    io: File.open(mp3_audio),
+                    filename: "audio_2s.mp3",
+                    content_type: "audio/mpeg"
+                  }
+                else
+                  {
+                    io: File.open(png_image),
+                    filename: "image_150x150.png",
+                    content_type: "image/png"
+                  }
+                end
               end
 
               it { is_expected_to_be_valid }
 
               describe "when not passed with a content_type" do
                 let(:attachable) do
-                  {
-                    io: File.open(png_image),
-                    filename: "image_150x150.png"
-                  }
+                  if validator_test_class.name == "Duration::Validator"
+                    {
+                      io: File.open(mp3_audio),
+                      filename: "audio_2s.mp3"
+                    }
+                  else
+                    {
+                      io: File.open(png_image),
+                      filename: "image_150x150.png"
+                    }
+                  end
                 end
 
                 it { is_expected_to_be_valid }
@@ -121,17 +164,31 @@ module WorksFineWithAttachables
                 let(:url) { "https://example_image.jpg" }
                 let(:uri) { URI.parse(url) }
                 let(:attachable) do
-                  {
-                    io: io,
-                    filename: fetched_file,
-                    content_type: "image/png"
-                  }
+                  if validator_test_class.name == "Duration::Validator"
+                    {
+                      io: io,
+                      filename: fetched_file,
+                      content_type: "audio/mpeg"
+                    }
+                  else
+                    {
+                      io: io,
+                      filename: fetched_file,
+                      content_type: "image/png"
+                    }
+                  end
                 end
 
                 describe "using StringIO constructor as io" do
                   let(:io) { StringIO.new(remote_image.to_s) }
                   let(:remote_image) { Net::HTTP.get(uri) }
-                  let(:fetched_file) { "image_150x150.png" }
+                  let(:fetched_file) do
+                    if validator_test_class.name == "Duration::Validator"
+                      "audio_2s.mp3"
+                    else
+                      "image_150x150.png"
+                    end
+                  end
 
                   it { is_expected_to_be_valid }
                 end
@@ -140,13 +197,25 @@ module WorksFineWithAttachables
                   let(:io) { uri.open }
 
                   describe "Opening small images (< 10ko) resulting in OpenUri returning a StringIO" do
-                    let(:fetched_file) { "image_150x150.png" }
+                    let(:fetched_file) do
+                      if validator_test_class.name == "Duration::Validator"
+                        "audio_2s.mp3"
+                      else
+                        "image_150x150.png"
+                      end
+                    end
 
                     it { is_expected_to_be_valid }
                   end
 
                   describe "Opening large images (>= 10ko) resulting in OpenUri returning a Tempfile" do
-                    let(:fetched_file) { "file_28ko.png" }
+                    let(:fetched_file) do
+                      if validator_test_class.name == "Duration::Validator"
+                        "audio_5s.mp3"
+                      else
+                        "file_28ko.png"
+                      end
+                    end
 
                     it { is_expected_to_be_valid }
                   end
@@ -158,12 +227,22 @@ module WorksFineWithAttachables
               subject { model.public_send(attribute).attach(attachables) and model }
 
               let(:attachable) do
-                blob = ActiveStorage::Blob.create_and_upload!(
-                  io: File.open(png_image),
-                  filename: "image_150x150.png",
-                  content_type: "image/png",
-                  service_name: "test"
-                )
+                blob = if validator_test_class.name == "Duration::Validator"
+                  ActiveStorage::Blob.create_and_upload!(
+                    io: File.open(mp3_audio),
+                    filename: "audio_2s.mp3",
+                    content_type: "audio/mpeg",
+                    service_name: "test"
+                  )
+                else
+                  ActiveStorage::Blob.create_and_upload!(
+                    io: File.open(png_image),
+                    filename: "image_150x150.png",
+                    content_type: "image/png",
+                    service_name: "test"
+                  )
+                end
+
                 blob.signed_id
               end
 
@@ -173,7 +252,13 @@ module WorksFineWithAttachables
             describe "File object" do
               subject { model.public_send(attribute).attach(attachable) and model }
 
-              let(:attachable) { File.open(png_image) }
+              let(:attachable) do
+                if validator_test_class.name == "Duration::Validator"
+                  File.open(mp3_audio)
+                else
+                  File.open(png_image)
+                end
+              end
 
               if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
                 it { is_expected_to_be_valid }
@@ -185,7 +270,13 @@ module WorksFineWithAttachables
             describe "Pathname object" do
               subject { model.public_send(attribute).attach(attachable) and model }
 
-              let(:attachable) { Pathname.new(png_image) }
+              let(:attachable) do
+                if validator_test_class.name == "Duration::Validator"
+                  Pathname.new(mp3_audio)
+                else
+                  Pathname.new(png_image)
+                end
+              end
 
               if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
                 it { is_expected_to_be_valid }
@@ -207,11 +298,19 @@ module WorksFineWithAttachables
 
       describe "rewinding the attachable io" do
         let(:attachable) do
-          {
-            io: File.open(png_image, "rb"), # read as binary to prevent encoding mismatch
-            filename: "image_150x150.png",
-            content_type: "image/png"
-          }
+          if validator_test_class.name == "Duration::Validator"
+            {
+              io: File.open(mp3_audio, "rb"), # read as binary to prevent encoding mismatch
+              filename: "audio_2s.mp3",
+              content_type: "audio/mpeg"
+            }
+          else
+            {
+              io: File.open(png_image, "rb"), # read as binary to prevent encoding mismatch
+              filename: "image_150x150.png",
+              content_type: "image/png"
+            }
+          end
         end
 
         before do
@@ -239,11 +338,19 @@ module WorksFineWithAttachables
 
       describe "when several passed files are the same file" do
         let(:attachable) do
-          {
-            io: File.open(png_image),
-            filename: "image_150x150.png",
-            content_type: "image/png"
-          }
+          if validator_test_class.name == "Duration::Validator"
+            {
+              io: File.open(mp3_audio),
+              filename: "audio_2s.mp3",
+              content_type: "audio/mpeg"
+            }
+          else
+            {
+              io: File.open(png_image),
+              filename: "image_150x150.png",
+              content_type: "image/png"
+            }
+          end
         end
 
         before { subject.using_attachables.attach([ attachable, attachable ]) }
@@ -262,19 +369,37 @@ module WorksFineWithAttachables
         end
 
         let(:attachable_1) do
-          {
-            io: File.open(png_image),
-            filename: "image_150x150.png",
-            content_type: "image/png"
-          }
+          if validator_test_class.name == "Duration::Validator"
+            {
+              io: File.open(mp3_audio),
+              filename: "audio_2s.mp3",
+              content_type: "audio/mpeg"
+            }
+          else
+            {
+              io: File.open(png_image),
+              filename: "image_150x150.png",
+              content_type: "image/png"
+            }
+          end
         end
+
         let(:attachable_2) do
-          ActiveStorage::Blob.create_and_upload!(
-            io: File.open(png_image),
-            filename: "image_150x150.png",
-            content_type: "image/png",
-            service_name: "test"
-          )
+          if validator_test_class.name == "Duration::Validator"
+            ActiveStorage::Blob.create_and_upload!(
+              io: File.open(mp3_audio),
+              filename: "audio_2s.mp3",
+              content_type: "audio/mpeg",
+              service_name: "test"
+            )
+          else
+            ActiveStorage::Blob.create_and_upload!(
+              io: File.open(png_image),
+              filename: "image_150x150.png",
+              content_type: "image/png",
+              service_name: "test"
+            )
+          end
         end
 
         it "updates the attribute accordingly and does not break" do
@@ -302,7 +427,13 @@ module WorksFineWithAttachables
       end
 
       describe "when using `file_fixture_upload` (or its alias `fixture_file_upload`)" do
-        let(:attachable) { fixture_file_upload("image_150x150.png", "image/png") }
+        let(:attachable) do
+          if validator_test_class.name == "Duration::Validator"
+            fixture_file_upload("audio_2s.mp3", "audio/mpeg")
+          else
+            fixture_file_upload("image_150x150.png", "image/png")
+          end
+        end
 
         before { subject.using_attachable.attach(attachable) }
 

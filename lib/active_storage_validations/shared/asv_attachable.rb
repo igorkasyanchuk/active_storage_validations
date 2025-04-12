@@ -76,6 +76,7 @@ module ActiveStorageValidations
         raise_rails_like_error(attachable)
       end
     end
+    # rubocop:enable Metrics/MethodLength
 
     # Retrieve the declared content_type from attachable without potential mime
     # type parameters (e.g. 'application/x-rar-compressed;version=5')
@@ -135,6 +136,8 @@ module ActiveStorageValidations
       rewind_attachable_io(attachable)
       io
     end
+    # rubocop:enable Metrics/MethodLength
+    # rubocop:enable Metrics/AbcSize
 
     # Rewind the io attachable.
     def rewind_attachable_io(attachable)
@@ -179,6 +182,7 @@ module ActiveStorageValidations
         raise_rails_like_error(attachable)
       end
     end
+    # rubocop:enable Metrics/MethodLength
 
     # Raise the same Rails error for not-implemented file representations.
     def raise_rails_like_error(attachable)
