@@ -51,6 +51,20 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       let(:allowed_types) { [ "image/png", "image/gif" ] }
       let(:not_allowed_types) { [ "video/x-matroska", "application/pdf" ] }
 
+      describe "usage" do
+        describe "splatting the array" do
+          subject { matcher.allowing(*allowed_types) }
+
+          it { is_expected_to_match_for(klass) }
+        end
+
+        describe "passing the array" do
+          subject { matcher.allowing(allowed_types) }
+
+          it { is_expected_to_match_for(klass) }
+        end
+      end
+
       describe "when provided with the exact allowed types" do
         subject { matcher.allowing(*allowed_types) }
 
@@ -170,6 +184,22 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     end
 
     describe "several" do
+      describe "usage" do
+        let(:any_types) { [ "video/x-matroska", "image/gif" ] }
+
+        describe "splatting the array" do
+          subject { matcher.rejecting(*any_types) }
+
+          it { is_expected_to_match_for(klass) }
+        end
+
+        describe "passing the array" do
+          subject { matcher.rejecting(any_types) }
+
+          it { is_expected_to_match_for(klass) }
+        end
+      end
+
       describe "when provided with any types but the allowed type" do
         subject { matcher.rejecting(*any_types) }
 
