@@ -30,4 +30,22 @@ describe ActiveStorageValidations::ASVBlobMetadatable do
       end
     end
   end
+
+  describe "#remove_active_storage_validations_metadata!" do
+    describe "when the blob has our gem's metadata" do
+      before { blob.custom_metadata = { "asv_duration" => "1.0", "asv_width" => "100" } }
+
+      it "removes our gem's metadata from ActiveStorage::Blob custom metadata" do
+        blob.remove_active_storage_validations_metadata!
+        assert blob.active_storage_validations_metadata.empty?
+      end
+    end
+
+    describe "when the blob does not have our gem's metadata" do
+      it "does not raise an error and works fine" do
+        blob.remove_active_storage_validations_metadata!
+        assert blob.active_storage_validations_metadata.empty?
+      end
+    end
+  end
 end

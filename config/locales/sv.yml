@@ -34,6 +34,7 @@ sv:
         zero: "inga filer bifogade (maximalt är %{max} filer)"
         one: "för många filer bifogade (maximalt är %{max} -filer, fick %{count})"
         other: "för många filer bifogade (maximalt är %{max} -filer, fick %{count})"
+      attachment_missing: "har ingen bifogad fil"
       media_metadata_missing: "är inte en giltig mediefil"
       dimension_min_not_included_in: "måste minst vara %{width} x %{height} pixlar"
       dimension_max_not_included_in: "måste vara mindre eller lika med %{width} x %{height} pixlar"

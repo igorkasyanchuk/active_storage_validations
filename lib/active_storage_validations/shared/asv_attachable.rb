@@ -18,7 +18,14 @@ module ActiveStorageValidations
     # to perform file analyses.
     def validate_changed_files_from_metadata(record, attribute, metadata_keys)
       attachables_and_blobs(record, attribute).each do |attachable, blob|
-        is_valid?(record, attribute, attachable, metadata_for(blob, attachable, metadata_keys))
+        metadata = begin
+          metadata_for(blob, attachable, metadata_keys)
+        rescue ActiveStorage::FileNotFoundError
+          add_attachment_missing_error(record, attribute, attachable)
+          next
+        end
+
+        is_valid?(record, attribute, attachable, metadata)
       end
     end
 
@@ -211,6 +218,19 @@ module ActiveStorageValidations
     # Retrieve the content_type from the file name only
     def marcel_content_type_from_filename(attachable)
       Marcel::MimeType.for(name: attachable_filename(attachable).to_s)
+    end
+
+    # Add a media metadata missing error when metadata is missing.
+    def add_media_metadata_missing_error(record, attribute, attachable, already_set_errors_options = nil)
+      errors_options = already_set_errors_options || initialize_error_options(options, attachable)
+      add_error(record, attribute, :media_metadata_missing, **errors_options)
+    end
+
+    # Add an attachment missing error when an ActiveStorage::FileNotFoundError
+    # is raised.
+    def add_attachment_missing_error(record, attribute, attachable)
+      errors_options = initialize_error_options(options, attachable)
+      add_error(record, attribute, :attachment_missing, **errors_options)
     end
   end
 end

@@ -4,6 +4,7 @@ module ActiveStorageValidations
   module ASVBlobMetadatable
     extend ActiveSupport::Concern
 
+    # rubocop:disable Metrics/BlockLength
     included do
       # This method returns the metadata that has been set by our gem.
       # The metadata is stored in the blob's custom metadata. All keys are prefixed with 'asv_'
@@ -44,6 +45,12 @@ module ActiveStorageValidations
         hash.transform_keys { |key, _| key.to_s.start_with?("asv_") ? key : "asv_#{key}" }
             .transform_values(&:to_s)
       end
+
+      def remove_active_storage_validations_metadata!
+        metadata["custom"] ||= {}
+        metadata["custom"].delete_if { |key, _| key.to_s.start_with?("asv_") }
+      end
     end
+    # rubocop:enable Metrics/BlockLength
   end
 end

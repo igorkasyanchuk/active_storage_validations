@@ -34,6 +34,7 @@ da:
         zero: "ingen filer vedhæftet (maks. er %{max} filer)"
         one: "for mange vedhæftede filer (maks. er %{max} filer, fik %{count})"
         other: "for mange vedhæftede filer (maks. er %{max} filer, fik %{count})"
+      attachment_missing: "har ingen vedhæftet fil"
       media_metadata_missing: "er ikke en gyldig mediefil"
       dimension_min_not_included_in: "skal være større end eller lig med %{width} x %{height} pixel"
       dimension_max_not_included_in: "skal være mindre end eller lig med %{width} x %{height} pixel"

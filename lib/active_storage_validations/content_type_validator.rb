@@ -96,9 +96,7 @@ module ActiveStorageValidations
 
       return true if attachable_content_type_is_authorized
 
-      errors_options = initialize_and_populate_error_options(options, attachable)
-      add_error(record, attribute, ERROR_TYPES.first, **errors_options)
-      false
+      add_content_type_invalid_error(record, attribute, attachable)
     end
 
     def marcel_attachable_content_type(attachable)
@@ -108,14 +106,15 @@ module ActiveStorageValidations
     def not_spoofing_content_type?(record, attribute, attachable, blob)
       return true unless enable_spoofing_protection?
 
-      @detected_content_type = metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:content_type, nil)
+      @detected_content_type = begin
+        metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:content_type, nil)
+      rescue ActiveStorage::FileNotFoundError
+        add_attachment_missing_error(record, attribute, attachable)
+        return false
+      end
 
       if attachable_content_type_vs_detected_content_type_mismatch?
-        errors_options = initialize_and_populate_error_options(options, attachable)
-        errors_options[:detected_content_type] = @detected_content_type
-        errors_options[:detected_human_content_type] = content_type_to_human_format(@detected_content_type)
-        add_error(record, attribute, ERROR_TYPES.second, **errors_options)
-        false
+        add_content_type_spoofed_error(record, attribute, attachable, @detected_content_type)
       else
         true
       end
@@ -147,6 +146,20 @@ module ActiveStorageValidations
 
     def parent_content_types(content_type)
       Marcel::TYPE_PARENTS[content_type] || []
+    end
+
+    def add_content_type_invalid_error(record, attribute, attachable)
+      errors_options = initialize_and_populate_error_options(options, attachable)
+      add_error(record, attribute, ERROR_TYPES.first, **errors_options)
+      false
+    end
+
+    def add_content_type_spoofed_error(record, attribute, attachable, detected_content_type)
+      errors_options = initialize_and_populate_error_options(options, attachable)
+      errors_options[:detected_content_type] = @detected_content_type
+      errors_options[:detected_human_content_type] = content_type_to_human_format(@detected_content_type)
+      add_error(record, attribute, ERROR_TYPES.second, **errors_options)
+      false
     end
 
     def initialize_and_populate_error_options(options, attachable)

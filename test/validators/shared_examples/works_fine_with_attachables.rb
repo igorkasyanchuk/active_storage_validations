@@ -336,6 +336,33 @@ module WorksFineWithAttachables
         end
       end
 
+      describe "when a blob has been attached, but later the attachment was removed from the blob for some reason (never a good reason)" do
+        let(:attachable) do
+          if validator_test_class.name == "Duration::Validator"
+            {
+              io: File.open(mp3_audio),
+              filename: "audio_2s.mp3",
+              content_type: "audio/mpeg"
+            }
+          else
+            {
+              io: File.open(png_image),
+              filename: "image_150x150.png",
+              content_type: "image/png"
+            }
+          end
+        end
+
+        before do
+          subject.using_attachable.attach(attachable)
+          subject.save!
+          subject.using_attachable.blob.attachments.destroy_all
+          subject.using_attachable.blob.remove_active_storage_validations_metadata! # so it tries to download the blob's attachment
+        end
+
+        it { is_expected_not_to_be_valid }
+      end
+
       describe "when several passed files are the same file" do
         let(:attachable) do
           if validator_test_class.name == "Duration::Validator"

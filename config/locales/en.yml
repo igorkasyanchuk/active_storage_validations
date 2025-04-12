@@ -34,6 +34,7 @@ en:
         zero: "no files attached (maximum is %{max} files)"
         one: "too many files attached (maximum is %{max} files, got %{count})"
         other: "too many files attached (maximum is %{max} files, got %{count})"
+      attachment_missing: "is missing its attachment"
       media_metadata_missing: "is not a valid media file"
       dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixel"
       dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixel"

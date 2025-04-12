@@ -82,8 +82,7 @@ module ActiveStorageValidations
     def media_metadata_present?(record, attribute, attachable, metadata)
       return true if metadata[:width].to_i > 0 && metadata[:height].to_i > 0
 
-      errors_options = initialize_and_populate_error_options(options, attachable)
-      add_error(record, attribute, :media_metadata_missing, **errors_options)
+      add_media_metadata_missing_error(record, attribute, attachable)
       false
     end
 
