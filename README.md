@@ -250,7 +250,7 @@ If you choose to use a content_type 'shorthand' (like `png`), note that it will 
 Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files
 ```
 
-Be sure to at least include one the the `extensions`, `parents` or `magic` option, otherwise the content type will not be registered.
+Be sure to at least include one the `extensions`, `parents` or `magic` option, otherwise the content type will not be registered.
 
 #### Content type spoofing protection
 
