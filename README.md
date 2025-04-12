@@ -706,8 +706,8 @@ describe User do
 
   # content_type:
   # #allowing, #rejecting
-  it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') }
-  it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') }
+  it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') } # possible to use an Array or *splatted array
+  it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') } # possible to use an Array or *splatted array
 
   # dimension:
   # #width, #height, #width_min, #height_min, #width_max, #height_max, #width_between, #height_between
