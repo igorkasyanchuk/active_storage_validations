@@ -92,6 +92,23 @@ def image_1920x1080_file
 end
 alias :is_16_9_image_file :image_1920x1080_file
 
+def pdf_150x150_file
+  {
+    io: File.open(Rails.root.join("public", "pdf_150x150.pdf")),
+    filename: "pdf_150x150_file.pdf",
+    content_type: "application/pdf"
+  }
+end
+
+def pdf_200x300_file
+  {
+    io: File.open(Rails.root.join("public", "pdf_200x300.pdf")),
+    filename: "pdf_200x300_file.pdf",
+    content_type: "application/pdf"
+  }
+end
+
+
 def tar_file_with_image_content_type
   {
     io: File.open(Rails.root.join("public", "404.html.tar")),

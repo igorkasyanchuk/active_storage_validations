@@ -415,6 +415,8 @@ The `total_size` validator error messages expose 4 values that you can use:
 ### Dimension
 
 Validates the dimension of the attached image / video files.
+It can also be used for pdf files, but it will only analyze the pdf first page.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
@@ -479,6 +481,7 @@ The `dimension` validator error messages expose 6 values that you can use:
 ### Duration
 
 Validates the duration of the attached audio / video files.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
@@ -527,7 +530,9 @@ The `duration` validator error messages expose 4 values that you can use:
 
 ### Aspect ratio
 
-Validates the aspect ratio of the attached files.
+Validates the aspect ratio of the attached image / video files.
+It can also be used for pdf files, but it will only analyze the pdf first page.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
@@ -579,7 +584,8 @@ The `aspect_ratio` validator error messages expose 4 values that you can use:
 
 ### Processable file
 
-Validates if the attached files can be processed by MiniMagick or Vips (image) or ffmpeg (video/audio).
+Validates if the attached files can be processed by MiniMagick or Vips (image), ffmpeg (video/audio) or poppler (pdf).
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
@@ -655,6 +661,17 @@ But this major version bump also comes with some breaking changes. Below are the
 - `processable_image` validator
   - The validator has been replaced by `processable_file` validator, be sure to replace `processable_image: true` to `processable_file: true`
   - The associated matcher has also been updated accordingly, be sure to replace `validate_processable_image_of` to `validate_processable_file_of`
+
+## Upgrading from 2.x to 3.x
+
+Version 3 comes with the ability to support single page pdf dimension / aspect_ratio analysis, we had to make a breaking change:
+- To analyze PDFs, you must install the `poppler` PDF processing dependency
+  - It's a  Rails-supported PDF processing dependency (https://guides.rubyonrails.org/active_storage_overview.html#requirements)
+  - To install it, check their documentation at this [link](https://pdf2image.readthedocs.io/en/latest/installation.html).
+  - To check if it's installed, execute `pdftoppm -h`.
+  - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+
+Note that if you do not perform these validations on pdf the gem will work the same as in version 2.
 
 ## Internationalization (I18n)
 

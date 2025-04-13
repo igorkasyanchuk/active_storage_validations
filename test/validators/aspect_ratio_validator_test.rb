@@ -240,6 +240,39 @@ describe ActiveStorageValidations::AspectRatioValidator do
         it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
         it { is_expected_to_have_error_options(error_options) }
       end
+
+      describe "when the passed file is a pdf" do
+        describe "valid pdf" do
+          subject { model.public_send(attribute).attach(pdf_150x150_file) and model }
+
+          let(:attribute) { :with_pdf_file }
+          let(:error_options) do
+            {
+              filename: pdf_150x150_file[:filename]
+            }
+          end
+
+          it { is_expected_to_be_valid }
+        end
+
+        describe "invalid pdf" do
+          subject { model.public_send(attribute).attach(pdf_200x300_file) and model }
+
+          let(:attribute) { :with_pdf_file }
+          let(:error_options) do
+            {
+              authorized_aspect_ratios: "square",
+              width: 200,
+              height: 300,
+              filename: pdf_200x300_file[:filename]
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("aspect_ratio_not_square", error_options: error_options) }
+          it { is_expected_to_have_error_options(error_options) }
+        end
+      end
     end
   end
 
