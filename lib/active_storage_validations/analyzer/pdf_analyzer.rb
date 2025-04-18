@@ -7,8 +7,8 @@ module ActiveStorageValidations
   #
   # Extracts the following from a pdf attachable:
   #
-  # * Width (pixels) => for the first page only, we assume DPI is 72
-  # * Height (pixels) => for the first page only, we assume DPI is 72
+  # * Width (pts) => for the first page only
+  # * Height (pts) => for the first page only
   # * Pages (integer) => number of pages in the pdf
   #
   # Example:

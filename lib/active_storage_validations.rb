@@ -24,6 +24,7 @@ require "active_storage_validations/aspect_ratio_validator"
 require "active_storage_validations/processable_file_validator"
 require "active_storage_validations/size_validator"
 require "active_storage_validations/total_size_validator"
+require "active_storage_validations/pages_validator"
 
 require "active_storage_validations/engine"
 require "active_storage_validations/railtie"
