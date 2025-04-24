@@ -48,6 +48,8 @@ module ActiveStorageValidations
         value > flat_options[:greater_than]
       elsif flat_options[:greater_than_or_equal_to].present?
         value >= flat_options[:greater_than_or_equal_to]
+      elsif flat_options[:equal_to].present?
+        value == flat_options[:equal_to]
       end
     end
 

@@ -47,6 +47,7 @@ ActiveRecord::Schema.define do
     processable_file
     size
     total_size
+    pages
   ].each do |validator|
     create_table :"#{validator}_matchers", force: :cascade do |t|
       t.string :title
@@ -61,7 +62,7 @@ ActiveRecord::Schema.define do
       end
     end
 
-    if %i[content_type duration size total_size].include? validator
+    if %i[content_type duration size total_size pages].include? validator
       create_table :"#{validator}_validator_check_validity_several_checks", force: :cascade do |t|
         t.datetime :created_at, null: false
         t.datetime :updated_at, null: false
@@ -89,6 +90,7 @@ ActiveRecord::Schema.define do
     dimension
     duration
     processable_file
+    pages
   ].each do |validator|
     create_table :"#{validator}_validator_using_attachables", force: :cascade do |t|
       t.datetime :created_at, null: false
@@ -102,6 +104,7 @@ ActiveRecord::Schema.define do
     dimension
     duration
     processable_file
+    pages
   ].each do |validator|
     create_table :"#{validator}_validator_is_performance_optimizeds", force: :cascade do |t|
       t.datetime :created_at, null: false
