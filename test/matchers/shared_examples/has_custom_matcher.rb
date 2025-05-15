@@ -20,6 +20,7 @@ module HasCustomMatcher
         when :duration then custom_matcher_builder.validate_duration_of(model_attribute).less_than_or_equal_to(5.minutes)
         when :size then custom_matcher_builder.validate_size_of(model_attribute).less_than_or_equal_to(5.megabytes)
         when :total_size then custom_matcher_builder.validate_total_size_of(model_attribute).less_than_or_equal_to(5.megabytes)
+        when :pages then custom_matcher_builder.validate_pages_of(model_attribute).less_than_or_equal_to(5)
         end
       end
 

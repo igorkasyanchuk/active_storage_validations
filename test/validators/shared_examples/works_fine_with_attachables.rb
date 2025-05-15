@@ -30,6 +30,7 @@ module WorksFineWithAttachables
 
       let(:png_image) { Rails.root.join("public", "image_150x150.png") }
       let(:mp3_audio) { Rails.root.join("public", "audio_2s.mp3") }
+      let(:pdf_5_pages) { Rails.root.join("public", "pdf_5_pages.pdf") }
 
       describe "working with all attachable formats" do
         # As stated in ActiveStorage documentation, attachables can either be a:
@@ -59,6 +60,13 @@ module WorksFineWithAttachables
                     content_type: "audio/mpeg",
                     service_name: "test"
                   )
+                elsif validator_test_class.name == "Pages::Validator"
+                  ActiveStorage::Blob.create_and_upload!(
+                    io: File.open(pdf_5_pages),
+                    filename: "pdf_5_pages.pdf",
+                    content_type: "application/pdf",
+                    service_name: "test"
+                  )
                 else
                   ActiveStorage::Blob.create_and_upload!(
                     io: File.open(png_image),
@@ -86,6 +94,16 @@ module WorksFineWithAttachables
                     filename: "audio_2s.mp3",
                     type: "audio/mpeg"
                   })
+                elsif validator_test_class.name == "Pages::Validator"
+                  tempfile = Tempfile.new([ "pdf_5_pages", ".pdf" ])
+                  tempfile.write(File.read(pdf_5_pages))
+                  tempfile.rewind
+
+                  ActionDispatch::Http::UploadedFile.new({
+                    tempfile: tempfile,
+                    filename: "pdf_5_pages.pdf",
+                    type: "application/pdf"
+                  })
                 else
                   tempfile = Tempfile.new([ "image_150x150", ".png" ])
                   tempfile.write(File.read(png_image))
@@ -108,6 +126,8 @@ module WorksFineWithAttachables
               let(:attachable) do
                 if validator_test_class.name == "Duration::Validator"
                   Rack::Test::UploadedFile.new(mp3_audio, "audio/mpeg")
+                elsif validator_test_class.name == "Pages::Validator"
+                  Rack::Test::UploadedFile.new(pdf_5_pages, "application/pdf")
                 else
                   Rack::Test::UploadedFile.new(png_image, "image/png")
                 end
@@ -126,6 +146,12 @@ module WorksFineWithAttachables
                     filename: "audio_2s.mp3",
                     content_type: "audio/mpeg"
                   }
+                elsif validator_test_class.name == "Pages::Validator"
+                  {
+                    io: File.open(pdf_5_pages),
+                    filename: "pdf_5_pages.pdf",
+                    content_type: "application/pdf"
+                  }
                 else
                   {
                     io: File.open(png_image),
@@ -143,6 +169,11 @@ module WorksFineWithAttachables
                     {
                       io: File.open(mp3_audio),
                       filename: "audio_2s.mp3"
+                    }
+                  elsif validator_test_class.name == "Pages::Validator"
+                    {
+                      io: File.open(pdf_5_pages),
+                      filename: "pdf_5_pages.pdf"
                     }
                   else
                     {
@@ -170,6 +201,12 @@ module WorksFineWithAttachables
                       filename: fetched_file,
                       content_type: "audio/mpeg"
                     }
+                  elsif validator_test_class.name == "Pages::Validator"
+                    {
+                      io: io,
+                      filename: fetched_file,
+                      content_type: "application/pdf"
+                    }
                   else
                     {
                       io: io,
@@ -185,6 +222,8 @@ module WorksFineWithAttachables
                   let(:fetched_file) do
                     if validator_test_class.name == "Duration::Validator"
                       "audio_2s.mp3"
+                    elsif validator_test_class.name == "Pages::Validator"
+                      "pdf_5_pages.pdf"
                     else
                       "image_150x150.png"
                     end
@@ -200,6 +239,8 @@ module WorksFineWithAttachables
                     let(:fetched_file) do
                       if validator_test_class.name == "Duration::Validator"
                         "audio_2s.mp3"
+                      elsif validator_test_class.name == "Pages::Validator"
+                        "pdf_5_pages.pdf"
                       else
                         "image_150x150.png"
                       end
@@ -212,6 +253,8 @@ module WorksFineWithAttachables
                     let(:fetched_file) do
                       if validator_test_class.name == "Duration::Validator"
                         "audio_5s.mp3"
+                      elsif validator_test_class.name == "Pages::Validator"
+                        "pdf_5_pages.pdf"
                       else
                         "file_28ko.png"
                       end
@@ -232,6 +275,13 @@ module WorksFineWithAttachables
                     io: File.open(mp3_audio),
                     filename: "audio_2s.mp3",
                     content_type: "audio/mpeg",
+                    service_name: "test"
+                  )
+                elsif validator_test_class.name == "Pages::Validator"
+                  ActiveStorage::Blob.create_and_upload!(
+                    io: File.open(pdf_5_pages),
+                    filename: "pdf_5_pages.pdf",
+                    content_type: "application/pdf",
                     service_name: "test"
                   )
                 else
@@ -255,6 +305,8 @@ module WorksFineWithAttachables
               let(:attachable) do
                 if validator_test_class.name == "Duration::Validator"
                   File.open(mp3_audio)
+                elsif validator_test_class.name == "Pages::Validator"
+                  File.open(pdf_5_pages)
                 else
                   File.open(png_image)
                 end
@@ -273,6 +325,8 @@ module WorksFineWithAttachables
               let(:attachable) do
                 if validator_test_class.name == "Duration::Validator"
                   Pathname.new(mp3_audio)
+                elsif validator_test_class.name == "Pages::Validator"
+                  Pathname.new(pdf_5_pages)
                 else
                   Pathname.new(png_image)
                 end
@@ -303,6 +357,12 @@ module WorksFineWithAttachables
               io: File.open(mp3_audio, "rb"), # read as binary to prevent encoding mismatch
               filename: "audio_2s.mp3",
               content_type: "audio/mpeg"
+            }
+          elsif validator_test_class.name == "Pages::Validator"
+            {
+              io: File.open(pdf_5_pages, "rb"), # read as binary to prevent encoding mismatch
+              filename: "pdf_5_pages.pdf",
+              content_type: "application/pdf"
             }
           else
             {
@@ -344,6 +404,12 @@ module WorksFineWithAttachables
               filename: "audio_2s.mp3",
               content_type: "audio/mpeg"
             }
+          elsif validator_test_class.name == "Pages::Validator"
+            {
+              io: File.open(pdf_5_pages),
+              filename: "pdf_5_pages.pdf",
+              content_type: "application/pdf"
+            }
           else
             {
               io: File.open(png_image),
@@ -370,6 +436,12 @@ module WorksFineWithAttachables
               io: File.open(mp3_audio),
               filename: "audio_2s.mp3",
               content_type: "audio/mpeg"
+            }
+          elsif validator_test_class.name == "Pages::Validator"
+            {
+              io: File.open(pdf_5_pages),
+              filename: "pdf_5_pages.pdf",
+              content_type: "application/pdf"
             }
           else
             {
@@ -402,6 +474,12 @@ module WorksFineWithAttachables
               filename: "audio_2s.mp3",
               content_type: "audio/mpeg"
             }
+          elsif validator_test_class.name == "Pages::Validator"
+            {
+              io: File.open(pdf_5_pages),
+              filename: "pdf_5_pages.pdf",
+              content_type: "application/pdf"
+            }
           else
             {
               io: File.open(png_image),
@@ -417,6 +495,13 @@ module WorksFineWithAttachables
               io: File.open(mp3_audio),
               filename: "audio_2s.mp3",
               content_type: "audio/mpeg",
+              service_name: "test"
+            )
+          elsif validator_test_class.name == "Pages::Validator"
+            ActiveStorage::Blob.create_and_upload!(
+              io: File.open(pdf_5_pages),
+              filename: "pdf_5_pages.pdf",
+              content_type: "application/pdf",
               service_name: "test"
             )
           else
@@ -457,6 +542,8 @@ module WorksFineWithAttachables
         let(:attachable) do
           if validator_test_class.name == "Duration::Validator"
             fixture_file_upload("audio_2s.mp3", "audio/mpeg")
+          elsif validator_test_class.name == "Pages::Validator"
+            fixture_file_upload("pdf_5_pages.pdf", "application/pdf")
           else
             fixture_file_upload("image_150x150.png", "image/png")
           end

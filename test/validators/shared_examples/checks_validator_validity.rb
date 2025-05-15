@@ -18,6 +18,7 @@ module ChecksValidatorValidity
       when :processable_file then not_applicable
       when :size then "You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator"
       when :total_size then "You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator"
+      when :pages then "You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), :between or :exact to the validator"
       end
     end
 

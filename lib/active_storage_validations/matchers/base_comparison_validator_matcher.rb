@@ -68,7 +68,8 @@ module ActiveStorageValidations
           not_lower_than_min? &&
           higher_than_min? &&
           lower_than_max? &&
-          not_higher_than_max?
+          not_higher_than_max? &&
+          equal_to_exact?
       end
 
       protected
@@ -101,6 +102,10 @@ module ActiveStorageValidations
 
       def not_higher_than_max?
         @max.nil? || @max == Float::INFINITY || !passes_validation_with_value(@max + 1)
+      end
+
+      def equal_to_exact?
+        @exact.nil? || passes_validation_with_value(@exact)
       end
 
       def smallest_measurement
