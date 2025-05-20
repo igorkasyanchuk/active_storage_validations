@@ -2,7 +2,7 @@
 
 module ActiveStorageValidations
   class Railtie < ::Rails::Railtie
-    initializer "active_storage_validations.configure", after: :load_config_initializers do
+    initializer "active_storage_validations.configure" do
       ActiveSupport.on_load(:active_record) do
         include ActiveStorageValidations unless included_modules.include?(ActiveStorageValidations)
       end
