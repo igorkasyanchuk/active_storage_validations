@@ -169,8 +169,14 @@ describe "Integration tests" do
           parent_model.update!(child_attributes: { image: image_150x150_file })
         end
 
-        it "does not allow to save the parent model" do
+        it "does not allow to update the parent model" do
           assert_equal false, subject
+        end
+
+        it "adds the child model's error to the parent model's errors" do
+          subject
+
+          assert parent_model.errors.any? { |e| e.type == :content_type_invalid }
         end
       end
     end
