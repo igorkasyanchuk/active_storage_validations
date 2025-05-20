@@ -34,6 +34,7 @@ jobs:
           - rails_7_1
           - rails_7_2
           - rails_8_0
+          - rails_next
         image_processor:
           - vips
           - mini_magick
