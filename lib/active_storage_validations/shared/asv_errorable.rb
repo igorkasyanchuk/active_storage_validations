@@ -20,9 +20,18 @@ module ActiveStorageValidations
     def add_error(record, attribute, error_type, **errors_options)
       return if record.errors.added?(attribute, error_type)
 
+      error = record.errors.add(attribute, error_type, **errors_options)
+
+      # Rails 8.1 introduced a new way to mark errors as nested
+      # https://github.com/igorkasyanchuk/active_storage_validations/issues/377
+      if Rails.gem_version >= Gem::Version.new("8.1.0.alpha")
+        # Mark errors as nested when they occur in a parent/child context
+        set_nested_error(record, error) if updating_through_parent?(record)
+      end
+
       # You can read https://api.rubyonrails.org/classes/ActiveModel/Errors.html#method-i-add
       # to better understand how Rails model errors work
-      record.errors.add(attribute, error_type, **errors_options)
+      error
     end
 
     private
@@ -35,6 +44,21 @@ module ActiveStorageValidations
       when ActiveStorage::Blob then file.filename
       when Hash then file[:filename]
       end.to_s
+    end
+
+    def updating_through_parent?(record)
+      record.instance_variable_defined?(:@marked_for_destruction) ||
+        record.instance_variable_defined?(:@_destroy) ||
+        (record.respond_to?(:parent) && record.parent.present?)
+    end
+
+    def set_nested_error(record, error)
+      reflection = record.class.reflect_on_association(:parent)
+
+      if reflection
+        association = record.association(reflection.name)
+        record.errors.objects.append(ActiveRecord::Associations::NestedError.new(association, error))
+      end
     end
   end
 end

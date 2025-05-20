@@ -802,6 +802,7 @@ To run the gem tests, launch the following commands in the root folder of gem re
 * `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.1
 * `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test` to run for Rails 7.2
 * `BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test` to run for Rails 8.0
+* `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main
 
 Snippet to run in console:
 
@@ -811,11 +812,13 @@ BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 ```
 
 Tips:

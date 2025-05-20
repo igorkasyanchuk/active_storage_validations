@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+gem 'rails', github: 'rails/rails', branch: 'main'
+
+gemspec :path => '../'
+
+gem 'nokogiri', '~> 1.16.7'
+gem "debug", "~> 1.10", ">= 1.10.0"
