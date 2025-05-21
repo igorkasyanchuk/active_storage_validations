@@ -22,9 +22,9 @@ module ActiveStorageValidations
 
       error = record.errors.add(attribute, error_type, **errors_options)
 
-      # Rails 8.1 introduced a new way to mark errors as nested
+      # Rails 8.0.2 introduced a new way to mark errors as nested
       # https://github.com/igorkasyanchuk/active_storage_validations/issues/377
-      if Rails.gem_version >= Gem::Version.new("8.1.0.alpha")
+      if Rails.gem_version >= Gem::Version.new("8.0.2")
         # Mark errors as nested when they occur in a parent/child context
         set_nested_error(record, error) if updating_through_parent?(record)
       end
