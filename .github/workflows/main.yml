@@ -72,7 +72,7 @@ jobs:
         id: cache-libvips
         uses: actions/cache@v3
         with:
-          path: ~/.local/bin/vips
+          path: ~/.local/bin/vips-8.*
           key: ${{ runner.os }}-libvips-${{ hashFiles('**/workflow.yml') }}
 
       - name: Install libvips
@@ -80,7 +80,8 @@ jobs:
         run: |
           mkdir -p ~/.local/bin
           sudo apt-get update && sudo apt-get -y install libvips
-          sudo cp $(which vips) ~/.local/bin/
+          # Find and copy all vips executables
+          sudo find /usr/bin -name "vips-8.*" -exec cp {} ~/.local/bin/ \;
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Cache FFmpeg
