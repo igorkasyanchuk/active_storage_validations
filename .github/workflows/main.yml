@@ -72,23 +72,31 @@ jobs:
         id: cache-libvips
         uses: actions/cache@v3
         with:
-          path: /usr/bin/vips
-          key: ${{ runner.os }}-libvips
+          path: ~/.local/bin/vips
+          key: ${{ runner.os }}-libvips-${{ hashFiles('**/workflow.yml') }}
 
       - name: Install libvips
         if: steps.cache-libvips.outputs.cache-hit != 'true'
-        run: sudo apt-get update && sudo apt-get -y install libvips
+        run: |
+          mkdir -p ~/.local/bin
+          sudo apt-get update && sudo apt-get -y install libvips
+          sudo cp $(which vips) ~/.local/bin/
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Cache FFmpeg
         id: cache-ffmpeg
         uses: actions/cache@v3
         with:
-          path: /usr/bin/ffmpeg
-          key: ${{ runner.os }}-ffmpeg
+          path: ~/.local/bin/ffmpeg
+          key: ${{ runner.os }}-ffmpeg-${{ hashFiles('**/workflow.yml') }}
 
       - name: Install FFmpeg
         if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
-        run: sudo apt-get update && sudo apt-get -y install ffmpeg
+        run: |
+          mkdir -p ~/.local/bin
+          sudo apt-get update && sudo apt-get -y install ffmpeg
+          sudo cp $(which ffmpeg) ~/.local/bin/
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Check out code
         uses: actions/checkout@v4
