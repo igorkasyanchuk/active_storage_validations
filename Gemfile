@@ -24,7 +24,7 @@ group :development, :test do
   # gem "debug", "~> 1.10", ">= 1.10.0"
 
   # Linters
-  gem "rubocop", "~> 1.71", ">= 1.71.1", require: false
-  gem "rubocop-performance", "~> 1.23", ">= 1.23.1", require: false
-  gem "rubocop-rails-omakase", "~> 1.0", ">= 1.0.0", require: false
+  gem "rubocop", "~> 1.75", ">= 1.75.7", require: false
+  gem "rubocop-performance", "~> 1.25", ">= 1.25.0", require: false
+  gem "rubocop-rails-omakase", "~> 1.1", ">= 1.1.0", require: false
 end

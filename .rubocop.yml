@@ -13,7 +13,7 @@ AllCops:
     - 'vendor/bundle/**/*'
   NewCops: enable
 
-require:
+plugins:
   - rubocop-performance
 
 # ==============================================================================
