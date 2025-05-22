@@ -1,5 +1,6 @@
 - 2.0.4
   - Fix issue when updating a child record through a parent (like: parent_model.update(child_attributes: { image: file })) for Rails >= 8.0.2 (https://github.com/igorkasyanchuk/active_storage_validations/pull/378)
+  - Fix issue causing a stack error too deep edge case (not reproductible) because of the `after: :load_config_initializers` option (https://github.com/igorkasyanchuk/active_storage_validations/pull/382)
 
 - 2.0.3
   - Allow to pass an Array, a splatted Array, or a single string for allowing / rejecting content_type matcher methods (https://github.com/igorkasyanchuk/active_storage_validations/pull/372)
