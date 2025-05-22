@@ -15,7 +15,7 @@ gemspec
 
 # This Rails version will be the one used when running `bundle exec rake test` locally
 # Uncomment the line then run `bundle install`
-# gem "rails", "~> 8.0"
+gem "rails", "~> 8.0"
 # gem "sqlite3", ">= 2.5"
 # gem "nokogiri", ">= 1.18"
 

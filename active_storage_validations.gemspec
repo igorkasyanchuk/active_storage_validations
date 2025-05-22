@@ -33,6 +33,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pry'
   s.add_development_dependency 'ruby-vips', ">= 2.1.0"
   s.add_development_dependency 'simplecov'
-  s.add_development_dependency 'sqlite3', '>= 2.5' # To support Ruby 3.4, we need to use sqlite3 >= 2.5
+  s.add_development_dependency 'sqlite3' # To support Ruby 3.4, we need to use sqlite3 >= 2.5
   s.add_development_dependency 'webmock', ">= 3"
 end
