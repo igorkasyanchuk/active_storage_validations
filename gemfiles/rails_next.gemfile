@@ -4,6 +4,6 @@ gem 'rails', github: 'rails/rails', branch: 'main'
 
 gemspec :path => '../'
 
+# To support Ruby >= 3.4
 gem 'sqlite3', '>= 2.5' # To support Ruby 3.4, we need to use sqlite3 >= 2.5
 gem 'nokogiri', '>= 1.18' # To support Ruby 3.4, we need to use nokogiri >= 1.18
-gem "debug", "~> 1.10", ">= 1.10.0"

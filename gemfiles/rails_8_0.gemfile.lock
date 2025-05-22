@@ -126,7 +126,6 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.8-x86_64-linux-musl)
       racc (~> 1.4)
-    ostruct (0.6.1)
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -224,7 +223,6 @@ DEPENDENCIES
   minitest-mock_expectations (~> 1.2, >= 1.2.0)
   minitest-stub_any_instance (~> 1.0, >= 1.0.3)
   nokogiri (>= 1.18)
-  ostruct
   pry
   ruby-vips (>= 2.1.0)
   simplecov
