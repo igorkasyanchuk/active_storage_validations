@@ -7,6 +7,7 @@
 [![RailsJazz](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/my_other.svg?raw=true)](https://www.railsjazz.com)
 [![https://www.patreon.com/igorkasyanchuk](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/patron.svg?raw=true)](https://www.patreon.com/igorkasyanchuk)
 
+[!["Buy Me A Coffee"](https://github.com/igorkasyanchuk/get-smart/blob/main/docs/snapshot-bmc-button-small.png?raw=true)](https://buymeacoffee.com/igorkasyanchuk)
 
 Active Storage Validations is a gem that allows you to add validations for Active Storage attributes.
 
@@ -53,7 +54,7 @@ $ bundle
 
 ### Error messages (I18n)
 
-Once you have installed the gem, you need to add the gem I18n error messages to your app. See [Internationalization (I18n)](#internationalization-i18n) section for more details.
+Once you have installed the gem, I18n error messages will be added automatically to your app. See [Internationalization (I18n)](#internationalization-i18n) section for more details.
 
 ### Using image metadata validators
 
@@ -70,6 +71,8 @@ Plus, you have to be sure to have the corresponding command-line tool installed 
 ### Using video and audio metadata validators
 
 To use the video and audio metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
+
+If you want some inspiration about how to add `imagemagick`, `libvips` or `ffmpeg` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
 
 ### Using content type spoofing protection validator option
 
@@ -248,7 +251,7 @@ If you choose to use a content_type 'shorthand' (like `png`), note that it will 
 Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files
 ```
 
-Be sure to at least include one the the `extensions`, `parents` or `magic` option, otherwise the content type will not be registered.
+Be sure to at least include one the `extensions`, `parents` or `magic` option, otherwise the content type will not be registered.
 
 #### Content type spoofing protection
 
@@ -656,65 +659,11 @@ But this major version bump also comes with some breaking changes. Below are the
 
 ## Internationalization (I18n)
 
-Active Storage Validations uses I18n for error messages. Add these keys in your translation files to make them available:
+Active Storage Validations uses I18n for error messages. The error messages are automatically loaded in your Rails app if your language translations are present in the gem.
 
-```yml
-en:
-  errors:
-    messages:
-      content_type_invalid:
-        one: "has an invalid content type (authorized content type is %{authorized_human_content_types})"
-        other: "has an invalid content type (authorized content types are %{authorized_human_content_types})"
-      content_type_spoofed:
-        one: "has a content type that is not equivalent to the one that is detected through its content (authorized content type is %{authorized_human_content_types})"
-        other: "has a content type that is not equivalent to the one that is detected through its content (authorized content types are %{authorized_human_content_types})"
-      file_size_not_less_than: "file size must be less than %{max} (current size is %{file_size})"
-      file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max} (current size is %{file_size})"
-      file_size_not_greater_than: "file size must be greater than %{min} (current size is %{file_size})"
-      file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min} (current size is %{file_size})"
-      file_size_not_between: "file size must be between %{min} and %{max} (current size is %{file_size})"
-      total_file_size_not_less_than: "total file size must be less than %{max} (current size is %{total_file_size})"
-      total_file_size_not_less_than_or_equal_to: "total file size must be less than or equal to %{max} (current size is %{total_file_size})"
-      total_file_size_not_greater_than: "total file size must be greater than %{min} (current size is %{total_file_size})"
-      total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min} (current size is %{total_file_size})"
-      total_file_size_not_between: "total file size must be between %{min} and %{max} (current size is %{total_file_size})"
-      duration_not_less_than: "duration must be less than %{max} (current duration is %{duration})"
-      duration_not_less_than_or_equal_to: "duration must be less than or equal to %{max} (current duration is %{duration})"
-      duration_not_greater_than: "duration must be greater than %{min} (current duration is %{duration})"
-      duration_not_greater_than_or_equal_to: "duration must be greater than or equal to %{min} (current duration is %{duration})"
-      duration_not_between: "duration must be between %{min} and %{max} (current duration is %{duration})"
-      limit_out_of_range:
-        zero: "no files attached (must have between %{min} and %{max} files)"
-        one: "only 1 file attached (must have between %{min} and %{max} files)"
-        other: "total number of files must be between %{min} and %{max} files (there are %{count} files attached)"
-      limit_min_not_reached:
-        zero: "no files attached (must have at least %{min} files)"
-        one: "only 1 file attached (must have at least %{min} files)"
-        other: "%{count} files attached (must have at least %{min} files)"
-      limit_max_exceeded:
-        zero: "no files attached (maximum is %{max} files)"
-        one: "too many files attached (maximum is %{max} files, got %{count})"
-        other: "too many files attached (maximum is %{max} files, got %{count})"
-      media_metadata_missing: "is not a valid media file"
-      dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixel"
-      dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixel"
-      dimension_width_not_included_in: "width is not included between %{min} and %{max} pixel"
-      dimension_height_not_included_in: "height is not included between %{min} and %{max} pixel"
-      dimension_width_not_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
-      dimension_height_not_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
-      dimension_width_not_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
-      dimension_height_not_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
-      dimension_width_not_equal_to: "width must be equal to %{length} pixel"
-      dimension_height_not_equal_to: "height must be equal to %{length} pixel"
-      aspect_ratio_not_square: "must be square (current file is %{width}x%{height}px)"
-      aspect_ratio_not_portrait: "must be portrait (current file is %{width}x%{height}px)"
-      aspect_ratio_not_landscape: "must be landscape (current file is %{width}x%{height}px)"
-      aspect_ratio_not_x_y: "must be %{authorized_aspect_ratios} (current file is %{width}x%{height}px)"
-      aspect_ratio_invalid: "has an invalid aspect ratio (valid aspect ratios are %{authorized_aspect_ratios})"
-      file_not_processable: "is not identified as a valid media file"
-```
+Translation files are available [here](https://github.com/igorkasyanchuk/active_storage_validations/tree/master/config/locales). We currently have translations for `da`, `de`, `en`, `en-GB`, `es`, `fr`, `it`, `ja`, `nl`, `pl`, `pt-BR`, `ru`, `sv`, `tr`, `uk`, `vi` and `zh-CN`. Feel free to drop a PR to add your language ✌️.
 
-Other translation files are available [here](https://github.com/igorkasyanchuk/active_storage_validations/tree/master/config/locales).
+If you wish to customize the error messages, just copy, paste and update the translation files into your application locales.
 
 ## Test matchers
 
@@ -760,8 +709,8 @@ describe User do
 
   # content_type:
   # #allowing, #rejecting
-  it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') }
-  it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') }
+  it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') } # possible to use an Array or *splatted array
+  it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') } # possible to use an Array or *splatted array
 
   # dimension:
   # #width, #height, #width_min, #height_min, #width_max, #height_max, #width_between, #height_between
@@ -853,6 +802,7 @@ To run the gem tests, launch the following commands in the root folder of gem re
 * `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.1
 * `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test` to run for Rails 7.2
 * `BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test` to run for Rails 8.0
+* `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main
 
 Snippet to run in console:
 
@@ -862,11 +812,13 @@ BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 ```
 
 Tips:
@@ -890,3 +842,5 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 [<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
 />](https://www.railsjazz.com/?utm_source=github&utm_medium=bottom&utm_campaign=active_storage_validations)
+
+[!["Buy Me A Coffee"](https://github.com/igorkasyanchuk/get-smart/blob/main/docs/snapshot-bmc-button.png?raw=true)](https://buymeacoffee.com/igorkasyanchuk)

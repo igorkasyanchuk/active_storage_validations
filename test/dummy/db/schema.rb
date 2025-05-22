@@ -87,6 +87,7 @@ ActiveRecord::Schema.define do
     aspect_ratio
     content_type
     dimension
+    duration
     processable_file
   ].each do |validator|
     create_table :"#{validator}_validator_using_attachables", force: :cascade do |t|
@@ -161,12 +162,20 @@ ActiveRecord::Schema.define do
   %w[
     based_on_a_file_property
     performance
+    nested_error_parent
     zero_byte_image
   ].each do |integration_test|
     create_table :"integration_validator_#{integration_test.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
     end
+  end
+
+  create_table :integration_validator_nested_error_children, force: :cascade do |t|
+    t.bigint :nested_error_parent_id
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+    t.index [ "nested_error_parent_id" ], name: "idx_iv_nested_error_children_on_nested_error_parent_id"
   end
 
   create_table :limit_attachments, force: :cascade do |t|

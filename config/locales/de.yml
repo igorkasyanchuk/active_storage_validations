@@ -34,6 +34,7 @@ de:
         zero: "Keine Dateien angehängt (maximal %{max} Dateien)"
         one: "zu viele angehängte Dateien (maximal %{max} Dateien, %{count})"
         other: "Zu viele angehängte Dateien (maximal %{max} Dateien, %{count})"
+      attachment_missing: "hat keine angehängte Datei"
       media_metadata_missing: "ist keine gültige Mediendatei"
       dimension_min_not_included_in: "muss größer oder gleich %{width} x %{height} Pixel sein"
       dimension_max_not_included_in: "muss kleiner oder gleich %{width} x %{height} Pixel sein"

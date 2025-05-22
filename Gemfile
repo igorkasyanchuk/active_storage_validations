@@ -20,8 +20,8 @@ gemspec
 # gem "nokogiri", "~> 1.16", ">= 1.16.7"
 
 group :development, :test do
-  # To use a debugger:
-  # gem 'byebug'
+  # To use debugger:
+  # gem "debug", "~> 1.10", ">= 1.10.0"
 
   # To test S3 services
   # gem "aws-sdk-s3", require: false
