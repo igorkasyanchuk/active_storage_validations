@@ -2,9 +2,12 @@
 
 module ActiveStorageValidations
   class Railtie < ::Rails::Railtie
-    initializer "active_storage_validations.configure", after: :load_config_initializers do
+    # Using after: :load_config_initializers would cause a stack level too deep error
+    # See: https://github.com/igorkasyanchuk/active_storage_validations/issues/364
+
+    initializer "active_storage_validations.configure" do
       ActiveSupport.on_load(:active_record) do
-        include ActiveStorageValidations unless included_modules.include?(ActiveStorageValidations)
+        include ActiveStorageValidations
       end
     end
 
