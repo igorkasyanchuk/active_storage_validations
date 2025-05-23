@@ -72,10 +72,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get -y install libvips
 
       - name: Install FFmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v3
-        id: setup-ffmpeg
-        with:
-          ffmpeg-version: release
+        run: sudo apt-get update && sudo apt-get -y install ffmpeg
 
       - name: Check out code
         uses: actions/checkout@v4
