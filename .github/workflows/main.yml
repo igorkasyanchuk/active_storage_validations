@@ -68,36 +68,14 @@ jobs:
       - name: Verify imagemagick
         run: magick -version
 
-      - name: Cache libvips
-        id: cache-libvips
-        uses: actions/cache@v3
-        with:
-          path: ~/.local/bin/vips-8.*
-          key: ${{ runner.os }}-libvips-${{ hashFiles('**/workflow.yml') }}
-
       - name: Install libvips
-        if: steps.cache-libvips.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ~/.local/bin
-          sudo apt-get update && sudo apt-get -y install libvips
-          # Find and copy all vips executables
-          sudo find /usr/bin -name "vips-8.*" -exec cp {} ~/.local/bin/ \;
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Cache FFmpeg
-        id: cache-ffmpeg
-        uses: actions/cache@v3
-        with:
-          path: ~/.local/bin/ffmpeg
-          key: ${{ runner.os }}-ffmpeg-${{ hashFiles('**/workflow.yml') }}
+        run: sudo apt-get update && sudo apt-get -y install libvips
 
       - name: Install FFmpeg
-        if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ~/.local/bin
-          sudo apt-get update && sudo apt-get -y install ffmpeg
-          sudo cp $(which ffmpeg) ~/.local/bin/
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        id: setup-ffmpeg
+        with:
+          ffmpeg-version: release
 
       - name: Check out code
         uses: actions/checkout@v4
