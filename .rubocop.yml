@@ -4,7 +4,7 @@ inherit_gem:
   rubocop-rails-omakase: rubocop.yml
 
 AllCops:
-  TargetRubyVersion: 3.1 # same as .github/workflows/main.yml
+  TargetRubyVersion: 3.3 # same as .github/workflows/main.yml
   Exclude:
     - 'bin/*'
     - 'config/locales/*'
@@ -13,7 +13,7 @@ AllCops:
     - 'vendor/bundle/**/*'
   NewCops: enable
 
-require:
+plugins:
   - rubocop-performance
 
 # ==============================================================================
