@@ -13,6 +13,11 @@ require "combustion"
 Combustion.path = "test/dummy"
 Combustion.initialize! :active_record, :active_storage, :active_job do
   config.active_storage.variant_processor = ENV["IMAGE_PROCESSOR"]&.to_sym
+
+  # Uncomment this to test S3 services
+  # require "aws-sdk-s3"
+  # config.active_storage.service = :digitalocean
+
   config.active_job.queue_adapter = :inline
 end
 

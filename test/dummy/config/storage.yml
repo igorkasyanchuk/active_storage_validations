@@ -1,3 +1,11 @@
 test:
   service: Disk
   root: <%= Rails.root.join('tmp/storage') %>
+
+digitalocean:
+  service: S3
+  endpoint: https://nyc3.digitaloceanspaces.com
+  access_key_id: xxxx
+  secret_access_key: xxx
+  bucket: active_storage_validations_test
+  region: eu-west-1

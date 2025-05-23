@@ -23,6 +23,9 @@ group :development, :test do
   # To use debugger:
   # gem "debug", "~> 1.10", ">= 1.10.0"
 
+  # To test S3 services
+  # gem "aws-sdk-s3", require: false
+
   # Linters
   gem "rubocop", "~> 1.71", ">= 1.71.1", require: false
   gem "rubocop-performance", "~> 1.23", ">= 1.23.1", require: false
