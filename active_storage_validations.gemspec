@@ -19,6 +19,9 @@ Gem::Specification.new do |s|
   s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md']
 
   s.metadata['rubygems_mfa_required'] = 'true'
+  s.metadata['changelog_uri'] = 'https://github.com/igorkasyanchuk/active_storage_validations/blob/master/CHANGES.md'
+  s.metadata['source_code_uri'] = 'https://github.com/igorkasyanchuk/active_storage_validations'
+  s.metadata['bug_tracker_uri'] = 'https://github.com/igorkasyanchuk/active_storage_validations/issues'
 
   s.required_ruby_version = '>= 2.5.0' # We support Rails >= 6.1.4
 
