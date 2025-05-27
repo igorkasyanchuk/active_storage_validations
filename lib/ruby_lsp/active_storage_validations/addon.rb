@@ -14,7 +14,7 @@ module RubyLsp
       end
 
       def create_hover_listener(response_builder, node_context, dispatcher)
-        Hover.new(response_builder, dispatcher)
+        RubyLsp::ActiveStorageValidations::Hover.new(response_builder, dispatcher)
       end
     end
   end
