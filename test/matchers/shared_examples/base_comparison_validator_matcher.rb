@@ -13,12 +13,14 @@ module BaseComparisonValidatorMatcher
             case matcher_class.name
             when /Size/ then 0.5.kilobyte
             when /Duration/ then 1.second
+            when /Pages/ then 1
             end
           end
           let(:higher_value) do
             case matcher_class.name
             when /Size/ then 99.kilobytes
             when /Duration/ then 99.seconds
+            when /Pages/ then 99
             end
           end
 

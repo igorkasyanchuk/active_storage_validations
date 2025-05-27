@@ -69,10 +69,19 @@ jobs:
         run: magick -version
 
       - name: Install libvips
-        run: sudo apt-get update && sudo apt-get -y install libvips
+        run: sudo apt-get update && sudo apt-get -y install libvips libvips-tools
+
+      - name: Verify libvips
+        run: vips -v
 
       - name: Install FFmpeg
         run: sudo apt-get update && sudo apt-get -y install ffmpeg
+
+      - name: Install poppler
+        run: sudo apt-get update && sudo apt-get -y install poppler-utils
+
+      - name: Verify poppler
+        run: pdftoppm -h
 
       - name: Check out code
         uses: actions/checkout@v4

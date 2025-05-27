@@ -30,7 +30,9 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Duration](#duration)
   - [Aspect ratio](#aspect-ratio)
   - [Processable file](#processable-file)
+  - [Pages](#pages)
 - [Upgrading from 1.x to 2.x](#upgrading-from-1x-to-2x)
+- [Upgrading from 2.x to 3.x](#upgrading-from-2x-to-3x)
 - [Internationalization (I18n)](#internationalization-i18n)
 - [Test matchers](#test-matchers)
 - [Contributing](#contributing)
@@ -90,6 +92,7 @@ To use the `spoofing_protection` option with the `content_type` validator, you o
 - [Duration](#duration): validates video / audio duration
 - [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
 - [Processable file](#processable-file): validates if a file can be processed
+- [Pages](#pages): validates pdf number of pages
 <br>
 <br>
 
@@ -416,6 +419,8 @@ The `total_size` validator error messages expose 4 values that you can use:
 ### Dimension
 
 Validates the dimension of the attached image / video files.
+It can also be used for pdf files, but it will only analyze the pdf first page, and will assume a DPI of 72.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
@@ -480,6 +485,7 @@ The `dimension` validator error messages expose 6 values that you can use:
 ### Duration
 
 Validates the duration of the attached audio / video files.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
@@ -528,7 +534,9 @@ The `duration` validator error messages expose 4 values that you can use:
 
 ### Aspect ratio
 
-Validates the aspect ratio of the attached files.
+Validates the aspect ratio of the attached image / video files.
+It can also be used for pdf files, but it will only analyze the pdf first page.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
@@ -580,7 +588,8 @@ The `aspect_ratio` validator error messages expose 4 values that you can use:
 
 ### Processable file
 
-Validates if the attached files can be processed by MiniMagick or Vips (image) or ffmpeg (video/audio).
+Validates if the attached files can be processed by MiniMagick or Vips (image), ffmpeg (video/audio) or poppler (pdf).
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
@@ -608,6 +617,60 @@ en:
 
 The `processable_file` validator error messages expose 1 value that you can use:
 - `filename` containing the current filename in error
+
+---
+
+### Pages
+
+Validates each attached pdf file number of pages.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
+
+#### Options
+
+The `pages` validator has 6 possible options:
+- `less_than`: defines the strict maximum allowed number of pages
+- `less_than_or_equal_to`: defines the maximum allowed number of pages
+- `greater_than`: defines the strict minimum allowed number of pages
+- `greater_than_or_equal_to`: defines the minimum allowed number of pages
+- `between`: defines the allowed number of pages range
+- `equal_to`: defines the exact allowed number of pages
+
+#### Examples
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_one_attached :contract
+
+  validates :contract, pages: { less_than: 2 } # restricts the number of pages to < 2
+  validates :contract, pages: { less_than_or_equal_to: 2 } # restricts the number of pages to <= 2
+  validates :contract, pages: { greater_than: 1 } # restricts the number of pages to > 1
+  validates :contract, pages: { greater_than_or_equal_to: 1 } # restricts the number of pages to >= 1
+  validates :contract, pages: { between: 1..2 } # restricts the number of pages to between 1 and 2
+  validates :contract, pages: { equal_to: 1 } # restricts the number of pages to exactly 1
+end
+```
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      pages_not_less_than: "page count must be less than %{max} (current page count is %{pages})"
+      pages_not_less_than_or_equal_to: "page count must be less than or equal to %{max} (current page count is %{pages})"
+      pages_not_greater_than: "page count must be greater than %{min} (current page count is %{pages})"
+      pages_not_greater_than_or_equal_to: "page count must be greater than or equal to %{min} (current page count is %{pages})"
+      pages_not_between: "page count must be between %{min} and %{max} (current page count is %{pages})"
+      pages_not_equal_to: "page count must be equal to %{exact} (current page count is %{pages})"
+```
+
+The `pages` validator error messages expose 5 values that you can use:
+- `pages` containing the current file number of pages (e.g. `7`)
+- `min` containing the minimum allowed number of pages (e.g. `1`)
+- `exact` containing the exact allowed number of pages (e.g. `3`)
+- `max` containing the maximum allowed number of pages (e.g. `5`)
+- `filename` containing the current file name
 
 ---
 
@@ -656,6 +719,19 @@ But this major version bump also comes with some breaking changes. Below are the
 - `processable_image` validator
   - The validator has been replaced by `processable_file` validator, be sure to replace `processable_image: true` to `processable_file: true`
   - The associated matcher has also been updated accordingly, be sure to replace `validate_processable_image_of` to `validate_processable_file_of`
+
+## Upgrading from 2.x to 3.x
+
+Version 3 comes with the ability to support single page pdf dimension / aspect_ratio analysis, we had to make a breaking change:
+- To analyze PDFs, you must install the `poppler` PDF processing dependency
+  - It's a  Rails-supported PDF processing dependency (https://guides.rubyonrails.org/active_storage_overview.html#requirements)
+  - To install it, check their documentation at this [link](https://pdf2image.readthedocs.io/en/latest/installation.html).
+  - To check if it's installed, execute `pdftoppm -h`.
+  - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+
+We also added the `pages` validator to validate pdf number of pages.
+
+Note that, if you do not perform these metadata validations on pdfs, the gem will work the same as in version 2.
 
 ## Internationalization (I18n)
 
@@ -746,6 +822,15 @@ describe User do
   it { is_expected.to validate_duration_of(:introduction).greater_than(1.minute) }
   it { is_expected.to validate_duration_of(:introduction).greater_than_or_equal_to(1.minute) }
   it { is_expected.to validate_duration_of(:introduction).between(100..500.seconds) }
+
+  # pages:
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
+  it { is_expected.to validate_pages_of(:contract).less_than(50) }
+  it { is_expected.to validate_pages_of(:contract).less_than_or_equal_to(50) }
+  it { is_expected.to validate_pages_of(:contract).greater_than(5) }
+  it { is_expected.to validate_pages_of(:contract).greater_than_or_equal_to(5) }
+  it { is_expected.to validate_pages_of(:contract).between(100..500) }
+  it { is_expected.to validate_pages_of(:contract).equal_to(5) }
 end
 ```
 (Note that matcher methods are chainable)

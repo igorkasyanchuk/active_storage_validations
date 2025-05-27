@@ -9,6 +9,7 @@ require "active_storage_validations/matchers/dimension_validator_matcher"
 require "active_storage_validations/matchers/duration_validator_matcher"
 require "active_storage_validations/matchers/size_validator_matcher"
 require "active_storage_validations/matchers/total_size_validator_matcher"
+require "active_storage_validations/matchers/pages_validator_matcher"
 
 module ActiveStorageValidations
   module Matchers

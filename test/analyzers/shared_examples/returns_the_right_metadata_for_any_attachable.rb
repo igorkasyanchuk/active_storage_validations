@@ -169,18 +169,20 @@ module ReturnsTheRightMetadataForAnyAttachable
       end
 
       describe "Edge cases" do
-        describe "rotated media" do
-          let(:attachable) do
-            ActiveStorage::Blob.create_and_upload!(
-              io: File.open(Rails.root.join("public", media_filename_rotated)),
-              filename: media_filename_rotated,
-              content_type: media_content_type_rotated,
-              service_name: "test"
-            )
-          end
-          let(:expected_metadata) { expected_metadata_rotated }
+        if self.test_rotatable_media?
+          describe "rotated media" do
+            let(:attachable) do
+              ActiveStorage::Blob.create_and_upload!(
+                io: File.open(Rails.root.join("public", media_filename_rotated)),
+                filename: media_filename_rotated,
+                content_type: media_content_type_rotated,
+                service_name: "test"
+              )
+            end
+            let(:expected_metadata) { expected_metadata_rotated }
 
-          it { is_expected_to_return_the_right_metadata }
+            it { is_expected_to_return_the_right_metadata }
+          end
         end
 
         describe "0 byte size file" do

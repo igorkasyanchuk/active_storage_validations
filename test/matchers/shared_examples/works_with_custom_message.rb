@@ -16,6 +16,7 @@ module WorksWithCustomMessage
         when :duration then matcher.less_than_or_equal_to(5.minutes)
         when :size then matcher.less_than_or_equal_to(5.megabytes)
         when :total_size then matcher.less_than_or_equal_to(5.megabytes)
+        when :pages then matcher.equal_to(5)
         end
       end
 

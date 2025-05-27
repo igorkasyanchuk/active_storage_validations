@@ -15,6 +15,7 @@ module ChecksIfIsValid
             when :dimension then matcher.width(150)
             when :size then matcher.less_than(10.megabytes)
             when :total_size then matcher.less_than(10.megabytes)
+            when :pages then matcher.less_than(10)
             end
           end
 
