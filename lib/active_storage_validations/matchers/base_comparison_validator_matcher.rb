@@ -58,6 +58,11 @@ module ActiveStorageValidations
         self
       end
 
+      def equal_to(value)
+        @exact = value
+        self
+      end
+
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
 

@@ -200,7 +200,7 @@ Validates if the attachment has an allowed content type.
 #### Options
 
 The `content_type` validator has 3 possible options:
-- `with`: defines the exact allowed content type (string, symbol or regex)
+- `with`: defines the allowed content type (string, symbol or regex)
 - `in`: defines the allowed content types (array of strings or symbols)
 - `spoofing_protection`: enables content type spoofing protection (boolean, defaults to `false`)
 
@@ -326,6 +326,7 @@ The `size` validator has 5 possible options:
 - `greater_than`: defines the strict minimum allowed file size
 - `greater_than_or_equal_to`: defines the minimum allowed file size
 - `between`: defines the allowed file size range
+- `equal_to`: defines the allowed file size
 
 #### Examples
 
@@ -339,6 +340,7 @@ class User < ApplicationRecord
   validates :avatar, size: { greater_than: 1.kilobyte } # restricts the file size to > 1KB
   validates :avatar, size: { greater_than_or_equal_to: 1.kilobyte } # restricts the file size to >= 1KB
   validates :avatar, size: { between: 1.kilobyte..2.megabytes } # restricts the file size to between 1KB and 2MB
+  validates :avatar, size: { equal_to: 1.megabyte } # restricts the file size to exactly 1MB
 end
 ```
 
@@ -358,11 +360,13 @@ en:
       file_size_not_greater_than: "file size must be greater than %{min} (current size is %{file_size})"
       file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min} (current size is %{file_size})"
       file_size_not_between: "file size must be between %{min} and %{max} (current size is %{file_size})"
+      file_size_not_equal_to: "file size must be equal to %{exact} (current size is %{file_size})"
 ```
 
 The `size` validator error messages expose 4 values that you can use:
 - `file_size` containing the current file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed file size (e.g. `1KB`)
+- `exact` containing the allowed file size (e.g. `1MB`)
 - `max` containing the maximum allowed file size (e.g. `2MB`)
 - `filename` containing the current file name
 
@@ -380,6 +384,7 @@ The `total_size` validator has 5 possible options:
 - `greater_than`: defines the strict minimum allowed total file size
 - `greater_than_or_equal_to`: defines the minimum allowed total file size
 - `between`: defines the allowed total file size range
+- `equal_to`: defines the allowed total file size
 
 #### Examples
 
@@ -393,6 +398,7 @@ class User < ApplicationRecord
   validates :certificates, total_size: { greater_than: 1.kilobyte } # restricts the total size to > 1KB
   validates :certificates, total_size: { greater_than_or_equal_to: 1.kilobyte } # restricts the total size to >= 1KB
   validates :certificates, total_size: { between: 1.kilobyte..10.megabytes } # restricts the total size to between 1KB and 10MB
+  validates :certificates, total_size: { equal_to: 1.megabyte } # restricts the total file size to exactly 1MB
 end
 ```
 
@@ -407,11 +413,13 @@ en:
       total_file_size_not_greater_than: "total file size must be greater than %{min} (current size is %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min} (current size is %{total_file_size})"
       total_file_size_not_between: "total file size must be between %{min} and %{max} (current size is %{total_file_size})"
+      total_file_size_not_equal_to: "total file size must be equal to %{exact} (current size is %{total_file_size})"
 ```
 
 The `total_size` validator error messages expose 4 values that you can use:
 - `total_file_size` containing the current total file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed total file size (e.g. `1KB`)
+- `exact` containing the allowed total file size (e.g. `1MB`)
 - `max` containing the maximum allowed total file size (e.g. `2MB`)
 
 ---
@@ -425,11 +433,11 @@ It can also be used for pdf files, but it will only analyze the pdf first page, 
 #### Options
 
 The `dimension` validator has several possible options:
-- `width`: defines the exact allowed width (integer)
+- `width`: defines the allowed width (integer)
   - `min`: defines the minimum allowed width (integer)
   - `max`: defines the maximum allowed width (integer)
   - `in`: defines the allowed width range (range)
-- `height`: defines the exact allowed height (integer)
+- `height`: defines the allowed height (integer)
   - `min`: defines the minimum allowed height (integer)
   - `max`: defines the maximum allowed height (integer)
   - `in`: defines the allowed height range (range)
@@ -495,19 +503,21 @@ The `duration` validator has 5 possible options:
 - `greater_than`: defines the strict minimum allowed file duration
 - `greater_than_or_equal_to`: defines the minimum allowed file duration
 - `between`: defines the allowed file duration range
+- `equal_to`: defines the allowed duration
 
 #### Examples
 
 Use it like this:
 ```ruby
 class User < ApplicationRecord
-  has_one_attached :avatar
+  has_one_attached :intro_song
 
-  validates :avatar, duration: { less_than: 2.minutes } # restricts the file duration to < 2 minutes
-  validates :avatar, duration: { less_than_or_equal_to: 2.minutes } # restricts the file duration to <= 2 minutes
-  validates :avatar, duration: { greater_than: 1.second } # restricts the file duration to > 1 second
-  validates :avatar, duration: { greater_than_or_equal_to: 1.second } # restricts the file duration to >= 1 second
-  validates :avatar, duration: { between: 1.second..2.minutes } # restricts the file duration to between 1 second and 2 minutes
+  validates :intro_song, duration: { less_than: 2.minutes } # restricts the file duration to < 2 minutes
+  validates :intro_song, duration: { less_than_or_equal_to: 2.minutes } # restricts the file duration to <= 2 minutes
+  validates :intro_song, duration: { greater_than: 1.second } # restricts the file duration to > 1 second
+  validates :intro_song, duration: { greater_than_or_equal_to: 1.second } # restricts the file duration to >= 1 second
+  validates :intro_song, duration: { between: 1.second..2.minutes } # restricts the file duration to between 1 second and 2 minutes
+  validates :intro_song, duration: { equal_to: 1.minute } # restricts the duration to exactly 1 minute
 end
 ```
 
@@ -522,11 +532,13 @@ en:
       duration_not_greater_than: "duration must be greater than %{min} (current duration is %{duration})"
       duration_not_greater_than_or_equal_to: "duration must be greater than or equal to %{min} (current duration is %{duration})"
       duration_not_between: "duration must be between %{min} and %{max} (current duration is %{duration})"
+      duration_not_equal_to: "duration must be equal to %{exact} (current duration is %{duration})"
 ```
 
 The `duration` validator error messages expose 4 values that you can use:
 - `duration` containing the current duration size (e.g. `2 minutes`)
 - `min` containing the minimum allowed duration size (e.g. `1 second`)
+- `exact` containing the allowed duration (e.g. `3 seconds`)
 - `max` containing the maximum allowed duration size (e.g. `2 minutes`)
 - `filename` containing the current file name
 
@@ -541,7 +553,7 @@ It can also be used for pdf files, but it will only analyze the pdf first page.
 #### Options
 
 The `aspect_ratio` validator has several options:
-- `with`: defines the exact allowed aspect ratio (e.g. `:is_16/9`)
+- `with`: defines the allowed aspect ratio (e.g. `:is_16/9`)
 - `in`: defines the allowed aspect ratios (e.g. `%i[square landscape]`)
 
 This validator can define aspect ratios in several ways:
@@ -633,7 +645,7 @@ The `pages` validator has 6 possible options:
 - `greater_than`: defines the strict minimum allowed number of pages
 - `greater_than_or_equal_to`: defines the minimum allowed number of pages
 - `between`: defines the allowed number of pages range
-- `equal_to`: defines the exact allowed number of pages
+- `equal_to`: defines the allowed number of pages
 
 #### Examples
 
@@ -668,7 +680,7 @@ en:
 The `pages` validator error messages expose 5 values that you can use:
 - `pages` containing the current file number of pages (e.g. `7`)
 - `min` containing the minimum allowed number of pages (e.g. `1`)
-- `exact` containing the exact allowed number of pages (e.g. `3`)
+- `exact` containing the allowed number of pages (e.g. `3`)
 - `max` containing the maximum allowed number of pages (e.g. `5`)
 - `filename` containing the current file name
 
@@ -729,7 +741,7 @@ Version 3 comes with the ability to support single page pdf dimension / aspect_r
   - To check if it's installed, execute `pdftoppm -h`.
   - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
 
-We also added the `pages` validator to validate pdf number of pages.
+We also added the `pages` validator to validate pdf number of pages, and the `equal_to` option to `duration`, `size`and `total_size` validators.
 
 Note that, if you do not perform these metadata validations on pdfs, the gem will work the same as in version 2.
 
@@ -800,28 +812,31 @@ describe User do
   it { is_expected.to validate_dimensions_of(:avatar).height_between(100..300) }
 
   # size:
-  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
   it { is_expected.to validate_size_of(:avatar).less_than(50.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).less_than_or_equal_to(50.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).greater_than(1.kilobyte) }
   it { is_expected.to validate_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
   it { is_expected.to validate_size_of(:avatar).between(100..500.kilobytes) }
+  it { is_expected.to validate_size_of(:avatar).equal_to(5.megabytes) }
 
   # total_size:
-  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
   it { is_expected.to validate_total_size_of(:avatar).less_than(50.kilobytes) }
   it { is_expected.to validate_total_size_of(:avatar).less_than_or_equal_to(50.kilobytes) }
   it { is_expected.to validate_total_size_of(:avatar).greater_than(1.kilobyte) }
   it { is_expected.to validate_total_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
   it { is_expected.to validate_total_size_of(:avatar).between(100..500.kilobytes) }
+  it { is_expected.to validate_total_size_of(:avatar).equal_to(5.megabytes) }
 
   # duration:
-  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
   it { is_expected.to validate_duration_of(:introduction).less_than(50.seconds) }
   it { is_expected.to validate_duration_of(:introduction).less_than_or_equal_to(50.seconds) }
   it { is_expected.to validate_duration_of(:introduction).greater_than(1.minute) }
   it { is_expected.to validate_duration_of(:introduction).greater_than_or_equal_to(1.minute) }
   it { is_expected.to validate_duration_of(:introduction).between(100..500.seconds) }
+  it { is_expected.to validate_duration_of(:avatar).equal_to(5.minutes) }
 
   # pages:
   # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to

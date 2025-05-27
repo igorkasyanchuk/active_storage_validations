@@ -18,6 +18,7 @@ module ActiveStorageValidations
       greater_than
       greater_than_or_equal_to
       between
+      equal_to
     ].freeze
 
     def initialize(*args)
@@ -29,8 +30,12 @@ module ActiveStorageValidations
 
     def check_validity!
       unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
-        raise ArgumentError, "You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), or :between to the validator"
+        raise ArgumentError, "You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), :between or :equal_to to the validator"
       end
+    end
+
+    def validate_each(record, attribute, value)
+      raise NotImplementedError
     end
 
     private
@@ -55,6 +60,7 @@ module ActiveStorageValidations
 
     def populate_error_options(errors_options, flat_options)
       errors_options[:min] = format_bound_value(min(flat_options))
+      errors_options[:exact] = format_bound_value(exact(flat_options))
       errors_options[:max] = format_bound_value(max(flat_options))
     end
 
@@ -64,6 +70,10 @@ module ActiveStorageValidations
 
     def min(flat_options)
       flat_options[:between]&.min || flat_options[:greater_than] || flat_options[:greater_than_or_equal_to]
+    end
+
+    def exact(flat_options)
+      flat_options[:equal_to]
     end
 
     def max(flat_options)
