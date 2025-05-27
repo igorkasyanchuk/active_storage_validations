@@ -1,3 +1,5 @@
+require_relative "hover"
+
 module RubyLsp
   module ActiveStorageValidations
     class Addon < ::RubyLsp::Addon
