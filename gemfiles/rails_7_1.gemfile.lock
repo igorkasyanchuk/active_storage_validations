@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    active_storage_validations (2.0.2)
+    active_storage_validations (2.0.4)
       activejob (>= 6.1.4)
       activemodel (>= 6.1.4)
       activestorage (>= 6.1.4)
@@ -94,11 +94,11 @@ GEM
     minitest-mock_expectations (1.2.0)
     minitest-stub_any_instance (1.0.3)
     mutex_m (0.2.0)
-    nokogiri (1.16.7-arm64-darwin)
+    nokogiri (1.16.8-arm64-darwin)
       racc (~> 1.4)
-    nokogiri (1.16.7-x86_64-darwin)
+    nokogiri (1.16.8-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.16.7-x86_64-linux)
+    nokogiri (1.16.8-x86_64-linux)
       racc (~> 1.4)
     pry (0.14.2)
       coderay (~> 1.1)

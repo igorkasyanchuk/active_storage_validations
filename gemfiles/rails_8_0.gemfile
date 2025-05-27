@@ -4,5 +4,7 @@ source 'https://rubygems.org'
 
 gemspec :path => '../'
 
-gem 'nokogiri', '~> 1.16.7'
-gem 'ostruct'
+# To support Ruby >= 3.4
+gem 'sqlite3', '>= 2.5'
+gem 'nokogiri', '>= 1.18'
+gem 'ffi', '>= 1.17.1'

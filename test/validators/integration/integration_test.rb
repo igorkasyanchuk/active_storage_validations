@@ -156,4 +156,29 @@ describe "Integration tests" do
       end
     end
   end
+
+  describe "Nested errors" do
+    let(:parent_model) { integration_test_class::NestedErrorParent.create }
+    let(:child_model) { integration_test_class::NestedErrorChild.new }
+
+    describe "when updating the child model through attributes passed to the parent model" do
+      describe "when the child model has an attachment that will cause a validation error" do
+        subject { parent_model.update(child_attributes: { image: empty_io_file }) }
+
+        before do
+          parent_model.update!(child_attributes: { image: image_150x150_file })
+        end
+
+        it "does not allow to update the parent model" do
+          assert_equal false, subject
+        end
+
+        it "adds the child model's error to the parent model's errors" do
+          subject
+
+          assert parent_model.errors.any? { |e| e.type == :content_type_invalid }
+        end
+      end
+    end
+  end
 end

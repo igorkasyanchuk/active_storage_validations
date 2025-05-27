@@ -1,3 +1,5 @@
+- Unreleased
+
 - 3.0.0
   - Allow to perform dimension / aspect_ratio validations on single page pdf (https://github.com/igorkasyanchuk/active_storage_validations/pull/374)
   - Added `pages` validator to validate pdf number of pages.
@@ -10,6 +12,10 @@
     - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
 
   Note that, if you do not perform dimension / aspect_ratio validations on pdf, the gem will work the same as in version 2 without any breaking change.
+
+- 2.0.4
+  - Fix issue when updating a child record through a parent (like: parent_model.update(child_attributes: { image: file })) for Rails >= 8.0.2 (https://github.com/igorkasyanchuk/active_storage_validations/pull/378)
+  - Fix issue causing a stack error too deep edge case (not reproductible) because of the `after: :load_config_initializers` option (https://github.com/igorkasyanchuk/active_storage_validations/pull/382)
 
 - 2.0.3
   - Allow to pass an Array, a splatted Array, or a single string for allowing / rejecting content_type matcher methods (https://github.com/igorkasyanchuk/active_storage_validations/pull/372)
