@@ -21,12 +21,14 @@ class Duration::Matcher < ApplicationRecord
   has_one_attached :greater_than
   has_one_attached :greater_than_or_equal_to
   has_one_attached :between
+  has_one_attached :equal_to
   has_many_attached :many_greater_than
   validates :less_than, duration: { less_than: 2.seconds }
   validates :less_than_or_equal_to, duration: { less_than_or_equal_to: 2.seconds }
   validates :greater_than, duration: { greater_than: 7.seconds }
   validates :greater_than_or_equal_to, duration: { greater_than_or_equal_to: 7.seconds }
   validates :between, duration: { between: 2.seconds..7.seconds }
+  validates :equal_to, duration: { equal_to: 5.seconds }
   validates :many_greater_than, duration: { greater_than: 7.seconds }
 
   has_one_attached :proc_less_than
@@ -34,12 +36,14 @@ class Duration::Matcher < ApplicationRecord
   has_one_attached :proc_greater_than
   has_one_attached :proc_greater_than_or_equal_to
   has_one_attached :proc_between
+  has_one_attached :proc_equal_to
   has_many_attached :proc_many_greater_than
   validates :proc_less_than, duration: { less_than: ->(record) { 2.seconds } }
   validates :proc_less_than_or_equal_to, duration: { less_than_or_equal_to: ->(record) { 2.seconds } }
   validates :proc_greater_than, duration: { greater_than: ->(record) { 7.seconds } }
   validates :proc_greater_than_or_equal_to, duration: { greater_than_or_equal_to: ->(record) { 7.seconds } }
   validates :proc_between, duration: { between: -> { 2.seconds..7.seconds } }
+  validates :proc_equal_to, duration: { equal_to: ->(record) { 5.seconds } }
   validates :proc_many_greater_than, duration: { greater_than: ->(record) { 7.seconds } }
 
   has_one_attached :allow_blank

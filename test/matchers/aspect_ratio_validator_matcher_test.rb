@@ -119,7 +119,7 @@ describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher do
             let(:model_attribute) { :"allowing_one_#{aspect_ratio}" }
             let(:allowed_aspect_ratio) { aspect_ratio }
 
-            describe "when provided with the exact allowed named aspect ratio" do
+            describe "when provided with the allowed named aspect ratio" do
               subject { matcher.rejecting(allowed_aspect_ratio) }
 
               it { is_expected_not_to_match_for(klass) }
@@ -147,7 +147,7 @@ describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher do
       describe "'is_x_y' aspect ratio" do
         let(:model_attribute) { :allowing_one_is_x_y }
 
-        describe "when provided with the exact allowed aspect ratio" do
+        describe "when provided with the allowed aspect ratio" do
           subject { matcher.rejecting(allowed_aspect_ratio) }
 
           let(:allowed_aspect_ratio) { :is_16_9 }
@@ -179,7 +179,7 @@ describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher do
       let(:model_attribute) { :allowing_one_with_message }
       let(:allowed_aspect_ratio) { :portrait }
 
-      describe "when provided with the exact allowed type" do
+      describe "when provided with the allowed type" do
         describe "and when provided with the message specified in the model validations" do
           subject do
             matcher.allowing(allowed_aspect_ratio)
@@ -212,7 +212,7 @@ describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher do
       let(:allowed_aspect_ratio) { :square }
       let(:not_allowed_aspect_ratio) { :portrait }
 
-      describe "when provided with the exact allowed aspect ratio" do
+      describe "when provided with the allowed aspect ratio" do
         describe "and when provided with a not allowed aspect ratio specified in the model validations" do
           subject do
             matcher.allowing(allowed_aspect_ratio)
@@ -229,7 +229,7 @@ describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher do
       let(:allowed_aspect_ratio) { :portrait }
       let(:not_allowed_aspect_ratio) { :landscape }
 
-      describe "when provided with the exact allowed aspect ratio" do
+      describe "when provided with the allowed aspect ratio" do
         describe "and when provided with a not allowed aspect ratio" do
           describe "and when provided with the message specified in the model validations" do
             subject do

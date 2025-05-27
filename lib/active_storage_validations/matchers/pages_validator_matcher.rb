@@ -19,11 +19,6 @@ module ActiveStorageValidations
         message.join("\n")
       end
 
-      def equal_to(value)
-        @exact = value
-        self
-      end
-
       private
 
       def failure_message_unit

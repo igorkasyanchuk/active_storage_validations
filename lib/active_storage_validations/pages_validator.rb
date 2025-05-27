@@ -9,15 +9,6 @@ module ActiveStorageValidations
     include ASVAnalyzable
     include ASVAttachable
 
-    AVAILABLE_CHECKS = %i[
-      less_than
-      less_than_or_equal_to
-      greater_than
-      greater_than_or_equal_to
-      between
-      equal_to
-    ].freeze
-
     ERROR_TYPES = %i[
       pages_not_less_than
       pages_not_less_than_or_equal_to
@@ -29,12 +20,6 @@ module ActiveStorageValidations
     METADATA_KEYS = %i[pages].freeze
 
     delegate :number_to_delimited, to: ActiveSupport::NumberHelper
-
-    def check_validity!
-      unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
-        raise ArgumentError, "You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), :between or :exact to the validator"
-      end
-    end
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
@@ -67,15 +52,6 @@ module ActiveStorageValidations
 
     def valid_metadata?(metadata)
       metadata[:pages].to_i > 0
-    end
-
-    def populate_error_options(errors_options, flat_options)
-      super
-      errors_options[:exact] = format_bound_value(exact(flat_options))
-    end
-
-    def exact(flat_options)
-      flat_options[:equal_to]
     end
 
     def format_bound_value(value)

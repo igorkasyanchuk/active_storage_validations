@@ -3,6 +3,7 @@
 - 3.0.0
   - Allow to perform dimension / aspect_ratio validations on single page pdf (https://github.com/igorkasyanchuk/active_storage_validations/pull/374)
   - Added `pages` validator to validate pdf number of pages.
+  - Added `equal_to` option to `duration`, `size`and `total_size` validators.
 
   Version 3 comes with the ability to support single page pdf dimension / aspect_ratio analysis, we had to make a breaking change:
   - To analyze PDFs, you must install the `poppler` PDF processing dependency

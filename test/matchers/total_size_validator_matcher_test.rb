@@ -103,6 +103,14 @@ describe ActiveStorageValidations::Matchers::TotalSizeValidatorMatcher do
     end
   end
 
+  describe "#equal_to" do
+    let(:matcher_method) { :equal_to }
+    let(:model_attribute) { matcher_method }
+    let(:validator_value) { 5.kilobytes }
+
+    include BaseComparisonValidatorMatcher::OnlyMatchWhenExactValue
+  end
+
   describe "#allow_blank" do
     include WorksWithAllowBlank
   end
