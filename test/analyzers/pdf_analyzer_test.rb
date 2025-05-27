@@ -8,7 +8,7 @@ require "analyzers/shared_examples/works_fine_with_2_pages_pdf"
 describe ActiveStorageValidations::Analyzer::PdfAnalyzer do
   include AnalyzerHelpers
 
-  def self.test_rotated_media?
+  def self.test_rotatable_media?
     false
   end
 

@@ -7,7 +7,7 @@ require "analyzers/shared_examples/returns_the_right_metadata_for_any_attachable
 describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick do
   include AnalyzerHelpers
 
-  def self.test_rotated_media?
+  def self.test_rotatable_media?
     true
   end
 

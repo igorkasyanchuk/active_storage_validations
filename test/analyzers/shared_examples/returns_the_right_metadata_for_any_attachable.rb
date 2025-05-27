@@ -169,7 +169,7 @@ module ReturnsTheRightMetadataForAnyAttachable
       end
 
       describe "Edge cases" do
-        if self.test_rotated_media?
+        if self.test_rotatable_media?
           describe "rotated media" do
             let(:attachable) do
               ActiveStorage::Blob.create_and_upload!(
