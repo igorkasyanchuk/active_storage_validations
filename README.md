@@ -32,6 +32,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Processable file](#processable-file)
   - [Pages](#pages)
 - [Upgrading from 1.x to 2.x](#upgrading-from-1x-to-2x)
+- [Upgrading from 2.x to 3.x](#upgrading-from-2x-to-3x)
 - [Internationalization (I18n)](#internationalization-i18n)
 - [Test matchers](#test-matchers)
 - [Contributing](#contributing)
@@ -418,7 +419,7 @@ The `total_size` validator error messages expose 4 values that you can use:
 ### Dimension
 
 Validates the dimension of the attached image / video files.
-It can also be used for pdf files, but it will only analyze the pdf first page, and assume a DPI of 72.
+It can also be used for pdf files, but it will only analyze the pdf first page, and will assume a DPI of 72.
 (be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
