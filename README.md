@@ -84,7 +84,7 @@ To use the pdf metadata validators (`dimension`, `aspect_ratio`, `processable_fi
 
 To use the `spoofing_protection` option with the `content_type` validator, you only need to have the UNIX `file` command on your system.
 
-If you want some inspiration about how to add `imagemagick`, `libvips` or `ffmpeg` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+If you want some inspiration about how to add `imagemagick`, `libvips`, `ffmpeg` or `poppler` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
 
 ## Validators
 
