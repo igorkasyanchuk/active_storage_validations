@@ -20,6 +20,8 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Error messages (I18n)](#error-messages-i18n)
   - [Using image metadata validators](#using-image-metadata-validators)
   - [Using video and audio metadata validators](#using-video-and-audio-metadata-validators)
+  - [Using pdf metadata validators](#using-pdf-metadata-validators)
+  - [Using content type spoofing protection validator option](#using-content-type-spoofing-protection-validator-option)
 - [Validators](#validators)
   - [Attached](#attached)
   - [Limit](#limit)
@@ -74,11 +76,15 @@ Plus, you have to be sure to have the corresponding command-line tool installed 
 
 To use the video and audio metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
 
-If you want some inspiration about how to add `imagemagick`, `libvips` or `ffmpeg` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+### Using pdf metadata validators
+
+To use the pdf metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `pages`), you will not need to add any gems. However you will need to have the `poppler` tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
 
 ### Using content type spoofing protection validator option
 
 To use the `spoofing_protection` option with the `content_type` validator, you only need to have the UNIX `file` command on your system.
+
+If you want some inspiration about how to add `imagemagick`, `libvips` or `ffmpeg` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
 
 ## Validators
 
@@ -734,14 +740,14 @@ But this major version bump also comes with some breaking changes. Below are the
 
 ## Upgrading from 2.x to 3.x
 
-Version 3 comes with the ability to support single page pdf dimension / aspect_ratio analysis, we had to make a breaking change:
+Version 3 comes with the ability to support single page pdf `dimension` / `aspect_ratio` analysis, we had to make a breaking change:
 - To analyze PDFs, you must install the `poppler` PDF processing dependency
   - It's a  Rails-supported PDF processing dependency (https://guides.rubyonrails.org/active_storage_overview.html#requirements)
   - To install it, check their documentation at this [link](https://pdf2image.readthedocs.io/en/latest/installation.html).
   - To check if it's installed, execute `pdftoppm -h`.
   - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
 
-We also added the `pages` validator to validate pdf number of pages, and the `equal_to` option to `duration`, `size`and `total_size` validators.
+We also added the `pages` validator to validate pdf number of pages, and the `equal_to` option to `duration`, `size` and `total_size` validators.
 
 Note that, if you do not perform these metadata validations on pdfs, the gem will work the same as in version 2.
 
