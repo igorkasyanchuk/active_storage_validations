@@ -20,6 +20,10 @@ class AspectRatio::Matcher < ApplicationRecord
     has_one_attached :"allowing_one_#{aspect_ratio}"
     validates :"allowing_one_#{aspect_ratio}", aspect_ratio: aspect_ratio
   end
+
+  has_one_attached :allowing_several
+  validates :allowing_several, aspect_ratio: [ :square, :portrait ]
+
   has_one_attached :allowing_one_is_x_y
   validates :allowing_one_is_x_y, aspect_ratio: :is_16_9
 

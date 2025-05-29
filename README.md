@@ -787,8 +787,8 @@ Matcher methods available:
 describe User do
   # aspect_ratio:
   # #allowing, #rejecting
-  it { is_expected.to validate_aspect_ratio_of(:avatar).allowing(:square) }
-  it { is_expected.to validate_aspect_ratio_of(:avatar).rejecting(:portrait) }
+  it { is_expected.to validate_aspect_ratio_of(:avatar).allowing(:square, :portrait) } # possible to use an Array or *splatted array
+  it { is_expected.to validate_aspect_ratio_of(:avatar).rejecting(:square, :landscape) } # possible to use an Array or *splatted array
 
   # attached
   it { is_expected.to validate_attached_of(:avatar) }
