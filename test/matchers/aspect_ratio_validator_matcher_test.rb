@@ -199,7 +199,7 @@ describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher do
     describe "several" do
       describe "when rejecting aspect ratios that are not in the allowed list" do
         let(:model_attribute) { :allowing_several }
-        subject { matcher.rejecting(:landscape, :square) }
+        subject { matcher.rejecting(:is_16_9, :landscape) }
 
         it { is_expected_to_match_for(klass) }
       end
