@@ -109,6 +109,29 @@ describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher do
         end
       end
     end
+
+    describe "several" do
+      describe "when all specified aspect ratios exactly match the allowed list" do
+        let(:model_attribute) { :allowing_several }
+        subject { matcher.allowing(:portrait, :square) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      describe "when some specified aspect ratios match but not all" do
+        let(:model_attribute) { :allowing_several }
+        subject { matcher.allowing(:landscape, :square) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe "when none of the specified aspect ratios match" do
+        let(:model_attribute) { :allowing_several }
+        subject { matcher.allowing(:landscape, :is_4_3) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
   end
 
   describe "#rejecting" do
@@ -170,6 +193,29 @@ describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher do
 
           it { is_expected_not_to_match_for(klass) }
         end
+      end
+    end
+
+    describe "several" do
+      describe "when rejecting aspect ratios that are not in the allowed list" do
+        let(:model_attribute) { :allowing_several }
+        subject { matcher.rejecting(:landscape, :square) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      describe "when rejecting some aspect ratios that overlap with the allowed list" do
+        let(:model_attribute) { :allowing_several }
+        subject { matcher.rejecting(:landscape, :square) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      describe "when rejecting aspect ratios that are in the allowed list" do
+        let(:model_attribute) { :allowing_several }
+        subject { matcher.rejecting(:square, :portrait) }
+
+        it { is_expected_not_to_match_for(klass) }
       end
     end
   end
