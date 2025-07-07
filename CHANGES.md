@@ -2,6 +2,7 @@
 
 - 3.0.1
   - Fix translation issues for German keys for pdf `pages` validator (`pages_not_greater_than_or_equal_to` / `pages_not_equal_to`)
+  - Fix translation issues for Japanese keys (#https://github.com/igorkasyanchuk/active_storage_validations/issues/392)
 
 - 3.0.0
   - Allow to perform dimension / aspect_ratio validations on single page pdf (https://github.com/igorkasyanchuk/active_storage_validations/pull/374)
