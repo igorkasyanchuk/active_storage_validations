@@ -1,6 +1,6 @@
 - Unreleased
 
-- 3.0.01
+- 3.0.1
   - Fix translation issues for German keys for pdf `pages` validator (`pages_not_greater_than_or_equal_to` / `pages_not_equal_to`)
 
 - 3.0.0
