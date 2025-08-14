@@ -473,16 +473,16 @@ end
 en:
   errors:
     messages:
-      dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixel"
-      dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixel"
-      dimension_width_not_included_in: "width is not included between %{min} and %{max} pixel"
-      dimension_height_not_included_in: "height is not included between %{min} and %{max} pixel"
-      dimension_width_not_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
-      dimension_height_not_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
-      dimension_width_not_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
-      dimension_height_not_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
-      dimension_width_not_equal_to: "width must be equal to %{length} pixel"
-      dimension_height_not_equal_to: "height must be equal to %{length} pixel"
+      dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixels"
+      dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixels"
+      dimension_width_not_included_in: "width is not included between %{min} and %{max} pixels"
+      dimension_height_not_included_in: "height is not included between %{min} and %{max} pixels"
+      dimension_width_not_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixels"
+      dimension_height_not_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixels"
+      dimension_width_not_less_than_or_equal_to: "width must be less than or equal to %{length} pixels"
+      dimension_height_not_less_than_or_equal_to: "height must be less than or equal to %{length} pixels"
+      dimension_width_not_equal_to: "width must be equal to %{length} pixels"
+      dimension_height_not_equal_to: "height must be equal to %{length} pixels"
       media_metadata_missing: "is not a valid media file"
 ```
 
