@@ -301,28 +301,28 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_documents.attach(pdf_file)
     e.dimension_exact.attach(image_150x150_file)
     # e.proc_dimension_exact.attach(image_150x150_file)
-    assert e.valid?, "Dimension exact: width and height must be equal to 150 x 150 pixel."
+    assert e.valid?, "Dimension exact: width and height must be equal to 150 x 150 pixels."
 
     e = Project.new(title: "Death Star")
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_range.attach(image_800x600_file)
     e.proc_dimension_range.attach(image_800x600_file)
-    assert e.valid?, "Dimension range: width and height must be greater than or equal to 800 x 600 pixel."
+    assert e.valid?, "Dimension range: width and height must be greater than or equal to 800 x 600 pixels."
 
     e = Project.new(title: "Death Star")
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_range.attach(image_1200x900_file)
     e.proc_dimension_range.attach(image_1200x900_file)
-    assert e.valid?, "Dimension range: width and height must be less than or equal to 1200 x 900 pixel."
+    assert e.valid?, "Dimension range: width and height must be less than or equal to 1200 x 900 pixels."
 
     e = Project.new(title: "Death Star")
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_min.attach(image_800x600_file)
     e.proc_dimension_min.attach(image_800x600_file)
-    assert e.valid?, "Dimension min: width and height must be greater than or equal to 800 x 600 pixel."
+    assert e.valid?, "Dimension min: width and height must be greater than or equal to 800 x 600 pixels."
 
     e = Project.new(title: "Death Star")
     e.documents.attach(pdf_file)
