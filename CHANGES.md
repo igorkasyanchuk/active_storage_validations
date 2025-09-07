@@ -1,4 +1,6 @@
 - Unreleased
+  - Fix issue with active_storage_validations metadata not being saved if only running a `valid?` call  (https://github.com/igorkasyanchuk/active_storage_validations/issues/361)
+  - Fix typo for English dimension translations (#https://github.com/igorkasyanchuk/active_storage_validations/issues/395)
 
 - 3.0.1
   - Fix translation issues for German keys for pdf `pages` validator (`pages_not_greater_than_or_equal_to` / `pages_not_equal_to`)
