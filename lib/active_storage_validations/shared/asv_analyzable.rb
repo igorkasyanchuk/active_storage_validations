@@ -21,6 +21,9 @@ module ActiveStorageValidations
 
       new_metadata = generate_metadata_for(attachable, metadata_keys)
       blob.merge_into_active_storage_validations_metadata(new_metadata)
+      blob.save!
+
+      blob.active_storage_validations_metadata
     end
 
     def blob_has_asv_metadata?(blob, metadata_keys)
