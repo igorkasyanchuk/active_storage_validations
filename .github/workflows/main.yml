@@ -12,7 +12,7 @@ jobs:
       - name: Setup Ruby and install gems
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3 # same as .rubocop.yml, recommended Rails & Ruby version for Gemfile
+          ruby-version: 3.4.5 # same as .rubocop.yml, recommended Rails & Ruby version for Gemfile
           bundler-cache: true
 
       - name: Run linters
