@@ -49,11 +49,28 @@ module ActiveStorageValidations
     def updating_through_parent?(record)
       record.instance_variable_defined?(:@marked_for_destruction) ||
         record.instance_variable_defined?(:@_destroy) ||
-        (record.respond_to?(:parent) && record.parent.present?)
+        find_parent_association(record)
+    end
+
+    def find_parent_association(record)
+      @parent_association ||= begin
+        # Find all belongs_to associations
+        record.class.reflect_on_all_associations(:belongs_to).find do |reflection|
+          # The association's class should match the class that's doing the nested attributes update
+          # We can find this by looking at which association is being updated through nested attributes
+          parent_class = reflection.klass
+          parent_class.nested_attributes_options.any? do |assoc_name, _|
+            # Check if this class accepts nested attributes for an association that matches our record's class
+            parent_assoc = parent_class.reflect_on_association(assoc_name)
+            parent_assoc && parent_assoc.klass == record.class
+          end
+        end
+      end
     end
 
     def set_nested_error(record, error)
-      reflection = record.class.reflect_on_association(:parent)
+      parent_association = find_parent_association(record)
+      reflection = record.class.reflect_on_association(parent_association.name)
 
       if reflection
         association = record.association(reflection.name)

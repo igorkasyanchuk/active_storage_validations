@@ -176,7 +176,11 @@ describe "Integration tests" do
         it "adds the child model's error to the parent model's errors" do
           subject
 
-          assert parent_model.errors.any? { |e| e.type == :content_type_invalid }
+          assert parent_model.errors.one? do |error|
+            error.is_a?(ActiveRecord::Associations::NestedError) &&
+              error.attribute == "child.parent.image" &&
+              error.type == :content_type_invalid
+          end
         end
       end
     end
