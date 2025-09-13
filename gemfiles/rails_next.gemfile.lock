@@ -101,7 +101,7 @@ GIT
 PATH
   remote: ..
   specs:
-    active_storage_validations (3.0.1)
+    active_storage_validations (3.0.2)
       activejob (>= 6.1.4)
       activemodel (>= 6.1.4)
       activestorage (>= 6.1.4)
