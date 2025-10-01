@@ -20,5 +20,23 @@ module WorksFineWith2PagesPdf
         assert_equal(expected_metadata, subject)
       end
     end
+
+    describe "working with a pdf with decimal dimensions" do
+      subject { analyzer.metadata }
+
+      let(:attachable) do
+        {
+          io: File.open(Rails.root.join("public", "pdf_123.4x200.7.pdf")),
+          filename: "pdf_123.4x200.7.pdf",
+          content_type: "application/pdf"
+        }
+      end
+
+      let(:expected_metadata) { { width: 123, height: 200, pages: 1 } }
+
+      it "correctly reports decimal dimensions" do
+        assert_equal(expected_metadata, subject)
+      end
+    end
   end
 end

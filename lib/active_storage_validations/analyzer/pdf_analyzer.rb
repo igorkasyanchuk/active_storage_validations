@@ -75,11 +75,11 @@ module ActiveStorageValidations
     end
 
     def width
-      @media["page_size"].scan(/\d+/)[0].to_i
+      @media["page_size"].scan(/\d+\.?\d?/)[0].to_i
     end
 
     def height
-      @media["page_size"].scan(/\d+/)[1].to_i
+      @media["page_size"].scan(/\d+\.?\d?/)[1].to_i
     end
 
     def pages
