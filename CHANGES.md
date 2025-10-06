@@ -1,5 +1,8 @@
 - Unreleased
 
+- 3.0.3
+  - Fix issue with pdf having decimal dimensions (e.g. 200.3 pt) (https://github.com/igorkasyanchuk/active_storage_validations/issues/401) @tekin
+
 - 3.0.2
   - Fix issue with active_storage_validations metadata not being saved if only running a `valid?` call  (https://github.com/igorkasyanchuk/active_storage_validations/issues/361)
   - Fix typo for English dimension translations (#https://github.com/igorkasyanchuk/active_storage_validations/issues/395)
@@ -246,3 +249,4 @@
 
 - 0.7.1
   - added dimension validator
+
