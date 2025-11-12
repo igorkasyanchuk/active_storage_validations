@@ -20,7 +20,7 @@ module ComparisonLessThanOption
           subject { model.less_than.attach(file_having_exact_less_than_option) and model }
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_include_error_message(error_name, error_options: error_options_for_file_having_exact_less_than_option) }
+          it { is_expected_to_include_error_message(error_name, with_locales: [ "en" ], error_options: error_options_for_file_having_exact_less_than_option) }
           it { is_expected_to_have_error_options(error_options_for_file_having_exact_less_than_option) }
         end
 
@@ -28,7 +28,7 @@ module ComparisonLessThanOption
           subject { model.less_than.attach(file_having_higher_than_less_than_option) and model }
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_include_error_message(error_name, error_options: error_options_for_file_having_higher_than_less_than_option) }
+          it { is_expected_to_include_error_message(error_name, with_locales: [ "en" ], error_options: error_options_for_file_having_higher_than_less_than_option) }
           it { is_expected_to_have_error_options(error_options_for_file_having_higher_than_less_than_option) }
         end
       end

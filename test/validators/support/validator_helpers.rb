@@ -28,21 +28,25 @@ module ValidatorHelpers
     )
   end
 
-  def is_expected_to_include_error_message(message_key, **kwargs)
-    subject.valid?(kwargs[:context])
+  def is_expected_to_include_error_message(message_key, with_locales: I18n.available_locales, **kwargs)
+    with_locales.each do |locale|
+      I18n.with_locale(locale) do
+        subject.valid?(kwargs[:context])
 
-    validator_error_messages =
-      subject.errors.select do |error|
-        error.options[:validator_type] == kwargs[:validator] || validator_sym
-      end.map(&:message)
+        validator_error_messages =
+          subject.errors.select do |error|
+            error.options[:validator_type] == kwargs[:validator] || validator_sym
+          end.map(&:message)
 
-    message = kwargs[:error_options][:custom_message] || I18n.t("errors.messages.#{message_key}", **kwargs[:error_options])
+        message = kwargs[:error_options][:custom_message] || I18n.t("errors.messages.#{message_key}", **kwargs[:error_options])
 
-    assert_includes(
-      validator_error_messages,
-      message,
-      "Expected error messages to include '#{message.inspect}'\nbut got #{validator_error_messages.inspect}"
-    )
+        assert_includes(
+          validator_error_messages,
+          message,
+          "Expected error messages to include '#{message.inspect}'\nbut got #{validator_error_messages.inspect}"
+        )
+      end
+    end
   end
 
   def is_expected_to_raise_error(error_class, message)
