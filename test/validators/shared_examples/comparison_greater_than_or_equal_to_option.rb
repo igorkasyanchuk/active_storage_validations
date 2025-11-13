@@ -14,7 +14,7 @@ module ComparisonGreaterThanOrEqualToOption
           subject { model.greater_than_or_equal_to.attach(file_having_lower_than_greater_than_or_equal_to_option) and model }
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_include_error_message(error_name, error_options: error_options_for_file_having_lower_than_greater_than_or_equal_to_option) }
+          it { is_expected_to_include_error_message(error_name, with_locales: [ "en" ], error_options: error_options_for_file_having_lower_than_greater_than_or_equal_to_option) }
           it { is_expected_to_have_error_options(error_options_for_file_having_lower_than_greater_than_or_equal_to_option) }
         end
 

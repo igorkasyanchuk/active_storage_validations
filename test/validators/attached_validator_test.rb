@@ -34,7 +34,7 @@ describe ActiveStorageValidations::AttachedValidator do
       subject { model }
 
       it { is_expected_not_to_be_valid }
-      it { is_expected_to_include_error_message("blank", error_options: {}) }
+      it { is_expected_to_include_error_message("blank", with_locales: [ "en" ], error_options: {}) }
     end
 
     describe "when provided with a file that is marked for destruction" do
@@ -42,7 +42,7 @@ describe ActiveStorageValidations::AttachedValidator do
       subject { model.has_to_be_attached.attach(image_1920x1080_file) and model.has_to_be_attached.mark_for_destruction and model }
 
       it { is_expected_not_to_be_valid }
-      it { is_expected_to_include_error_message("blank", error_options: {}) }
+      it { is_expected_to_include_error_message("blank", with_locales: [ "en" ], error_options: {}) }
     end
   end
 

@@ -14,7 +14,7 @@ module ComparisonBetweenOption
           subject { model.between.attach(file_having_lower_than_lower_bound_between_option) and model }
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_include_error_message(error_name, error_options: error_options_for_file_having_lower_than_lower_bound_between_option) }
+          it { is_expected_to_include_error_message(error_name, with_locales: [ "en" ], error_options: error_options_for_file_having_lower_than_lower_bound_between_option) }
           it { is_expected_to_have_error_options(error_options_for_file_having_lower_than_lower_bound_between_option) }
         end
 
@@ -40,7 +40,7 @@ module ComparisonBetweenOption
           subject { model.between.attach(file_having_higher_than_higher_bound_between_option) and model }
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_include_error_message(error_name, error_options: error_options_for_file_having_higher_than_higher_bound_between_option) }
+          it { is_expected_to_include_error_message(error_name, with_locales: [ "en" ], error_options: error_options_for_file_having_higher_than_higher_bound_between_option) }
           it { is_expected_to_have_error_options(error_options_for_file_having_higher_than_higher_bound_between_option) }
         end
       end
