@@ -200,18 +200,12 @@ GEM
     zeitwerk (2.7.3)
 
 PLATFORMS
-  aarch64-linux
   aarch64-linux-gnu
   aarch64-linux-musl
-  arm-linux
   arm-linux-gnu
   arm-linux-musl
   arm64-darwin
-  x86-linux
-  x86-linux-gnu
-  x86-linux-musl
   x86_64-darwin
-  x86_64-linux
   x86_64-linux-gnu
   x86_64-linux-musl
 
@@ -230,8 +224,8 @@ DEPENDENCIES
   pry
   ruby-vips (>= 2.1.0)
   simplecov
-  sqlite3 (>= 2.5, >= 0)
+  sqlite3 (>= 2.5)
   webmock (>= 3)
 
 BUNDLED WITH
-   2.7.1
+   2.5.6
