@@ -50,6 +50,10 @@ jobs:
         exclude:
           - ruby: '3.1'
             gemfile: rails_8_0
+          - ruby: '3.1'
+            gemfile: rails_8_1
+          - ruby: '3.1'
+            gemfile: rails_next
           - ruby: '3.2'
             gemfile: rails_8_1
           - ruby: '3.2'
