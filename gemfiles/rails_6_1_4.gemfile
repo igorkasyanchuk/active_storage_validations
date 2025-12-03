@@ -5,4 +5,5 @@ source 'https://rubygems.org'
 gemspec :path => '../'
 
 gem 'nokogiri', '~> 1.16.7'
-gem "ffi", "~> 1.16.3"
+gem 'ffi', '~> 1.16.3'
+gem 'sqlite3', '~> 1.4'
