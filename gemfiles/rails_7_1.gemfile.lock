@@ -75,7 +75,6 @@ GEM
       bigdecimal
       rexml
     crass (1.0.6)
-    date (3.5.0)
     docile (1.4.1)
     drb (2.2.3)
     erb (4.0.4)
@@ -128,8 +127,7 @@ GEM
     pry (0.15.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    psych (5.2.6)
-      date
+    psych (5.1.2)
       stringio
     public_suffix (6.0.2)
     racc (1.8.1)
@@ -228,6 +226,7 @@ DEPENDENCIES
   minitest-stub_any_instance (~> 1.0, >= 1.0.3)
   nokogiri (~> 1.16.8)
   pry
+  psych (~> 5.1.1)
   ruby-vips (>= 2.1.0)
   simplecov
   sqlite3
