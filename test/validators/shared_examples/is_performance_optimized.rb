@@ -57,14 +57,14 @@ module IsPerformanceOptimized
           begin
             # First validation should download the file
             subject.valid?
-            assert_match(/Disk Storage.*Downloaded file from key:/, log_output.string)
+            assert_match(/Downloaded file from key:/, log_output.string)
 
             log_output.truncate(0)
             log_output.rewind
 
             # Second validation should not log another download (in-memory validation)
             subject.valid?
-            refute_match(/Disk Storage.*Downloaded file from key:/, log_output.string)
+            refute_match(/Downloaded file from key:/, log_output.string)
 
             log_output.truncate(0)
             log_output.rewind
@@ -72,7 +72,7 @@ module IsPerformanceOptimized
             # When we reload the instance, still not downloading the file (in-database validation)
             subject.reload
             subject.valid?
-            refute_match(/Disk Storage.*Downloaded file from key:/, log_output.string)
+            refute_match(/Downloaded file from key:/, log_output.string)
           ensure
             Rails.logger = rails_logger_was
             ActiveRecord::Base.logger = active_record_logger_was
@@ -103,7 +103,7 @@ module IsPerformanceOptimized
           begin
             # First validation should not log another download (in-memory validation)
             subject.valid?
-            refute_match(/Disk Storage.*Downloaded file from key:/, log_output.string)
+            refute_match(/Downloaded file from key:/, log_output.string)
 
             log_output.truncate(0)
             log_output.rewind
@@ -111,7 +111,7 @@ module IsPerformanceOptimized
             # When we reload the instance, still not downloading the file (in-database validation)
             subject.reload
             subject.valid?
-            refute_match(/Disk Storage.*Downloaded file from key:/, log_output.string)
+            refute_match(/Downloaded file from key:/, log_output.string)
           ensure
             Rails.logger = rails_logger_was
             ActiveRecord::Base.logger = active_record_logger_was
