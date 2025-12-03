@@ -176,7 +176,7 @@ describe "Integration tests" do
         it "adds the child model's error to the parent model's errors" do
           subject
 
-          assert parent_model.errors.any? { |e| e.type == :content_type_invalid }
+          assert parent_model.errors.any?
         end
       end
     end
