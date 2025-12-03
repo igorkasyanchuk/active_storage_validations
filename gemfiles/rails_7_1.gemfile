@@ -5,5 +5,3 @@ source 'https://rubygems.org'
 gemspec :path => '../'
 
 gem 'nokogiri', '~> 1.16.8'
-gem 'image_processing', '~> 1.2'
-gem 'psych', '~> 5.1.1'
