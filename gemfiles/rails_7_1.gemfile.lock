@@ -226,7 +226,7 @@ DEPENDENCIES
   minitest-focus (~> 1.4)
   minitest-mock_expectations (~> 1.2, >= 1.2.0)
   minitest-stub_any_instance (~> 1.0, >= 1.0.3)
-  nokogiri (~> 1.16.7)
+  nokogiri (~> 1.16.8)
   pry
   ruby-vips (>= 2.1.0)
   simplecov
