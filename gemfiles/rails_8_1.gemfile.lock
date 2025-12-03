@@ -200,12 +200,18 @@ GEM
     zeitwerk (2.7.3)
 
 PLATFORMS
+  aarch64-linux
   aarch64-linux-gnu
   aarch64-linux-musl
+  arm-linux
   arm-linux-gnu
   arm-linux-musl
   arm64-darwin
+  x86-linux
+  x86-linux-gnu
+  x86-linux-musl
   x86_64-darwin
+  x86_64-linux
   x86_64-linux-gnu
   x86_64-linux-musl
 
