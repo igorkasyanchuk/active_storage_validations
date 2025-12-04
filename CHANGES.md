@@ -3,7 +3,7 @@
 - 3.0.3
   - Fix issue with pdf having decimal dimensions (e.g. 200.3 pt) (https://github.com/igorkasyanchuk/active_storage_validations/issues/401) @tekin
   - Fix typos in I18n variables for `sv`, `uk`, `vi` and `zh-CN` locales, improve I18n issue detection (https://github.com/igorkasyanchuk/active_storage_validations/pull/403) @miry
-  - Remove useless checks for parent relation, this bug was present from Rails `8.0.2` until `8.0.4`, because of Rails own bug (excluded) (https://github.com/igorkasyanchuk/active_storage_validations/issues/377) @mth0158
+  - Remove useless checks for parent relation, this bug was present from Rails `8.0.2` until `8.0.4` (excluded), because of Rails own bug (https://github.com/igorkasyanchuk/active_storage_validations/issues/377) @mth0158
 
 - 3.0.2
   - Fix issue with active_storage_validations metadata not being saved if only running a `valid?` call  (https://github.com/igorkasyanchuk/active_storage_validations/issues/361)
