@@ -51,7 +51,7 @@ describe "Integration tests" do
           end
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_include_error_message("file_size_not_less_than", error_options: error_options, validator: :size) }
+          it { is_expected_to_include_error_message("file_size_not_less_than", with_locales: [ "en" ], error_options: error_options, validator: :size) }
           it { is_expected_to_have_error_options(error_options, validator: :size) }
         end
       end
@@ -69,7 +69,7 @@ describe "Integration tests" do
           end
 
           it { is_expected_not_to_be_valid }
-          it { is_expected_to_include_error_message("file_size_not_less_than", error_options: error_options, validator: :size) }
+          it { is_expected_to_include_error_message("file_size_not_less_than", with_locales: [ "en" ], error_options: error_options, validator: :size) }
           it { is_expected_to_have_error_options(error_options, validator: :size) }
         end
       end
@@ -152,6 +152,31 @@ describe "Integration tests" do
           subject.videos.blobs.each do |blob|
             assert_equal expected_saved_metadata, blob.active_storage_validations_metadata
           end
+        end
+      end
+    end
+  end
+
+  describe "Nested errors" do
+    let(:parent_model) { integration_test_class::NestedErrorParent.create }
+    let(:child_model) { integration_test_class::NestedErrorChild.new }
+
+    describe "when updating the child model through attributes passed to the parent model" do
+      describe "when the child model has an attachment that will cause a validation error" do
+        subject { parent_model.update(child_attributes: { image: empty_io_file }) }
+
+        before do
+          parent_model.update!(child_attributes: { image: image_150x150_file })
+        end
+
+        it "does not allow to update the parent model" do
+          assert_equal false, subject
+        end
+
+        it "adds the child model's error to the parent model's errors" do
+          subject
+
+          assert parent_model.errors.any?
         end
       end
     end

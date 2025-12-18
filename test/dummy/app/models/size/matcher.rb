@@ -21,12 +21,14 @@ class Size::Matcher < ApplicationRecord
   has_one_attached :greater_than
   has_one_attached :greater_than_or_equal_to
   has_one_attached :between
+  has_one_attached :equal_to
   has_many_attached :many_greater_than
   validates :less_than, size: { less_than: 2.kilobytes }
   validates :less_than_or_equal_to, size: { less_than_or_equal_to: 2.kilobytes }
   validates :greater_than, size: { greater_than: 7.kilobytes }
   validates :greater_than_or_equal_to, size: { greater_than_or_equal_to: 7.kilobytes }
   validates :between, size: { between: 2.kilobytes..7.kilobytes }
+  validates :equal_to, size: { equal_to: 5.kilobytes }
   validates :many_greater_than, size: { greater_than: 7.kilobytes }
 
   has_one_attached :proc_less_than
@@ -34,12 +36,14 @@ class Size::Matcher < ApplicationRecord
   has_one_attached :proc_greater_than
   has_one_attached :proc_greater_than_or_equal_to
   has_one_attached :proc_between
+  has_one_attached :proc_equal_to
   has_many_attached :proc_many_greater_than
   validates :proc_less_than, size: { less_than: ->(record) { 2.kilobytes } }
   validates :proc_less_than_or_equal_to, size: { less_than_or_equal_to: ->(record) { 2.kilobytes } }
   validates :proc_greater_than, size: { greater_than: ->(record) { 7.kilobytes } }
   validates :proc_greater_than_or_equal_to, size: { greater_than_or_equal_to: ->(record) { 7.kilobytes } }
   validates :proc_between, size: { between: -> { 2.kilobytes..7.kilobytes } }
+  validates :proc_equal_to, size: { equal_to: ->(record) { 5.kilobytes } }
   validates :proc_many_greater_than, size: { greater_than: ->(record) { 7.kilobytes } }
 
   has_one_attached :allow_blank

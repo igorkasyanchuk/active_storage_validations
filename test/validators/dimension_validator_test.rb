@@ -523,6 +523,40 @@ describe ActiveStorageValidations::DimensionValidator do
         it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
         it { is_expected_to_have_error_options(error_options) }
       end
+
+      describe "when the passed file is a pdf" do
+        describe "valid pdf" do
+          subject { model.public_send(attribute).attach(pdf_150x150_file) and model }
+
+          let(:attribute) { :with_pdf_file }
+          let(:error_options) do
+            {
+              filename: pdf_150x150_file[:filename]
+            }
+          end
+
+          it { is_expected_to_be_valid }
+        end
+
+        describe "invalid pdf" do
+          subject { model.public_send(attribute).attach(pdf_200x300_file) and model }
+
+          let(:attribute) { :with_pdf_file }
+          let(:error_options) do
+            {
+              length: 150,
+              width: 150,
+              height: 150,
+              filename: "pdf_200x300_file.pdf"
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("dimension_width_not_equal_to", error_options: error_options) }
+          it { is_expected_to_include_error_message("dimension_height_not_equal_to", error_options: error_options) }
+          it { is_expected_to_have_error_options(error_options) }
+        end
+      end
     end
   end
 

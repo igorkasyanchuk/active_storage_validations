@@ -7,6 +7,7 @@
 [![RailsJazz](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/my_other.svg?raw=true)](https://www.railsjazz.com)
 [![https://www.patreon.com/igorkasyanchuk](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/patron.svg?raw=true)](https://www.patreon.com/igorkasyanchuk)
 
+[!["Buy Me A Coffee"](https://github.com/igorkasyanchuk/get-smart/blob/main/docs/snapshot-bmc-button-small.png?raw=true)](https://buymeacoffee.com/igorkasyanchuk)
 
 Active Storage Validations is a gem that allows you to add validations for Active Storage attributes.
 
@@ -19,6 +20,8 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Error messages (I18n)](#error-messages-i18n)
   - [Using image metadata validators](#using-image-metadata-validators)
   - [Using video and audio metadata validators](#using-video-and-audio-metadata-validators)
+  - [Using pdf metadata validators](#using-pdf-metadata-validators)
+  - [Using content type spoofing protection validator option](#using-content-type-spoofing-protection-validator-option)
 - [Validators](#validators)
   - [Attached](#attached)
   - [Limit](#limit)
@@ -29,7 +32,9 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Duration](#duration)
   - [Aspect ratio](#aspect-ratio)
   - [Processable file](#processable-file)
+  - [Pages](#pages)
 - [Upgrading from 1.x to 2.x](#upgrading-from-1x-to-2x)
+- [Upgrading from 2.x to 3.x](#upgrading-from-2x-to-3x)
 - [Internationalization (I18n)](#internationalization-i18n)
 - [Test matchers](#test-matchers)
 - [Contributing](#contributing)
@@ -71,11 +76,15 @@ Plus, you have to be sure to have the corresponding command-line tool installed 
 
 To use the video and audio metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
 
-If you want some inspiration about how to add `imagemagick`, `libvips` or `ffmpeg` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+### Using pdf metadata validators
+
+To use the pdf metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `pages`), you will not need to add any gems. However you will need to have the `poppler` tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
 
 ### Using content type spoofing protection validator option
 
 To use the `spoofing_protection` option with the `content_type` validator, you only need to have the UNIX `file` command on your system.
+
+If you want some inspiration about how to add `imagemagick`, `libvips`, `ffmpeg` or `poppler` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
 
 ## Validators
 
@@ -89,6 +98,7 @@ To use the `spoofing_protection` option with the `content_type` validator, you o
 - [Duration](#duration): validates video / audio duration
 - [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
 - [Processable file](#processable-file): validates if a file can be processed
+- [Pages](#pages): validates pdf number of pages
 <br>
 <br>
 
@@ -196,7 +206,7 @@ Validates if the attachment has an allowed content type.
 #### Options
 
 The `content_type` validator has 3 possible options:
-- `with`: defines the exact allowed content type (string, symbol or regex)
+- `with`: defines the allowed content type (string, symbol or regex)
 - `in`: defines the allowed content types (array of strings or symbols)
 - `spoofing_protection`: enables content type spoofing protection (boolean, defaults to `false`)
 
@@ -322,6 +332,7 @@ The `size` validator has 5 possible options:
 - `greater_than`: defines the strict minimum allowed file size
 - `greater_than_or_equal_to`: defines the minimum allowed file size
 - `between`: defines the allowed file size range
+- `equal_to`: defines the allowed file size
 
 #### Examples
 
@@ -335,6 +346,7 @@ class User < ApplicationRecord
   validates :avatar, size: { greater_than: 1.kilobyte } # restricts the file size to > 1KB
   validates :avatar, size: { greater_than_or_equal_to: 1.kilobyte } # restricts the file size to >= 1KB
   validates :avatar, size: { between: 1.kilobyte..2.megabytes } # restricts the file size to between 1KB and 2MB
+  validates :avatar, size: { equal_to: 1.megabyte } # restricts the file size to exactly 1MB
 end
 ```
 
@@ -354,11 +366,13 @@ en:
       file_size_not_greater_than: "file size must be greater than %{min} (current size is %{file_size})"
       file_size_not_greater_than_or_equal_to: "file size must be greater than or equal to %{min} (current size is %{file_size})"
       file_size_not_between: "file size must be between %{min} and %{max} (current size is %{file_size})"
+      file_size_not_equal_to: "file size must be equal to %{exact} (current size is %{file_size})"
 ```
 
 The `size` validator error messages expose 4 values that you can use:
 - `file_size` containing the current file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed file size (e.g. `1KB`)
+- `exact` containing the allowed file size (e.g. `1MB`)
 - `max` containing the maximum allowed file size (e.g. `2MB`)
 - `filename` containing the current file name
 
@@ -376,6 +390,7 @@ The `total_size` validator has 5 possible options:
 - `greater_than`: defines the strict minimum allowed total file size
 - `greater_than_or_equal_to`: defines the minimum allowed total file size
 - `between`: defines the allowed total file size range
+- `equal_to`: defines the allowed total file size
 
 #### Examples
 
@@ -389,6 +404,7 @@ class User < ApplicationRecord
   validates :certificates, total_size: { greater_than: 1.kilobyte } # restricts the total size to > 1KB
   validates :certificates, total_size: { greater_than_or_equal_to: 1.kilobyte } # restricts the total size to >= 1KB
   validates :certificates, total_size: { between: 1.kilobyte..10.megabytes } # restricts the total size to between 1KB and 10MB
+  validates :certificates, total_size: { equal_to: 1.megabyte } # restricts the total file size to exactly 1MB
 end
 ```
 
@@ -403,11 +419,13 @@ en:
       total_file_size_not_greater_than: "total file size must be greater than %{min} (current size is %{total_file_size})"
       total_file_size_not_greater_than_or_equal_to: "total file size must be greater than or equal to %{min} (current size is %{total_file_size})"
       total_file_size_not_between: "total file size must be between %{min} and %{max} (current size is %{total_file_size})"
+      total_file_size_not_equal_to: "total file size must be equal to %{exact} (current size is %{total_file_size})"
 ```
 
 The `total_size` validator error messages expose 4 values that you can use:
 - `total_file_size` containing the current total file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed total file size (e.g. `1KB`)
+- `exact` containing the allowed total file size (e.g. `1MB`)
 - `max` containing the maximum allowed total file size (e.g. `2MB`)
 
 ---
@@ -415,15 +433,17 @@ The `total_size` validator error messages expose 4 values that you can use:
 ### Dimension
 
 Validates the dimension of the attached image / video files.
+It can also be used for pdf files, but it will only analyze the pdf first page, and will assume a DPI of 72.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
 The `dimension` validator has several possible options:
-- `width`: defines the exact allowed width (integer)
+- `width`: defines the allowed width (integer)
   - `min`: defines the minimum allowed width (integer)
   - `max`: defines the maximum allowed width (integer)
   - `in`: defines the allowed width range (range)
-- `height`: defines the exact allowed height (integer)
+- `height`: defines the allowed height (integer)
   - `min`: defines the minimum allowed height (integer)
   - `max`: defines the maximum allowed height (integer)
   - `in`: defines the allowed height range (range)
@@ -453,16 +473,16 @@ end
 en:
   errors:
     messages:
-      dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixel"
-      dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixel"
-      dimension_width_not_included_in: "width is not included between %{min} and %{max} pixel"
-      dimension_height_not_included_in: "height is not included between %{min} and %{max} pixel"
-      dimension_width_not_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixel"
-      dimension_height_not_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixel"
-      dimension_width_not_less_than_or_equal_to: "width must be less than or equal to %{length} pixel"
-      dimension_height_not_less_than_or_equal_to: "height must be less than or equal to %{length} pixel"
-      dimension_width_not_equal_to: "width must be equal to %{length} pixel"
-      dimension_height_not_equal_to: "height must be equal to %{length} pixel"
+      dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixels"
+      dimension_max_not_included_in: "must be less than or equal to %{width} x %{height} pixels"
+      dimension_width_not_included_in: "width is not included between %{min} and %{max} pixels"
+      dimension_height_not_included_in: "height is not included between %{min} and %{max} pixels"
+      dimension_width_not_greater_than_or_equal_to: "width must be greater than or equal to %{length} pixels"
+      dimension_height_not_greater_than_or_equal_to: "height must be greater than or equal to %{length} pixels"
+      dimension_width_not_less_than_or_equal_to: "width must be less than or equal to %{length} pixels"
+      dimension_height_not_less_than_or_equal_to: "height must be less than or equal to %{length} pixels"
+      dimension_width_not_equal_to: "width must be equal to %{length} pixels"
+      dimension_height_not_equal_to: "height must be equal to %{length} pixels"
       media_metadata_missing: "is not a valid media file"
 ```
 
@@ -479,6 +499,7 @@ The `dimension` validator error messages expose 6 values that you can use:
 ### Duration
 
 Validates the duration of the attached audio / video files.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
@@ -488,19 +509,21 @@ The `duration` validator has 5 possible options:
 - `greater_than`: defines the strict minimum allowed file duration
 - `greater_than_or_equal_to`: defines the minimum allowed file duration
 - `between`: defines the allowed file duration range
+- `equal_to`: defines the allowed duration
 
 #### Examples
 
 Use it like this:
 ```ruby
 class User < ApplicationRecord
-  has_one_attached :avatar
+  has_one_attached :intro_song
 
-  validates :avatar, duration: { less_than: 2.minutes } # restricts the file duration to < 2 minutes
-  validates :avatar, duration: { less_than_or_equal_to: 2.minutes } # restricts the file duration to <= 2 minutes
-  validates :avatar, duration: { greater_than: 1.second } # restricts the file duration to > 1 second
-  validates :avatar, duration: { greater_than_or_equal_to: 1.second } # restricts the file duration to >= 1 second
-  validates :avatar, duration: { between: 1.second..2.minutes } # restricts the file duration to between 1 second and 2 minutes
+  validates :intro_song, duration: { less_than: 2.minutes } # restricts the file duration to < 2 minutes
+  validates :intro_song, duration: { less_than_or_equal_to: 2.minutes } # restricts the file duration to <= 2 minutes
+  validates :intro_song, duration: { greater_than: 1.second } # restricts the file duration to > 1 second
+  validates :intro_song, duration: { greater_than_or_equal_to: 1.second } # restricts the file duration to >= 1 second
+  validates :intro_song, duration: { between: 1.second..2.minutes } # restricts the file duration to between 1 second and 2 minutes
+  validates :intro_song, duration: { equal_to: 1.minute } # restricts the duration to exactly 1 minute
 end
 ```
 
@@ -515,11 +538,13 @@ en:
       duration_not_greater_than: "duration must be greater than %{min} (current duration is %{duration})"
       duration_not_greater_than_or_equal_to: "duration must be greater than or equal to %{min} (current duration is %{duration})"
       duration_not_between: "duration must be between %{min} and %{max} (current duration is %{duration})"
+      duration_not_equal_to: "duration must be equal to %{exact} (current duration is %{duration})"
 ```
 
 The `duration` validator error messages expose 4 values that you can use:
 - `duration` containing the current duration size (e.g. `2 minutes`)
 - `min` containing the minimum allowed duration size (e.g. `1 second`)
+- `exact` containing the allowed duration (e.g. `3 seconds`)
 - `max` containing the maximum allowed duration size (e.g. `2 minutes`)
 - `filename` containing the current file name
 
@@ -527,12 +552,14 @@ The `duration` validator error messages expose 4 values that you can use:
 
 ### Aspect ratio
 
-Validates the aspect ratio of the attached files.
+Validates the aspect ratio of the attached image / video files.
+It can also be used for pdf files, but it will only analyze the pdf first page.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
 The `aspect_ratio` validator has several options:
-- `with`: defines the exact allowed aspect ratio (e.g. `:is_16/9`)
+- `with`: defines the allowed aspect ratio (e.g. `:is_16/9`)
 - `in`: defines the allowed aspect ratios (e.g. `%i[square landscape]`)
 
 This validator can define aspect ratios in several ways:
@@ -579,7 +606,8 @@ The `aspect_ratio` validator error messages expose 4 values that you can use:
 
 ### Processable file
 
-Validates if the attached files can be processed by MiniMagick or Vips (image) or ffmpeg (video/audio).
+Validates if the attached files can be processed by MiniMagick or Vips (image), ffmpeg (video/audio) or poppler (pdf).
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
 
 #### Options
 
@@ -607,6 +635,60 @@ en:
 
 The `processable_file` validator error messages expose 1 value that you can use:
 - `filename` containing the current filename in error
+
+---
+
+### Pages
+
+Validates each attached pdf file number of pages.
+(be sure to have the right dependencies installed as mentioned in [installation](#installation))
+
+#### Options
+
+The `pages` validator has 6 possible options:
+- `less_than`: defines the strict maximum allowed number of pages
+- `less_than_or_equal_to`: defines the maximum allowed number of pages
+- `greater_than`: defines the strict minimum allowed number of pages
+- `greater_than_or_equal_to`: defines the minimum allowed number of pages
+- `between`: defines the allowed number of pages range
+- `equal_to`: defines the allowed number of pages
+
+#### Examples
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_one_attached :contract
+
+  validates :contract, pages: { less_than: 2 } # restricts the number of pages to < 2
+  validates :contract, pages: { less_than_or_equal_to: 2 } # restricts the number of pages to <= 2
+  validates :contract, pages: { greater_than: 1 } # restricts the number of pages to > 1
+  validates :contract, pages: { greater_than_or_equal_to: 1 } # restricts the number of pages to >= 1
+  validates :contract, pages: { between: 1..2 } # restricts the number of pages to between 1 and 2
+  validates :contract, pages: { equal_to: 1 } # restricts the number of pages to exactly 1
+end
+```
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      pages_not_less_than: "page count must be less than %{max} (current page count is %{pages})"
+      pages_not_less_than_or_equal_to: "page count must be less than or equal to %{max} (current page count is %{pages})"
+      pages_not_greater_than: "page count must be greater than %{min} (current page count is %{pages})"
+      pages_not_greater_than_or_equal_to: "page count must be greater than or equal to %{min} (current page count is %{pages})"
+      pages_not_between: "page count must be between %{min} and %{max} (current page count is %{pages})"
+      pages_not_equal_to: "page count must be equal to %{exact} (current page count is %{pages})"
+```
+
+The `pages` validator error messages expose 5 values that you can use:
+- `pages` containing the current file number of pages (e.g. `7`)
+- `min` containing the minimum allowed number of pages (e.g. `1`)
+- `exact` containing the allowed number of pages (e.g. `3`)
+- `max` containing the maximum allowed number of pages (e.g. `5`)
+- `filename` containing the current file name
 
 ---
 
@@ -656,6 +738,19 @@ But this major version bump also comes with some breaking changes. Below are the
   - The validator has been replaced by `processable_file` validator, be sure to replace `processable_image: true` to `processable_file: true`
   - The associated matcher has also been updated accordingly, be sure to replace `validate_processable_image_of` to `validate_processable_file_of`
 
+## Upgrading from 2.x to 3.x
+
+Version 3 comes with the ability to support single page pdf `dimension` / `aspect_ratio` analysis, we had to make a breaking change:
+- To analyze PDFs, you must install the `poppler` PDF processing dependency
+  - It's a  Rails-supported PDF processing dependency (https://guides.rubyonrails.org/active_storage_overview.html#requirements)
+  - To install it, check their documentation at this [link](https://pdf2image.readthedocs.io/en/latest/installation.html).
+  - To check if it's installed, execute `pdftoppm -h`.
+  - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+
+We also added the `pages` validator to validate pdf number of pages, and the `equal_to` option to `duration`, `size` and `total_size` validators.
+
+Note that, if you do not perform these metadata validations on pdfs, the gem will work the same as in version 2.
+
 ## Internationalization (I18n)
 
 Active Storage Validations uses I18n for error messages. The error messages are automatically loaded in your Rails app if your language translations are present in the gem.
@@ -692,8 +787,8 @@ Matcher methods available:
 describe User do
   # aspect_ratio:
   # #allowing, #rejecting
-  it { is_expected.to validate_aspect_ratio_of(:avatar).allowing(:square) }
-  it { is_expected.to validate_aspect_ratio_of(:avatar).rejecting(:portrait) }
+  it { is_expected.to validate_aspect_ratio_of(:avatar).allowing(:square, :portrait) } # possible to use an Array or *splatted array
+  it { is_expected.to validate_aspect_ratio_of(:avatar).rejecting(:square, :landscape) } # possible to use an Array or *splatted array
 
   # attached
   it { is_expected.to validate_attached_of(:avatar) }
@@ -723,28 +818,40 @@ describe User do
   it { is_expected.to validate_dimensions_of(:avatar).height_between(100..300) }
 
   # size:
-  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
   it { is_expected.to validate_size_of(:avatar).less_than(50.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).less_than_or_equal_to(50.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).greater_than(1.kilobyte) }
   it { is_expected.to validate_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
   it { is_expected.to validate_size_of(:avatar).between(100..500.kilobytes) }
+  it { is_expected.to validate_size_of(:avatar).equal_to(5.megabytes) }
 
   # total_size:
-  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
   it { is_expected.to validate_total_size_of(:avatar).less_than(50.kilobytes) }
   it { is_expected.to validate_total_size_of(:avatar).less_than_or_equal_to(50.kilobytes) }
   it { is_expected.to validate_total_size_of(:avatar).greater_than(1.kilobyte) }
   it { is_expected.to validate_total_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
   it { is_expected.to validate_total_size_of(:avatar).between(100..500.kilobytes) }
+  it { is_expected.to validate_total_size_of(:avatar).equal_to(5.megabytes) }
 
   # duration:
-  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
   it { is_expected.to validate_duration_of(:introduction).less_than(50.seconds) }
   it { is_expected.to validate_duration_of(:introduction).less_than_or_equal_to(50.seconds) }
   it { is_expected.to validate_duration_of(:introduction).greater_than(1.minute) }
   it { is_expected.to validate_duration_of(:introduction).greater_than_or_equal_to(1.minute) }
   it { is_expected.to validate_duration_of(:introduction).between(100..500.seconds) }
+  it { is_expected.to validate_duration_of(:avatar).equal_to(5.minutes) }
+
+  # pages:
+  # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
+  it { is_expected.to validate_pages_of(:contract).less_than(50) }
+  it { is_expected.to validate_pages_of(:contract).less_than_or_equal_to(50) }
+  it { is_expected.to validate_pages_of(:contract).greater_than(5) }
+  it { is_expected.to validate_pages_of(:contract).greater_than_or_equal_to(5) }
+  it { is_expected.to validate_pages_of(:contract).between(100..500) }
+  it { is_expected.to validate_pages_of(:contract).equal_to(5) }
 end
 ```
 (Note that matcher methods are chainable)
@@ -801,6 +908,8 @@ To run the gem tests, launch the following commands in the root folder of gem re
 * `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.1
 * `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test` to run for Rails 7.2
 * `BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test` to run for Rails 8.0
+* `BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle exec rake test` to run for Rails 8.1
+* `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main
 
 Snippet to run in console:
 
@@ -810,11 +919,15 @@ BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 ```
 
 Tips:
@@ -838,3 +951,5 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 [<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
 />](https://www.railsjazz.com/?utm_source=github&utm_medium=bottom&utm_campaign=active_storage_validations)
+
+[!["Buy Me A Coffee"](https://github.com/igorkasyanchuk/get-smart/blob/main/docs/snapshot-bmc-button.png?raw=true)](https://buymeacoffee.com/igorkasyanchuk)

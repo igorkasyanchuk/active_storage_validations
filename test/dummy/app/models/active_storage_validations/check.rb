@@ -30,4 +30,9 @@ class ActiveStorageValidations::Check < ApplicationRecord
     attachable.variant :medium, resize_to_fill: [ 800, 400 ], preprocessed: true
   end
   validates :working_with_fixture_and_variant, content_type: "image/png", processable_file: true, attached: true
+  
+  # This validator is related to a test that we can download files from a
+  # service
+  has_one_attached :digitalocean
+  validates :digitalocean, content_type: "image/png"
 end

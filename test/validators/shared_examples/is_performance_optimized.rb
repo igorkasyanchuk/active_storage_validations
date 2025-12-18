@@ -30,5 +30,95 @@ module IsPerformanceOptimized
         end
       end
     end
+
+    describe "persistance of the active_storage_validations metadata" do
+      describe "on an already saved attachable without active_storage_validations metadata (like an attachable saved before v2 of the gem)" do
+        before do
+          subject.is_performance_optimized.attach(attachable)
+          subject.save!
+          subject.is_performance_optimized.blob.update!(metadata: {})
+        end
+
+        it "persists the active_storage_validations metadata" do
+          assert_equal(subject.is_performance_optimized.blob.metadata, {})
+
+          log_output = StringIO.new
+
+          rails_logger_was = Rails.logger
+          active_record_logger_was = ActiveRecord::Base.logger
+          active_storage_logger_was = ActiveStorage.logger
+
+          test_logger = Logger.new(log_output, level: Logger::DEBUG)
+
+          Rails.logger = test_logger
+          ActiveRecord::Base.logger = test_logger
+          ActiveStorage.logger = test_logger
+
+          begin
+            # First validation should download the file
+            subject.valid?
+            assert_match(/Downloaded file from key:/, log_output.string)
+
+            log_output.truncate(0)
+            log_output.rewind
+
+            # Second validation should not log another download (in-memory validation)
+            subject.valid?
+            refute_match(/Downloaded file from key:/, log_output.string)
+
+            log_output.truncate(0)
+            log_output.rewind
+
+            # When we reload the instance, still not downloading the file (in-database validation)
+            subject.reload
+            subject.valid?
+            refute_match(/Downloaded file from key:/, log_output.string)
+          ensure
+            Rails.logger = rails_logger_was
+            ActiveRecord::Base.logger = active_record_logger_was
+            ActiveStorage.logger = active_storage_logger_was
+          end
+        end
+      end
+
+      describe "on a record saved after the v2 upgrade" do
+        before do
+          subject.is_performance_optimized.attach(attachable)
+          subject.save!
+        end
+
+        it "persists the active_storage_validations metadata" do
+          log_output = StringIO.new
+
+          rails_logger_was = Rails.logger
+          active_record_logger_was = ActiveRecord::Base.logger
+          active_storage_logger_was = ActiveStorage.logger
+
+          test_logger = Logger.new(log_output, level: Logger::DEBUG)
+
+          Rails.logger = test_logger
+          ActiveRecord::Base.logger = test_logger
+          ActiveStorage.logger = test_logger
+
+          begin
+            # First validation should not log another download (in-memory validation)
+            subject.valid?
+            refute_match(/Downloaded file from key:/, log_output.string)
+
+            log_output.truncate(0)
+            log_output.rewind
+
+            # When we reload the instance, still not downloading the file (in-database validation)
+            subject.reload
+            subject.valid?
+            refute_match(/Downloaded file from key:/, log_output.string)
+          ensure
+            Rails.logger = rails_logger_was
+            ActiveRecord::Base.logger = active_record_logger_was
+            ActiveStorage.logger = active_storage_logger_was
+          end
+        end
+      end
+    end
   end
 end

@@ -15,6 +15,7 @@ module WorksWithAllowBlankOption
       when :processable_file then image_150x150_file
       when :size then file_1ko
       when :total_size then [ blob_file_0_5ko, blob_file_0_5ko ]
+      when :pages then pdf_5_pages_file
       end
     end
     let(:file_not_matching_requirements) do
@@ -28,6 +29,7 @@ module WorksWithAllowBlankOption
       when :processable_file then tar_file_with_image_content_type
       when :size then file_5ko
       when :total_size then [ blob_file_5ko, blob_file_5ko ]
+      when :pages then pdf_7_pages_file
       end
     end
 

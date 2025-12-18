@@ -1,0 +1,9 @@
+source 'https://rubygems.org'
+
+%w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| gem rails_subcomponent, '~> 8.1.0' }
+
+gemspec :path => '../'
+
+# To support Ruby >= 3.4
+gem 'sqlite3', '>= 2.5' # To support Ruby 3.4, we need to use sqlite3 >= 2.5
+gem 'nokogiri', '>= 1.18' # To support Ruby 3.4, we need to use nokogiri >= 1.18

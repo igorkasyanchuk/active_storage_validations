@@ -31,7 +31,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       let(:model_attribute) { :allowing_one }
       let(:allowed_type) { "image/png" }
 
-      describe "when provided with the exact allowed type" do
+      describe "when provided with the allowed type" do
         subject { matcher.allowing(allowed_type) }
 
         it { is_expected_to_match_for(klass) }
@@ -65,7 +65,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
         end
       end
 
-      describe "when provided with the exact allowed types" do
+      describe "when provided with the allowed types" do
         subject { matcher.allowing(*allowed_types) }
 
         it { is_expected_to_match_for(klass) }
@@ -135,7 +135,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
         let(:model_attribute) { :allowing_symbol }
         let(:allowed_type) { :png }
 
-        describe "when provided with the exact allowed type" do
+        describe "when provided with the allowed type" do
           subject { matcher.allowing(allowed_type) }
 
           it { is_expected_to_match_for(klass) }
@@ -146,7 +146,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
         let(:model_attribute) { :allowing_sneaky_edge_cases }
         let(:allowed_types) { [ "image/svg+xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ] }
 
-        describe "when provided with the exact allowed types" do
+        describe "when provided with the allowed types" do
           subject { matcher.allowing(*allowed_types) }
 
           it { is_expected_to_match_for(klass) }
@@ -160,7 +160,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
     let(:allowed_type) { "image/png" }
 
     describe "one" do
-      describe "when provided with the exact allowed type" do
+      describe "when provided with the allowed type" do
         subject { matcher.rejecting(allowed_type) }
 
         it { is_expected_not_to_match_for(klass) }
@@ -236,7 +236,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       let(:model_attribute) { :allowing_one_with_message }
       let(:allowed_type) { "application/pdf" }
 
-      describe "when provided with the exact allowed type" do
+      describe "when provided with the allowed type" do
         describe "and when provided with the message specified in the model validations" do
           subject do
             matcher.allowing(allowed_type)
@@ -269,7 +269,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       let(:allowed_type) { "image/png" }
       let(:not_allowed_type) { "video/x-matroska" }
 
-      describe "when provided with the exact allowed type" do
+      describe "when provided with the allowed type" do
         describe "and when provided with a not allowed type specified in the model validations" do
           subject do
             matcher.allowing(allowed_type)
@@ -286,7 +286,7 @@ describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
       let(:allowed_type) { "application/pdf" }
       let(:not_allowed_type) { "video/x-matroska" }
 
-      describe "when provided with the exact allowed type" do
+      describe "when provided with the allowed type" do
         describe "and when provided with a not allowed type" do
           describe "and when provided with the message specified in the model validations" do
             subject do

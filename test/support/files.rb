@@ -92,6 +92,55 @@ def image_1920x1080_file
 end
 alias :is_16_9_image_file :image_1920x1080_file
 
+def pdf_150x150_file
+  {
+    io: File.open(Rails.root.join("public", "pdf_150x150.pdf")),
+    filename: "pdf_150x150_file.pdf",
+    content_type: "application/pdf"
+  }
+end
+alias :pdf_1_page_file :pdf_150x150_file
+
+def pdf_200x300_file
+  {
+    io: File.open(Rails.root.join("public", "pdf_200x300.pdf")),
+    filename: "pdf_200x300_file.pdf",
+    content_type: "application/pdf"
+  }
+end
+
+def pdf_2_pages_file
+  {
+    io: File.open(Rails.root.join("public", "pdf_2_pages.pdf")),
+    filename: "pdf_2_pages.pdf",
+    content_type: "application/pdf"
+  }
+end
+
+def pdf_5_pages_file
+  {
+    io: File.open(Rails.root.join("public", "pdf_5_pages.pdf")),
+    filename: "pdf_5_pages.pdf",
+    content_type: "application/pdf"
+  }
+end
+
+def pdf_7_pages_file
+  {
+    io: File.open(Rails.root.join("public", "pdf_7_pages.pdf")),
+    filename: "pdf_7_pages.pdf",
+    content_type: "application/pdf"
+  }
+end
+
+def pdf_10_pages_file
+  {
+    io: File.open(Rails.root.join("public", "pdf_10_pages.pdf")),
+    filename: "pdf_10_pages.pdf",
+    content_type: "application/pdf"
+  }
+end
+
 def tar_file_with_image_content_type
   {
     io: File.open(Rails.root.join("public", "404.html.tar")),

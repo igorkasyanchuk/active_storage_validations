@@ -1,5 +1,12 @@
 name: CI
-on: [push]
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   linters:
@@ -12,7 +19,7 @@ jobs:
       - name: Setup Ruby and install gems
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1 # same as .rubocop.yml
+          ruby-version: 3.4.5 # same as .rubocop.yml, recommended Rails & Ruby version for Gemfile
           bundler-cache: true
 
       - name: Run linters
@@ -29,19 +36,36 @@ jobs:
           - '3.1'
           - '3.2'
           - '3.3'
+          - '3.4'
         gemfile:
           - rails_7_0
           - rails_7_1
           - rails_7_2
           - rails_8_0
+          - rails_8_1
+          - rails_next
         image_processor:
           - vips
           - mini_magick
         exclude:
           - ruby: '3.1'
             gemfile: rails_8_0
+          - ruby: '3.1'
+            gemfile: rails_8_1
+          - ruby: '3.1'
+            gemfile: rails_next
+          - ruby: '3.2'
+            gemfile: rails_8_1
+          - ruby: '3.2'
+            gemfile: rails_next
           - ruby: '3.3'
             gemfile: rails_7_0
+          - ruby: '3.4'
+            gemfile: rails_7_0
+          - ruby: '3.4'
+            gemfile: rails_7_1
+          - ruby: '3.4'
+            gemfile: rails_7_2
         include:
           - ruby: '3.0'
             gemfile: rails_6_1_4
@@ -59,10 +83,19 @@ jobs:
         run: magick -version
 
       - name: Install libvips
-        run: sudo apt-get update && sudo apt-get -y install libvips
+        run: sudo apt-get update && sudo apt-get -y install libvips libvips-tools
+
+      - name: Verify libvips
+        run: vips -v
 
       - name: Install FFmpeg
         run: sudo apt-get update && sudo apt-get -y install ffmpeg
+
+      - name: Install poppler
+        run: sudo apt-get update && sudo apt-get -y install poppler-utils
+
+      - name: Verify poppler
+        run: pdftoppm -h
 
       - name: Check out code
         uses: actions/checkout@v4

@@ -15,16 +15,19 @@ gemspec
 
 # This Rails version will be the one used when running `bundle exec rake test` locally
 # Uncomment the line then run `bundle install`
-# gem "rails", "7.1.2"
-# gem "sqlite3", "~> 1.7"
-# gem "nokogiri", "~> 1.16", ">= 1.16.7"
+gem "rails", "8.0.4"
+# gem "sqlite3", ">= 2.5"
+# gem "nokogiri", ">= 1.18"
 
 group :development, :test do
   # To use debugger:
   # gem "debug", "~> 1.10", ">= 1.10.0"
 
+  # To test S3 services
+  # gem "aws-sdk-s3", require: false
+
   # Linters
-  gem "rubocop", "~> 1.71", ">= 1.71.1", require: false
-  gem "rubocop-performance", "~> 1.23", ">= 1.23.1", require: false
-  gem "rubocop-rails-omakase", "~> 1.0", ">= 1.0.0", require: false
+  gem "rubocop", "~> 1.80", ">= 1.80.2", require: false
+  gem "rubocop-performance", "~> 1.26", ">= 1.26.0", require: false
+  gem "rubocop-rails-omakase", "~> 1.1", ">= 1.1.0", require: false
 end

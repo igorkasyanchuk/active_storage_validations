@@ -10,6 +10,7 @@ module ActiveStorageValidations
       total_file_size_not_greater_than
       total_file_size_not_greater_than_or_equal_to
       total_file_size_not_between
+      total_file_size_not_equal_to
     ].freeze
 
     delegate :number_to_human_size, to: ActiveSupport::NumberHelper

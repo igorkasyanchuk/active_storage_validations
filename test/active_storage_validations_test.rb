@@ -301,42 +301,42 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     e.proc_documents.attach(pdf_file)
     e.dimension_exact.attach(image_150x150_file)
     # e.proc_dimension_exact.attach(image_150x150_file)
-    assert e.valid?, "Dimension exact: width and height must be equal to 150 x 150 pixel."
+    assert e.valid?, "Dimension exact: width and height must be equal to 150 x 150 pixels."
 
     e = Project.new(title: "Death Star")
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_range.attach(image_800x600_file)
     e.proc_dimension_range.attach(image_800x600_file)
-    assert e.valid?, "Dimension range: width and height must be greater than or equal to 800 x 600 pixel."
+    assert e.valid?, "Dimension range: width and height must be greater than or equal to 800 x 600 pixels."
 
     e = Project.new(title: "Death Star")
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_range.attach(image_1200x900_file)
     e.proc_dimension_range.attach(image_1200x900_file)
-    assert e.valid?, "Dimension range: width and height must be less than or equal to 1200 x 900 pixel."
+    assert e.valid?, "Dimension range: width and height must be less than or equal to 1200 x 900 pixels."
 
     e = Project.new(title: "Death Star")
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_min.attach(image_800x600_file)
     e.proc_dimension_min.attach(image_800x600_file)
-    assert e.valid?, "Dimension min: width and height must be greater than or equal to 800 x 600 pixel."
+    assert e.valid?, "Dimension min: width and height must be greater than or equal to 800 x 600 pixels."
 
     e = Project.new(title: "Death Star")
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_max.attach(image_1200x900_file)
     e.proc_dimension_max.attach(image_1200x900_file)
-    assert e.valid?, "Dimension max: width and height must be greater than or equal to 1200 x 900 pixel."
+    assert e.valid?, "Dimension max: width and height must be greater than or equal to 1200 x 900 pixels."
 
     e = Project.new(title: "Death Star")
     e.documents.attach(pdf_file)
     e.proc_documents.attach(pdf_file)
     e.dimension_images.attach([ image_800x600_file, image_1200x900_file ])
     e.proc_dimension_images.attach([ image_800x600_file, image_1200x900_file ])
-    assert e.valid?, "Dimension many: width and height must be between or equal to 800 x 600 and 1200 x 900 pixel."
+    assert e.valid?, "Dimension many: width and height must be between or equal to 800 x 600 and 1200 x 900 pixels."
 
     e = Project.new(title: "Death Star")
     e.documents.attach(pdf_file)
@@ -374,27 +374,27 @@ class ActiveStorageValidations::Test < ActiveSupport::TestCase
     project = Project.new(title: "Death Star")
     project.dimension_range.attach(image_700x500_file)
     assert_not project.valid?
-    assert_includes project.errors.full_messages, "Dimension range width is not included between 800 and 1200 pixel"
-    assert_includes project.errors.full_messages, "Dimension range height is not included between 600 and 900 pixel"
+    assert_includes project.errors.full_messages, "Dimension range width is not included between 800 and 1200 pixels"
+    assert_includes project.errors.full_messages, "Dimension range height is not included between 600 and 900 pixels"
 
     project = Project.new(title: "Death Star")
     project.dimension_images.attach([ image_700x500_file ])
     assert_not project.valid?
-    assert_includes project.errors.full_messages, "Dimension images width must be greater than or equal to 800 pixel"
-    assert_includes project.errors.full_messages, "Dimension images height must be greater than or equal to 600 pixel"
+    assert_includes project.errors.full_messages, "Dimension images width must be greater than or equal to 800 pixels"
+    assert_includes project.errors.full_messages, "Dimension images height must be greater than or equal to 600 pixels"
 
     # image dimensions are greater than the specified range
     project = Project.new(title: "Death Star")
     project.dimension_range.attach(image_1300x1000_file)
     assert_not project.valid?
-    assert_includes project.errors.full_messages, "Dimension range width is not included between 800 and 1200 pixel"
-    assert_includes project.errors.full_messages, "Dimension range height is not included between 600 and 900 pixel"
+    assert_includes project.errors.full_messages, "Dimension range width is not included between 800 and 1200 pixels"
+    assert_includes project.errors.full_messages, "Dimension range height is not included between 600 and 900 pixels"
 
     project = Project.new(title: "Death Star")
     project.dimension_images.attach([ image_1300x1000_file ])
     assert_not project.valid?
-    assert_includes project.errors.full_messages, "Dimension images width must be less than or equal to 1200 pixel"
-    assert_includes project.errors.full_messages, "Dimension images height must be less than or equal to 900 pixel"
+    assert_includes project.errors.full_messages, "Dimension images width must be less than or equal to 1200 pixels"
+    assert_includes project.errors.full_messages, "Dimension images height must be less than or equal to 900 pixels"
   rescue Exception => ex
     puts ex.message
     puts ex.backtrace.join("\n")

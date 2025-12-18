@@ -21,6 +21,9 @@ module ActiveStorageValidations
 
       new_metadata = generate_metadata_for(attachable, metadata_keys)
       blob.merge_into_active_storage_validations_metadata(new_metadata)
+      blob.save!
+
+      blob.active_storage_validations_metadata
     end
 
     def blob_has_asv_metadata?(blob, metadata_keys)
@@ -38,12 +41,18 @@ module ActiveStorageValidations
     end
 
     def metadata_analyzer_for(attachable)
+      return pdf_analyzer_for(attachable) if attachable_content_type(attachable) == "application/pdf"
+
       case attachable_media_type(attachable)
       when "image" then image_analyzer_for(attachable)
       when "video" then video_analyzer_for(attachable)
       when "audio" then audio_analyzer_for(attachable)
       else fallback_analyzer_for(attachable)
       end
+    end
+
+    def pdf_analyzer_for(attachable)
+      ActiveStorageValidations::Analyzer::PdfAnalyzer.new(attachable)
     end
 
     def image_analyzer_for(attachable)

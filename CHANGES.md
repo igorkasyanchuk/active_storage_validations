@@ -1,3 +1,36 @@
+- Unreleased
+
+- 3.0.3
+  - Fix issue with pdf having decimal dimensions (e.g. 200.3 pt) (https://github.com/igorkasyanchuk/active_storage_validations/issues/401) @tekin
+  - Fix typos in I18n variables for `sv`, `uk`, `vi` and `zh-CN` locales, improve I18n issue detection (https://github.com/igorkasyanchuk/active_storage_validations/pull/403) @miry
+  - Remove useless checks for parent relation, this bug was present from Rails `8.0.2` until `8.0.4` (excluded), because of Rails own bug (https://github.com/igorkasyanchuk/active_storage_validations/issues/377) @mth0158
+
+- 3.0.2
+  - Fix issue with active_storage_validations metadata not being saved if only running a `valid?` call  (https://github.com/igorkasyanchuk/active_storage_validations/issues/361)
+  - Fix typo for English dimension translations (#https://github.com/igorkasyanchuk/active_storage_validations/issues/395)
+
+- 3.0.1
+  - Fix translation issues for German keys for pdf `pages` validator (`pages_not_greater_than_or_equal_to` / `pages_not_equal_to`)
+  - Fix translation issues for Japanese keys (#https://github.com/igorkasyanchuk/active_storage_validations/issues/392)
+
+- 3.0.0
+  - Allow to perform dimension / aspect_ratio validations on single page pdf (https://github.com/igorkasyanchuk/active_storage_validations/pull/374)
+  - Added `pages` validator to validate pdf number of pages (https://github.com/igorkasyanchuk/active_storage_validations/pull/374)
+  - Added `equal_to` option to `duration`, `size`and `total_size` validators (https://github.com/igorkasyanchuk/active_storage_validations/pull/386)
+
+  Version 3 comes with the ability to support single page pdf dimension / aspect_ratio analysis, we had to make a breaking change:
+  - To analyze PDFs, you must install the `poppler` PDF processing dependency
+    - It's a  Rails-supported PDF processing dependency (https://guides.rubyonrails.org/active_storage_overview.html#requirements)
+    - To install it, check their documentation at this [link](https://pdf2image.readthedocs.io/en/latest/installation.html).
+    - To check if it's installed, execute `pdftoppm -h`.
+    - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+
+  Note that, if you do not perform dimension / aspect_ratio validations on pdf, the gem will work the same as in version 2 without any breaking change.
+
+- 2.0.4
+  - Fix issue when updating a child record through a parent (like: parent_model.update(child_attributes: { image: file })) for Rails >= 8.0.2 (https://github.com/igorkasyanchuk/active_storage_validations/pull/378)
+  - Fix issue causing a stack error too deep edge case (not reproductible) because of the `after: :load_config_initializers` option (https://github.com/igorkasyanchuk/active_storage_validations/pull/382)
+
 - 2.0.3
   - Allow to pass an Array, a splatted Array, or a single string for allowing / rejecting content_type matcher methods (https://github.com/igorkasyanchuk/active_storage_validations/pull/372)
   - Fix issue when an attachment was missing on a blob (https://github.com/igorkasyanchuk/active_storage_validations/pull/373)
@@ -218,3 +251,4 @@
 
 - 0.7.1
   - added dimension validator
+

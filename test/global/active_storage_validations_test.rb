@@ -30,6 +30,18 @@ describe ActiveStorageValidations do
       assert_equal(Marcel::MimeType.for(declared_type: "application/asv_test"), "application/asv_test")
     end
   end
+
+  describe "services" do
+    # Uncomment this after having uncommented the S3 service in test_helper.rb
+    #
+    # describe "digitalocean" do
+    #   subject { instance }
+
+    #   it "works fine with the digitalocean service" do
+    #     subject.digitalocean.attach(png_file)
+    #   end
+    # end
+  end
 end
 
 if Rails.gem_version >= Gem::Version.new("7.0.0.rc1")
