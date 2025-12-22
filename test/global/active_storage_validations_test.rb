@@ -43,3 +43,17 @@ describe ActiveStorageValidations do
     # end
   end
 end
+
+if Rails.gem_version >= Gem::Version.new("7.0.0.rc1")
+  # This test is to ensure that the gem is properly working with ActiveStorage
+  # fixtures. These feature is available since Rails 7.0.
+  class ActiveStorageValidations::FixtureTest < ActiveSupport::TestCase
+    setup do
+      @check = active_storage_validations_checks(:one)
+    end
+
+    test "working with active_storage fixtures" do
+      assert(@check.valid?)
+    end
+  end
+end

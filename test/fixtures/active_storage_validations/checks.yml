@@ -1,0 +1,4 @@
+one:
+  name: "the one"
+  created_at: <%= 1.day.ago %>
+  updated_at: <%= 1.day.ago %>
