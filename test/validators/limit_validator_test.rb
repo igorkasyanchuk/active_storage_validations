@@ -2,6 +2,7 @@
 
 require "test_helper"
 require "validators/shared_examples/checks_validator_validity"
+require "validators/shared_examples/asv_errorable"
 require "validators/shared_examples/works_with_all_rails_common_validation_options"
 
 describe ActiveStorageValidations::LimitValidator do
@@ -9,6 +10,10 @@ describe ActiveStorageValidations::LimitValidator do
 
   let(:validator_test_class) { Limit::Validator }
   let(:params) { {} }
+
+  describe "#initialize_error_options" do
+    include ASVErrorable
+  end
 
   describe "#check_validity!" do
     include ChecksValidatorValidity
