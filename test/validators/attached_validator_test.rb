@@ -3,7 +3,6 @@
 require "test_helper"
 require "validators/shared_examples/does_not_work_with_allow_blank_option"
 require "validators/shared_examples/does_not_work_with_allow_nil_option"
-require "validators/shared_examples/asv_errorable"
 require "validators/shared_examples/works_with_if_option"
 require "validators/shared_examples/works_with_message_option"
 require "validators/shared_examples/works_with_on_option"
@@ -15,10 +14,6 @@ describe ActiveStorageValidations::AttachedValidator do
 
   let(:validator_test_class) { Attached::Validator }
   let(:params) { {} }
-
-  describe "#initialize_error_options" do
-    include ASVErrorable
-  end
 
   describe "#check_validity!" do
     # Checked by Rails options tests
