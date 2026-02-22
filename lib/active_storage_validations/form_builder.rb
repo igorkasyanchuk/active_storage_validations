@@ -29,7 +29,7 @@ module ActiveStorageValidations
           when Symbol
             Marcel::MimeType.for(declared_type: type.to_s, extension: type.to_s)
           when Regexp
-            match = type.source.match(%r{\A\\A([a-z]+)\\/\.\*\\z\z})
+            match = type.source.match(%r{\A\\A([a-z]+)/\.\*\\z\z})
             "#{match[1]}/*" if match
           end
         end

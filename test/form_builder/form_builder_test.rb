@@ -44,8 +44,13 @@ describe ActiveStorageValidations::FormBuilder do
       refute_includes html, "accept="
     end
 
-    it "skips Regexp options gracefully" do
+    it "auto-sets accept from Regexp content type" do
       html = builder.file_field(:with_regex)
+      assert_includes html, 'accept="image/*"'
+    end
+
+    it "skips non-matching Regexp options gracefully" do
+      html = builder.file_field(:with_non_matching_regex)
       refute_includes html, "accept="
     end
   end
