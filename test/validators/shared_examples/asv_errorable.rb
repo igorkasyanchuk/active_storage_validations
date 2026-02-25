@@ -2,56 +2,26 @@ module ASVErrorable
   extend ActiveSupport::Concern
 
   included do
-    let(:validator_klass) { "ActiveStorageValidations::#{validator_test_class.name.sub(/::/, '')}".constantize }
-    let(:validator) { validator_klass.allocate }
-    let(:user) { User.new(name: "ASV Errorable") }
-    let(:file) { nil }
-    let(:error_options) { validator.send(:initialize_error_options, {}, file) }
+    subject { validator_test_class::AsvErrorable.new(params) }
 
-    describe "when file is nil" do
-      it "does not include filename" do
-        assert_nil error_options[:filename]
+    let(:file_not_matching_requirements) do
+      case validator_sym
+      when :aspect_ratio then image_700x500_file
+      when :content_type then html_file
+      when :dimension then image_700x500_file
+      when :duration then audio_5s
+      when :processable_file then tar_file_with_image_content_type
+      when :size then file_5ko
+      when :pages then pdf_7_pages_file
       end
     end
+    let(:error_options) { { filename: file_not_matching_requirements[:filename] } }
 
-    describe "when file is an ActiveStorage::Attached object" do
-      let(:file) { user.avatar.attach(file_1ko) and user.avatar }
+    describe "when passed a file not matching validation requirements" do
+      before { subject.asv_errorable.attach(file_not_matching_requirements) }
 
-      it "includes filename" do
-        assert_equal "file_1ko.png", error_options[:filename]
-      end
-    end
-
-    describe "when file is an ActiveStorage::Attachment object" do
-      let(:file) { user.avatar.attach(file_1ko) and user.avatar.attachment }
-
-      it "includes filename" do
-        assert_equal "file_1ko.png", error_options[:filename]
-      end
-    end
-
-    describe "when file is an ActiveStorage::Blob object" do
-      let(:file) { user.avatar.attach(file_1ko) and user.avatar.blob }
-
-      it "includes filename" do
-        assert_equal "file_1ko.png", error_options[:filename]
-      end
-    end
-
-    describe "when file is a signed blob id String" do
-      let(:file) { blob_file_1ko.signed_id }
-
-      it "includes filename" do
-        assert_equal "file_1ko", error_options[:filename]
-      end
-    end
-
-    describe "when file is a Hash object" do
-      let(:file) { file_1ko }
-
-      it "includes filename" do
-        assert_equal "file_1ko.png", error_options[:filename]
-      end
+      it { is_expected_not_to_be_valid(context: :create) }
+      it { is_expected_to_have_error_options(error_options, context: :create) }
     end
   end
 end
