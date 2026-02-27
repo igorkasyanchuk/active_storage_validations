@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "validators/shared_examples/asv_errorable"
 require "validators/shared_examples/is_performance_optimized"
 require "validators/shared_examples/works_fine_with_attachables"
 require "validators/shared_examples/works_with_all_rails_common_validation_options"
@@ -10,6 +11,10 @@ describe ActiveStorageValidations::ProcessableFileValidator do
 
   let(:validator_test_class) { ProcessableFile::Validator }
   let(:params) { {} }
+
+  describe "#initialize_error_options" do
+    include ASVErrorable
+  end
 
   describe "Validator checks" do
     include WorksFineWithAttachables
