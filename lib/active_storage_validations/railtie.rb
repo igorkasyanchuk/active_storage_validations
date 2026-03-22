@@ -11,6 +11,12 @@ module ActiveStorageValidations
       end
     end
 
+    initializer "active_storage_validations.form_builder" do
+      ActiveSupport.on_load(:action_view) do
+        ActionView::Helpers::FormBuilder.prepend(ActiveStorageValidations::FormBuilder)
+      end
+    end
+
     initializer "active_storage_validations.extend_active_storage_blob" do
       ActiveSupport.on_load(:active_storage_blob) do
         include ActiveStorageValidations::ASVBlobMetadatable
