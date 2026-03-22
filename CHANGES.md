@@ -1,5 +1,8 @@
 - Unreleased
 
+- 4.0.0
+  - Drop support for Rails 6.1
+
 - 3.0.4
   - Add `filename` error options for direct uploads (https://github.com/igorkasyanchuk/active_storage_validations/pull/414).
 
