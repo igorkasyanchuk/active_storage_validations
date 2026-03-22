@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+%w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| gem rails_subcomponent, '~> 7.0.1' }
+
+gemspec :path => '../'
+
+gem 'nokogiri', '~> 1.16.7'
+gem 'sqlite3', '~> 1.4'

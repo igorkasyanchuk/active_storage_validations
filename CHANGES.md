@@ -1,7 +1,8 @@
 # Unreleased
 
 - 4.0.0
-  - Drop support for Rails 6.1
+  - Drop support for Rails 6.1.4, 7.0.0 (we keep support for Rails >= 7.0.1)
+  - Drop support for Ruby 3.1, 3.2, since the recommended version for Rails >= 7.0.1 is >= 3.3
 
 # Released
 - 3.0.4
