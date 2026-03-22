@@ -2,10 +2,10 @@ PATH
   remote: ..
   specs:
     active_storage_validations (3.0.2)
-      activejob (>= 6.1.4)
-      activemodel (>= 6.1.4)
-      activestorage (>= 6.1.4)
-      activesupport (>= 6.1.4)
+      activejob (>= 7.0)
+      activemodel (>= 7.0)
+      activestorage (>= 7.0)
+      activesupport (>= 7.0)
       marcel (>= 1.0.3)
 
 GEM
@@ -109,22 +109,14 @@ GEM
     method_source (1.1.0)
     mini_magick (5.3.1)
       logger
+    mini_portile2 (2.8.9)
     minitest (5.26.2)
     minitest-focus (1.4.0)
       minitest (>= 4, < 6)
     minitest-mock_expectations (1.2.0)
     minitest-stub_any_instance (1.0.3)
-    nokogiri (1.16.8-aarch64-linux)
-      racc (~> 1.4)
-    nokogiri (1.16.8-arm-linux)
-      racc (~> 1.4)
-    nokogiri (1.16.8-arm64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.16.8-x86-linux)
-      racc (~> 1.4)
-    nokogiri (1.16.8-x86_64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.16.8-x86_64-linux)
+    nokogiri (1.16.8)
+      mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     pp (0.6.3)
       prettyprint

@@ -103,10 +103,10 @@ PATH
   remote: ..
   specs:
     active_storage_validations (3.0.2)
-      activejob (>= 6.1.4)
-      activemodel (>= 6.1.4)
-      activestorage (>= 6.1.4)
-      activesupport (>= 6.1.4)
+      activejob (>= 7.0)
+      activemodel (>= 7.0)
+      activestorage (>= 7.0)
+      activesupport (>= 7.0)
       marcel (>= 1.0.3)
 
 GEM
@@ -278,9 +278,6 @@ PLATFORMS
   arm-linux-gnu
   arm-linux-musl
   arm64-darwin
-  x86-linux
-  x86-linux-gnu
-  x86-linux-musl
   x86_64-darwin
   x86_64-linux
   x86_64-linux-gnu

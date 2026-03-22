@@ -44,7 +44,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
 
 ### Installation
 
-Active Storage Validations work with Rails 6.1.4 onwards. Add this line to your application's Gemfile:
+Active Storage Validations work with Rails 7.0 onwards. Add this line to your application's Gemfile:
 
 ```ruby
 gem 'active_storage_validations'
@@ -903,7 +903,6 @@ Before submitting your pull request, run the tests to make sure everything works
 
 To run the gem tests, launch the following commands in the root folder of gem repository:
 
-* `BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test` to run for Rails 6.1.4
 * `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
 * `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.1
 * `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test` to run for Rails 7.2
@@ -914,14 +913,12 @@ To run the gem tests, launch the following commands in the root folder of gem re
 Snippet to run in console:
 
 ```bash
-BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test
