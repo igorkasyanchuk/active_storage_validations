@@ -14,7 +14,8 @@ module ValidatorHelpers
 
     validator_error_options =
       subject.errors.find do |error|
-        error.options[:validator_type] == kwargs[:validator] || validator_sym
+        expected_validator = kwargs[:validator] || validator_sym
+        error.options[:validator_type] == expected_validator
       end&.options
 
     raise Minitest::Assertion, "Expected validator error options to be present but got nil" if validator_error_options.nil?
@@ -35,7 +36,8 @@ module ValidatorHelpers
 
         validator_error_messages =
           subject.errors.select do |error|
-            error.options[:validator_type] == kwargs[:validator] || validator_sym
+            expected_validator = kwargs[:validator] || validator_sym
+            error.options[:validator_type] == expected_validator
           end.map(&:message)
 
         message = kwargs[:error_options][:custom_message] || I18n.t("errors.messages.#{message_key}", **kwargs[:error_options])
