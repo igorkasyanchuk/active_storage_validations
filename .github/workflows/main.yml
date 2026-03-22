@@ -35,6 +35,7 @@ jobs:
         ruby:
           - '3.3'
           - '3.4'
+          - '4.0'
         gemfile:
           - rails_7_0_1
           - rails_7_1
@@ -45,6 +46,9 @@ jobs:
         image_processor:
           - vips
           - mini_magick
+        exclude:
+          - ruby: '4.0'
+            gemfile: rails_7_0_1
     steps:
       - name: Install imagemagick
         uses: mfinelli/setup-imagemagick@v6
