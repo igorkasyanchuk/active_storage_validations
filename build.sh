@@ -1,4 +1,4 @@
-BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_7_0_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle

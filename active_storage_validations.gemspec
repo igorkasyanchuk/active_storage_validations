@@ -23,10 +23,10 @@ Gem::Specification.new do |s|
   s.metadata['source_code_uri'] = 'https://github.com/igorkasyanchuk/active_storage_validations'
   s.metadata['bug_tracker_uri'] = 'https://github.com/igorkasyanchuk/active_storage_validations/issues'
 
-  s.required_ruby_version = '>= 2.7.0' # We support Rails >= 7.0
+  s.required_ruby_version = '>= 2.7.0' # We support Rails >= 7.0.1
 
-  %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 7.0' }
-  s.add_dependency 'marcel', ">= 1.0.3" # necessary for mime type spoofing features, required for Rails >= 7.0 anyway
+  %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 7.0.1' }
+  s.add_dependency 'marcel', ">= 1.0.3" # necessary for mime type spoofing features, required for Rails >= 7.0.1 anyway
 
   s.add_development_dependency 'combustion', "~> 1.3"
   s.add_development_dependency 'mini_magick', ">= 4.9.5"
