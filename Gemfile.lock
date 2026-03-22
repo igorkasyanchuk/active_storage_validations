@@ -2,10 +2,10 @@ PATH
   remote: .
   specs:
     active_storage_validations (3.0.4)
-      activejob (>= 6.1.4)
-      activemodel (>= 6.1.4)
-      activestorage (>= 6.1.4)
-      activesupport (>= 6.1.4)
+      activejob (>= 7.0)
+      activemodel (>= 7.0)
+      activestorage (>= 7.0)
+      activesupport (>= 7.0)
       marcel (>= 1.0.3)
 
 GEM
