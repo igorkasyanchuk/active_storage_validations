@@ -23,9 +23,7 @@ end
 
 # Load other test helpers
 require "rails/test_help"
-require "minitest/autorun"
 require "minitest/focus"
-require "minitest/mock"
 require "minitest/mock_expectations"
 require "minitest/spec"
 require "minitest/stub_any_instance"
