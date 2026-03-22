@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.email       = [ 'igorkasyanchuk@gmail.com' ]
   s.homepage    = 'https://github.com/igorkasyanchuk/active_storage_validations'
   s.summary     = 'Validations for Active Storage'
-  s.description = 'Validations for Active Storage (presence)'
+  s.description = 'Validations for Active Storage (presence, size, content type, ...)'
   s.license     = 'MIT'
 
   s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md']
@@ -23,10 +23,10 @@ Gem::Specification.new do |s|
   s.metadata['source_code_uri'] = 'https://github.com/igorkasyanchuk/active_storage_validations'
   s.metadata['bug_tracker_uri'] = 'https://github.com/igorkasyanchuk/active_storage_validations/issues'
 
-  s.required_ruby_version = '>= 2.5.0' # We support Rails >= 6.1.4
+  s.required_ruby_version = '>= 2.7.0' # We support Rails >= 7.0
 
-  %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 6.1.4' }
-  s.add_dependency 'marcel', ">= 1.0.3" # necessary for mime type spoofing features, required for Rails >= 6.1.4 anyway
+  %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 7.0' }
+  s.add_dependency 'marcel', ">= 1.0.3" # necessary for mime type spoofing features, required for Rails >= 7.0 anyway
 
   s.add_development_dependency 'combustion', "~> 1.3"
   s.add_development_dependency 'mini_magick', ">= 4.9.5"
