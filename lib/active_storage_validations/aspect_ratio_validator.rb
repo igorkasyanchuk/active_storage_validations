@@ -5,6 +5,7 @@ require_relative "shared/asv_analyzable"
 require_relative "shared/asv_attachable"
 require_relative "shared/asv_errorable"
 require_relative "shared/asv_optionable"
+require_relative "shared/asv_orchestrable"
 require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
@@ -14,6 +15,7 @@ module ActiveStorageValidations
     include ASVAttachable
     include ASVErrorable
     include ASVOptionable
+    include ASVOrchestrable
     include ASVSymbolizable
 
     AVAILABLE_CHECKS = %i[with in].freeze
@@ -30,15 +32,19 @@ module ActiveStorageValidations
     PRECISION = 3.freeze
     METADATA_KEYS = %i[width height].freeze
 
+    def self.heavyweight?(_options); true; end
+
     def check_validity!
-      ensure_at_least_one_validator_option
-      ensure_aspect_ratio_validity
+      ensure_exactly_one_validator_option
+      ensure_aspect_ratio_options_validity
     end
 
     def validate_each(record, attribute, _value)
+      warn_if_used_without_orchestration(attribute)
+
       return if no_attachments?(record, attribute)
 
-      flat_options = set_flat_options(record)
+      flat_options = flatten_options(record)
       @authorized_aspect_ratios = authorized_aspect_ratios_from_options(flat_options).compact
       return if @authorized_aspect_ratios.empty?
 
@@ -112,23 +118,27 @@ module ActiveStorageValidations
       x > 0 && y > 0 && (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
     end
 
-    def ensure_at_least_one_validator_option
-      return if AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-
-      raise ArgumentError, "You must pass either :with or :in to the validator"
+    def ensure_exactly_one_validator_option
+      unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
+        raise ArgumentError, error_message_exactly_one_validator_option
+      end
     end
 
-    def ensure_aspect_ratio_validity
+    def error_message_exactly_one_validator_option
+      "You must pass either :with or :in option to the validator"
+    end
+
+    def ensure_aspect_ratio_options_validity
       return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
 
       authorized_aspect_ratios_from_options(options).each do |aspect_ratio|
         unless NAMED_ASPECT_RATIOS.include?(aspect_ratio) || aspect_ratio =~ ASPECT_RATIO_REGEX
-          raise ArgumentError, invalid_aspect_ratio_message
+          raise ArgumentError, error_message_invalid_aspect_ratio_options
         end
       end
     end
 
-    def invalid_aspect_ratio_message
+    def error_message_invalid_aspect_ratio_options
       <<~ERROR_MESSAGE
         You must pass a valid aspect ratio to the validator
         It should either be a named aspect ratio (#{NAMED_ASPECT_RATIOS.join(', ')})

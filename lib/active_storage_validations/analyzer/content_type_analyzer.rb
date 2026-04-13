@@ -10,14 +10,14 @@ module ActiveStorageValidations
   #
   # Example:
   #
-  #   ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable).content_type
+  #   ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable).metadata
   #   # => { content_type: "image/png" }
   #
   # This analyzer requires the {UNIX file}[https://en.wikipedia.org/wiki/File_(command)] command, which is not provided by \Rails. While it is available on most UNIX distributions, it may need to be installed explicitly on minimal or custom setups.
   class Analyzer::ContentTypeAnalyzer < Analyzer
     class FileCommandLineToolNotInstalledError < StandardError; end
 
-    def content_type
+    def metadata
       read_media do |media|
         {
           content_type: media

@@ -40,6 +40,7 @@ ActiveRecord::Schema.define do
   %i[
     aspect_ratio
     attached
+    attachment
     content_type
     dimension
     duration
@@ -62,7 +63,7 @@ ActiveRecord::Schema.define do
       end
     end
 
-    if %i[content_type duration size total_size pages].include? validator
+    if %i[aspect_ratio content_type duration pages size total_size].include? validator
       create_table :"#{validator}_validator_check_validity_several_checks", force: :cascade do |t|
         t.datetime :created_at, null: false
         t.datetime :updated_at, null: false
@@ -70,6 +71,11 @@ ActiveRecord::Schema.define do
     end
 
     create_table :"#{validator}_validator_checks", force: :cascade do |t|
+      t.datetime :created_at, null: false
+      t.datetime :updated_at, null: false
+    end
+
+    create_table :"#{validator}_validator_optimized_with_validate_attacheds", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
     end
@@ -86,6 +92,7 @@ ActiveRecord::Schema.define do
 
   %i[
     aspect_ratio
+    attachment
     content_type
     dimension
     duration
@@ -100,13 +107,14 @@ ActiveRecord::Schema.define do
 
   %i[
     aspect_ratio
+    attachment
     content_type
     dimension
     duration
     processable_file
     pages
   ].each do |validator|
-    create_table :"#{validator}_validator_is_performance_optimizeds", force: :cascade do |t|
+    create_table :"#{validator}_validator_optimized_with_blob_metadata", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
     end
@@ -114,6 +122,7 @@ ActiveRecord::Schema.define do
 
   %i[
     aspect_ratio
+    attachment
     content_type
     dimension
     duration
@@ -160,6 +169,21 @@ ActiveRecord::Schema.define do
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
     end
+  end
+
+  create_table :attached_validator_check_validity_with_allow_nil_options, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :attached_validator_check_validity_with_allow_blank_options, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
+  create_table :attachment_validator_check_validity_h_validator_presences, force: :cascade do |t|
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
   end
 
   create_table :total_size_validator_check_validity_has_many_attached_onlies, force: :cascade do |t|

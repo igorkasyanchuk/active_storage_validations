@@ -5,7 +5,7 @@ module ActiveStorageValidations
     extend ActiveSupport::Concern
 
     def logger
-      Rails.logger
+      defined?(Rails) ? Rails.logger : Logger.new($stdout)
     end
   end
 end

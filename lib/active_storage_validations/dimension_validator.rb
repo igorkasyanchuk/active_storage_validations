@@ -5,6 +5,7 @@ require_relative "shared/asv_analyzable"
 require_relative "shared/asv_attachable"
 require_relative "shared/asv_errorable"
 require_relative "shared/asv_optionable"
+require_relative "shared/asv_orchestrable"
 require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
@@ -14,6 +15,7 @@ module ActiveStorageValidations
     include ASVAttachable
     include ASVErrorable
     include ASVOptionable
+    include ASVOrchestrable
     include ASVSymbolizable
 
     AVAILABLE_CHECKS = %i[width height min max].freeze
@@ -32,13 +34,17 @@ module ActiveStorageValidations
     ].freeze
     METADATA_KEYS = %i[width height].freeze
 
+    def self.heavyweight?(_options); true; end
+
     def check_validity!
       ensure_at_least_one_validator_option
-      ensure_dimension_in_option_validity
-      ensure_min_max_option_validity
+      ensure_dimension_in_options_validity
+      ensure_min_max_options_validity
     end
 
     def validate_each(record, attribute, _value)
+      warn_if_used_without_orchestration(attribute)
+
       return if no_attachments?(record, attribute)
 
       validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
@@ -48,11 +54,15 @@ module ActiveStorageValidations
 
     def ensure_at_least_one_validator_option
       unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-        raise ArgumentError, "You must pass either :width, :height, :min or :max to the validator"
+        raise ArgumentError, error_message_at_least_one_validator_option
       end
     end
 
-    def ensure_dimension_in_option_validity
+    def error_message_at_least_one_validator_option
+      "You must pass either :width, :height, :min or :max to the validator"
+    end
+
+    def ensure_dimension_in_options_validity
       %i[width height].each do |dimension|
         if options[dimension]&.is_a?(Hash) && options[dimension][:in].present?
           raise ArgumentError, "{ #{dimension}: { in: value } } value must be a Range (min..max)" if !options[dimension][:in].is_a?(Range) && !options[dimension][:in].is_a?(Proc)
@@ -60,7 +70,7 @@ module ActiveStorageValidations
       end
     end
 
-    def ensure_min_max_option_validity
+    def ensure_min_max_options_validity
       %i[min max].each do |bound|
         if options[bound].present?
           raise ArgumentError, "{ #{bound}: value } value must be a Range (#{bound}_width..#{bound}_height)" if !options[bound]&.is_a?(Range) && !options[bound]&.is_a?(Proc)
@@ -203,7 +213,7 @@ module ActiveStorageValidations
     end
 
     def process_options(record)
-      flat_options = set_flat_options(record)
+      flat_options = flatten_options(record)
 
       %i[width height].each do |dimension|
         if flat_options[dimension] and flat_options[dimension].is_a?(Hash)

@@ -141,7 +141,7 @@ describe "Integration tests" do
 
         it "calls once the corresponding media analyzers (expensive operation) on the new attachable" do
           assert_called_on_instance_of(ActiveStorageValidations::Analyzer::VideoAnalyzer, :metadata, times: 1, returns: { width: 150, height: 150, duration: 1.7, audio: false, video: true }) do
-            assert_called_on_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer, :content_type, times: 1, returns: { content_type: "video/mp4" }) do
+            assert_called_on_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer, :metadata, times: 1, returns: { content_type: "video/mp4" }) do
               subject.videos.attach(attachable_2)
             end
           end

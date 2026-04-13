@@ -3,6 +3,7 @@
 require_relative "shared/asv_active_storageable"
 require_relative "shared/asv_errorable"
 require_relative "shared/asv_optionable"
+require_relative "shared/asv_orchestrable"
 require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
@@ -10,6 +11,7 @@ module ActiveStorageValidations
     include ASVActiveStorageable
     include ASVErrorable
     include ASVOptionable
+    include ASVOrchestrable
     include ASVSymbolizable
 
     AVAILABLE_CHECKS = %i[
@@ -29,9 +31,7 @@ module ActiveStorageValidations
     end
 
     def check_validity!
-      unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
-        raise ArgumentError, "You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), :between or :equal_to to the validator"
-      end
+      ensure_exactly_one_validator_option
     end
 
     def validate_each(record, attribute, value)
@@ -78,6 +78,16 @@ module ActiveStorageValidations
 
     def max(flat_options)
       flat_options[:between]&.max || flat_options[:less_than] || flat_options[:less_than_or_equal_to]
+    end
+
+    def ensure_exactly_one_validator_option
+      unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
+        raise ArgumentError, error_message_exactly_one_validator_option
+      end
+    end
+
+    def error_message_exactly_one_validator_option
+      "You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), :between or :equal_to to the validator"
     end
   end
 end

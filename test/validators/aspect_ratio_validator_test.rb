@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "validators/shared_examples/checks_validator_validity"
 require "validators/shared_examples/asv_errorable"
-require "validators/shared_examples/is_performance_optimized"
+require "validators/shared_examples/optimized_with_blob_metadata"
+require "validators/shared_examples/optimized_with_validate_attached"
 require "validators/shared_examples/works_fine_with_attachables"
 require "validators/shared_examples/works_with_all_rails_common_validation_options"
 
@@ -13,14 +13,38 @@ describe ActiveStorageValidations::AspectRatioValidator do
   let(:validator_test_class) { AspectRatio::Validator }
   let(:params) { {} }
 
-  describe "#initialize_error_options" do
+  describe "ASVErrorable shared behavior" do
     include ASVErrorable
   end
 
   describe "#check_validity!" do
-    include ChecksValidatorValidity
+    describe "#ensure_exactly_one_validator_option" do
+      describe "when the validator does not have checks" do
+        subject { validator_test_class::CheckValidityNoCheck.new(params) }
 
-    describe "aspect ratio validity" do
+        let(:error_message_no_check) do
+          "You must pass either :with or :in option to the validator"
+        end
+
+        it "raises an error at model initialization" do
+          is_expected_to_raise_error(ArgumentError, error_message_no_check)
+        end
+      end
+
+      describe "when the validator has several checks" do
+        subject { validator_test_class::CheckValiditySeveralChecks.new(params) }
+
+        let(:error_message_several_checks) do
+          "You must pass either :with or :in option to the validator"
+        end
+
+        it "raises an error at model initialization" do
+          is_expected_to_raise_error(ArgumentError, error_message_several_checks)
+        end
+      end
+    end
+
+    describe "#ensure_aspect_ratio_options_validity" do
       describe "when the passed option is an invalid" do
         let(:error_message) do
           <<~ERROR_MESSAGE
@@ -281,6 +305,10 @@ describe ActiveStorageValidations::AspectRatioValidator do
     end
   end
 
+  describe "Optimized with validate_attached behavior" do
+    include OptimizedWithValidateAttached
+  end
+
   describe "Blob Metadata" do
     let(:attachable) do
       {
@@ -290,7 +318,7 @@ describe ActiveStorageValidations::AspectRatioValidator do
       }
     end
 
-    include IsPerformanceOptimized
+    include OptimizedWithBlobMetadata
   end
 
   describe "Rails options" do

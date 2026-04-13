@@ -34,7 +34,7 @@ module ActiveStorageValidations
 
     def generate_metadata_for(attachable, metadata_keys)
       if metadata_keys == ActiveStorageValidations::ContentTypeValidator::METADATA_KEYS
-        content_type_analyzer_for(attachable).content_type
+        content_type_analyzer_for(attachable).metadata
       else
         metadata_analyzer_for(attachable).metadata
       end

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "validators/shared_examples/checks_validator_validity"
 require "validators/shared_examples/asv_errorable"
-require "validators/shared_examples/is_performance_optimized"
+require "validators/shared_examples/optimized_with_blob_metadata"
+require "validators/shared_examples/optimized_with_validate_attached"
 require "validators/shared_examples/works_fine_with_attachables"
 require "validators/shared_examples/works_with_all_rails_common_validation_options"
 
@@ -13,14 +13,26 @@ describe ActiveStorageValidations::ContentTypeValidator do
   let(:validator_test_class) { ContentType::Validator }
   let(:params) { {} }
 
-  describe "#initialize_error_options" do
+  describe "ASVErrorable shared behavior" do
     include ASVErrorable
   end
 
   describe "#check_validity!" do
-    include ChecksValidatorValidity
+    describe "#ensure_exactly_one_validator_option" do
+      describe "when the validator does not have checks" do
+        subject { validator_test_class::CheckValidityNoCheck.new(params) }
 
-    describe "content type validity" do
+        let(:error_message_no_check) do
+          "You must pass either :with or :in to the validator"
+        end
+
+        it "raises an error at model initialization" do
+          is_expected_to_raise_error(ArgumentError, error_message_no_check)
+        end
+      end
+    end
+
+    describe "#ensure_content_type_options_validity" do
       describe "when the passed option is an invalid content type" do
         describe ":with" do
           subject { validator_test_class::CheckValidityInvalidContentTypeWith.new(params) }
@@ -482,6 +494,10 @@ describe ActiveStorageValidations::ContentTypeValidator do
     end
   end
 
+  describe "Optimized with validate_attached behavior" do
+    include OptimizedWithValidateAttached
+  end
+
   describe "Blob Metadata" do
     let(:attachable) do
       {
@@ -491,7 +507,7 @@ describe ActiveStorageValidations::ContentTypeValidator do
       }
     end
 
-    include IsPerformanceOptimized
+    include OptimizedWithBlobMetadata
   end
 
   describe "Rails options" do

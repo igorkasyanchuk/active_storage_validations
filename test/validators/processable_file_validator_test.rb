@@ -2,7 +2,8 @@
 
 require "test_helper"
 require "validators/shared_examples/asv_errorable"
-require "validators/shared_examples/is_performance_optimized"
+require "validators/shared_examples/optimized_with_blob_metadata"
+require "validators/shared_examples/optimized_with_validate_attached"
 require "validators/shared_examples/works_fine_with_attachables"
 require "validators/shared_examples/works_with_all_rails_common_validation_options"
 
@@ -12,8 +13,24 @@ describe ActiveStorageValidations::ProcessableFileValidator do
   let(:validator_test_class) { ProcessableFile::Validator }
   let(:params) { {} }
 
-  describe "#initialize_error_options" do
+  describe "ASVErrorable shared behavior" do
     include ASVErrorable
+  end
+
+  describe "#check_validity!" do
+    describe "#ensure_options_validity" do
+      describe "when the validator has an invalid check" do
+        subject { validator_test_class::CheckValidityInvalidCheck.new(params) }
+
+        let(:error_message_invalid_check) do
+          "You must pass either `true` or `{ with: true/Proc }`"
+        end
+
+        it "raises an error at model initialization" do
+          is_expected_to_raise_error(ArgumentError, error_message_invalid_check)
+        end
+      end
+    end
   end
 
   describe "Validator checks" do
@@ -61,6 +78,10 @@ describe ActiveStorageValidations::ProcessableFileValidator do
     end
   end
 
+  describe "Optimized with validate_attached behavior" do
+    include OptimizedWithValidateAttached
+  end
+
   describe "Blob Metadata" do
     let(:attachable) do
       {
@@ -70,7 +91,7 @@ describe ActiveStorageValidations::ProcessableFileValidator do
       }
     end
 
-    include IsPerformanceOptimized
+    include OptimizedWithBlobMetadata
   end
 
   describe "Rails options" do

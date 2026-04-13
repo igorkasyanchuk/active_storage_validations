@@ -11,7 +11,7 @@
 
 Active Storage Validations is a gem that allows you to add validations for Active Storage attributes.
 
-This gems is doing it right for you! Just use `validates :avatar, attached: true, content_type: 'image/png'` and that's it!
+This gems is doing it right for you! Just use `validate_attached :avatar, attached: true, content_type: 'image/png'` and that's it!
 
 ## Table of Contents
 
@@ -33,10 +33,13 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Aspect ratio](#aspect-ratio)
   - [Processable file](#processable-file)
   - [Pages](#pages)
-- [Upgrading from 1.x to 2.x](#upgrading-from-1x-to-2x)
-- [Upgrading from 2.x to 3.x](#upgrading-from-2x-to-3x)
+- [Performance and security](#performance-and-security)
 - [Internationalization (I18n)](#internationalization-i18n)
 - [Test matchers](#test-matchers)
+- [Upgrading major versions](#upgrading-major-versions)
+  - [Upgrading from 1.x to 2.x](#upgrading-from-1x-to-2x)
+  - [Upgrading from 2.x to 3.x](#upgrading-from-2x-to-3x)
+  - [Upgrading from 3.x to 4.x](#upgrading-from-3x-to-4x)
 - [Contributing](#contributing)
 - [Additional information](#additional-information)
 
@@ -108,14 +111,9 @@ Every validator can use procs instead of values in all the validator examples:
 class User < ApplicationRecord
   has_many_attached :files
 
-  validates :files, limit: { max: -> (record) { record.admin? ? 100 : 10 } }
+  validate_attached :files, limit: { max: -> (record) { record.admin? ? 100 : 10 } }
 end
 ```
-
-**Performance optimization**<br>
-Some validators rely on an expensive operation (metadata analysis and content type analysis). To mitigate the performance cost, the gem leverages the `ActiveStorage::Blob.metadata` method to store retrieved metadata. Therefore, once the file has been analyzed by our gem, the expensive analysis operation will not be triggered again for new validations.
-
-As stated in the Rails documentation: "Blobs are intended to be immutable in so far as their reference to a specific file goes". We based our performance optimization on the same assumption, so if you do not follow it, the gem will not work as expected.
 
 ---
 
@@ -134,7 +132,7 @@ Use it like this:
 class User < ApplicationRecord
   has_one_attached :avatar
 
-  validates :avatar, attached: true # ensures that avatar has an attached file
+  validate_attached :avatar, attached: true # ensures that avatar has an attached file
 end
 ```
 
@@ -168,7 +166,7 @@ Use it like this:
 class User < ApplicationRecord
   has_many_attached :certificates
 
-  validates :certificates, limit: { min: 1, max: 10 } # restricts the number of files to between 1 and 10
+  validate_attached :certificates, limit: { min: 1, max: 10 } # restricts the number of files to between 1 and 10
 end
 ```
 
@@ -222,11 +220,11 @@ Use it like this:
 class User < ApplicationRecord
   has_one_attached :avatar
 
-  validates :avatar, content_type: 'image/png' # only allows PNG images
-  validates :avatar, content_type: :png # only allows PNG images, same as { with: :png }
-  validates :avatar, content_type: /\Avideo\/.*\z/ # only allows video files
-  validates :avatar, content_type: ['image/png', 'image/jpeg'] # only allows PNG and JPEG images
-  validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true } # only allows PNG, JPEG and their variants, with spoofing protection enabled
+  validate_attached :avatar, content_type: 'image/png' # only allows PNG images
+  validate_attached :avatar, content_type: :png # only allows PNG images, same as { with: :png }
+  validate_attached :avatar, content_type: /\Avideo\/.*\z/ # only allows video files
+  validate_attached :avatar, content_type: ['image/png', 'image/jpeg'] # only allows PNG and JPEG images
+  validate_attached :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true } # only allows PNG, JPEG and their variants, with spoofing protection enabled
 end
 ```
 
@@ -241,7 +239,7 @@ class User < ApplicationRecord
 
   has_one_attached :avatar
 
-  validates :avatar, content_type: ACCEPTED_CONTENT_TYPES
+  validate_attached :avatar, content_type: ACCEPTED_CONTENT_TYPES
 end
 ```
 
@@ -341,12 +339,12 @@ Use it like this:
 class User < ApplicationRecord
   has_one_attached :avatar
 
-  validates :avatar, size: { less_than: 2.megabytes } # restricts the file size to < 2MB
-  validates :avatar, size: { less_than_or_equal_to: 2.megabytes } # restricts the file size to <= 2MB
-  validates :avatar, size: { greater_than: 1.kilobyte } # restricts the file size to > 1KB
-  validates :avatar, size: { greater_than_or_equal_to: 1.kilobyte } # restricts the file size to >= 1KB
-  validates :avatar, size: { between: 1.kilobyte..2.megabytes } # restricts the file size to between 1KB and 2MB
-  validates :avatar, size: { equal_to: 1.megabyte } # restricts the file size to exactly 1MB
+  validate_attached :avatar, size: { less_than: 2.megabytes } # restricts the file size to < 2MB
+  validate_attached :avatar, size: { less_than_or_equal_to: 2.megabytes } # restricts the file size to <= 2MB
+  validate_attached :avatar, size: { greater_than: 1.kilobyte } # restricts the file size to > 1KB
+  validate_attached :avatar, size: { greater_than_or_equal_to: 1.kilobyte } # restricts the file size to >= 1KB
+  validate_attached :avatar, size: { between: 1.kilobyte..2.megabytes } # restricts the file size to between 1KB and 2MB
+  validate_attached :avatar, size: { equal_to: 1.megabyte } # restricts the file size to exactly 1MB
 end
 ```
 
@@ -399,12 +397,12 @@ Use it like this:
 class User < ApplicationRecord
   has_many_attached :certificates
 
-  validates :certificates, total_size: { less_than: 10.megabytes } # restricts the total size to < 10MB
-  validates :certificates, total_size: { less_than_or_equal_to: 10.megabytes } # restricts the total size to <= 10MB
-  validates :certificates, total_size: { greater_than: 1.kilobyte } # restricts the total size to > 1KB
-  validates :certificates, total_size: { greater_than_or_equal_to: 1.kilobyte } # restricts the total size to >= 1KB
-  validates :certificates, total_size: { between: 1.kilobyte..10.megabytes } # restricts the total size to between 1KB and 10MB
-  validates :certificates, total_size: { equal_to: 1.megabyte } # restricts the total file size to exactly 1MB
+  validate_attached :certificates, total_size: { less_than: 10.megabytes } # restricts the total size to < 10MB
+  validate_attached :certificates, total_size: { less_than_or_equal_to: 10.megabytes } # restricts the total size to <= 10MB
+  validate_attached :certificates, total_size: { greater_than: 1.kilobyte } # restricts the total size to > 1KB
+  validate_attached :certificates, total_size: { greater_than_or_equal_to: 1.kilobyte } # restricts the total size to >= 1KB
+  validate_attached :certificates, total_size: { between: 1.kilobyte..10.megabytes } # restricts the total size to between 1KB and 10MB
+  validate_attached :certificates, total_size: { equal_to: 1.megabyte } # restricts the total file size to exactly 1MB
 end
 ```
 
@@ -457,13 +455,13 @@ Use it like this:
 class User < ApplicationRecord
   has_one_attached :avatar
 
-  validates :avatar, dimension: { width: 100 } # restricts the width to 100 pixels
-  validates :avatar, dimension: { width: { min: 80, max: 100 } } # restricts the width to between 80 and 100 pixels
-  validates :avatar, dimension: { width: { in: 80..100 } } # restricts the width to between 80 and 100 pixels
-  validates :avatar, dimension: { height: 100 } # restricts the height to 100 pixels
-  validates :avatar, dimension: { height: { min: 600, max: 1800 } } # restricts the height to between 600 and 1800 pixels
-  validates :avatar, dimension: { height: { in: 600..1800 } } # restricts the height to between 600 and 1800 pixels
-  validates :avatar, dimension: { min: 80..600, max: 100..1800 } # restricts the width to between 80 and 100 pixels, and the height to between 600 and 1800 pixels
+  validate_attached :avatar, dimension: { width: 100 } # restricts the width to 100 pixels
+  validate_attached :avatar, dimension: { width: { min: 80, max: 100 } } # restricts the width to between 80 and 100 pixels
+  validate_attached :avatar, dimension: { width: { in: 80..100 } } # restricts the width to between 80 and 100 pixels
+  validate_attached :avatar, dimension: { height: 100 } # restricts the height to 100 pixels
+  validate_attached :avatar, dimension: { height: { min: 600, max: 1800 } } # restricts the height to between 600 and 1800 pixels
+  validate_attached :avatar, dimension: { height: { in: 600..1800 } } # restricts the height to between 600 and 1800 pixels
+  validate_attached :avatar, dimension: { min: 80..600, max: 100..1800 } # restricts the width to between 80 and 100 pixels, and the height to between 600 and 1800 pixels
 end
 ```
 
@@ -518,12 +516,12 @@ Use it like this:
 class User < ApplicationRecord
   has_one_attached :intro_song
 
-  validates :intro_song, duration: { less_than: 2.minutes } # restricts the file duration to < 2 minutes
-  validates :intro_song, duration: { less_than_or_equal_to: 2.minutes } # restricts the file duration to <= 2 minutes
-  validates :intro_song, duration: { greater_than: 1.second } # restricts the file duration to > 1 second
-  validates :intro_song, duration: { greater_than_or_equal_to: 1.second } # restricts the file duration to >= 1 second
-  validates :intro_song, duration: { between: 1.second..2.minutes } # restricts the file duration to between 1 second and 2 minutes
-  validates :intro_song, duration: { equal_to: 1.minute } # restricts the duration to exactly 1 minute
+  validate_attached :intro_song, duration: { less_than: 2.minutes } # restricts the file duration to < 2 minutes
+  validate_attached :intro_song, duration: { less_than_or_equal_to: 2.minutes } # restricts the file duration to <= 2 minutes
+  validate_attached :intro_song, duration: { greater_than: 1.second } # restricts the file duration to > 1 second
+  validate_attached :intro_song, duration: { greater_than_or_equal_to: 1.second } # restricts the file duration to >= 1 second
+  validate_attached :intro_song, duration: { between: 1.second..2.minutes } # restricts the file duration to between 1 second and 2 minutes
+  validate_attached :intro_song, duration: { equal_to: 1.minute } # restricts the duration to exactly 1 minute
 end
 ```
 
@@ -574,11 +572,11 @@ Use it like this:
 class User < ApplicationRecord
   has_one_attached :avatar
 
-  validates :avatar, aspect_ratio: :square # restricts the aspect ratio to 1:1
-  validates :avatar, aspect_ratio: :portrait # restricts the aspect ratio to x:y where y > x
-  validates :avatar, aspect_ratio: :landscape # restricts the aspect ratio to x:y where x > y
-  validates :avatar, aspect_ratio: :is_16_9 # restricts the aspect ratio to 16:9
-  validates :avatar, aspect_ratio: %i[square is_16_9] # restricts the aspect ratio to 1:1 and 16:9
+  validate_attached :avatar, aspect_ratio: :square # restricts the aspect ratio to 1:1
+  validate_attached :avatar, aspect_ratio: :portrait # restricts the aspect ratio to x:y where y > x
+  validate_attached :avatar, aspect_ratio: :landscape # restricts the aspect ratio to x:y where x > y
+  validate_attached :avatar, aspect_ratio: :is_16_9 # restricts the aspect ratio to 16:9
+  validate_attached :avatar, aspect_ratio: %i[square is_16_9] # restricts the aspect ratio to 1:1 and 16:9
 end
 ```
 
@@ -620,7 +618,7 @@ Use it like this:
 class User < ApplicationRecord
   has_one_attached :avatar
 
-  validates :avatar, processable_file: true # ensures that the file is processable by MiniMagick or Vips (image) or ffmpeg (video/audio)
+  validate_attached :avatar, processable_file: true # ensures that the file is processable by MiniMagick or Vips (image) or ffmpeg (video/audio)
 end
 ```
 
@@ -660,12 +658,12 @@ Use it like this:
 class User < ApplicationRecord
   has_one_attached :contract
 
-  validates :contract, pages: { less_than: 2 } # restricts the number of pages to < 2
-  validates :contract, pages: { less_than_or_equal_to: 2 } # restricts the number of pages to <= 2
-  validates :contract, pages: { greater_than: 1 } # restricts the number of pages to > 1
-  validates :contract, pages: { greater_than_or_equal_to: 1 } # restricts the number of pages to >= 1
-  validates :contract, pages: { between: 1..2 } # restricts the number of pages to between 1 and 2
-  validates :contract, pages: { equal_to: 1 } # restricts the number of pages to exactly 1
+  validate_attached :contract, pages: { less_than: 2 } # restricts the number of pages to < 2
+  validate_attached :contract, pages: { less_than_or_equal_to: 2 } # restricts the number of pages to <= 2
+  validate_attached :contract, pages: { greater_than: 1 } # restricts the number of pages to > 1
+  validate_attached :contract, pages: { greater_than_or_equal_to: 1 } # restricts the number of pages to >= 1
+  validate_attached :contract, pages: { between: 1..2 } # restricts the number of pages to between 1 and 2
+  validate_attached :contract, pages: { equal_to: 1 } # restricts the number of pages to exactly 1
 end
 ```
 
@@ -692,64 +690,24 @@ The `pages` validator error messages expose 5 values that you can use:
 
 ---
 
-## Upgrading from 1.x to 2.x
+## Performance and security
+### Blob metadata
+Many validators rely on expensive operations such as metadata extraction or content type analysis. To reduce this cost, the gem leverages ActiveStorage::Blob.metadata to cache the extracted data.
 
-If you are upgrading from 1.x to 2.x, you will be pleased to note that a lot of things have been added and improved!
+As a result, once a file has been analyzed, subsequent validations will reuse the stored metadata instead of reprocessing the file.
 
-Added features:
-- `duration` validator has been added for audio / video files
-- `dimension` validator now supports videos
-- `aspect_ratio` validator now supports videos
-- `processable_image` validator is now `processable_file` validator and supports image/video/audio
-- Major performance improvement have been added: we now only perform the expensive io analysis operation on the newly attached files. For previously attached files, we validate them using Rails `ActiveStorage::Blob#metadata` internal mecanism ([more here](https://github.com/rails/rails/blob/main/activestorage/app/models/active_storage/blob/analyzable.rb)).
-- All error messages have been given an upgrade and new variables that you can use
+This optimization relies on a core assumption from Rails: "Blobs are intended to be immutable in so far as their reference to a specific file goes". We based our performance optimization on the same assumption, so if you do not follow it, the gem will not work as expected.
 
-But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
-- Error messages
-  - We advise you to replace all the v1 translations by the new v2 rather than changing them one by one. A majority of messages have been completely rewritten to be more consistent and easier to understand.
-  - If you wish to change them one by one, here is the list of changes to make:
-    - Some validator errors have been totally changed:
-      - `limit` validator keys have been totally reworked
-      - `dimension` validator keys have been totally reworked
-      - `content_type` validator keys have been totally reworked
-      - `processable_image` validator keys have been totally reworked
-    - Some keys have been changed:
-      - `image_metadata_missing` has been replaced by `media_metadata_missing`
-      - `aspect_ratio_is_not` has been replaced by `aspect_ratio_not_x_y`
-    - Some error messages variables names have been changed to improve readability:
-      - `aspect_ratio` validator:
-        - `aspect_ratio` has been replaced by `authorized_aspect_ratios`
-      - `content_type` validator:
-        - `authorized_types` has been replaced by `authorized_human_content_types`
-      - `size` validator:
-        - `min_size` has been replaced by `min`
-        - `max_size` has been replaced by `max`
-      - `total_size` validator:
-        - `min_size` has been replaced by `min`
-        - `max_size` has been replaced by `max`
+### Short-circuiting
+Analyzing file metadata is expensive because it requires opening the file using external tools (e.g. `libvips`, `ffmpeg`, `poppler`). For large files, this can significantly impact both CPU usage and memory consumption.
 
-- `content_type` validator
-  - The `:in` option now only accepts 'valid' content types (ie content types deemed by Marcel as valid).
-    - The check was mistakenly only performed on the `:with` option previously. Therefore, invalid content types were accepted in the `:in` option, which is not the expected behavior.
-    - This might break some cases when you had for example `content_type: ['image/png', 'image/jpg']`, because `image/jpg` is not a valid content type, it should be replaced by `image/jpeg`.
-  - An `ArgumentError` is now raised if `image/jpg` is used to make it easier to fix. You should now only use `image/jpeg`.
+To mitigate this, the gem short-circuits validation when possible:
+- `size` and `content_type` validators are always executed first
+- if one of them fails, metadata validators are not executed
 
-- `processable_image` validator
-  - The validator has been replaced by `processable_file` validator, be sure to replace `processable_image: true` to `processable_file: true`
-  - The associated matcher has also been updated accordingly, be sure to replace `validate_processable_image_of` to `validate_processable_file_of`
+This prevents unnecessary file processing when the file is already invalid. This behavior is especially beneficial when validating large uploads, as it avoids loading unnecessary data into memory.
 
-## Upgrading from 2.x to 3.x
-
-Version 3 comes with the ability to support single page pdf `dimension` / `aspect_ratio` analysis, we had to make a breaking change:
-- To analyze PDFs, you must install the `poppler` PDF processing dependency
-  - It's a  Rails-supported PDF processing dependency (https://guides.rubyonrails.org/active_storage_overview.html#requirements)
-  - To install it, check their documentation at this [link](https://pdf2image.readthedocs.io/en/latest/installation.html).
-  - To check if it's installed, execute `pdftoppm -h`.
-  - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
-
-We also added the `pages` validator to validate pdf number of pages, and the `equal_to` option to `duration`, `size` and `total_size` validators.
-
-Note that, if you do not perform these metadata validations on pdfs, the gem will work the same as in version 2.
+If you choose to bypass this behavior by using `validates` instead of `validate_attached`, the gem will not be able to optimize execution and will emit a warning in the logs.
 
 ## Internationalization (I18n)
 
@@ -894,6 +852,76 @@ end
 #### Matchers
 Then you can use the matchers with the syntax specified in the RSpec section, just use `should validate_method` instead of `it { is_expected_to validate_method }` as specified in the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem.
 
+## Upgrading major versions
+### Upgrading from 1.x to 2.x
+
+If you are upgrading from 1.x to 2.x, you will be pleased to note that a lot of things have been added and improved!
+
+Added features:
+- `duration` validator has been added for audio / video files
+- `dimension` validator now supports videos
+- `aspect_ratio` validator now supports videos
+- `processable_image` validator is now `processable_file` validator and supports image/video/audio
+- Major performance improvement have been added: we now only perform the expensive io analysis operation on the newly attached files. For previously attached files, we validate them using Rails `ActiveStorage::Blob#metadata` internal mecanism ([more here](https://github.com/rails/rails/blob/main/activestorage/app/models/active_storage/blob/analyzable.rb)).
+- All error messages have been given an upgrade and new variables that you can use
+
+But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
+- Error messages
+  - We advise you to replace all the v1 translations by the new v2 rather than changing them one by one. A majority of messages have been completely rewritten to be more consistent and easier to understand.
+  - If you wish to change them one by one, here is the list of changes to make:
+    - Some validator errors have been totally changed:
+      - `limit` validator keys have been totally reworked
+      - `dimension` validator keys have been totally reworked
+      - `content_type` validator keys have been totally reworked
+      - `processable_image` validator keys have been totally reworked
+    - Some keys have been changed:
+      - `image_metadata_missing` has been replaced by `media_metadata_missing`
+      - `aspect_ratio_is_not` has been replaced by `aspect_ratio_not_x_y`
+    - Some error messages variables names have been changed to improve readability:
+      - `aspect_ratio` validator:
+        - `aspect_ratio` has been replaced by `authorized_aspect_ratios`
+      - `content_type` validator:
+        - `authorized_types` has been replaced by `authorized_human_content_types`
+      - `size` validator:
+        - `min_size` has been replaced by `min`
+        - `max_size` has been replaced by `max`
+      - `total_size` validator:
+        - `min_size` has been replaced by `min`
+        - `max_size` has been replaced by `max`
+
+- `content_type` validator
+  - The `:in` option now only accepts 'valid' content types (ie content types deemed by Marcel as valid).
+    - The check was mistakenly only performed on the `:with` option previously. Therefore, invalid content types were accepted in the `:in` option, which is not the expected behavior.
+    - This might break some cases when you had for example `content_type: ['image/png', 'image/jpg']`, because `image/jpg` is not a valid content type, it should be replaced by `image/jpeg`.
+  - An `ArgumentError` is now raised if `image/jpg` is used to make it easier to fix. You should now only use `image/jpeg`.
+
+- `processable_image` validator
+  - The validator has been replaced by `processable_file` validator, be sure to replace `processable_image: true` to `processable_file: true`
+  - The associated matcher has also been updated accordingly, be sure to replace `validate_processable_image_of` to `validate_processable_file_of`
+
+### Upgrading from 2.x to 3.x
+
+Version 3 comes with the ability to support single page pdf `dimension` / `aspect_ratio` analysis, we had to make a breaking change:
+- To analyze PDFs, you must install the `poppler` PDF processing dependency
+  - It's a  Rails-supported PDF processing dependency (https://guides.rubyonrails.org/active_storage_overview.html#requirements)
+  - To install it, check their documentation at this [link](https://pdf2image.readthedocs.io/en/latest/installation.html).
+  - To check if it's installed, execute `pdftoppm -h`.
+  - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+
+We also added the `pages` validator to validate pdf number of pages, and the `equal_to` option to `duration`, `size` and `total_size` validators.
+
+Note that, if you do not perform these metadata validations on pdfs, the gem will work the same as in version 2.
+
+### Upgrading from 3.x to 4.x
+Version 4 is focused on delivering performance & security enhancements.
+- A new validator API, `validate_attached`, is available to declare validators. This new API allows us to orchestrate validators, its use is strongly recommended when using metadata validators (`dimension`, `aspect_ratio`, `processable_file`, `duration`, `pages`, and `content_type` if `spoofing_protection` option is set to true).
+  - To use it, just replace your `validates` with `validate_attached`. That's it!
+    - Example: `validate_attached :logo, content_type: :png, aspect_ratio: :square, dimension: { max: 640..640 }, size: { less_than_or_equal_to: 2.megabytes }`
+  - Using this API allows to not run metadata validators if the `size`, `total_size`, `content_type` or `limit` validations are not passing. Therefore, it reduces the memory footprint of the validation since the gem does not open and analyze the uploaded file if it's already failing validations.
+    - Example: for a logo file you use the `aspect_ratio` validator and the `size` validator limiting to 2 MB maximum. A user uploads a 100 MB file, the `aspect_ratio` validator will not run since the `size` validator fails.
+    - When a metatadata validation is skipped, the gem logs the skip in Rails logger.
+  - To help you migrate your metadata validators to the new `validate_attached` API, we have added deprecation warnings for validators which could benefit from it.
+  - The old way of declaring validators with `validates` will still work as expected, but it cannot benefit from the enhanced abilities of `validate_attached`, we really advise to migrate to `validate_attached`. The readme has been updated to only mention `validate_attached` to reduce confusion.
 
 ## Contributing
 

@@ -3,8 +3,24 @@
 - 4.0.0
   - **BREAKING**
     - Drop support for Rails 6.1.4, 7.0.0 (we keep support for Rails >= 7.0.1)
+    - `ActiveStorageValidations::Analyzer::ContentTypeAnalyzer` `content_type` instance method has been renamed to `metadata`. This is one of the gem internal analyzers, if your code is not using it (99.9% sure) you are fine.
+
+  - **FEATURES**
+    Version 4 is focused on delivering performance & security enhancements.
+    - A new validator API, `validate_attached`, is available to declare validators. This new API allows us to orchestrate validators, its use is strongly recommended when using metadata validators (`dimension`, `aspect_ratio`, `processable_file`, `duration`, `pages`, and `content_type` if `spoofing_protection` option is set to true).
+      - To use it, just replace your `validates` with `validate_attached`. That's it!
+        - Example: `validate_attached :logo, content_type: :png, aspect_ratio: :square, dimension: { max: 640..640 }, size: { less_than_or_equal_to: 2.megabytes }`
+      - Using this API allows to not run metadata validators if the `size`, `total_size`, `content_type` or `limit` validations are not passing. Therefore, it reduces the memory footprint of the validation since the gem does not open and analyze the uploaded file if it's already failing validations.
+        - Example: for a logo file you use the `aspect_ratio` validator and the `size` validator limiting to 2 MB maximum. A user uploads a 100 MB file, the `aspect_ratio` validator will not run since the `size` validator fails.
+        - When a metatadata validation is skipped, the gem logs the skip in Rails logger.
+      - To help you migrate your metadata validators to the new `validate_attached` API, we have added deprecation warnings for validators which could benefit from it.
+      - The old way of declaring validators with `validates` will still work as expected, but it cannot benefit from the enhanced abilities of `validate_attached`, we really advise to migrate to `validate_attached`. The readme has been updated to only mention `validate_attached` to reduce confusion.
+    - Other loggers than Rails logger are now supported
+    - Stricter validations performed on validator options for easier validation setup
+
+  - **SUPPORT**
+    - Add support for Ruby 4.0 in CI matrix
     - Drop support for Ruby 3.1, 3.2 in CI matrix, since the recommended version for Rails >= 7.0.1 is >= 3.3
-  - Add support for Ruby 4.0 in CI matrix
 
 # Released
 - 3.0.4

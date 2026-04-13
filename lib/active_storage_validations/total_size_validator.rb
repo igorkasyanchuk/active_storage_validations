@@ -15,13 +15,15 @@ module ActiveStorageValidations
 
     delegate :number_to_human_size, to: ActiveSupport::NumberHelper
 
+    def self.heavyweight?(_options); false; end
+
     def validate_each(record, attribute, _value)
       custom_check_validity!(record, attribute)
 
       return if no_attachments?(record, attribute)
 
       total_file_size = attached_files(record, attribute).sum { |file| file.blob.byte_size }
-      flat_options = set_flat_options(record)
+      flat_options = flatten_options(record)
 
       return if is_valid?(total_file_size, flat_options)
 

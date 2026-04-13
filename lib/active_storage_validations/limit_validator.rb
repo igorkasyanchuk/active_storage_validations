@@ -3,6 +3,7 @@
 require_relative "shared/asv_active_storageable"
 require_relative "shared/asv_errorable"
 require_relative "shared/asv_optionable"
+require_relative "shared/asv_orchestrable"
 require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
@@ -10,6 +11,7 @@ module ActiveStorageValidations
     include ASVActiveStorageable
     include ASVErrorable
     include ASVOptionable
+    include ASVOrchestrable
     include ASVSymbolizable
 
     AVAILABLE_CHECKS = %i[max min].freeze
@@ -19,14 +21,16 @@ module ActiveStorageValidations
       limit_max_exceeded
     ].freeze
 
+    def self.heavyweight?(_options); false; end
+
     def check_validity!
       ensure_at_least_one_validator_option
-      ensure_arguments_validity
+      ensure_limit_options_validity
     end
 
     def validate_each(record, attribute, _value)
       files = attached_files(record, attribute).reject(&:blank?)
-      flat_options = set_flat_options(record)
+      flat_options = flatten_options(record)
       count = files.count
 
       return if files_count_valid?(count, flat_options)
@@ -50,11 +54,15 @@ module ActiveStorageValidations
 
     def ensure_at_least_one_validator_option
       unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
-        raise ArgumentError, "You must pass either :max or :min to the validator"
+        raise ArgumentError, error_message_at_least_one_validator_option
       end
     end
 
-    def ensure_arguments_validity
+    def error_message_at_least_one_validator_option
+      "You must pass either :max or :min to the validator"
+    end
+
+    def ensure_limit_options_validity
       return true if min_max_are_proc? || min_or_max_is_proc_and_other_not_present?
 
       raise ArgumentError, "You must pass integers to :min and :max" if min_or_max_defined_and_not_integer?
