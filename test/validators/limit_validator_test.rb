@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "validators/shared_examples/checks_validator_validity"
 require "validators/shared_examples/works_with_all_rails_common_validation_options"
 
 describe ActiveStorageValidations::LimitValidator do
@@ -11,9 +10,21 @@ describe ActiveStorageValidations::LimitValidator do
   let(:params) { {} }
 
   describe "#check_validity!" do
-    include ChecksValidatorValidity
+    describe "#ensure_at_least_one_validator_option" do
+      describe "when the validator does not have checks" do
+        subject { validator_test_class::CheckValidityNoCheck.new(params) }
 
-    describe "arguments validity" do
+        let(:error_message_no_check) do
+          "You must pass either :max or :min to the validator"
+        end
+
+        it "raises an error at model initialization" do
+          is_expected_to_raise_error(ArgumentError, error_message_no_check)
+        end
+      end
+    end
+
+    describe "#ensure_limit_options_validity" do
       describe "when the passed argument to min or max is not an integer" do
         subject { validator_test_class::CheckValidityInvalidArgument.new(params) }
 

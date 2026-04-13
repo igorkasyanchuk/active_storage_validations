@@ -21,7 +21,11 @@ module ActiveStorageValidations
 
     delegate :number_to_delimited, to: ActiveSupport::NumberHelper
 
+    def self.heavyweight?(_options); true; end
+
     def validate_each(record, attribute, _value)
+      warn_if_used_without_orchestration(attribute)
+
       return if no_attachments?(record, attribute)
 
       validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
@@ -30,7 +34,7 @@ module ActiveStorageValidations
     private
 
     def is_valid?(record, attribute, file, metadata)
-      flat_options = set_flat_options(record)
+      flat_options = flatten_options(record)
       errors_options = initialize_error_options(options, file)
 
       unless valid_metadata?(metadata)

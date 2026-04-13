@@ -9,11 +9,7 @@ module ActiveStorageValidations
 
     private
 
-    def set_flat_options(record)
-      flatten_options(record, self.options)
-    end
-
-    def flatten_options(record, options, available_checks = self.class::AVAILABLE_CHECKS)
+    def flatten_options(record, options = self.options, available_checks = self.class::AVAILABLE_CHECKS)
       case options
       when Hash
         options.merge(options) do |key, value|

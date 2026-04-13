@@ -21,7 +21,7 @@ gem "rails", "8.1.2"
 
 group :development, :test do
   # To use debugger:
-  # gem "debug", "~> 1.10", ">= 1.10.0"
+  gem "debug", "~> 1.10", ">= 1.10.0"
 
   # To test S3 services
   # gem "aws-sdk-s3", require: false

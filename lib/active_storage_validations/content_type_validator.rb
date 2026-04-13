@@ -5,6 +5,7 @@ require_relative "shared/asv_analyzable"
 require_relative "shared/asv_attachable"
 require_relative "shared/asv_errorable"
 require_relative "shared/asv_optionable"
+require_relative "shared/asv_orchestrable"
 require_relative "shared/asv_symbolizable"
 require_relative "analyzer/content_type_analyzer"
 
@@ -15,6 +16,7 @@ module ActiveStorageValidations
     include ASVAttachable
     include ASVErrorable
     include ASVOptionable
+    include ASVOrchestrable
     include ASVSymbolizable
 
     AVAILABLE_CHECKS = %i[with in].freeze
@@ -24,9 +26,25 @@ module ActiveStorageValidations
     ].freeze
     METADATA_KEYS = %i[content_type].freeze
 
+    def self.heavyweight?(options); options[:spoofing_protection] == true; end
+
+    def self.validation_steps(options)
+      steps = []
+
+      if options.key?(:with) || options.key?(:in)
+        steps << options.slice(:with, :in)
+      end
+
+      if options[:spoofing_protection]
+        steps << { spoofing_protection: true }
+      end
+
+      steps
+    end
+
     def check_validity!
       ensure_exactly_one_validator_option
-      ensure_content_types_validity
+      ensure_content_type_options_validity
     end
 
     def validate_each(record, attribute, _value)
@@ -44,7 +62,7 @@ module ActiveStorageValidations
     private
 
     def authorized_content_types_from_options(record)
-      flat_options = set_flat_options(record)
+      flat_options = flatten_options(record)
 
       (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).compact.map do |type|
         case type
@@ -188,11 +206,15 @@ module ActiveStorageValidations
 
     def ensure_exactly_one_validator_option
       unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
-        raise ArgumentError, "You must pass either :with or :in to the validator"
+        raise ArgumentError, error_message_exactly_one_validator_option
       end
     end
 
-    def ensure_content_types_validity
+    def error_message_exactly_one_validator_option
+      "You must pass either :with or :in to the validator"
+    end
+
+    def ensure_content_type_options_validity
       return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
 
       (Array(options[:with]) + Array(options[:in])).each do |content_type|

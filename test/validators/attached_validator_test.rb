@@ -16,7 +16,45 @@ describe ActiveStorageValidations::AttachedValidator do
   let(:params) { {} }
 
   describe "#check_validity!" do
-    # Checked by Rails options tests
+    describe "#ensure_options_validity" do
+      describe "when the validator has an invalid check" do
+        subject { validator_test_class::CheckValidityInvalidCheck.new(params) }
+
+        let(:error_message_invalid_check) do
+          "You must pass either `true` or `{ with: true/Proc }`"
+        end
+
+        it "raises an error at model initialization" do
+          is_expected_to_raise_error(ArgumentError, error_message_invalid_check)
+        end
+      end
+    end
+
+    describe "#ensure_no_allow_nil_or_blank_options" do
+      describe "when the validator has an allow_nil option" do
+        subject { validator_test_class::CheckValidityAllowNilOption.new(params) }
+
+        let(:error_message_allow_nil) do
+          "You cannot pass the :allow_nil option to the #{validator_test_class.name.delete('::').underscore.split('_').join(' ')}"
+        end
+
+        it "raises an error at model initialization" do
+          is_expected_to_raise_error(ArgumentError, error_message_allow_nil)
+        end
+      end
+
+      describe "when the validator has an allow_blank option" do
+        subject { validator_test_class::CheckValidityAllowBlankOption.new(params) }
+
+        let(:error_message_allow_blank) do
+          "You cannot pass the :allow_blank option to the #{validator_test_class.name.delete('::').underscore.split('_').join(' ')}"
+        end
+
+        it "raises an error at model initialization" do
+          is_expected_to_raise_error(ArgumentError, error_message_allow_blank)
+        end
+      end
+    end
   end
 
   describe "Validator checks" do

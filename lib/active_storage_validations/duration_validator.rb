@@ -17,10 +17,14 @@ module ActiveStorageValidations
     ].freeze
     METADATA_KEYS = %i[duration].freeze
 
+    def self.heavyweight?(_options); true; end
+
     def validate_each(record, attribute, _value)
+      warn_if_used_without_orchestration(attribute)
+
       return if no_attachments?(record, attribute)
 
-      flat_options = set_flat_options(record)
+      flat_options = flatten_options(record)
 
       attachables_and_blobs(record, attribute).each do |attachable, blob|
         duration = begin

@@ -15,6 +15,7 @@ def image_150x150_file
   }
 end
 alias :square_image_file :image_150x150_file
+alias :image_150x150_file_0_3ko :image_150x150_file
 
 def image_500x500_file
   {
@@ -23,6 +24,7 @@ def image_500x500_file
     content_type: "image/png"
   }
 end
+alias :image_500x500_13ko :image_500x500_file
 
 def image_600x600_file
   {
@@ -92,6 +94,14 @@ def image_1920x1080_file
 end
 alias :is_16_9_image_file :image_1920x1080_file
 
+def pdf_22ko_file
+  {
+    io: File.open(Rails.root.join("public", "pdf_22ko.pdf")),
+    filename: "pdf_22ko_file.pdf",
+    content_type: "application/pdf"
+  }
+end
+
 def pdf_150x150_file
   {
     io: File.open(Rails.root.join("public", "pdf_150x150.pdf")),
@@ -100,6 +110,7 @@ def pdf_150x150_file
   }
 end
 alias :pdf_1_page_file :pdf_150x150_file
+alias :pdf_2ko_file :pdf_150x150_file
 
 def pdf_200x300_file
   {
@@ -282,6 +293,7 @@ def audio_file
   }
 end
 alias :audio_1s :audio_file
+alias :audio_4ko :audio_file
 
 def audio_2s
   {
@@ -298,6 +310,7 @@ def audio_5s
     content_type: "audio/mp3"
   }
 end
+alias :audio_65_7ko :audio_5s
 
 def audio_7s
   {

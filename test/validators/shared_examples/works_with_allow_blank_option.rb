@@ -8,6 +8,7 @@ module WorksWithAllowBlankOption
       case validator_sym
       when :aspect_ratio then image_150x150_file
       when :attached then image_150x150_file
+      when :attachment then image_150x150_file
       when :content_type then webp_file
       when :dimension then image_150x150_file
       when :duration then audio_1s
@@ -22,6 +23,7 @@ module WorksWithAllowBlankOption
       case validator_sym
       when :aspect_ratio then image_700x500_file
       when :attached then nil
+      when :attachment then image_700x500_file
       when :content_type then html_file
       when :dimension then image_700x500_file
       when :duration then audio_5s
@@ -32,6 +34,7 @@ module WorksWithAllowBlankOption
       when :pages then pdf_7_pages_file
       end
     end
+    let(:validator_for_error_options) { validator_sym == :attachment ? :aspect_ratio : validator_sym }
 
     describe "when passed a file matching the requirements" do
       before { subject.with_allow_blank.attach(file_matching_requirements) }
@@ -45,7 +48,7 @@ module WorksWithAllowBlankOption
       before { subject.with_allow_blank.attach(file_not_matching_requirements) }
 
       it { is_expected_not_to_be_valid }
-      it { is_expected_to_have_error_options(error_options) }
+      it { is_expected_to_have_error_options(error_options, validator: validator_for_error_options) }
     end
   end
 end

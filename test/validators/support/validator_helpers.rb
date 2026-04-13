@@ -14,7 +14,8 @@ module ValidatorHelpers
 
     validator_error_options =
       subject.errors.find do |error|
-        error.options[:validator_type] == kwargs[:validator] || validator_sym
+        expected_validator = kwargs[:validator] || validator_sym
+        error.options[:validator_type] == expected_validator
       end&.options
 
     raise Minitest::Assertion, "Expected validator error options to be present but got nil" if validator_error_options.nil?
@@ -35,7 +36,8 @@ module ValidatorHelpers
 
         validator_error_messages =
           subject.errors.select do |error|
-            error.options[:validator_type] == kwargs[:validator] || validator_sym
+            expected_validator = kwargs[:validator] || validator_sym
+            error.options[:validator_type] == expected_validator
           end.map(&:message)
 
         message = kwargs[:error_options][:custom_message] || I18n.t("errors.messages.#{message_key}", **kwargs[:error_options])
@@ -53,8 +55,8 @@ module ValidatorHelpers
     begin
       subject.valid?
     rescue => e
-      assert_equal(e.class, error_class)
-      assert(e.message.include?(message))
+      assert_equal(error_class, e.class)
+      assert_includes(e.message, message)
     else
       raise StandardError, "It should raise an error but it does not raise any"
     end
@@ -65,6 +67,33 @@ module ValidatorHelpers
     yield
   end
 
+  def assert_logged(expected = nil, level: :debug)
+    old_logger = Rails.logger
+    io = StringIO.new
+    Rails.logger = ActiveSupport::Logger.new(io)
+
+    yield
+
+    logs = io.string
+    Rails.logger = old_logger
+
+    if expected
+      case expected
+      when String
+        assert logs.include?(expected), "Expected log to include #{expected.inspect}, got:\n#{logs}"
+      when Regexp
+        assert logs.match?(expected), "Expected log to match #{expected.inspect}, got:\n#{logs}"
+      when Hash
+        expected.each do |key, value|
+          assert logs.include?(value.to_s),
+                 "Expected log to include #{key}: #{value.inspect}, got:\n#{logs}"
+        end
+      end
+    else
+      assert logs.present?, "Expected logs but got none"
+    end
+  end
+
   def validator_class
     "ActiveStorageValidations::#{subject.class.name.sub(/::/, '').sub(/::.+/, '')}".constantize
   end
@@ -72,8 +101,11 @@ module ValidatorHelpers
   def validator_sym
     begin
       validator_class.to_sym
-    rescue NameError, "uninitialized constant ActiveStorageValidations::IntegrationValidator"
-      nil # Use the :validator kwarg for this expect method since it could be any validator (e.g. integration test file)
+    rescue NameError => e
+      # Use the :validator kwarg for this expect method since it could be any validator (e.g. integration test file)
+      return nil if e.message.include?("uninitialized constant ActiveStorageValidations::IntegrationValidator")
+
+      raise
     end
   end
 

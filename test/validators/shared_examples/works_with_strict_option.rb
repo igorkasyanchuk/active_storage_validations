@@ -8,6 +8,7 @@ module WorksWithStrictOption
       case validator_sym
       when :aspect_ratio then image_150x150_file
       when :attached then image_150x150_file
+      when :attachment then image_150x150_file
       when :content_type then webp_file
       when :dimension then image_150x150_file
       when :duration then audio_1s
@@ -22,6 +23,7 @@ module WorksWithStrictOption
       case validator_sym
       when :aspect_ratio then image_700x500_file
       when :attached then nil
+      when :attachment then image_700x500_file
       when :content_type then html_file
       when :dimension then image_700x500_file
       when :duration then audio_5s

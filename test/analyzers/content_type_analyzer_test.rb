@@ -19,7 +19,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
       assert_equal({ content_type: "inode/x-empty" }, subject)
     end
 
-    subject { analyzer.content_type }
+    subject { analyzer.metadata }
 
     describe "returns the right content_type for any attachable" do
       # As stated in ActiveStorage documentation, attachables can either be a:

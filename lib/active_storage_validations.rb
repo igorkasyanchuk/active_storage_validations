@@ -16,6 +16,7 @@ require "active_storage_validations/extensors/asv_blob_metadatable"
 require "active_storage_validations/extensors/asv_marcelable"
 
 require "active_storage_validations/attached_validator"
+require "active_storage_validations/attachment_validator"
 require "active_storage_validations/content_type_validator"
 require "active_storage_validations/limit_validator"
 require "active_storage_validations/dimension_validator"
@@ -26,5 +27,26 @@ require "active_storage_validations/size_validator"
 require "active_storage_validations/total_size_validator"
 require "active_storage_validations/pages_validator"
 
+require "active_storage_validations/deprecator"
 require "active_storage_validations/engine"
 require "active_storage_validations/railtie"
+
+
+module ActiveStorageValidations
+  extend ActiveSupport::Concern
+
+  RAILS_VALIDATOR_OPTIONS = %i[allow_blank allow_nil if message on strict unless].freeze
+
+  class_methods do
+    # Declare Active Storage validations with a dedicated validator API.
+    #
+    # It behaves exactly like Rails `validates`, however this custom validator
+    # allows to orchestrate between lightweight and heavyweight validators.
+    #
+    # Metadata validators, which are heavyweight validators, are short-circuited
+    # when the size or content_type validator failed (lightweight validators).
+    def validate_attached(*attributes, **options)
+      validates_with AttachmentValidator, _merge_attributes(attributes).merge(options)
+    end
+  end
+end

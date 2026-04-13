@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-module IsPerformanceOptimized
+module OptimizedWithBlobMetadata
   extend ActiveSupport::Concern
 
   included do
-    subject { validator_test_class::IsPerformanceOptimized.new(params) }
+    subject { validator_test_class::OptimizedWithBlobMetadata.new(params) }
 
     let(:validator_class) { "ActiveStorageValidations::#{validator_test_class.name.delete('::')}".constantize }
 
     describe "when the attachable blob has not been analyzed by our gem yet" do
-      before { subject.is_performance_optimized.attach(attachable) }
+      before { subject.optimized_with_blob_metadata.attach(attachable) }
 
       it "calls the corresponding media analyzer (expensive operation) once" do
         assert_called_on_instance_of(validator_class, :generate_metadata_for, times: 1, returns: {}) do
@@ -20,13 +20,13 @@ module IsPerformanceOptimized
 
     describe "when an attachable blob has already been analyzed by our gem" do
       before do
-        subject.is_performance_optimizeds.attach(attachable)
+        subject.optimized_with_blob_metadatas.attach(attachable)
         subject.save!
       end
 
       it "only calls the corresponding media analyzer (expensive operation) on the new attachable" do
         assert_called_on_instance_of(validator_class, :generate_metadata_for, times: 1, returns: {}) do
-          subject.is_performance_optimizeds.attach(attachable)
+          subject.optimized_with_blob_metadatas.attach(attachable)
         end
       end
     end
@@ -34,13 +34,13 @@ module IsPerformanceOptimized
     describe "persistance of the active_storage_validations metadata" do
       describe "on an already saved attachable without active_storage_validations metadata (like an attachable saved before v2 of the gem)" do
         before do
-          subject.is_performance_optimized.attach(attachable)
+          subject.optimized_with_blob_metadata.attach(attachable)
           subject.save!
-          subject.is_performance_optimized.blob.update!(metadata: {})
+          subject.optimized_with_blob_metadata.blob.update!(metadata: {})
         end
 
         it "persists the active_storage_validations metadata" do
-          assert_equal(subject.is_performance_optimized.blob.metadata, {})
+          assert_equal(subject.optimized_with_blob_metadata.blob.metadata, {})
 
           log_output = StringIO.new
 
@@ -83,7 +83,7 @@ module IsPerformanceOptimized
 
       describe "on a record saved after the v2 upgrade" do
         before do
-          subject.is_performance_optimized.attach(attachable)
+          subject.optimized_with_blob_metadata.attach(attachable)
           subject.save!
         end
 
