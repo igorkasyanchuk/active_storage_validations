@@ -59,7 +59,7 @@ module ASVAttachable
       end
 
       it "allows to attach the blob as both Blob object and multiple signed_ids" do
-        subject.asv_attachables.attach([ blob, valid_blob.signed_id, valid_blob.signed_id ])
+        subject.asv_attachables.attach([ valid_blob, valid_blob.signed_id, valid_blob.signed_id ])
 
         assert(subject.valid?)
       end
