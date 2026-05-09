@@ -1,5 +1,8 @@
 - Unreleased
 
+- 3.0.5
+  - Fix issue when uploading a Blob and signed_id String that references the same Blob (https://github.com/igorkasyanchuk/active_storage_validations/issues/419)
+
 - 3.0.4
   - Add `filename` error options for direct uploads (https://github.com/igorkasyanchuk/active_storage_validations/pull/414).
 
