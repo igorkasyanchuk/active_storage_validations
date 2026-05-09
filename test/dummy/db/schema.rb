@@ -119,8 +119,13 @@ ActiveRecord::Schema.define do
     duration
     processable_file
     size
+    total_size
     pages
   ].each do |validator|
+    create_table :"#{validator}_validator_asv_attachables", force: :cascade do |t|
+      t.datetime :created_at, null: false
+      t.datetime :updated_at, null: false
+    end
     create_table :"#{validator}_validator_asv_errorables", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false

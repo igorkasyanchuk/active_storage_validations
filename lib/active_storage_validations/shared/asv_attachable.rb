@@ -44,7 +44,7 @@ module ActiveStorageValidations
       return to_enum(:attachables_and_blobs, record, attribute) if changes.blank? || !block_given?
 
       if changes.is_a?(ActiveStorage::Attached::Changes::CreateMany)
-        changes.attachables.uniq.zip(changes.blobs.uniq).each do |attachable, blob|
+        changes.attachables.zip(changes.blobs).uniq { |_, blob| blob&.id }.each do |attachable, blob|
           yield attachable, blob
         end
       else

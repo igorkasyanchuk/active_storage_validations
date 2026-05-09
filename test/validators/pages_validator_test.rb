@@ -2,6 +2,7 @@
 
 require "test_helper"
 require "validators/shared_examples/checks_validator_validity"
+require "validators/shared_examples/asv_attachable"
 require "validators/shared_examples/asv_errorable"
 require "validators/shared_examples/comparison_less_than_option"
 require "validators/shared_examples/comparison_less_than_or_equal_to_option"
@@ -18,6 +19,10 @@ describe ActiveStorageValidations::PagesValidator do
 
   let(:validator_test_class) { Pages::Validator }
   let(:params) { {} }
+
+  describe "ASVAttachable shared behavior" do
+    include ASVAttachable
+  end
 
   describe "#initialize_error_options" do
     include ASVErrorable
