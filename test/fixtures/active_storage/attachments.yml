@@ -1,0 +1,8 @@
+first_active_storage_validations_check_working_with_fixture_attachment:
+  name: working_with_fixture
+  record: one (ActiveStorageValidations::Check)
+  blob: first_active_storage_validations_check_working_with_fixture_blob
+second_active_storage_validations_check_working_with_fixture_attachment:
+  name: working_with_fixture_and_variant
+  record: one (ActiveStorageValidations::Check)
+  blob: second_active_storage_validations_check_working_with_fixture_blob

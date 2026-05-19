@@ -2,6 +2,10 @@ test:
   service: Disk
   root: <%= Rails.root.join('tmp/storage') %>
 
+test_fixtures:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage_fixtures") %>
+ 
 digitalocean:
   service: S3
   endpoint: https://nyc3.digitaloceanspaces.com
