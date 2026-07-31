@@ -85,5 +85,15 @@ module ASVAttachable
         assert(subject.invalid?)
       end
     end
+
+    describe "when multiple new files are attached at once" do
+      it "still reports errors for the invalid file when another new file is valid" do
+        next if file_not_matching_requirements.nil? # validators like :limit or :attached don't apply here
+
+        subject.asv_attachables.attach([ file_matching_requirements, file_not_matching_requirements ])
+
+        assert(subject.invalid?)
+      end
+    end
   end
 end
