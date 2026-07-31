@@ -9,4 +9,5 @@ gem 'connection_pool', '~> 2.0' # connection_pool 3 requires Ruby >= 3.2
 gem 'public_suffix', '< 7' # public_suffix 7 requires Ruby >= 3.2
 gem 'rdoc', '< 8' # rdoc 8 requires Ruby >= 3.2
 gem 'simplecov', '~> 0.22.0' # simplecov 1 requires Ruby >= 3.2
+gem 'sqlite3', '< 2.9' # sqlite3 2.9 requires Ruby >= 3.2
 gem 'zeitwerk', '< 2.7' # zeitwerk 2.7 requires Ruby >= 3.2
