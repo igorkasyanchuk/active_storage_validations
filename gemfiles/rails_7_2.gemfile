@@ -5,3 +5,4 @@ source 'https://rubygems.org'
 gemspec :path => '../'
 
 gem 'nokogiri', '~> 1.16.7'
+gem 'connection_pool', '~> 2.0' # connection_pool 3 requires Ruby >= 3.2
