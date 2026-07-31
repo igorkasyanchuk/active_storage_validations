@@ -75,8 +75,11 @@ GEM
       bigdecimal
       rexml
     crass (1.0.7)
+    date (3.5.1)
+    docile (1.4.1)
     drb (2.2.3)
-    erb (6.0.6)
+    erb (4.0.4.1)
+      cgi (>= 0.3.3)
     erubi (1.13.1)
     ffi (1.17.4-aarch64-linux-gnu)
     ffi (1.17.4-aarch64-linux-musl)
@@ -105,15 +108,21 @@ GEM
     method_source (1.1.0)
     mini_magick (5.3.2)
       logger
-    mini_portile2 (2.8.9)
     minitest (5.27.0)
     minitest-focus (1.4.1)
       minitest (> 5.0)
     minitest-mock_expectations (1.2.0)
     minitest-stub_any_instance (1.0.3)
     mutex_m (0.3.0)
-    nokogiri (1.16.8)
-      mini_portile2 (~> 2.8.2)
+    nokogiri (1.16.8-aarch64-linux)
+      racc (~> 1.4)
+    nokogiri (1.16.8-arm-linux)
+      racc (~> 1.4)
+    nokogiri (1.16.8-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.16.8-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.16.8-x86_64-linux)
       racc (~> 1.4)
     pp (0.6.4)
       prettyprint
@@ -123,7 +132,10 @@ GEM
       coderay (~> 1.1)
       method_source (~> 1.0)
       reline (>= 0.6.0)
-    public_suffix (7.0.5)
+    psych (5.4.0)
+      date
+      stringio
+    public_suffix (6.0.2)
     racc (1.8.1)
     rack (3.2.6)
     rack-session (2.1.2)
@@ -151,14 +163,9 @@ GEM
       tsort (>= 0.2)
       zeitwerk (~> 2.6)
     rake (13.4.2)
-    rbs (4.1.1)
-      logger
-      prism (>= 1.6.0)
-      tsort
-    rdoc (8.0.0)
+    rdoc (7.2.0)
       erb
-      prism (>= 1.6.0)
-      rbs (>= 4.0.0)
+      psych (>= 4.0.0)
       tsort
     reline (0.6.3)
       io-console (~> 0.5)
@@ -167,7 +174,12 @@ GEM
       ffi (~> 1.12)
       logger
     securerandom (0.4.1)
-    simplecov (1.0.3)
+    simplecov (0.22.0)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.13.2)
+    simplecov_json_formatter (0.1.4)
     sqlite3 (2.9.5-aarch64-linux-gnu)
     sqlite3 (2.9.5-aarch64-linux-musl)
     sqlite3 (2.9.5-arm-linux-gnu)
@@ -176,6 +188,7 @@ GEM
     sqlite3 (2.9.5-x86_64-darwin)
     sqlite3 (2.9.5-x86_64-linux-gnu)
     sqlite3 (2.9.5-x86_64-linux-musl)
+    stringio (3.2.0)
     thor (1.5.0)
     timeout (0.6.1)
     tsort (0.2.0)
@@ -215,8 +228,10 @@ DEPENDENCIES
   minitest-stub_any_instance (~> 1.0, >= 1.0.3)
   nokogiri (~> 1.16.7)
   pry
+  public_suffix (< 7)
+  rdoc (< 8)
   ruby-vips (>= 2.1.0)
-  simplecov
+  simplecov (~> 0.22.0)
   sqlite3
   webmock (>= 3)
 
