@@ -197,6 +197,7 @@ DEPENDENCIES
   simplecov (~> 0.22.0)
   sqlite3 (~> 1.4)
   webmock (>= 3)
+  zeitwerk (< 2.7)
 
 BUNDLED WITH
    2.4.22
