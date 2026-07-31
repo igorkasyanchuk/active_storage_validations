@@ -2,6 +2,7 @@
 
 - 3.0.6
   - Fix `processable_file` rejecting formats with libvips untrusted loaders (e.g. SVG) after Rails enables `Vips.block_untrusted(true)` (https://github.com/igorkasyanchuk/active_storage_validations/issues/423). No impact on Rails versions that do not enable this Vips change (before 7.2.3.2 / 8.0.5.1 / 8.1.3.1, unless the app blocks untrusted loaders itself).
+  - Fix validation of multiple new attachables with nil blob ids (https://github.com/igorkasyanchuk/active_storage_validations/pull/422) @tmnb
 
 - 3.0.5
   - Fix issue when uploading a Blob and signed_id String that references the same Blob (https://github.com/igorkasyanchuk/active_storage_validations/issues/419)
