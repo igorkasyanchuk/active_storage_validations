@@ -19,6 +19,12 @@ Combustion.initialize! :active_record, :active_storage, :active_job do
   # config.active_storage.service = :digitalocean
 
   config.active_job.queue_adapter = :inline
+
+  # Active Storage enqueues PreviewImageJob on attach when system previewers
+  # (poppler / ffmpeg) are present. That path requires the image_processing gem,
+  # which this project does not use (analyzers call mini_magick / ruby-vips /
+  # pdfinfo directly). Disable previewers so PDF/video saves do not fail in CI.
+  config.active_storage.previewers = []
 end
 
 # Load other test helpers

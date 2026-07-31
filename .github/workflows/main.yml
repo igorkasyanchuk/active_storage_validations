@@ -75,7 +75,7 @@ jobs:
             image_processor: mini_magick
     steps:
       - name: Install imagemagick
-        uses: mfinelli/setup-imagemagick@v6
+        uses: mfinelli/setup-imagemagick@v8
         with:
           cache: true
 
