@@ -2,4 +2,7 @@ source 'https://rubygems.org'
 
 %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| gem rails_subcomponent, '~> 7.2.0' }
 
+# sqlite3 < 2.9 requires ruby < 3.5.dev, which breaks CI on Ruby 4.0
+gem 'sqlite3', '>= 2.9'
+
 gemspec :path => '../'

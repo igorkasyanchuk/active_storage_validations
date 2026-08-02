@@ -5,4 +5,7 @@ source 'https://rubygems.org'
 # nokogiri < 1.18 requires ruby < 3.4.dev, which breaks CI on Ruby 3.4 / 4.0
 gem 'nokogiri', '>= 1.18'
 
+# sqlite3 < 2.9 requires ruby < 3.5.dev, which breaks CI on Ruby 4.0
+gem 'sqlite3', '>= 2.9'
+
 gemspec :path => '../'

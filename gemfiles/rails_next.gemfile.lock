@@ -298,7 +298,7 @@ DEPENDENCIES
   rails!
   ruby-vips (>= 2.1.0)
   simplecov
-  sqlite3 (>= 2.5, >= 0)
+  sqlite3 (>= 2.9, >= 0)
   webmock (>= 3)
 
 BUNDLED WITH

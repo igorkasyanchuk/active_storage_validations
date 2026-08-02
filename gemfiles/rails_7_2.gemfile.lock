@@ -224,7 +224,7 @@ DEPENDENCIES
   pry
   ruby-vips (>= 2.1.0)
   simplecov
-  sqlite3
+  sqlite3 (>= 2.9)
   webmock (>= 3)
 
 BUNDLED WITH
