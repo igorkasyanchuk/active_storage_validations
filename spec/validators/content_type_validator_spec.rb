@@ -489,6 +489,16 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
 
           it { is_expected_not_to_be_valid }
         end
+
+        # a-chacon / #404
+        context "when attaching a PDF with leading whitespace before %PDF" do
+          subject(:record) { model.public_send(attribute).attach(pdf_file) and model }
+
+          let(:attribute) { :spoofing_protection_pdf_file }
+          let(:pdf_file) { pdf_leading_space_file }
+
+          it { is_expected_not_to_be_valid }
+        end
       end
 
       context "when the protection is enabled (spoofing_protection: :magika option)" do
@@ -524,6 +534,16 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
           end
 
           it { is_expected_not_to_be_valid }
+        end
+
+        # a-chacon / #404 — Magika correctly identifies the PDF (unlike file/libmagic)
+        context "when attaching a PDF with leading whitespace before %PDF", if: magika_cli_available? do
+          subject(:record) { model.public_send(attribute).attach(pdf_file) and model }
+
+          let(:attribute) { :spoofing_protection_pdf_magika }
+          let(:pdf_file) { pdf_leading_space_file }
+
+          it { is_expected_to_be_valid }
         end
       end
 

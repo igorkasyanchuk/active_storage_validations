@@ -83,6 +83,18 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::Magika d
         )
       end
     end
+
+    # a-chacon / #404: leading space before %PDF — Magika still sees PDF (unlike file/libmagic)
+    describe "PDF with leading whitespace before %PDF", if: magika_cli_available? do
+      let(:attachable) { pdf_leading_space_file }
+
+      it "detects application/pdf" do
+        expect(content_type).to eq(
+          content_type: "application/pdf",
+          content_type_backend: "magika"
+        )
+      end
+    end
   end
 
   describe "timeouts" do

@@ -207,6 +207,18 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File do
         expect { content_type }.to raise_error(analyzer_error, "file command-line tool is not installed")
       end
     end
+
+    # a-chacon / #404: leading space before %PDF fools libmagic
+    describe "PDF with leading whitespace before %PDF" do
+      let(:attachable) { pdf_leading_space_file }
+
+      it "detects application/octet-stream (libmagic false negative)" do
+        expect(content_type).to eq(
+          content_type: "application/octet-stream",
+          content_type_backend: "file"
+        )
+      end
+    end
   end
 
   describe "timeouts" do

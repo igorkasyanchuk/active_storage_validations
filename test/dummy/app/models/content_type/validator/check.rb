@@ -64,10 +64,14 @@ class ContentType::Validator::Check < ApplicationRecord
   has_one_attached :spoofing_protection
   has_one_attached :spoofing_protection_file
   has_one_attached :spoofing_protection_magika
+  has_one_attached :spoofing_protection_pdf_file
+  has_one_attached :spoofing_protection_pdf_magika
   has_one_attached :no_spoofing_protection
   validates :spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
   validates :spoofing_protection_file, content_type: { with: :jpg, spoofing_protection: :file }
   validates :spoofing_protection_magika, content_type: { with: :jpg, spoofing_protection: :magika }
+  validates :spoofing_protection_pdf_file, content_type: { with: :pdf, spoofing_protection: :file }
+  validates :spoofing_protection_pdf_magika, content_type: { with: :pdf, spoofing_protection: :magika }
   validates :no_spoofing_protection, content_type: :jpg
   has_many_attached :many_spoofing_protection
   validates :many_spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
