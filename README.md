@@ -869,7 +869,7 @@ end
 ```
 (Note that matcher methods are chainable)
 
-All matchers can currently be customized with Rails validation options:
+All matchers can currently be customized with these options:
 
 ```ruby
 describe User do
@@ -886,6 +886,10 @@ describe User do
 
   # :message
   it { is_expected.to validate_dimensions_of(:avatar).width(250).with_message('Invalid dimensions.') }
+
+  # :timeout (analyzer command timeout — metadata validators + content_type with spoofing)
+  it { is_expected.to validate_duration_of(:video).less_than(5.minutes).timeout(30.seconds) }
+  it { is_expected.to validate_processable_file_of(:avatar).timeout(5.seconds) }
 end
 ```
 

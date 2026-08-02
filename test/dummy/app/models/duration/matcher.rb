@@ -52,6 +52,9 @@ class Duration::Matcher < ApplicationRecord
   has_one_attached :with_message
   validates :with_message, duration: { less_than_or_equal_to: 5.minutes, message: "Custom message" }
 
+  has_one_attached :with_timeout
+  validates :with_timeout, duration: { less_than_or_equal_to: 5.minutes, timeout: 5.seconds }
+
   has_one_attached :with_context_symbol
   validates :with_context_symbol, duration: { less_than_or_equal_to: 5.minutes }, on: :update
   has_one_attached :with_context_array

@@ -126,6 +126,10 @@ RSpec.describe ActiveStorageValidations::Matchers::DurationValidatorMatcher do
     it_behaves_like "works with except_on"
   end
 
+  describe "#timeout" do
+    it_behaves_like "works with timeout"
+  end
+
   describe "Combinations" do
     describe "#less_than + #with_message" do
       let(:model_attribute) { :less_than_with_message }

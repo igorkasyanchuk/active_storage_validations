@@ -9,6 +9,7 @@
   - **ADDED**
     - Add `#except_on` matcher option to support Rails `:except_on` validation option (available since Rails 8.0) (https://github.com/igorkasyanchuk/active_storage_validations/issues/380)
     - Add optional per-validator `timeout:` and `timeout.active_storage_validations` instrumentation for analyzer commands. Timed-out analysis fails closed using existing validation errors
+    - Add `#timeout` matcher option for metadata validators (`dimension`, `aspect_ratio`, `duration`, `pages`, `processable_file`) and `content_type`
   - **FIXED**
     - Fix `dimension: { min:, max: }` when both top-level bounds are set together (previously the second bound overwrote the first in `process_options`)
     - Fix Proc options with arity 0 (e.g. `-> { 2.kilobytes..7.kilobytes }`) being called with the record argument

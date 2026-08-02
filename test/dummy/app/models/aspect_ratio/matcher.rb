@@ -33,6 +33,9 @@ class AspectRatio::Matcher < ApplicationRecord
   has_one_attached :with_message
   validates :with_message, aspect_ratio: { with: :square, message: "Custom message" }
 
+  has_one_attached :with_timeout
+  validates :with_timeout, aspect_ratio: { with: :square, timeout: 5.seconds }
+
   has_one_attached :with_context_symbol
   validates :with_context_symbol, aspect_ratio: :square, on: :update
   has_one_attached :with_context_array

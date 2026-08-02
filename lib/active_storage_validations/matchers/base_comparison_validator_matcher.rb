@@ -78,10 +78,16 @@ module ActiveStorageValidations
           higher_than_min? &&
           lower_than_max? &&
           not_higher_than_max? &&
-          equal_to_exact?
+          equal_to_exact? &&
+          is_timeout_valid?
       end
 
       protected
+
+      # Hook for ASVTimeoutable (Duration / Pages). Size / TotalSize leave this as-is.
+      def is_timeout_valid?
+        true
+      end
 
       def build_failure_message(message)
         return unless @failure_message_artefacts.present?

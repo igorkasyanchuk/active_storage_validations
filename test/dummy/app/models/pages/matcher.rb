@@ -52,6 +52,9 @@ class Pages::Matcher < ApplicationRecord
   has_one_attached :with_message
   validates :with_message, pages: { less_than_or_equal_to: 5, message: "Custom message" }
 
+  has_one_attached :with_timeout
+  validates :with_timeout, pages: { equal_to: 5, timeout: 5.seconds }
+
   has_one_attached :with_context_symbol
   validates :with_context_symbol, pages: { less_than_or_equal_to: 5 }, on: :update
   has_one_attached :with_context_array

@@ -34,6 +34,9 @@ class ContentType::Matcher < ApplicationRecord
   has_one_attached :with_message
   validates :with_message, content_type: { in: [ "image/png" ], message: "Custom message" }
 
+  has_one_attached :with_timeout
+  validates :with_timeout, content_type: { in: [ "image/png" ], timeout: 5.seconds }
+
   has_one_attached :with_context_symbol
   validates :with_context_symbol, content_type: :png, on: :update
   has_one_attached :with_context_array

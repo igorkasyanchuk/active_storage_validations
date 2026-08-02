@@ -36,4 +36,8 @@ RSpec.describe ActiveStorageValidations::Matchers::ProcessableFileValidatorMatch
   describe "#except_on" do
     it_behaves_like "works with except_on"
   end
+
+  describe "#timeout" do
+    it_behaves_like "works with timeout"
+  end
 end

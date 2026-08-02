@@ -22,6 +22,9 @@ class ProcessableFile::Matcher < ApplicationRecord
   has_one_attached :with_message
   validates :with_message, processable_file: { message: "Custom message" }
 
+  has_one_attached :with_timeout
+  validates :with_timeout, processable_file: { timeout: 5.seconds }
+
   has_one_attached :with_context_symbol
   validates :with_context_symbol, processable_file: true, on: :update
   has_one_attached :with_context_array

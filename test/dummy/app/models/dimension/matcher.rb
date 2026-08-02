@@ -54,6 +54,9 @@ class Dimension::Matcher < ApplicationRecord
   validates :with_message, dimension: { width: 150, height: 150, message: "Custom message" }
   validates :without_message, dimension: { width: 150, height: 150 }
 
+  has_one_attached :with_timeout
+  validates :with_timeout, dimension: { width: 150, height: 150, timeout: 5.seconds }
+
   has_one_attached :with_context_symbol
   validates :with_context_symbol, dimension: { width: 150, height: 150 }, on: :update
   has_one_attached :with_context_array

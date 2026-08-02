@@ -7,6 +7,7 @@ require_relative "shared/asv_contextable"
 require_relative "shared/asv_except_onable"
 require_relative "shared/asv_messageable"
 require_relative "shared/asv_rspecable"
+require_relative "shared/asv_timeoutable"
 require_relative "shared/asv_validatable"
 
 module ActiveStorageValidations
@@ -23,6 +24,7 @@ module ActiveStorageValidations
       include ASVExceptOnable
       include ASVMessageable
       include ASVRspecable
+      include ASVTimeoutable
       include ASVValidatable
 
       def initialize(attribute_name)
@@ -31,6 +33,7 @@ module ActiveStorageValidations
         initialize_except_onable
         initialize_messageable
         initialize_rspecable
+        initialize_timeoutable
         @attribute_name = attribute_name
         @width_min = @width_max = @height_min = @height_max = nil
       end
@@ -92,6 +95,7 @@ module ActiveStorageValidations
           is_context_valid? &&
           is_except_on_valid? &&
           is_allowing_blank? &&
+          is_timeout_valid? &&
           is_custom_message_valid? &&
           width_not_smaller_than_min? &&
           width_larger_than_min? &&

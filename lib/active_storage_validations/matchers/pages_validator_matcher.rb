@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "base_comparison_validator_matcher"
+require_relative "shared/asv_timeoutable"
 
 module ActiveStorageValidations
   module Matchers
@@ -9,6 +10,13 @@ module ActiveStorageValidations
     end
 
     class PagesValidatorMatcher < BaseComparisonValidatorMatcher
+      include ASVTimeoutable
+
+      def initialize(attribute_name)
+        super
+        initialize_timeoutable
+      end
+
       def description
         "validate file number of pages of :#{@attribute_name}"
       end

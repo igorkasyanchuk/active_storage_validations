@@ -62,6 +62,7 @@ See the README [Configuration](../README.md#configuration) section for the full 
 
 - `#except_on` matcher option to support Rails `:except_on` (available since Rails 8.0), e.g. `validate_attached_of(:avatar).except_on(:update)`
 - Optional per-validator `timeout:` for analyzer commands, plus `timeout.active_storage_validations` instrumentation (timed-out analysis fails closed using existing validation errors)
+- `#timeout` matcher option for metadata validators and `content_type`, e.g. `validate_duration_of(:video).less_than(5.minutes).timeout(30.seconds)`
 
 ### Fixed
 
