@@ -157,6 +157,47 @@ RSpec.describe ActiveStorageValidations::TotalSizeValidator do
 
       it_behaves_like "comparison equal_to option"
     end
+
+    describe "multi-file sum" do
+      # validates :equal_to, total_size: { equal_to: 5.kilobytes }
+      let(:attribute) { :equal_to }
+
+      context "when the sum of several files equals the bound" do
+        subject(:record) { model.public_send(attribute).attach([ file_2ko, file_2ko, file_1ko ]) and model }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when the sum of several files is lower than the bound" do
+        subject(:record) { model.public_send(attribute).attach([ file_1ko, file_1ko ]) and model }
+
+        let(:error_options) do
+          {
+            total_file_size: "2 KB",
+            exact: "5 KB"
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("total_file_size_not_equal_to", with_locales: [ "en" ], error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+
+      context "when the sum of several files is higher than the bound" do
+        subject(:record) { model.public_send(attribute).attach([ file_2ko, file_5ko ]) and model }
+
+        let(:error_options) do
+          {
+            total_file_size: "7 KB",
+            exact: "5 KB"
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("total_file_size_not_equal_to", with_locales: [ "en" ], error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+    end
   end
 
   describe "Rails options" do

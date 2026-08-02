@@ -239,6 +239,13 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
         it { is_expected_to_have_error_options(error_options) }
       end
 
+      describe "when the attached file is missing from storage" do
+        let(:attribute) { :with_square }
+        let(:file_for_attachment_missing) { image_150x150_file }
+
+        it_behaves_like "reports attachment_missing"
+      end
+
       context "when the passed file is a pdf" do
         describe "valid pdf" do
           subject(:record) { model.public_send(attribute).attach(pdf_150x150_file) and model }

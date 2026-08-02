@@ -382,6 +382,55 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
       end
     end
 
+    describe ":min and :max options together" do
+      # validates :min_max, dimension: { min: 400..500, max: 600..700 }
+      # validates :min_max_proc, dimension: { min: -> (record) { 400..500 }, max: -> (record) { 600..700 } }
+      # restricts width to 400..600 and height to 500..700
+      %w[value proc].each do |value_type|
+        describe value_type do
+          let(:attribute) { :"min_max#{'_proc' if value_type == 'proc'}" }
+
+          context "when provided with an image within both width and height bounds" do
+            subject(:record) { model.public_send(attribute).attach(image_500x500_file) and model }
+
+            it { is_expected_to_be_valid }
+          end
+
+          context "when provided with an image below the min width or height" do
+            subject(:record) { model.public_send(attribute).attach(image_150x150_file) and model }
+
+            let(:error_options) do
+              {
+                width: 400,
+                height: 500,
+                filename: "image_150x150_file.png"
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_include_error_message("dimension_min_not_included_in", error_options: error_options) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+
+          context "when provided with an image above the max width or height" do
+            subject(:record) { model.public_send(attribute).attach(image_800x600_file) and model }
+
+            let(:error_options) do
+              {
+                width: 600,
+                height: 700,
+                filename: "image_800x600_file.png"
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_include_error_message("dimension_max_not_included_in", error_options: error_options) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+        end
+      end
+    end
+
     describe "Integration tests" do
       describe ":width exact + :height exact" do
         let(:attribute) { :width_height_exact }
@@ -525,6 +574,13 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
         it { is_expected_not_to_be_valid }
         it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
         it { is_expected_to_have_error_options(error_options) }
+      end
+
+      describe "when the attached file is missing from storage" do
+        let(:attribute) { :width }
+        let(:file_for_attachment_missing) { image_150x150_file }
+
+        it_behaves_like "reports attachment_missing"
       end
 
       context "when the passed file is a pdf" do

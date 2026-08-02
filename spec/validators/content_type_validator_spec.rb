@@ -464,6 +464,13 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
         end
       end
 
+      context "when the attached file is missing from storage" do
+        let(:attribute) { :spoofing_protection }
+        let(:file_for_attachment_missing) { file_7ko_and_jpg }
+
+        it_behaves_like "reports attachment_missing"
+      end
+
       context "when the protection is disabled (default / spoofing_protection: false option)" do
         let(:attribute) { :no_spoofing_protection }
 

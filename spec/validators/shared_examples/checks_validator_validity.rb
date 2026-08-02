@@ -37,7 +37,7 @@ RSpec.shared_examples "checks validator validity" do
     end
   end
 
-  if %i[content_type size total_size].include? described_class.to_sym
+  if %i[content_type size total_size duration pages].include? described_class.to_sym
     context "when the validator has several checks" do
       subject(:model) { validator_test_class::CheckValiditySeveralChecks.new(params) }
 

@@ -33,6 +33,10 @@ class Pages::Validator::Check < ApplicationRecord
   validates :less_than_or_equal_to_proc, pages: { less_than_or_equal_to: ->(record) { 2 } }
   validates :greater_than_proc, pages: { greater_than: ->(record) { 7 } }
   validates :greater_than_or_equal_to_proc, pages: { greater_than_or_equal_to: ->(record) { 7 } }
-  validates :between_proc, pages: { between: -> { 2..7 } }
+  validates :between_proc, pages: { between: ->(record) { 2..7 } }
   validates :equal_to_proc, pages: { equal_to: ->(record) { 5 } }
+
+  # Edge cases
+  has_one_attached :with_invalid_media_file
+  validates :with_invalid_media_file, pages: { equal_to: 5 }
 end

@@ -51,5 +51,12 @@ RSpec.describe ActiveStorageValidations::AttachedValidator do
         it_behaves_like "works with #{supported_validation_option} option"
       end
     end
+
+    # Rails :except_on is available since Rails 8.0
+    if Rails.gem_version >= Gem::Version.new("8.0.0")
+      describe ":except_on" do
+        it_behaves_like "works with except_on option"
+      end
+    end
   end
 end

@@ -59,6 +59,13 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
       it { is_expected_to_be_valid }
     end
 
+    describe "when the attached file is missing from storage" do
+      let(:attribute) { :has_to_be_processable }
+      let(:file_for_attachment_missing) { image_150x150_file }
+
+      it_behaves_like "reports attachment_missing"
+    end
+
     context "when using Vips with untrusted loaders blocked" do
       # Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call Vips.block_untrusted(true), so
       # analysis of formats with untrusted loaders returns empty metadata by design.

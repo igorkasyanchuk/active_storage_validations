@@ -7,8 +7,10 @@ RSpec.shared_examples "comparison greater_than_or_equal_to option" do
   # validates :greater_than_or_equal_to_proc, <validator>: { greater_than_or_equal_to: -> (record) { <7 value> } }
   %w[value proc].each do |value_type|
     describe "#{value_type} validator" do
+      let(:attribute) { :"greater_than_or_equal_to#{'_proc' if value_type == 'proc'}" }
+
       context "when provided with a file with a lower value than the value specified in the model validations" do
-        subject(:record) { model.greater_than_or_equal_to.attach(file_having_lower_than_greater_than_or_equal_to_option) and model }
+        subject(:record) { model.public_send(attribute).attach(file_having_lower_than_greater_than_or_equal_to_option) and model }
 
         it { is_expected_not_to_be_valid }
         it { is_expected_to_include_error_message(error_name, with_locales: [ "en" ], error_options: error_options_for_file_having_lower_than_greater_than_or_equal_to_option) }
@@ -16,13 +18,13 @@ RSpec.shared_examples "comparison greater_than_or_equal_to option" do
       end
 
       context "when provided with a file with the exact value specified in the model validations" do
-        subject(:record) { model.greater_than_or_equal_to.attach(file_having_exact_greater_than_or_equal_to_option) and model }
+        subject(:record) { model.public_send(attribute).attach(file_having_exact_greater_than_or_equal_to_option) and model }
 
         it { is_expected_to_be_valid }
       end
 
       context "when provided with a file with a higher value than the value specified in the model validations" do
-        subject(:record) { model.greater_than_or_equal_to.attach(file_having_higher_than_greater_than_or_equal_to_option) and model }
+        subject(:record) { model.public_send(attribute).attach(file_having_higher_than_greater_than_or_equal_to_option) and model }
 
         it { is_expected_to_be_valid }
       end

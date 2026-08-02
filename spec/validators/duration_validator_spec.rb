@@ -165,6 +165,30 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
 
       it_behaves_like "comparison equal_to option"
     end
+
+    describe "Edge cases" do
+      context "when the passed file is not a valid media" do
+        subject(:record) { model.public_send(attribute).attach(empty_io_file) and model }
+
+        let(:attribute) { :with_invalid_media_file }
+        let(:error_options) do
+          {
+            filename: empty_io_file[:filename]
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+
+      describe "when the attached file is missing from storage" do
+        let(:attribute) { :less_than }
+        let(:file_for_attachment_missing) { audio_1s }
+
+        it_behaves_like "reports attachment_missing"
+      end
+    end
   end
 
   describe "Blob Metadata" do
