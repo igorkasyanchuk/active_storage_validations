@@ -866,6 +866,8 @@ Then you can use the matchers with the syntax specified in the RSpec section, ju
 
 If you want to contribute to the project, you will have to fork the repository and create a new branch from the `master` branch. Then build your feature, or fix the issue, and create a pull request. Be sure to add tests for your changes.
 
+AI coding agents: see [AGENTS.md](AGENTS.md) for architecture, test commands, and contribution patterns.
+
 Before submitting your pull request, run the tests to make sure everything works as expected.
 
 To run the gem tests, launch the following commands in the root folder of gem repository:

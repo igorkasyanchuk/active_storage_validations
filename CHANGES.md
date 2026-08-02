@@ -9,6 +9,7 @@
     - Add `#except_on` matcher option to support Rails `:except_on` validation option (available since Rails 8.0) (https://github.com/igorkasyanchuk/active_storage_validations/issues/380)
   - **MISC**
     - Add support for Ruby 4.0 in CI matrix
+    - Add [AGENTS.md](AGENTS.md) with codebase guide for AI coding agents
 
   - To upgrade from version 3.x to 4.x, please read the [upgrade guide](docs/upgrade_to_4.md)
 
