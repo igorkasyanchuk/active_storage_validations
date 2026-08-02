@@ -132,6 +132,7 @@ IMAGE_PROCESSOR=mini_magick bundle exec rake test
 4. Update or add dummy models under `test/dummy/app/models/<validator>/`
 5. If error types change, sync all locale files
 6. If the public API changes, update README + CHANGES
+7. Behavior or API changes almost always require updating the related matcher under `lib/active_storage_validations/matchers/` and its tests under `test/matchers/`
 
 ### Changing a matcher
 
