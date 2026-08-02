@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "open3"
-
 module ActiveStorageValidations
   # = ActiveStorageValidations PDF \Analyzer
   #
@@ -49,13 +47,9 @@ module ActiveStorageValidations
     end
 
     def media_from_path(path)
-      instrument(File.basename(pdfinfo_path)) do
-        stdout, _stderr, status = Open3.capture3(
-          pdfinfo_path,
-          path
-        )
-
-        status.success? ? stdout_to_hash(stdout) : nil
+      instrument(File.basename(pdfinfo_path)) do |payload|
+        result = run_command(pdfinfo_path, path, payload: payload)
+        result.success? ? stdout_to_hash(result.stdout) : nil
       end
     end
 

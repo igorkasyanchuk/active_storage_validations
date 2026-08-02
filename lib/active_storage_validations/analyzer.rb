@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "shared/asv_attachable"
+require_relative "shared/asv_commandable"
 require_relative "shared/asv_loggable"
 
 module ActiveStorageValidations
@@ -12,12 +13,14 @@ module ActiveStorageValidations
   # Heavily (not to say 100%) inspired by Rails own ActiveStorage::Analyzer
   class Analyzer
     include ASVAttachable
+    include ASVCommandable
     include ASVLoggable
 
     attr_reader :attachable
 
-    def initialize(attachable)
+    def initialize(attachable, timeout: ActiveStorageValidations.command_timeout)
       @attachable = attachable
+      @timeout = timeout
     end
 
     # Override this method in a concrete subclass. Have it return a String content type.
@@ -81,8 +84,37 @@ module ActiveStorageValidations
       raise NotImplementedError
     end
 
-    def instrument(analyzer, &block)
-      ActiveSupport::Notifications.instrument("analyze.active_storage_validations", analyzer: analyzer, &block)
+    def timeout_in_seconds
+      return nil if @timeout.nil?
+
+      @timeout.to_f
+    end
+
+    def instrument(analyzer)
+      payload = {
+        analyzer: analyzer,
+        command: analyzer,
+        timeout: timeout_in_seconds,
+        timed_out: false
+      }
+
+      ActiveSupport::Notifications.instrument("analyze.active_storage_validations", payload) do
+        started_at = monotonic_time
+        result = yield payload
+        payload[:duration] = monotonic_time - started_at
+        result
+      end
+    end
+
+    def mark_timed_out!(payload, command)
+      payload[:timed_out] = true if payload
+      ActiveSupport::Notifications.instrument(
+        "timeout.active_storage_validations",
+        analyzer: payload&.[](:analyzer) || command,
+        command: command,
+        timeout: timeout_in_seconds
+      )
+      logger.info "Skipping file analysis because #{command} timed out after #{timeout_in_seconds} seconds"
     end
   end
 end

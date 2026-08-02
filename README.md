@@ -22,6 +22,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Using video and audio metadata validators](#using-video-and-audio-metadata-validators)
   - [Using pdf metadata validators](#using-pdf-metadata-validators)
   - [Using content type spoofing protection validator option](#using-content-type-spoofing-protection-validator-option)
+  - [Configuration](#configuration)
 - [Validators](#validators)
   - [Attached](#attached)
   - [Limit](#limit)
@@ -84,6 +85,43 @@ To use the pdf metadata validators (`dimension`, `aspect_ratio`, `processable_fi
 To use the `spoofing_protection` option with the `content_type` validator, you only need to have the UNIX `file` command on your system.
 
 If you want some inspiration about how to add `imagemagick`, `libvips`, `ffmpeg` or `poppler` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+
+### Configuration
+
+Optional global settings can go in an initializer. Example template:
+
+```ruby
+# config/initializers/active_storage_validations.rb
+ActiveStorageValidations.configure do |config|
+  # Infer HTML accept= on file_field from content_type validators (default: true)
+  # config.infer_file_field_accept = false
+
+  # Max time for external analyzer commands: ffprobe, pdfinfo, file, ImageMagick identify, libvips
+  # (default: 10.seconds; set to nil to disable)
+  # config.command_timeout = 10.seconds
+end
+
+# Optional: monitor analyzer timeouts
+# ActiveSupport::Notifications.subscribe("timeout.active_storage_validations") do |*args|
+#   event = ActiveSupport::Notifications::Event.new(*args)
+#   Rails.logger.warn("[ASV] command timeout: #{event.payload}")
+# end
+```
+
+`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection: true`). When a command times out, analysis fails closed and the validator adds its usual error (`file_not_processable` / `media_metadata_missing` / content-type errors) — there is no separate timeout error message.
+
+The 10s default is enough for typical uploads. Raise it (or set `nil`) if you analyze very large videos/PDFs, especially on slow or network storage — otherwise those files can start failing validation after upgrade. See [upgrade to 4.x](docs/upgrade_to_4.md#analyzer-command-timeout).
+
+Per-validator override (applies to the analysis triggered by that validator; the first analysis for a blob is cached):
+
+```ruby
+validates :video, duration: { less_than: 5.minutes, timeout: 30.seconds }
+```
+
+Notes:
+- Setting `command_timeout` (or per-validator `timeout:`) to `nil` disables the deadline
+- ImageMagick analysis runs `identify` through the same killable command runner (MiniMagick is only used to build the argv)
+- For libvips, a timeout may not immediately free the Ruby thread stuck in FFI/C; the validation still fails closed and emits `timeout.active_storage_validations`
 
 ## Validators
 
@@ -204,10 +242,11 @@ Validates if the attachment has an allowed content type.
 
 #### Options
 
-The `content_type` validator has 3 possible options:
+The `content_type` validator has several possible options:
 - `with`: defines the allowed content type (string, symbol or regex)
 - `in`: defines the allowed content types (array of strings or symbols)
 - `spoofing_protection`: enables content type spoofing protection (boolean, defaults to `false`)
+- `timeout`: overrides the global analyzer [command timeout](#configuration) when spoofing protection runs the `file` command
 
 As mentioned above, this validator can define content types in several ways:
 - String: `image/png` or `png`
@@ -259,8 +298,10 @@ Explicit `accept` values are never overridden. You can also disable inference:
 ```
 
 ```ruby
-# Globally (e.g. in config/initializers/active_storage_validations.rb)
+# Globally — see [Configuration](#configuration) for a full initializer template
 ActiveStorageValidations.infer_file_field_accept = false
+# or:
+# ActiveStorageValidations.configure { |config| config.infer_file_field_accept = false }
 ```
 
 Notes:
@@ -465,6 +506,7 @@ The `dimension` validator has several possible options:
   - `in`: defines the allowed height range (range)
 - `min`: defines the minimum allowed width and height (range)
 - `max`: defines the maximum allowed width and height (range)
+- `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 #### Examples
 
@@ -519,13 +561,14 @@ Validates the duration of the attached audio / video files.
 
 #### Options
 
-The `duration` validator has 5 possible options:
+The `duration` validator has several possible options:
 - `less_than`: defines the strict maximum allowed file duration
 - `less_than_or_equal_to`: defines the maximum allowed file duration
 - `greater_than`: defines the strict minimum allowed file duration
 - `greater_than_or_equal_to`: defines the minimum allowed file duration
 - `between`: defines the allowed file duration range
 - `equal_to`: defines the allowed duration
+- `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 #### Examples
 
@@ -540,6 +583,7 @@ class User < ApplicationRecord
   validates :intro_song, duration: { greater_than_or_equal_to: 1.second } # restricts the file duration to >= 1 second
   validates :intro_song, duration: { between: 1.second..2.minutes } # restricts the file duration to between 1 second and 2 minutes
   validates :intro_song, duration: { equal_to: 1.minute } # restricts the duration to exactly 1 minute
+  validates :intro_song, duration: { less_than: 5.minutes, timeout: 5.seconds } # custom analyzer timeout
 end
 ```
 
@@ -577,6 +621,7 @@ It can also be used for pdf files, but it will only analyze the pdf first page.
 The `aspect_ratio` validator has several options:
 - `with`: defines the allowed aspect ratio (e.g. `:is_16/9`)
 - `in`: defines the allowed aspect ratios (e.g. `%i[square landscape]`)
+- `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 This validator can define aspect ratios in several ways:
 - Symbols:
@@ -627,7 +672,8 @@ Validates if the attached files can be processed by MiniMagick or Vips (image), 
 
 #### Options
 
-The `processable_file` validator has no options.
+The `processable_file` validator supports:
+- `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 #### Examples
 
@@ -637,6 +683,7 @@ class User < ApplicationRecord
   has_one_attached :avatar
 
   validates :avatar, processable_file: true # ensures that the file is processable by MiniMagick or Vips (image) or ffmpeg (video/audio)
+  validates :avatar, processable_file: { timeout: 5.seconds }
 end
 ```
 
@@ -661,13 +708,14 @@ Validates each attached pdf file number of pages.
 
 #### Options
 
-The `pages` validator has 6 possible options:
+The `pages` validator has several possible options:
 - `less_than`: defines the strict maximum allowed number of pages
 - `less_than_or_equal_to`: defines the maximum allowed number of pages
 - `greater_than`: defines the strict minimum allowed number of pages
 - `greater_than_or_equal_to`: defines the minimum allowed number of pages
 - `between`: defines the allowed number of pages range
 - `equal_to`: defines the allowed number of pages
+- `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 #### Examples
 

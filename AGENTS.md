@@ -7,7 +7,7 @@ It is a **gem**, not a Rails application. Tests boot a Combustion dummy app unde
 ## Architecture Overview
 
 ```
-lib/active_storage_validations.rb          # Entry point + infer_file_field_accept config
+lib/active_storage_validations.rb          # Entry point + infer_file_field_accept / command_timeout config
 lib/active_storage_validations/
   *_validator.rb                           # Validators (ActiveModel::EachValidator)
   base_comparison_validator.rb             # Shared comparison options (<, <=, >, >=, between, equal_to)
@@ -39,6 +39,7 @@ docs/upgrade_to_*.md                       # Upgrade guides
 | `ASVActiveStorageable` | Attachment presence / attached files |
 | `ASVAttachable` | Loop attachables/blobs; metadata validation path |
 | `ASVAnalyzable` | Pick analyzer; cache results on blob custom metadata (`asv_*`) |
+| `ASVCommandable` | Timed external commands with process-group kill (`command_timeout`) |
 | `ASVErrorable` | `add_error` with `validator_type`, `filename`, bounds |
 | `ASVOptionable` | Flatten options; evaluate Proc options |
 | `ASVSymbolizable` | Map validator class → error symbol (`:content_type`, …) |
@@ -64,6 +65,10 @@ By default, `f.file_field :avatar` may render an HTML `accept` attribute derived
 - Disable globally: `ActiveStorageValidations.infer_file_field_accept = false`
 - Disable per field: `f.file_field :avatar, infer_accept: false`
 - Explicit `accept:` is never overridden
+
+### Analyzer `command_timeout` (v4)
+
+External analyzer commands default to a 10s deadline (`ActiveStorageValidations.command_timeout`). Override globally, via `configure`, or per validator with `timeout:`. Timeouts fail closed (existing validation errors) and emit `timeout.active_storage_validations`.
 
 ## Testing Commands
 

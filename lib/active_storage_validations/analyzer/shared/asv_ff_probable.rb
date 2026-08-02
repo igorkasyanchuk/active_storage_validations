@@ -28,17 +28,18 @@ module ActiveStorageValidations
     end
 
     def media_from_path(path)
-      instrument(File.basename(ffprobe_path)) do
-        stdout, _stderr, status = Open3.capture3(
+      instrument(File.basename(ffprobe_path)) do |payload|
+        result = run_command(
           ffprobe_path,
           "-print_format", "json",
           "-show_streams",
           "-show_format",
           "-v", "error",
-          path
+          path,
+          payload: payload
         )
 
-        status.success? ? JSON.parse(stdout) : nil
+        result.success? ? JSON.parse(result.stdout) : nil
       end
     end
 

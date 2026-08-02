@@ -19,7 +19,7 @@ module ActiveStorageValidations
     def metadata_for(blob, attachable, metadata_keys)
       return blob.active_storage_validations_metadata if blob_has_asv_metadata?(blob, metadata_keys)
 
-      new_metadata = generate_metadata_for(attachable, metadata_keys)
+      new_metadata = generate_metadata_for(attachable, metadata_keys) || {}
       blob.merge_into_active_storage_validations_metadata(new_metadata)
       blob.save!
 
@@ -52,15 +52,15 @@ module ActiveStorageValidations
     end
 
     def pdf_analyzer_for(attachable)
-      ActiveStorageValidations::Analyzer::PdfAnalyzer.new(attachable)
+      ActiveStorageValidations::Analyzer::PdfAnalyzer.new(attachable, **analyzer_timeout_options)
     end
 
     def image_analyzer_for(attachable)
       case image_processor
       when :mini_magick
-        ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick.new(attachable)
+        ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick.new(attachable, **analyzer_timeout_options)
       when :vips
-        ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips.new(attachable)
+        ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips.new(attachable, **analyzer_timeout_options)
       end
     end
 
@@ -71,19 +71,25 @@ module ActiveStorageValidations
     end
 
     def video_analyzer_for(attachable)
-      ActiveStorageValidations::Analyzer::VideoAnalyzer.new(attachable)
+      ActiveStorageValidations::Analyzer::VideoAnalyzer.new(attachable, **analyzer_timeout_options)
     end
 
     def audio_analyzer_for(attachable)
-      ActiveStorageValidations::Analyzer::AudioAnalyzer.new(attachable)
+      ActiveStorageValidations::Analyzer::AudioAnalyzer.new(attachable, **analyzer_timeout_options)
     end
 
     def fallback_analyzer_for(attachable)
-      ActiveStorageValidations::Analyzer::NullAnalyzer.new(attachable)
+      ActiveStorageValidations::Analyzer::NullAnalyzer.new(attachable, **analyzer_timeout_options)
     end
 
     def content_type_analyzer_for(attachable)
-      ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable)
+      ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable, **analyzer_timeout_options)
+    end
+
+    # Passes raw validator +timeout:+ through to analyzers. Kept out of
+    # AVAILABLE_CHECKS so ASVOptionable does not flatten it as a comparison bound.
+    def analyzer_timeout_options
+      options.key?(:timeout) ? { timeout: options[:timeout] } : {}
     end
   end
 end

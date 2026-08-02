@@ -3,12 +3,22 @@
 require "active_model"
 require "active_support/concern"
 require "active_support/core_ext/module/attribute_accessors"
+require "active_support/core_ext/numeric/time"
 
 module ActiveStorageValidations
   # When true (default), FormBuilder#file_field automatically sets the HTML
   # +accept+ attribute from +content_type+ validators. Can also be overridden
   # per field with +infer_accept:+.
   mattr_accessor :infer_file_field_accept, instance_accessor: false, default: true
+
+  # Maximum time allowed for external analyzer commands (ffprobe, pdfinfo, file,
+  # MiniMagick, libvips). Set to +nil+ to disable. Per-validator +timeout:+
+  # overrides this value for the analysis that validator triggers.
+  mattr_accessor :command_timeout, instance_accessor: false, default: 10.seconds
+
+  def self.configure
+    yield self
+  end
 end
 
 require "active_storage_validations/analyzer"

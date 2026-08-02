@@ -5,8 +5,10 @@
     - Drop support for Rails 6.1.4, 7.0.0 (we keep support for Rails >= 7.0.1)
     - Drop support for Ruby < 3.3 (`required_ruby_version` is now `>= 3.3.0`)
     - `FormBuilder#file_field` now automatically sets the HTML `accept` attribute from `content_type` validators (https://github.com/igorkasyanchuk/active_storage_validations/pull/415). Disable globally with `ActiveStorageValidations.infer_file_field_accept = false`, or per field with `infer_accept: false`
+    - Analyzer commands (`ffprobe`, `pdfinfo`, `file`, ImageMagick `identify`, libvips) now default to a 10s `command_timeout` (https://github.com/igorkasyanchuk/active_storage_validations/issues/410). Most apps are unaffected; this is breaking for uploads whose metadata analysis legitimately takes longer than 10s (e.g. very large videos on slow/network storage). Raise globally, per validator with `timeout:`, or set `nil` to restore unbounded waits — see [upgrade guide](docs/upgrade_to_4.md)
   - **ADDED**
     - Add `#except_on` matcher option to support Rails `:except_on` validation option (available since Rails 8.0) (https://github.com/igorkasyanchuk/active_storage_validations/issues/380)
+    - Add optional per-validator `timeout:` and `timeout.active_storage_validations` instrumentation for analyzer commands. Timed-out analysis fails closed using existing validation errors
   - **MISC**
     - Add support for Ruby 4.0 in CI matrix
     - Add [AGENTS.md](AGENTS.md) with codebase guide for AI coding agents

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "open3"
-
 module ActiveStorageValidations
   # = ActiveStorageValidations ContentType \Analyzer
   #
@@ -45,15 +43,9 @@ module ActiveStorageValidations
     end
 
     def media_from_path(path)
-      instrument("file") do
-        stdout, status = Open3.capture2(
-          "file",
-          "-b",
-          "--mime-type",
-          path
-        )
-
-        status.success? ? stdout.strip : nil
+      instrument("file") do |payload|
+        result = run_command("file", "-b", "--mime-type", path, payload: payload)
+        result.success? ? result.stdout.strip : nil
       end
     end
   end

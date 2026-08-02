@@ -16,6 +16,9 @@ module ActiveStorageValidations
             {}
           end
         ensure
+          # Best-effort: avoid unlinking the tempfile while a timed-out FFI load
+          # may still be using the path.
+          wait_for_vips_load_thread
           tempfile.close
         end
       end
@@ -25,17 +28,40 @@ module ActiveStorageValidations
     end
 
     def media_from_path(path)
-      instrument("vips") do
-        begin
-          ::Vips::Image.new_from_file(path, access: :sequential)
-        rescue ::Vips::Error
-          # Vips throw errors rather than returning false when reading a not
-          # supported attachable.
-          # We stumbled upon this issue while reading 0 byte size attachable
-          # https://github.com/janko/image_processing/issues/97
-          nil
-        end
+      instrument("vips") do |payload|
+        load_vips_image(path, payload)
       end
+    end
+
+    def load_vips_image(path, payload)
+      timeout = timeout_in_seconds
+      return open_vips_image(path) if timeout.nil?
+
+      result = nil
+      @vips_load_thread = Thread.new { result = open_vips_image(path) }
+
+      if @vips_load_thread.join(timeout)
+        result
+      else
+        # libvips work may continue in the background until the C call returns.
+        mark_timed_out!(payload, "vips")
+        nil
+      end
+    end
+
+    def wait_for_vips_load_thread
+      return unless @vips_load_thread&.alive?
+
+      @vips_load_thread.join(0.5)
+    end
+
+    # Returns nil for unsupported / empty files instead of raising.
+    # Vips raises on unreadable input (e.g. 0-byte files) rather than returning
+    # a falsy image — see https://github.com/janko/image_processing/issues/97
+    def open_vips_image(path)
+      ::Vips::Image.new_from_file(path, access: :sequential)
+    rescue ::Vips::Error
+      nil
     end
 
     ROTATIONS = /Right-top|Left-bottom|Top-right|Bottom-left/

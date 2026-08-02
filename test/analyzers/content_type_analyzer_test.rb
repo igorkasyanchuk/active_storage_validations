@@ -206,7 +206,7 @@ describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
       let(:analyzer_error) { analyzer_klass::FileCommandLineToolNotInstalledError }
 
       it "raises an explicit error" do
-        Open3.stub(:capture2, proc { raise Errno::ENOENT }) do
+        Process.stub(:spawn, proc { raise Errno::ENOENT }) do
           error = assert_raises(analyzer_error) { subject }
           assert_equal("file command-line tool is not installed", error.message)
         end

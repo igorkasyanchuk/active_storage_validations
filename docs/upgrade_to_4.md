@@ -7,6 +7,7 @@ Version 4 updates the supported Rails and Ruby versions, and adds automatic HTML
 - Drop support for Rails 6.1.4 and 7.0.0 (we keep support for Rails >= 7.0.1)
 - Drop support for Ruby < 3.3 (`required_ruby_version` is now `>= 3.3.0`)
 - `FormBuilder#file_field` now automatically sets the HTML `accept` attribute from `content_type` validators
+- Analyzer commands default to a 10 second timeout (breaking only for apps whose metadata analysis can legitimately exceed 10s — see below)
 
 Make sure your application runs on Rails >= 7.0.1 and Ruby >= 3.3 before upgrading.
 
@@ -17,7 +18,7 @@ After upgrading, calls such as `f.file_field :avatar` may start rendering an `ac
 To keep the previous behavior:
 
 ```ruby
-# Globally (e.g. in config/initializers/active_storage_validations.rb)
+# Globally (see README Configuration for a full initializer template)
 ActiveStorageValidations.infer_file_field_accept = false
 ```
 
@@ -27,6 +28,33 @@ ActiveStorageValidations.infer_file_field_accept = false
 ```
 
 Explicit `accept:` values are never overridden.
+
+### Analyzer command timeout
+
+Without a deadline, a single pathological or crafted upload can stall an analyzer binary (`ffprobe`, ImageMagick, …) indefinitely and tie up a request or background worker. A default timeout closes that hang/DoS class of failure while keeping normal uploads fast: analysis either finishes or fails closed with the validator’s existing error.
+
+Metadata analysis (`ffprobe`, `pdfinfo`, `file`, ImageMagick `identify`, libvips) now defaults to a **10 second** command timeout (`ActiveStorageValidations.command_timeout`). Commands that previously could hang forever now fail closed after that deadline; validators then add their usual errors (`file_not_processable`, `media_metadata_missing`, etc.).
+
+**Who is affected?** Most apps are not. Typical image / audio / short-video / PDF metadata extraction finishes in milliseconds to a couple of seconds. This is a breaking change only if legitimate uploads need more than 10s to analyze — for example:
+
+- Very large videos analyzed with `duration` / `processable_file` (especially on slow disks or network-mounted / remote storage)
+- Unusually large PDFs with `pages`
+- Environments where analyzer binaries are cold-started or heavily CPU-contended
+
+If you hit that case, raise or disable the limit:
+
+```ruby
+# config/initializers/active_storage_validations.rb
+ActiveStorageValidations.configure do |config|
+  config.command_timeout = 30.seconds # or nil to restore unbounded waits
+end
+```
+
+Or only for the slow validator: `validates :video, duration: { less_than: 5.minutes, timeout: 30.seconds }`.
+
+Subscribe to `timeout.active_storage_validations` after upgrading if you want to confirm whether any real uploads are timing out in production.
+
+See the README [Configuration](../README.md#configuration) section for the full initializer template and Notifications monitoring example.
 
 ## Other changes
 
