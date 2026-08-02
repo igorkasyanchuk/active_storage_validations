@@ -379,11 +379,16 @@ RSpec.shared_examples "works fine with attachables" do
     context "when there are no attachments" do
       it { is_expected_to_be_valid }
 
-      it "does not perform any validation" do
-        # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
-        allow_any_instance_of(validator_class).to receive(:is_valid?) { raise "shouldn't be called" }
-        # rubocop:enable RSpec/AnyInstance
-        subject.valid?
+      context "and is_valid? would raise if called" do
+        before do
+          # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
+          allow_any_instance_of(validator_class).to receive(:is_valid?) { raise "shouldn't be called" }
+          # rubocop:enable RSpec/AnyInstance
+        end
+
+        it "does not perform any validation" do
+          expect { subject.valid? }.not_to raise_error
+        end
       end
     end
 

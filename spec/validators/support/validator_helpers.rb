@@ -52,10 +52,6 @@ module ValidatorHelpers
     expect { subject.valid? }.to raise_error(error_class, /#{Regexp.escape(message)}/)
   end
 
-  def assert_nothing_raised
-    expect { yield }.not_to raise_error
-  end
-
   def validator_class
     "ActiveStorageValidations::#{subject.class.name.sub(/::/, '').sub(/::.+/, '')}".constantize
   end

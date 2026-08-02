@@ -88,9 +88,10 @@ RSpec/ContextWording:
     - that
     - but
 
-# Custom helpers (is_expected_to_be_valid, etc.) wrap expect — RuboCop cannot see them
+# Custom helpers wrap expect; treat is_expected_* as expectations
 RSpec/NoExpectationExample:
-  Enabled: false
+  AllowedPatterns:
+    - ^is_expected_
 
 # Flat layout: spec/validators/size_validator_spec.rb (not nested by module path)
 RSpec/SpecFilePathFormat:
