@@ -338,7 +338,9 @@ File content type spoofing happens when an ill-intentioned user uploads a file w
 How do we prevent it?
 </summary>
 
-The spoofing protection relies on both the UNIX `file` command and `Marcel` gem. Be careful, since it needs to load the whole file io to perform the analysis, it will use a lot of RAM for very large files. Therefore it could be a wise decision not to enable it in this case.
+The spoofing protection relies on both the UNIX `file` command and `Marcel` gem. The `file` command (via libmagic) mostly inspects magic bytes / headers — similar in spirit to Active Storage / Marcel identifying content type from the first few kilobytes — so it does **not** load the whole file into RAM.
+
+For already-persisted blobs (e.g. remote storage), the analyzer still downloads the blob to a local tempfile before running `file`. That download is streamed in chunks to disk (not held as one big in-memory string), but it can still be costly for very large files. Uploaded files that already have a local path are analyzed in place. For large remote uploads, you may prefer to skip `spoofing_protection` or combine it with a `size` validator.
 
 Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (ActiveStorage content type detection relies on a different logic using first 4kb of content + filename + extension). To handle this issue, we consider a close parent content type to be a match. For example, for an ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content types are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS` table.
 </details>

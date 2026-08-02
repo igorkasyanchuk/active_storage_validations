@@ -19,6 +19,7 @@
     - Add informational `benchmark/` suite for metadata validators (cold vs cached `asv_*`, vips vs mini_magick) with CI job and checked-in baseline
     - Migrate the gem test suite from Minitest to RSpec; add `rubocop-rspec` (https://github.com/igorkasyanchuk/active_storage_validations/issues/307). Consumer matcher APIs for RSpec and Minitest/shoulda are unchanged
     - Strengthen validator specs: comparison Proc options, `total_size` multi-file sums, `media_metadata_missing` / `attachment_missing`, duration/pages several-checks validity, Rails `:except_on`
+    - Correct `spoofing_protection` docs: `file`/libmagic does not load the whole file into RAM; remote blobs are still streamed to a tempfile (https://github.com/igorkasyanchuk/active_storage_validations/issues/376)
 
   - To upgrade from version 3.x to 4.x, please read the [upgrade guide](docs/upgrade_to_4.md)
 
