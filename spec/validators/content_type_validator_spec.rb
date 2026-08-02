@@ -299,7 +299,7 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
       end
     end
 
-    context "working with most common mime types" do
+    describe "working with most common mime types" do
       most_common_mime_types.each do |common_mime_type|
         describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
           subject(:record) { model.public_send(attribute).attach(allowed_file) and model }
@@ -402,7 +402,7 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
           it { is_expected_to_have_error_options(error_options, validator: :content_type) }
         end
 
-        context "working with most common mime types" do
+        describe "working with most common mime types" do
           most_common_mime_types.each do |common_mime_type|
             describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
               subject(:record) { model.public_send(attribute).attach(okay_file) and model }

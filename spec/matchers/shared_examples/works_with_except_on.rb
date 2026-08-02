@@ -52,7 +52,7 @@ RSpec.shared_examples "works with except_on" do
     context "when the model attribute uses an active_storage_validation validator several times" do
       context "with several except_on contexts" do
         context "and the matcher is provided with" do
-          context "one of the model attribute validators except_on contexts" do
+          context "when provided with one of the model attribute validators except_on contexts" do
             subject(:configured_matcher) { matcher.except_on(:custom) }
 
             let(:model_attribute) { :with_several_validators_and_except_on }
@@ -60,7 +60,7 @@ RSpec.shared_examples "works with except_on" do
             it { is_expected_to_match_for(klass) }
           end
 
-          context "all of the model attribute validators except_on contexts" do
+          context "when provided with all of the model attribute validators except_on contexts" do
             subject(:configured_matcher) { matcher.except_on(%i[update custom]) }
 
             let(:model_attribute) { :with_several_validators_and_except_on }
@@ -68,7 +68,7 @@ RSpec.shared_examples "works with except_on" do
             it { is_expected_to_match_for(klass) }
           end
 
-          context "one context that is not present in the model attribute validators except_on contexts" do
+          context "when provided with one context that is not present in the model attribute validators except_on contexts" do
             subject(:configured_matcher) { matcher.except_on(:not_present) }
 
             let(:model_attribute) { :with_several_validators_and_except_on }

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples "works fine with 2 pages pdf" do
-  context "working with 2 pages pdf with different dimensions" do
+  describe "working with 2 pages pdf with different dimensions" do
     subject(:metadata) { analyzer.metadata }
 
     let(:attachable) do
@@ -18,7 +18,7 @@ RSpec.shared_examples "works fine with 2 pages pdf" do
     end
   end
 
-  context "working with a pdf with decimal dimensions" do
+  describe "working with a pdf with decimal dimensions" do
     subject(:metadata) { analyzer.metadata }
 
     let(:attachable) do

@@ -26,7 +26,7 @@ RSpec.describe "Integration tests" do
     end
   end
 
-  context "based on a file property" do
+  describe "based on a file property" do
     let(:model) { integration_test_class::BasedOnAFileProperty.new(params) }
 
     context "when setting size constraints based on the content type" do

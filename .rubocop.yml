@@ -74,9 +74,16 @@ RSpec/ExampleLength:
 RSpec/MultipleMemoizedHelpers:
   Enabled: false
 
-# Project contexts also use "and when…", "which is…" (see .cursor/rules/spec.mdc)
+# Nested contexts continue with and/which/that/but (see .cursor/rules/spec.mdc)
 RSpec/ContextWording:
-  Enabled: false
+  Prefixes:
+    - when
+    - with
+    - without
+    - and
+    - which
+    - that
+    - but
 
 # Validators create analyzers internally — allow_any_instance_of is the seam
 RSpec/AnyInstance:

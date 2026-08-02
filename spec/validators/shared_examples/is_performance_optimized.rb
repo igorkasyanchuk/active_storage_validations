@@ -27,7 +27,7 @@ RSpec.shared_examples "is performance optimized" do
   end
 
   describe "persistance of the active_storage_validations metadata" do
-    context "on an already saved attachable without active_storage_validations metadata (like an attachable saved before v2 of the gem)" do
+    context "with an already saved attachable without active_storage_validations metadata (like an attachable saved before v2 of the gem)" do
       before do
         subject.is_performance_optimized.attach(attachable)
         subject.save!
@@ -76,7 +76,7 @@ RSpec.shared_examples "is performance optimized" do
       end
     end
 
-    context "on a record saved after the v2 upgrade" do
+    context "with a record saved after the v2 upgrade" do
       before do
         subject.is_performance_optimized.attach(attachable)
         subject.save!

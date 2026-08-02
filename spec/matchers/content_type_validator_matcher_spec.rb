@@ -297,7 +297,7 @@ RSpec.describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher d
     end
   end
 
-  context "working with most common mime types" do
+  describe "working with most common mime types" do
     most_common_mime_types.each do |common_mime_type|
       describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
         subject(:configured_matcher) { matcher.allowing(allowed_type) }

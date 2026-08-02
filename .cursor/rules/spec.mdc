@@ -33,6 +33,6 @@ subject { analyzer.metadata }
 expect(subject).to eq({})
 ```
 
-- Use `describe` for named units/topics (`#metadata`, `:less_than`, `"one"`, `"several"`, `"Edge cases"`) and `context` for situations (`when …`, `with …`, `without …`). Never `context "one"` — that is a topic, so `describe "one"`.
+- Use `describe` for named units/topics (`#metadata`, `:less_than`, `"one"`, `"several"`, `"Edge cases"`, `"working with …"`) and `context` for situations (`when …`, `with …`, `without …`, nested `and …` / `which …` / `that …` / `but …`). Never `context "one"` — that is a topic, so `describe "one"`.
 - Prefer `let` / `before` for setup; keep `it` descriptions as outcomes, not conditionals already expressed by the surrounding `context`.
 - Domain rules: `spec-validators.mdc`, `spec-matchers.mdc`, `spec-analyzers.mdc`, `spec-integration.mdc`.

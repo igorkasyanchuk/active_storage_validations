@@ -50,7 +50,7 @@ RSpec.shared_examples "works with context" do
   context "when the model attribute uses an active_storage_validation validator several times" do
     context "with several contexts" do
       context "and the matcher is provided with" do
-        context "one of the model attribute validators contexts" do
+        context "when provided with one of the model attribute validators contexts" do
           subject(:configured_matcher) { matcher.on(:custom) }
 
           let(:model_attribute) { :with_several_validators_and_contexts }
@@ -58,7 +58,7 @@ RSpec.shared_examples "works with context" do
           it { is_expected_to_match_for(klass) }
         end
 
-        context "all of the model attribute validators contexts" do
+        context "when provided with all of the model attribute validators contexts" do
           subject(:configured_matcher) { matcher.on(%i[update custom]) }
 
           let(:model_attribute) { :with_several_validators_and_contexts }
@@ -66,7 +66,7 @@ RSpec.shared_examples "works with context" do
           it { is_expected_to_match_for(klass) }
         end
 
-        context "one context that is not present in the model attribute validators contexts" do
+        context "when provided with one context that is not present in the model attribute validators contexts" do
           subject(:configured_matcher) { matcher.on(:not_present) }
 
           let(:model_attribute) { :with_several_validators_and_contexts }

@@ -21,7 +21,7 @@ RSpec.shared_examples "works fine with attachables" do
     let(:mp3_audio) { Rails.root.join("public", "audio_2s.mp3") }
     let(:pdf_5_pages) { Rails.root.join("public", "pdf_5_pages.pdf") }
 
-    context "working with all attachable formats" do
+    describe "working with all attachable formats" do
       # As stated in ActiveStorage documentation, attachables can either be a:
       #   ActiveStorage::Blob object
       #   ActionDispatch::Http::UploadedFile object
