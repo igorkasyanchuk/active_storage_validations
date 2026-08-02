@@ -95,8 +95,10 @@ GEM
     minitest-mock_expectations (1.2.0)
     minitest-stub_any_instance (1.0.3)
     mutex_m (0.3.0)
-    nokogiri (1.16.8)
+    nokogiri (1.19.4)
       mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
+    nokogiri (1.19.4-arm64-darwin)
       racc (~> 1.4)
     pry (0.16.0)
       coderay (~> 1.1)
@@ -162,6 +164,7 @@ DEPENDENCIES
   minitest-focus (~> 1.4)
   minitest-mock_expectations (~> 1.2, >= 1.2.0)
   minitest-stub_any_instance (~> 1.0, >= 1.0.3)
+  nokogiri (>= 1.18)
   pry
   ruby-vips (>= 2.1.0)
   simplecov

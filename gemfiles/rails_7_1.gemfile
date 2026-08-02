@@ -2,4 +2,7 @@ source 'https://rubygems.org'
 
 %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| gem rails_subcomponent, '~> 7.1.0' }
 
+# nokogiri < 1.18 requires ruby < 3.4.dev, which breaks CI on Ruby 3.4 / 4.0
+gem 'nokogiri', '>= 1.18'
+
 gemspec :path => '../'
