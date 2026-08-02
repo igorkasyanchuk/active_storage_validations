@@ -3,7 +3,7 @@
 require "rails_helper"
 require "analyzers/support/analyzer_helpers"
 
-RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick do
+RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, image_processor: :mini_magick do
   def self.test_rotatable_media?
     true
   end

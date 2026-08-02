@@ -106,6 +106,16 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
         end
       end
     end
+
+    describe "spoofing_protection validity" do
+      context "when provided with an invalid spoofing_protection value" do
+        subject(:model) { validator_test_class::CheckValidityInvalidSpoofingProtection.new(params) }
+
+        it "raises an error at model initialization" do
+          expect { model }.to raise_error(ArgumentError, /Unknown spoofing_protection option/)
+        end
+      end
+    end
   end
 
   describe "Validator checks" do
@@ -332,8 +342,6 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
     end
 
     describe ":spoofing_protection" do
-      # Further testing performed by content_type_spoof_detector_test.rb
-
       context "when the protection is enabled (spoofing_protection: true option)" do
         let(:attribute) { :spoofing_protection }
 
@@ -469,6 +477,144 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
         let(:file_for_attachment_missing) { file_7ko_and_jpg }
 
         it_behaves_like "reports attachment_missing"
+      end
+
+      context "when the protection is enabled (spoofing_protection: :file option)" do
+        let(:attribute) { :spoofing_protection_file }
+
+        context "when the file is spoofed" do
+          subject(:record) { model.public_send(attribute).attach(spoofed_file) and model }
+
+          let(:spoofed_file) { spoofed_jpeg }
+
+          it { is_expected_not_to_be_valid }
+        end
+
+        # a-chacon / #404
+        context "when attaching a PDF with leading whitespace before %PDF" do
+          subject(:record) { model.public_send(attribute).attach(pdf_file) and model }
+
+          let(:attribute) { :spoofing_protection_pdf_file }
+          let(:pdf_file) { pdf_leading_space_file }
+
+          it { is_expected_not_to_be_valid }
+        end
+      end
+
+      context "when the protection is enabled (spoofing_protection: :magika option)" do
+        let(:attribute) { :spoofing_protection_magika }
+
+        context "when the file is spoofed" do
+          subject(:record) { model.public_send(attribute).attach(spoofed_file) and model }
+
+          let(:spoofed_file) { spoofed_jpeg }
+          let(:magika_json) do
+            [
+              {
+                "result" => {
+                  "status" => "ok",
+                  "value" => {
+                    "output" => { "mime_type" => "text/plain", "label" => "txt" },
+                    "score" => 0.99
+                  }
+                }
+              }
+            ].to_json
+          end
+
+          before do
+            allow_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::Magika).to receive(:run_command).and_return( # rubocop:disable RSpec/AnyInstance
+              ActiveStorageValidations::ASVCommandable::CommandResult.new(
+                stdout: magika_json,
+                stderr: "",
+                status: instance_double(Process::Status, success?: true),
+                timed_out: false
+              )
+            )
+          end
+
+          it { is_expected_not_to_be_valid }
+        end
+
+        # a-chacon / #404 — Magika correctly identifies the PDF (unlike file/libmagic)
+        context "when attaching a PDF with leading whitespace before %PDF", if: magika_cli_available? do
+          subject(:record) { model.public_send(attribute).attach(pdf_file) and model }
+
+          let(:attribute) { :spoofing_protection_pdf_magika }
+          let(:pdf_file) { pdf_leading_space_file }
+
+          it { is_expected_to_be_valid }
+        end
+      end
+
+      describe "backend-aware content_type cache" do
+        let(:attribute) { :spoofing_protection }
+        let(:okay_file) { jpeg_file }
+        let(:blob) { model.public_send(attribute).blob }
+
+        before do
+          model.public_send(attribute).attach(okay_file)
+          model.valid?
+        end
+
+        context "when validating again with the file backend" do
+          it "reuses the cached analysis" do
+            # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
+            expect_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File).not_to receive(:content_type)
+            # rubocop:enable RSpec/AnyInstance
+            expect(model).to be_valid
+          end
+        end
+
+        context "when the blob only has legacy asv_content_type (no backend key)" do
+          before do
+            blob.metadata["custom"].delete("asv_content_type_backend")
+            blob.save!
+          end
+
+          it "reuses the cached analysis for the file backend" do
+            expect(blob.active_storage_validations_metadata).not_to have_key(:content_type_backend)
+            # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
+            expect_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File).not_to receive(:content_type)
+            # rubocop:enable RSpec/AnyInstance
+            expect(model).to be_valid
+          end
+        end
+
+        context "when validating the same blob with the magika backend" do
+          let(:magika_model) { validator_test_class::Check.new }
+
+          before { magika_model.spoofing_protection_magika.attach(blob) }
+
+          context "and magika analysis succeeds" do
+            it "re-analyzes with magika" do
+              expect(blob.active_storage_validations_metadata[:content_type_backend]).to eq("file")
+              # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
+              expect_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::Magika).to receive(:content_type).once.and_return(
+                { content_type: "image/jpeg", content_type_backend: "magika" }
+              )
+              # rubocop:enable RSpec/AnyInstance
+              expect(magika_model).to be_valid
+            end
+          end
+
+          context "and magika analysis fails" do
+            let(:file_content_type) { blob.active_storage_validations_metadata[:content_type] }
+
+            before do
+              # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
+              allow_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::Magika).to receive(:content_type).and_return(nil)
+              # rubocop:enable RSpec/AnyInstance
+            end
+
+            it "fails closed without overwriting the file cache" do
+              expect(blob.active_storage_validations_metadata[:content_type_backend]).to eq("file")
+              expect(magika_model).not_to be_valid
+              expect(blob.reload.active_storage_validations_metadata[:content_type]).to eq(file_content_type)
+              expect(blob.active_storage_validations_metadata[:content_type_backend]).to eq("file")
+            end
+          end
+        end
       end
 
       context "when the protection is disabled (default / spoofing_protection: false option)" do

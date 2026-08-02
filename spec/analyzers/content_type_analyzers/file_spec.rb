@@ -3,7 +3,7 @@
 require "open-uri"
 require "rails_helper"
 
-RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
+RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File do
   let(:analyzer) { described_class.new(attachable) }
 
   describe "#content_type" do
@@ -12,7 +12,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
     end
 
     def is_expected_to_return_empty_content_type
-      expect(content_type).to eq({ content_type: "inode/x-empty" })
+      expect(content_type).to eq({ content_type: "inode/x-empty", content_type_backend: "file" })
     end
 
     subject(:content_type) { analyzer.content_type }
@@ -34,8 +34,8 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
       let(:media_path) { Rails.root.join("public", media_filename) }
       let(:media_io) { File.open(media_path) }
       let(:media_content_type) { "image/png" }
-      let(:expected_content_type) { { content_type: "image/png" } }
-      let(:expected_content_type_over_10ko) { { content_type: "image/png" } }
+      let(:expected_content_type) { { content_type: "image/png", content_type_backend: "file" } }
+      let(:expected_content_type_over_10ko) { { content_type: "image/png", content_type_backend: "file" } }
 
       describe "ActiveStorage::Blob object" do
         let(:attachable) do
@@ -199,11 +199,24 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
           content_type: "image/png"
         }
       end
-      let(:analyzer_error) { described_class::FileCommandLineToolNotInstalledError }
+      let(:analyzer_error) { described_class::CommandLineToolNotInstalledError }
+
+      before { allow(Process).to receive(:spawn).and_raise(Errno::ENOENT) }
 
       it "raises an explicit error" do
-        allow(Process).to receive(:spawn).and_raise(Errno::ENOENT)
         expect { content_type }.to raise_error(analyzer_error, "file command-line tool is not installed")
+      end
+    end
+
+    # a-chacon / #404: leading space before %PDF fools libmagic
+    describe "PDF with leading whitespace before %PDF" do
+      let(:attachable) { pdf_leading_space_file }
+
+      it "detects application/octet-stream (libmagic false negative)" do
+        expect(content_type).to eq(
+          content_type: "application/octet-stream",
+          content_type_backend: "file"
+        )
       end
     end
   end

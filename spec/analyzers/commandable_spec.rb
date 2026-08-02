@@ -12,7 +12,7 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
   end
   let(:timeout) { 10.seconds }
   let(:analyzer) do
-    ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable, timeout: timeout)
+    ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File.new(attachable, timeout: timeout)
   end
 
   after do
@@ -185,7 +185,7 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
     before { ActiveStorageValidations.command_timeout = 3.seconds }
 
     context "when no instance timeout is given" do
-      let(:analyzer) { ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable) }
+      let(:analyzer) { ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File.new(attachable) }
 
       it { is_expected.to eq(3.0) }
     end

@@ -230,6 +230,10 @@ RSpec.describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher d
     it_behaves_like "works with timeout"
   end
 
+  describe "#spoofing_protection" do
+    it_behaves_like "works with spoofing protection"
+  end
+
   describe "Combinations" do
     describe "#allowing + #with_message" do
       let(:model_attribute) { :allowing_one_with_message }

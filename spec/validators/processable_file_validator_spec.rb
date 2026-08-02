@@ -66,15 +66,13 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
       it_behaves_like "reports attachment_missing"
     end
 
-    context "when using Vips with untrusted loaders blocked" do
+    context "when using Vips with untrusted loaders blocked", image_processor: :vips do
       # Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call Vips.block_untrusted(true), so
       # analysis of formats with untrusted loaders returns empty metadata by design.
       # https://github.com/rails/rails/security/advisories/GHSA-xr9x-r78c-5hrm
       let(:vips_block_state) { {} }
 
       before do
-        skip "requires the Vips image processor" unless ActiveStorage.variant_processor == :vips
-
         begin
           require "vips"
         rescue LoadError

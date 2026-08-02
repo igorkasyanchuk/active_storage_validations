@@ -12,7 +12,7 @@ module ActiveStorageValidations
   mattr_accessor :infer_file_field_accept, instance_accessor: false, default: true
 
   # Maximum time allowed for external analyzer commands (ffprobe, pdfinfo, file,
-  # MiniMagick, libvips). Set to +nil+ to disable. Per-validator +timeout:+
+  # magika, MiniMagick, libvips). Set to +nil+ to disable. Per-validator +timeout:+
   # overrides this value for the analysis that validator triggers.
   mattr_accessor :command_timeout, instance_accessor: false, default: 10.seconds
 
@@ -22,6 +22,9 @@ module ActiveStorageValidations
 end
 
 require "active_storage_validations/analyzer"
+require "active_storage_validations/analyzer/content_type_analyzer"
+require "active_storage_validations/analyzer/content_type_analyzer/file"
+require "active_storage_validations/analyzer/content_type_analyzer/magika"
 require "active_storage_validations/analyzer/image_analyzer"
 require "active_storage_validations/analyzer/image_analyzer/image_magick"
 require "active_storage_validations/analyzer/image_analyzer/vips"

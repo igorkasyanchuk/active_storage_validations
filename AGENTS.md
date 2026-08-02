@@ -112,7 +112,7 @@ IMAGE_PROCESSOR=vips bundle exec rake spec
 IMAGE_PROCESSOR=mini_magick bundle exec rake spec
 ```
 
-`spec/rails_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem).
+`spec/rails_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem). When `IMAGE_PROCESSOR` is set, examples tagged `image_processor: :vips` / `:mini_magick` for the other processor are excluded (not pending).
 
 ### Benchmarks
 

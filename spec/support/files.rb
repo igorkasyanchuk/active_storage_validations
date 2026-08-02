@@ -101,6 +101,16 @@ def pdf_150x150_file
 end
 alias :pdf_1_page_file :pdf_150x150_file
 
+# a-chacon / #404: leading space (0x20) before %PDF — libmagic often returns
+# application/octet-stream while Magika and pdf readers still see a PDF.
+def pdf_leading_space_file
+  {
+    io: File.open(Rails.root.join("public", "pdf_leading_space.pdf")),
+    filename: "pdf_leading_space.pdf",
+    content_type: "application/pdf"
+  }
+end
+
 def pdf_200x300_file
   {
     io: File.open(Rails.root.join("public", "pdf_200x300.pdf")),
@@ -355,4 +365,10 @@ end
 
 def blob_file_5ko
   create_blob(size: 5)
+end
+
+def magika_cli_available?
+  return @magika_cli_available if defined?(@magika_cli_available)
+
+  @magika_cli_available = system("magika", "--version", out: File::NULL, err: File::NULL)
 end

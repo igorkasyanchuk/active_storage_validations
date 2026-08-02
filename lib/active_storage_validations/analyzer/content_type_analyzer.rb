@@ -3,22 +3,20 @@
 module ActiveStorageValidations
   # = ActiveStorageValidations ContentType \Analyzer
   #
-  # Extracts the content type from an attachable. This is used to prevent content
-  # type spoofing.
+  # Abstract base for content-type sniffers used by +spoofing_protection+.
+  # Concrete backends:
   #
-  # Example:
+  #   ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File.new(attachable).content_type
+  #   # => { content_type: "image/png", content_type_backend: "file" }
   #
-  #   ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable).content_type
-  #   # => { content_type: "image/png" }
-  #
-  # This analyzer requires the {UNIX file}[https://en.wikipedia.org/wiki/File_(command)] command, which is not provided by \Rails. While it is available on most UNIX distributions, it may need to be installed explicitly on minimal or custom setups.
+  #   ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::Magika.new(attachable).content_type
+  #   # => { content_type: "image/png", content_type_backend: "magika" }
   class Analyzer::ContentTypeAnalyzer < Analyzer
-    class FileCommandLineToolNotInstalledError < StandardError; end
-
     def content_type
       read_media do |media|
         {
-          content_type: media
+          content_type: media,
+          content_type_backend: backend.to_s
         }
       end
     end
@@ -31,7 +29,7 @@ module ActiveStorageValidations
           if media(tempfile).present?
             yield media(tempfile)
           else
-            logger.info "Skipping file content_type analysis because Linux file command doesn't support the file"
+            logger.info "Skipping content_type analysis because #{backend} doesn't support the file"
             nil
           end
         ensure
@@ -39,14 +37,15 @@ module ActiveStorageValidations
         end
       end
     rescue Errno::ENOENT
-      raise FileCommandLineToolNotInstalledError, "file command-line tool is not installed"
+      raise missing_backend_error
     end
 
-    def media_from_path(path)
-      instrument("file") do |payload|
-        result = run_command("file", "-b", "--mime-type", path, payload: payload)
-        result.success? ? result.stdout.strip : nil
-      end
+    def backend
+      raise NotImplementedError
+    end
+
+    def missing_backend_error
+      raise NotImplementedError
     end
   end
 end

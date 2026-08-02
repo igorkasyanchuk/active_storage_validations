@@ -37,6 +37,11 @@ class ContentType::Matcher < ApplicationRecord
   has_one_attached :with_timeout
   validates :with_timeout, content_type: { in: [ "image/png" ], timeout: 5.seconds }
 
+  has_one_attached :with_spoofing_protection
+  validates :with_spoofing_protection, content_type: { in: [ "image/png" ], spoofing_protection: true }
+  has_one_attached :with_spoofing_protection_magika
+  validates :with_spoofing_protection_magika, content_type: { in: [ "image/png" ], spoofing_protection: :magika }
+
   has_one_attached :with_context_symbol
   validates :with_context_symbol, content_type: :png, on: :update
   has_one_attached :with_context_array

@@ -194,7 +194,7 @@ RSpec.describe "command timeout integration" do
     before do
       model.spoofing_protection.attach(jpeg_file)
       # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
-      allow_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer).to receive(:content_type).and_return(nil)
+      allow_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File).to receive(:content_type).and_return(nil)
       # rubocop:enable RSpec/AnyInstance
     end
 
