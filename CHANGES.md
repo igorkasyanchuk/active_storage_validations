@@ -14,6 +14,7 @@
   - **FIXED**
     - Fix `dimension: { min:, max: }` when both top-level bounds are set together (previously the second bound overwrote the first in `process_options`)
     - Fix Proc options with arity 0 (e.g. `-> { 2.kilobytes..7.kilobytes }`) being called with the record argument
+    - Fix metadata matchers (`aspect_ratio`, `dimension`, …) crashing with `NoMethodError` when the same attribute also has `content_type` spoofing protection (matcher `Analyzer` stub now responds to `#content_type`)
   - **MISC**
     - Add support for Ruby 4.0 in CI matrix
     - Add [AGENTS.md](AGENTS.md) with codebase guide for AI coding agents

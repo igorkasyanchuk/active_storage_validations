@@ -29,7 +29,15 @@ module ActiveStorageValidations
 
     def self.mock_metadata(attachment, metadata = {})
       asv_metadata_available_keys = { width: nil, height: nil, duration: nil, content_type: nil }
-      mock = Struct.new(:metadata).new(asv_metadata_available_keys.merge(metadata)) # ensure all keys are present, and it does not raise while trying to access them
+      merged = asv_metadata_available_keys.merge(metadata)
+      # Stubbing Analyzer.new also covers content-type sniffers (File / Magika),
+      # which call #content_type — not #metadata. Default to the dummy file type
+      # so stacked validators with spoofing_protection still pass under the mock.
+      detected_content_type = merged[:content_type].presence || "image/png"
+      mock = Struct.new(:metadata, :content_type).new(
+        merged,
+        { content_type: detected_content_type, content_type_backend: "file" }
+      )
 
       stub_method(ActiveStorageValidations::Analyzer, :new, mock) do
         yield
