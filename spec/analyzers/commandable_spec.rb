@@ -209,7 +209,9 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
 
       expect(result.success?).to be(true)
       expect(result.timed_out).to be(false)
-      expect(elapsed).to be < 0.05
+      # Bound must stay well under a polling-sleep interval, but leave headroom for
+      # CI process-spawn latency (observed ~0.06–0.08s under load).
+      expect(elapsed).to be < 0.25
     end
 
     it "reaps the process group after a timeout without leaving zombies" do
