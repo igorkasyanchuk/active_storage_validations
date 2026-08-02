@@ -60,6 +60,14 @@ class Duration::Matcher < ApplicationRecord
   validates :with_several_validators_and_contexts, duration: { less_than_or_equal_to: 5.minutes }, on: :update
   validates :with_several_validators_and_contexts, duration: { less_than_or_equal_to: 5.minutes }, on: :custom
 
+  has_one_attached :with_except_on_symbol
+  validates :with_except_on_symbol, duration: { less_than_or_equal_to: 5.minutes }, except_on: :update
+  has_one_attached :with_except_on_array
+  validates :with_except_on_array, duration: { less_than_or_equal_to: 5.minutes }, except_on: %i[update custom]
+  has_one_attached :with_several_validators_and_except_on
+  validates :with_several_validators_and_except_on, duration: { less_than_or_equal_to: 5.minutes }, except_on: :update
+  validates :with_several_validators_and_except_on, duration: { less_than_or_equal_to: 5.minutes }, except_on: :custom
+
   has_one_attached :as_instance
   validates :as_instance, duration: { less_than_or_equal_to: 5.minutes }
 

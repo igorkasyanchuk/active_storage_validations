@@ -7,6 +7,7 @@ require_relative "shared/asv_active_storageable"
 require_relative "shared/asv_allow_blankable"
 require_relative "shared/asv_attachable"
 require_relative "shared/asv_contextable"
+require_relative "shared/asv_except_onable"
 require_relative "shared/asv_messageable"
 require_relative "shared/asv_rspecable"
 require_relative "shared/asv_validatable"
@@ -20,6 +21,7 @@ module ActiveStorageValidations
       include ASVAllowBlankable
       include ASVAttachable
       include ASVContextable
+      include ASVExceptOnable
       include ASVMessageable
       include ASVRspecable
       include ASVValidatable
@@ -27,6 +29,7 @@ module ActiveStorageValidations
       def initialize(attribute_name)
         initialize_allow_blankable
         initialize_contextable
+        initialize_except_onable
         initialize_messageable
         initialize_rspecable
         @attribute_name = attribute_name
@@ -68,6 +71,7 @@ module ActiveStorageValidations
 
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
+          is_except_on_valid? &&
           is_allowing_blank? &&
           is_custom_message_valid? &&
           not_lower_than_min? &&

@@ -56,6 +56,14 @@ class TotalSize::Matcher < ApplicationRecord
   validates :with_several_validators_and_contexts, total_size: { less_than_or_equal_to: 5.megabytes }, on: :update
   validates :with_several_validators_and_contexts, total_size: { less_than_or_equal_to: 5.megabytes }, on: :custom
 
+  has_many_attached :with_except_on_symbol
+  validates :with_except_on_symbol, total_size: { less_than_or_equal_to: 5.megabytes }, except_on: :update
+  has_many_attached :with_except_on_array
+  validates :with_except_on_array, total_size: { less_than_or_equal_to: 5.megabytes }, except_on: %i[update custom]
+  has_many_attached :with_several_validators_and_except_on
+  validates :with_several_validators_and_except_on, total_size: { less_than_or_equal_to: 5.megabytes }, except_on: :update
+  validates :with_several_validators_and_except_on, total_size: { less_than_or_equal_to: 5.megabytes }, except_on: :custom
+
   has_many_attached :as_instance
   validates :as_instance, total_size: { less_than_or_equal_to: 5.megabytes }
 

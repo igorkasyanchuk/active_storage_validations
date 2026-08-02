@@ -830,6 +830,10 @@ describe User do
   it { is_expected.to validate_attached_of(:avatar).on(:update) }
   it { is_expected.to validate_attached_of(:avatar).on(%i[update custom]) }
 
+  # :except_on
+  it { is_expected.to validate_attached_of(:avatar).except_on(:update) }
+  it { is_expected.to validate_attached_of(:avatar).except_on(%i[update custom]) }
+
   # :message
   it { is_expected.to validate_dimensions_of(:avatar).width(250).with_message('Invalid dimensions.') }
 end

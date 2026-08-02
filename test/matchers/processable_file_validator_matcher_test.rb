@@ -7,6 +7,7 @@ require "matchers/shared_examples/has_custom_matcher"
 require "matchers/shared_examples/has_valid_rspec_message_methods"
 require "matchers/shared_examples/works_with_both_instance_and_class"
 require "matchers/shared_examples/works_with_context"
+require "matchers/shared_examples/works_with_except_on"
 require "matchers/shared_examples/works_with_custom_message"
 
 describe ActiveStorageValidations::Matchers::ProcessableFileValidatorMatcher do
@@ -39,5 +40,9 @@ describe ActiveStorageValidations::Matchers::ProcessableFileValidatorMatcher do
 
   describe "#on" do
     include WorksWithContext
+  end
+
+  describe "#except_on" do
+    include WorksWithExceptOn
   end
 end
