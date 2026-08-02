@@ -1,7 +1,13 @@
 # frozen_string_literal: true
 
 require "simplecov"
-SimpleCov.start
+
+SimpleCov.start do
+  command_name "RSpec"
+  skip "/spec/"
+  skip "/test/"
+  skip "/vendor/"
+end
 
 require "webmock/rspec"
 
