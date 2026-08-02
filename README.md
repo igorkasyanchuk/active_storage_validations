@@ -3,7 +3,7 @@
 
 # Active Storage Validations
 
-[![MiniTest](https://github.com/igorkasyanchuk/active_storage_validations/workflows/MiniTest/badge.svg)](https://github.com/igorkasyanchuk/active_storage_validations/actions)
+[![MiniTest](https://github.com/igorkasyanchuk/active_storage_validations/actions/workflows/main.yml/badge.svg)](https://github.com/igorkasyanchuk/active_storage_validations/actions/workflows/main.yml)
 [![RailsJazz](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/my_other.svg?raw=true)](https://www.railsjazz.com)
 [![https://www.patreon.com/igorkasyanchuk](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/patron.svg?raw=true)](https://www.patreon.com/igorkasyanchuk)
 
@@ -33,8 +33,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
   - [Aspect ratio](#aspect-ratio)
   - [Processable file](#processable-file)
   - [Pages](#pages)
-- [Upgrading from 1.x to 2.x](#upgrading-from-1x-to-2x)
-- [Upgrading from 2.x to 3.x](#upgrading-from-2x-to-3x)
+- [Upgrading](#upgrading)
 - [Internationalization (I18n)](#internationalization-i18n)
 - [Test matchers](#test-matchers)
 - [Contributing](#contributing)
@@ -44,7 +43,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
 
 ### Installation
 
-Active Storage Validations work with Rails 6.1.4 onwards. Add this line to your application's Gemfile:
+Active Storage Validations work with Rails 7.0.1 onwards. Add this line to your application's Gemfile:
 
 ```ruby
 gem 'active_storage_validations'
@@ -692,64 +691,11 @@ The `pages` validator error messages expose 5 values that you can use:
 
 ---
 
-## Upgrading from 1.x to 2.x
+## Upgrading
 
-If you are upgrading from 1.x to 2.x, you will be pleased to note that a lot of things have been added and improved!
-
-Added features:
-- `duration` validator has been added for audio / video files
-- `dimension` validator now supports videos
-- `aspect_ratio` validator now supports videos
-- `processable_image` validator is now `processable_file` validator and supports image/video/audio
-- Major performance improvement have been added: we now only perform the expensive io analysis operation on the newly attached files. For previously attached files, we validate them using Rails `ActiveStorage::Blob#metadata` internal mecanism ([more here](https://github.com/rails/rails/blob/main/activestorage/app/models/active_storage/blob/analyzable.rb)).
-- All error messages have been given an upgrade and new variables that you can use
-
-But this major version bump also comes with some breaking changes. Below are the main breaking changes you need to be aware of:
-- Error messages
-  - We advise you to replace all the v1 translations by the new v2 rather than changing them one by one. A majority of messages have been completely rewritten to be more consistent and easier to understand.
-  - If you wish to change them one by one, here is the list of changes to make:
-    - Some validator errors have been totally changed:
-      - `limit` validator keys have been totally reworked
-      - `dimension` validator keys have been totally reworked
-      - `content_type` validator keys have been totally reworked
-      - `processable_image` validator keys have been totally reworked
-    - Some keys have been changed:
-      - `image_metadata_missing` has been replaced by `media_metadata_missing`
-      - `aspect_ratio_is_not` has been replaced by `aspect_ratio_not_x_y`
-    - Some error messages variables names have been changed to improve readability:
-      - `aspect_ratio` validator:
-        - `aspect_ratio` has been replaced by `authorized_aspect_ratios`
-      - `content_type` validator:
-        - `authorized_types` has been replaced by `authorized_human_content_types`
-      - `size` validator:
-        - `min_size` has been replaced by `min`
-        - `max_size` has been replaced by `max`
-      - `total_size` validator:
-        - `min_size` has been replaced by `min`
-        - `max_size` has been replaced by `max`
-
-- `content_type` validator
-  - The `:in` option now only accepts 'valid' content types (ie content types deemed by Marcel as valid).
-    - The check was mistakenly only performed on the `:with` option previously. Therefore, invalid content types were accepted in the `:in` option, which is not the expected behavior.
-    - This might break some cases when you had for example `content_type: ['image/png', 'image/jpg']`, because `image/jpg` is not a valid content type, it should be replaced by `image/jpeg`.
-  - An `ArgumentError` is now raised if `image/jpg` is used to make it easier to fix. You should now only use `image/jpeg`.
-
-- `processable_image` validator
-  - The validator has been replaced by `processable_file` validator, be sure to replace `processable_image: true` to `processable_file: true`
-  - The associated matcher has also been updated accordingly, be sure to replace `validate_processable_image_of` to `validate_processable_file_of`
-
-## Upgrading from 2.x to 3.x
-
-Version 3 comes with the ability to support single page pdf `dimension` / `aspect_ratio` analysis, we had to make a breaking change:
-- To analyze PDFs, you must install the `poppler` PDF processing dependency
-  - It's a  Rails-supported PDF processing dependency (https://guides.rubyonrails.org/active_storage_overview.html#requirements)
-  - To install it, check their documentation at this [link](https://pdf2image.readthedocs.io/en/latest/installation.html).
-  - To check if it's installed, execute `pdftoppm -h`.
-  - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
-
-We also added the `pages` validator to validate pdf number of pages, and the `equal_to` option to `duration`, `size` and `total_size` validators.
-
-Note that, if you do not perform these metadata validations on pdfs, the gem will work the same as in version 2.
+- [Upgrading to 2.x](docs/upgrade_to_2.md)
+- [Upgrading to 3.x](docs/upgrade_to_3.md)
+- [Upgrading to 4.x](docs/upgrade_to_4.md)
 
 ## Internationalization (I18n)
 
@@ -903,8 +849,7 @@ Before submitting your pull request, run the tests to make sure everything works
 
 To run the gem tests, launch the following commands in the root folder of gem repository:
 
-* `BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test` to run for Rails 6.1.4
-* `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test` to run for Rails 7.0
+* `BUNDLE_GEMFILE=gemfiles/rails_7_0_1.gemfile bundle exec rake test` to run for Rails 7.0.1
 * `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.1
 * `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test` to run for Rails 7.2
 * `BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test` to run for Rails 8.0
@@ -914,15 +859,13 @@ To run the gem tests, launch the following commands in the root folder of gem re
 Snippet to run in console:
 
 ```bash
-BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle
+BUNDLE_GEMFILE=gemfiles/rails_7_0_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_6_1_4.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_7_0_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test

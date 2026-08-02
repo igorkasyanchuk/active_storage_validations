@@ -1,7 +1,0 @@
-source 'https://rubygems.org'
-
-%w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| gem rails_subcomponent, '~> 6.1.4' }
-
-gemspec :path => '../'
-
-gem 'nokogiri', '~> 1.16.7'
