@@ -1,6 +1,6 @@
 # Upgrading to 4.x
 
-Version 4 updates the supported Rails and Ruby versions, and adds automatic HTML `accept` inference for file fields.
+Version 4 updates the supported Rails and Ruby versions, adds automatic HTML `accept` inference for file fields, analyzer command timeouts, and matcher support for Rails `:except_on`.
 
 ## Breaking changes
 
@@ -58,4 +58,17 @@ See the README [Configuration](../README.md#configuration) section for the full 
 
 ## Other changes
 
+### Added
+
+- `#except_on` matcher option to support Rails `:except_on` (available since Rails 8.0), e.g. `validate_attached_of(:avatar).except_on(:update)`
+- Optional per-validator `timeout:` for analyzer commands, plus `timeout.active_storage_validations` instrumentation (timed-out analysis fails closed using existing validation errors)
+
+### Fixed
+
+- `dimension: { min:, max: }` when both top-level bounds are set together (previously the second bound overwrote the first)
+- Proc options with arity 0 (e.g. `-> { 2.kilobytes..7.kilobytes }`) being called with the record argument
+
+### Misc
+
 - Add support for Ruby 4.0 in the CI matrix
+- The gem’s own test suite migrated from Minitest to RSpec; consumer matcher APIs for RSpec and Minitest/shoulda are unchanged
