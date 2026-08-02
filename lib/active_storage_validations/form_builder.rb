@@ -3,7 +3,11 @@
 module ActiveStorageValidations
   module FormBuilder
     def file_field(method, options = {})
-      if options[:accept].blank?
+      options = options.symbolize_keys
+      infer_accept = options.delete(:infer_accept)
+      infer_accept = ActiveStorageValidations.infer_file_field_accept if infer_accept.nil?
+
+      if infer_accept && !options.key?(:accept)
         accept = inferred_accept_types(method)
         options[:accept] = accept.join(",") if accept.any?
       end

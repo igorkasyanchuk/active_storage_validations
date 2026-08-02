@@ -53,5 +53,30 @@ describe ActiveStorageValidations::FormBuilder do
       html = builder.file_field(:with_non_matching_regex)
       refute_includes html, "accept="
     end
+
+    it "can be disabled per field with infer_accept: false" do
+      html = builder.file_field(:with_symbol, infer_accept: false)
+      refute_includes html, "accept="
+    end
+
+    it "can be disabled globally" do
+      original = ActiveStorageValidations.infer_file_field_accept
+      ActiveStorageValidations.infer_file_field_accept = false
+
+      html = builder.file_field(:with_symbol)
+      refute_includes html, "accept="
+    ensure
+      ActiveStorageValidations.infer_file_field_accept = original
+    end
+
+    it "allows per-field infer_accept: true to override global disable" do
+      original = ActiveStorageValidations.infer_file_field_accept
+      ActiveStorageValidations.infer_file_field_accept = false
+
+      html = builder.file_field(:with_symbol, infer_accept: true)
+      assert_includes html, 'accept="image/png"'
+    ensure
+      ActiveStorageValidations.infer_file_field_accept = original
+    end
   end
 end

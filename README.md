@@ -229,27 +229,44 @@ class User < ApplicationRecord
 end
 ```
 
-#### Best practices
+#### HTML `accept` attribute (FormBuilder)
 
-When using the `content_type` validator, it is recommended to reflect the allowed content types in the html [`accept`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) attribute in the corresponding file field in your views. This will prevent users from trying to upload files with not allowed content types (however it is only an UX improvement, a malicious user can still try to upload files with not allowed content types therefore the backend validation).
+When using Rails' `FormBuilder#file_field`, the gem automatically sets the HTML [`accept`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) attribute from your `content_type` validators. This improves UX by filtering selectable files in the browser dialog. It is only a frontend hint: a malicious user can still submit disallowed types, so keep the backend validation.
 
-For example, if you want to allow PNG and JPEG images only, you can do this:
 ```ruby
 class User < ApplicationRecord
-  ACCEPTED_CONTENT_TYPES = ['image/png', 'image/jpeg'].freeze
-
   has_one_attached :avatar
 
-  validates :avatar, content_type: ACCEPTED_CONTENT_TYPES
+  validates :avatar, content_type: ['image/png', 'image/jpeg']
 end
 ```
 
 ```erb
 <%= form_with model: @user do |f| %>
-  <%= f.file_field :avatar,
-                   accept: ACCEPTED_CONTENT_TYPES.join(',') %>
+  <%= f.file_field :avatar %>
+  <%# => <input type="file" accept="image/png,image/jpeg" ...> %>
 <% end %>
 ```
+
+Explicit `accept` values are never overridden. You can also disable inference:
+
+```erb
+<%# Per field %>
+<%= f.file_field :avatar, infer_accept: false %>
+
+<%# Or set a custom accept value %>
+<%= f.file_field :avatar, accept: "image/*" %>
+```
+
+```ruby
+# Globally (e.g. in config/initializers/active_storage_validations.rb)
+ActiveStorageValidations.infer_file_field_accept = false
+```
+
+Notes:
+- Only broad MIME-type regexes of the form `/\Aimage\/.*\z/` (or `video` / `audio` / etc.) are inferred, as `image/*`
+- Other regexes (e.g. `/\Aimage\/(png|gif)\z/`) and Proc / dynamic `content_type` options are skipped, since they cannot be reliably represented in `accept`
+- Conditional validators (`if:` / `unless:`) are not evaluated: their content types are always included in `accept`, even when the condition would skip the validator for that record. Backend validation is unchanged; use `infer_accept: false` (or a custom `accept:`) if the picker must match the active conditions
 
 #### Content type shorthands
 

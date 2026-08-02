@@ -2,6 +2,14 @@
 
 require "active_model"
 require "active_support/concern"
+require "active_support/core_ext/module/attribute_accessors"
+
+module ActiveStorageValidations
+  # When true (default), FormBuilder#file_field automatically sets the HTML
+  # +accept+ attribute from +content_type+ validators. Can also be overridden
+  # per field with +infer_accept:+.
+  mattr_accessor :infer_file_field_accept, instance_accessor: false, default: true
+end
 
 require "active_storage_validations/analyzer"
 require "active_storage_validations/analyzer/image_analyzer"
