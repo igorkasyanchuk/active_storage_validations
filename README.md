@@ -11,7 +11,7 @@
 
 Active Storage Validations is a gem that allows you to add validations for Active Storage attributes.
 
-This gems is doing it right for you! Just use `validates :avatar, attached: true, content_type: 'image/png'` and that's it!
+This gem is doing it right for you! Just use `validates :avatar, attached: true, content_type: 'image/png'` and that's it!
 
 ## Table of Contents
 
@@ -44,7 +44,7 @@ This gems is doing it right for you! Just use `validates :avatar, attached: true
 
 ### Installation
 
-Active Storage Validations work with Rails 7.0.1 onwards. Add this line to your application's Gemfile:
+Active Storage Validations work with Rails 7.0.1 onwards and Ruby 3.3 onwards. Add this line to your application's Gemfile:
 
 ```ruby
 gem 'active_storage_validations'
@@ -310,8 +310,9 @@ Explicit `accept` values are never overridden. You can also disable inference:
 ```ruby
 # Globally — see [Configuration](#configuration) for a full initializer template
 ActiveStorageValidations.infer_file_field_accept = false
-# or:
-# ActiveStorageValidations.configure { |config| config.infer_file_field_accept = false }
+
+# Equivalent:
+ActiveStorageValidations.configure { |config| config.infer_file_field_accept = false }
 ```
 
 Notes:
@@ -416,7 +417,7 @@ Validates each attached file size.
 
 #### Options
 
-The `size` validator has 5 possible options:
+The `size` validator has 6 possible options:
 - `less_than`: defines the strict maximum allowed file size
 - `less_than_or_equal_to`: defines the maximum allowed file size
 - `greater_than`: defines the strict minimum allowed file size
@@ -474,7 +475,7 @@ Validates the total file size for several files.
 
 #### Options
 
-The `total_size` validator has 5 possible options:
+The `total_size` validator has 6 possible options:
 - `less_than`: defines the strict maximum allowed total file size
 - `less_than_or_equal_to`: defines the maximum allowed total file size
 - `greater_than`: defines the strict minimum allowed total file size
@@ -524,7 +525,7 @@ The `total_size` validator error messages expose 4 values that you can use:
 
 Validates the dimension of the attached image / video files.
 It can also be used for pdf files, but it will only analyze the pdf first page, and will assume a DPI of 72.
-(be sure to have the right dependencies installed as mentioned in [installation](#installation))
+(be sure to have the right dependencies installed as mentioned in [Getting started](#getting-started))
 
 #### Options
 
@@ -590,7 +591,7 @@ The `dimension` validator error messages expose 6 values that you can use:
 ### Duration
 
 Validates the duration of the attached audio / video files.
-(be sure to have the right dependencies installed as mentioned in [installation](#installation))
+(be sure to have the right dependencies installed as mentioned in [Using video and audio metadata validators](#using-video-and-audio-metadata-validators))
 
 #### Options
 
@@ -647,7 +648,7 @@ The `duration` validator error messages expose 4 values that you can use:
 
 Validates the aspect ratio of the attached image / video files.
 It can also be used for pdf files, but it will only analyze the pdf first page.
-(be sure to have the right dependencies installed as mentioned in [installation](#installation))
+(be sure to have the right dependencies installed as mentioned in [Getting started](#getting-started))
 
 #### Options
 
@@ -701,7 +702,7 @@ The `aspect_ratio` validator error messages expose 4 values that you can use:
 ### Processable file
 
 Validates if the attached files can be processed by MiniMagick or Vips (image), ffmpeg (video/audio) or poppler (pdf).
-(be sure to have the right dependencies installed as mentioned in [installation](#installation))
+(be sure to have the right dependencies installed as mentioned in [Getting started](#getting-started))
 
 #### Options
 
@@ -720,6 +721,10 @@ class User < ApplicationRecord
 end
 ```
 
+#### Notes
+
+Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call `Vips.block_untrusted(true)`, so libvips refuses to load formats marked untrusted (e.g. SVG, BMP). Analysis then returns empty metadata by design. `processable_file` does **not** treat that as failure for those content types. `dimension` / `aspect_ratio` still need width/height — use MiniMagick for those formats, or skip those validators for them.
+
 #### Error messages (I18n)
 
 ```yml
@@ -737,7 +742,7 @@ The `processable_file` validator error messages expose 1 value that you can use:
 ### Pages
 
 Validates each attached pdf file number of pages.
-(be sure to have the right dependencies installed as mentioned in [installation](#installation))
+(be sure to have the right dependencies installed as mentioned in [Using pdf metadata validators](#using-pdf-metadata-validators))
 
 #### Options
 
