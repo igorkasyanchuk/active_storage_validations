@@ -922,12 +922,12 @@ Before submitting your pull request, run the tests to make sure everything works
 
 To run the gem tests, launch the following commands in the root folder of gem repository:
 
-* `BUNDLE_GEMFILE=gemfiles/rails_7_0_1.gemfile bundle exec rake test` to run for Rails 7.0.1
-* `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test` to run for Rails 7.1
-* `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test` to run for Rails 7.2
-* `BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test` to run for Rails 8.0
-* `BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle exec rake test` to run for Rails 8.1
-* `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test` to run for Rails main
+* `BUNDLE_GEMFILE=gemfiles/rails_7_0_1.gemfile bundle exec rake spec` to run for Rails 7.0.1
+* `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake spec` to run for Rails 7.1
+* `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake spec` to run for Rails 7.2
+* `BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake spec` to run for Rails 8.0
+* `BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle exec rake spec` to run for Rails 8.1
+* `BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake spec` to run for Rails main
 
 Snippet to run in console:
 
@@ -938,17 +938,17 @@ BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
-BUNDLE_GEMFILE=gemfiles/rails_7_0_1.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_7_0_1.gemfile bundle exec rake spec
+BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake spec
+BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake spec
+BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake spec
+BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle exec rake spec
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake spec
 ```
 
 Tips:
-- To focus a specific test, use the `focus` class method provided by [minitest-focus](https://github.com/minitest/minitest-focus)
-- To focus a specific file, use the TEST option provided by minitest, e.g. to only run `size_validator_test.rb` file you will launch the following command: `bundle exec rake test TEST=test/validators/size_validator_test.rb`
+- To focus examples, tag them with `:focus` (or use `fit` / `fdescribe`); RSpec is configured with `filter_run_when_matching :focus`
+- To run a specific file: `bundle exec rspec spec/validators/size_validator_spec.rb`
 
 ### Benchmarks
 

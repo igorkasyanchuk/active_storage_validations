@@ -15,6 +15,7 @@ AllCops:
 
 plugins:
   - rubocop-performance
+  - rubocop-rspec
 
 # ==============================================================================
 # Cops
@@ -35,10 +36,96 @@ Metrics/MethodLength:
 Metrics/BlockLength:
   Exclude:
     - test/**/*
+    - spec/**/*
 
 
 Rails/AssertNot:
   Enabled: false
 
 Rails/RefuteMethods:
+  Enabled: false
+
+# RSpec cops — nested describe/context trees and custom helper DSLs are intentional
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Enabled: false
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+RSpec/ContextWording:
+  Enabled: false
+
+RSpec/NamedSubject:
+  Enabled: false
+
+RSpec/MessageExpectation:
+  Enabled: false
+
+RSpec/StubbedMock:
+  Enabled: false
+
+RSpec/AnyInstance:
+  Enabled: false
+
+RSpec/VerifiedDoubles:
+  Enabled: false
+
+RSpec/ExpectChange:
+  Enabled: false
+
+RSpec/ScatteredSetup:
+  Enabled: false
+
+RSpec/BeforeAfterAll:
+  Enabled: false
+
+RSpec/InstanceVariable:
+  Enabled: false
+
+# Custom helpers (is_expected_to_be_valid, etc.) wrap expect — RuboCop cannot see them
+RSpec/NoExpectationExample:
+  Enabled: false
+
+# Flat layout: spec/validators/size_validator_spec.rb (not nested by module path)
+RSpec/SpecFilePathFormat:
+  Enabled: false
+
+RSpec/SpecFilePathSuffix:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Enabled: false
+
+RSpec/IndexedLet:
+  Enabled: false
+
+RSpec/DescribedClass:
+  Enabled: false
+
+RSpec/EmptyExampleGroup:
+  Enabled: false
+
+RSpec/RepeatedExampleGroupBody:
+  Enabled: false
+
+RSpec/LetBeforeExamples:
+  Enabled: false
+
+RSpec/LeadingSubject:
+  Enabled: false
+
+RSpec/Output:
+  Enabled: false
+
+RSpec/IteratedExpectation:
+  Enabled: false
+
+RSpec/BeEq:
   Enabled: false

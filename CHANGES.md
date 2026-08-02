@@ -13,6 +13,7 @@
     - Add support for Ruby 4.0 in CI matrix
     - Add [AGENTS.md](AGENTS.md) with codebase guide for AI coding agents
     - Add informational `benchmark/` suite for metadata validators (cold vs cached `asv_*`, vips vs mini_magick) with CI job and checked-in baseline
+    - Migrate the gem test suite from Minitest to RSpec; add `rubocop-rspec` (https://github.com/igorkasyanchuk/active_storage_validations/issues/307). Consumer matcher APIs for RSpec and Minitest/shoulda are unchanged
 
   - To upgrade from version 3.x to 4.x, please read the [upgrade guide](docs/upgrade_to_4.md)
 
