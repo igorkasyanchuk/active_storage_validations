@@ -31,6 +31,7 @@ This gem is doing it right for you! Just use `validates :avatar, attached: true,
   - [Total size](#total-size)
   - [Dimension](#dimension)
   - [Duration](#duration)
+  - [With audio](#with-audio)
   - [Aspect ratio](#aspect-ratio)
   - [Processable file](#processable-file)
   - [Pages](#pages)
@@ -76,7 +77,7 @@ We recommend **libvips** (`ruby-vips` + `config.active_storage.variant_processor
 
 ### Using video and audio metadata validators
 
-To use the video and audio metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `duration`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
+To use the video and audio metadata validators (`dimension`, `aspect_ratio`, `processable_file`, `duration` and `with_audio`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
 
 ### Using pdf metadata validators
 
@@ -115,7 +116,7 @@ end
 # end
 ```
 
-`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection`). When a command times out, analysis fails closed and the validator adds its usual error (`file_not_processable` / `media_metadata_missing` / content-type errors) — there is no separate timeout error message.
+`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `with_audio`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection`). When a command times out, analysis fails closed and the validator adds its usual error (`file_not_processable` / `media_metadata_missing` / `audio_missing` / content-type errors) — there is no separate timeout error message.
 
 The 10s default is enough for typical uploads. Raise it (or set `nil`) if you analyze very large videos/PDFs, especially on slow or network storage — otherwise those files can start failing validation after upgrade. See [upgrade to 4.x](docs/upgrade_to_4.md#analyzer-command-timeout).
 
@@ -140,6 +141,7 @@ Notes:
 - [Total size](#total-size): validates total file size for several files
 - [Dimension](#dimension): validates image / video dimensions
 - [Duration](#duration): validates video / audio duration
+- [With audio](#with-audio): validates that a video contains an audio track
 - [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
 - [Processable file](#processable-file): validates if a file can be processed
 - [Pages](#pages): validates pdf number of pages
@@ -644,6 +646,41 @@ The `duration` validator error messages expose 4 values that you can use:
 
 ---
 
+### With audio
+
+Validates that attached video files contain an audio track.
+(be sure to have the right dependencies installed as mentioned in [Using video and audio metadata validators](#using-video-and-audio-metadata-validators))
+
+#### Options
+
+The `with_audio` validator supports:
+- `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
+
+#### Examples
+
+Use it like this:
+```ruby
+class User < ApplicationRecord
+  has_one_attached :video
+
+  validates :video, with_audio: true
+  validates :video, with_audio: { timeout: 5.seconds }
+end
+```
+
+#### Error messages (I18n)
+
+```yml
+en:
+  errors:
+    messages:
+      audio_missing: "must have an audio track"
+```
+
+The `with_audio` validator error message exposes the `filename` value containing the current file name.
+
+---
+
 ### Aspect ratio
 
 Validates the aspect ratio of the attached image / video files.
@@ -895,6 +932,9 @@ describe User do
   it { is_expected.to validate_duration_of(:introduction).between(100..500.seconds) }
   it { is_expected.to validate_duration_of(:avatar).equal_to(5.minutes) }
 
+  # with_audio
+  it { is_expected.to validate_with_audio_of(:video) }
+
   # pages:
   # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
   it { is_expected.to validate_pages_of(:contract).less_than(50) }
@@ -927,6 +967,7 @@ describe User do
 
   # :timeout (analyzer command timeout — metadata validators + content_type with spoofing)
   it { is_expected.to validate_duration_of(:video).less_than(5.minutes).timeout(30.seconds) }
+  it { is_expected.to validate_with_audio_of(:video).timeout(5.seconds) }
   it { is_expected.to validate_processable_file_of(:avatar).timeout(5.seconds) }
 end
 ```

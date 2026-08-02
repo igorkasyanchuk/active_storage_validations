@@ -55,6 +55,7 @@ en-GB:
       aspect_ratio_not_x_y: "must be %{authorized_aspect_ratios} (current file is %{width}x%{height}px)"
       aspect_ratio_invalid: "has an invalid aspect ratio (valid aspect ratios are %{authorized_aspect_ratios})"
       file_not_processable: "is not identified as a valid media file"
+      audio_missing: "must have an audio track"
       pages_not_less_than: "page count must be less than %{max} (current page count is %{pages})"
       pages_not_less_than_or_equal_to: "page count must be less than or equal to %{max} (current page count is %{pages})"
       pages_not_greater_than: "page count must be greater than %{min} (current page count is %{pages})"

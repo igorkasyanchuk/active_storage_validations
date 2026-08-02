@@ -13,6 +13,7 @@ RSpec.shared_examples "works with custom message" do
       when :content_type then matcher.allowing("image/png")
       when :dimension then matcher.width(150).height(150)
       when :duration then matcher.less_than_or_equal_to(5.minutes)
+      when :with_audio then nil
       when :size then matcher.less_than_or_equal_to(5.megabytes)
       when :total_size then matcher.less_than_or_equal_to(5.megabytes)
       when :pages then matcher.equal_to(5)

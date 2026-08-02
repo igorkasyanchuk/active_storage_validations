@@ -55,6 +55,7 @@ pt-BR:
       aspect_ratio_not_x_y: "deve ser %{authorized_aspect_ratios} (o arquivo atual é %{width}x%{height}px)"
       aspect_ratio_invalid: "tem uma proporção inválida (as proporções válidas são %{authorized_aspect_ratios})"
       file_not_processable: "não é identificado como um arquivo de mídia válido"
+      audio_missing: "deve ter uma faixa de áudio"
       pages_not_less_than: "a contagem de páginas deve ser menor que %{max} (a contagem atual de páginas é %{pages})"
       pages_not_less_than_or_equal_to: "a contagem de páginas deve ser menor ou igual a %{max} (a contagem atual de páginas é %{pages})"
       pages_not_greater_than: "a contagem de páginas deve ser maior que %{min} (a contagem atual de páginas é %{pages})"

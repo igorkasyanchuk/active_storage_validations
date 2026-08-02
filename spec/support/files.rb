@@ -333,6 +333,14 @@ def video_file
   }
 end
 
+def video_with_audio_file
+  {
+    io: File.open(Rails.root.join("public", "video_with_audio.mp4")),
+    filename: "video_with_audio",
+    content_type: "video/mp4"
+  }
+end
+
 def create_blob_from_file(file)
   ActiveStorage::Blob.create_and_upload!(
     io: file[:io],

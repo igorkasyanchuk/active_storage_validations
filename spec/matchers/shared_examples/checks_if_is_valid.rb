@@ -12,6 +12,7 @@ RSpec.shared_examples "checks if is valid" do
           when :attached then matcher
           when :content_type then matcher.rejecting("image/jpg")
           when :processable_file then matcher
+          when :with_audio then matcher
           when :limit then matcher.min(1)
           when :dimension then matcher.width(150)
           when :size then matcher.less_than(10.megabytes)
