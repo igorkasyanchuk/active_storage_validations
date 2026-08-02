@@ -12,15 +12,17 @@ lib/active_storage_validations/
   *_validator.rb                           # Validators (ActiveModel::EachValidator)
   base_comparison_validator.rb             # Shared comparison options (<, <=, >, >=, between, equal_to)
   shared/asv_*.rb                          # Shared concerns used by validators
-  analyzer/                                # Media metadata extractors (image/video/audio/pdf/content type)
+  analyzer/                                # Media metadata extractors (image/video/audio/pdf)
+  analyzer/content_type_analyzer/          # Spoofing sniffers: File + Magika backends
   extensors/                               # Blob metadata + Marcel helpers
   matchers/                                # Opt-in RSpec/Minitest matchers (consumer-facing)
   form_builder.rb                          # Infers HTML accept from content_type validators
   railtie.rb / engine.rb                   # Rails integration + locale loading
 config/locales/*.yml                       # I18n error messages (all locales must stay in sync)
-spec/                                      # RSpec suite (validators, matchers, analyzers, integration)
+spec/                                      # RSpec suite (validators, matchers, analyzers, form_builder, integration)
 test/dummy/                                # Combustion Rails app + per-validator models
 gemfiles/                                  # Per-Rails-version Bundler Gemfiles (not Appraisal)
+benchmark/                                 # Optional ips / require suite (not shipped in the gem)
 docs/upgrade_to_*.md                       # Upgrade guides
 ```
 
@@ -41,8 +43,9 @@ docs/upgrade_to_*.md                       # Upgrade guides
 | `ASVErrorable` | `add_error` with `validator_type`, `filename`, bounds |
 | `ASVOptionable` | Flatten options; evaluate Proc options |
 | `ASVSymbolizable` | Map validator class → error symbol (`:content_type`, …) |
+| `ASVLoggable` | `Rails.logger` helper used by analyzers |
 
-**Analyzers** depend on optional system tools: ImageMagick or libvips, ffmpeg, poppler, and the UNIX `file` command (content-type spoofing).
+**Analyzers** depend on optional system tools: ImageMagick or libvips, ffmpeg, poppler, the UNIX `file` command, and/or the [Google Magika](https://github.com/google/magika) CLI (content-type spoofing backends).
 
 **Matchers** are not auto-loaded. Require them explicitly:
 
@@ -52,7 +55,7 @@ require "active_storage_validations/matchers"
 
 ## Supported Versions (v4+)
 
-- Ruby `>= 3.3`
+- Ruby `>= 3.3` (CI also covers 3.4 and 4.0)
 - Rails `>= 7.0.1` (6.1 and 7.0.0 dropped)
 - See `docs/upgrade_to_4.md` and the Unreleased section of `CHANGES.md`
 
@@ -66,7 +69,15 @@ By default, `f.file_field :avatar` may render an HTML `accept` attribute derived
 
 ### Analyzer `command_timeout` (v4)
 
-External analyzer commands default to a 10s deadline (`ActiveStorageValidations.command_timeout`). Override globally, via `configure`, or per validator with `timeout:`. Timeouts fail closed (existing validation errors) and emit `timeout.active_storage_validations`.
+External analyzer commands (`ffprobe`, `pdfinfo`, `file`, `magika`, ImageMagick `identify`, libvips) default to a 10s deadline (`ActiveStorageValidations.command_timeout`). Override globally, via `configure`, or per validator with `timeout:`. Timeouts fail closed (existing validation errors) and emit `timeout.active_storage_validations`. Matcher: `#timeout`.
+
+### Content-type spoofing backends (v4)
+
+`content_type` `spoofing_protection` accepts `true` / `:file` (UNIX `file` CLI) or `:magika` (Google Magika CLI). Detected types are cached as `asv_content_type` plus `asv_content_type_backend`; switching backend re-analyzes. Legacy blobs with only `asv_content_type` are treated as the `:file` backend. Matcher: `#spoofing_protection` / `#spoofing_protection(:magika)`. Install Magika in any environment that uses `:magika` (CI already installs it).
+
+### Matcher `#except_on` (v4)
+
+Matchers support `#except_on` for Rails `:except_on` (available since Rails 8.0), e.g. `validate_attached_of(:avatar).except_on(:update)`. Specs that exercise it should guard for Rails < 8.0.
 
 ## Testing Commands
 
@@ -112,7 +123,9 @@ IMAGE_PROCESSOR=vips bundle exec rake spec
 IMAGE_PROCESSOR=mini_magick bundle exec rake spec
 ```
 
-`spec/rails_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem). When `IMAGE_PROCESSOR` is set, examples tagged `image_processor: :vips` / `:mini_magick` for the other processor are excluded (not pending).
+`spec/rails_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem). Unset locally: validators use MiniMagick (ASV default) and both image-analyzer unit specs run. When `IMAGE_PROCESSOR` is set, examples tagged `image_processor: :vips` / `:mini_magick` for the other processor are excluded (not pending).
+
+Live Magika examples are gated with `magika_cli_available?` (`spec/support/files.rb`); most Magika unit specs stub the CLI.
 
 ### Benchmarks
 
@@ -155,16 +168,17 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 ### Changing a matcher
 
 1. Implement under `lib/active_storage_validations/matchers/`
-2. Compose concerns from `matchers/shared/`
+2. Compose concerns from `matchers/shared/` (e.g. `ASVTimeoutable`, `ASVExceptOnable`, `ASVSpoofingProtectable`)
 3. Add/update specs under `spec/matchers/`
 4. Matchers filter errors using `validator_type` — keep that aligned with the validator
 
 ### Changing analyzers / metadata
 
-1. Analyzers live under `lib/active_storage_validations/analyzer/`
+1. Analyzers live under `lib/active_storage_validations/analyzer/` (content-type sniffers under `analyzer/content_type_analyzer/`)
 2. Results are cached on the blob via `ASVBlobMetadatable` as string keys `asv_*` (S3 metadata constraints)
-3. Blobs are treated as immutable: once metadata keys exist, re-analysis is skipped
+3. Blobs are treated as immutable: once metadata keys exist, re-analysis is skipped — except content-type spoofing, which also keys the cache on `asv_content_type_backend` (`file` vs `magika`)
 4. Run specs with both `IMAGE_PROCESSOR=vips` and `IMAGE_PROCESSOR=mini_magick` when touching image analysis
+5. Content-type sniffer changes usually need both `File` and `Magika` coverage under `spec/analyzers/content_type_analyzers/`
 
 ### Finding related code
 
@@ -173,6 +187,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 | Validator behavior | `lib/active_storage_validations/<name>_validator.rb` |
 | Shared attachable/blob loop | `shared/asv_attachable.rb` |
 | Analysis + caching | `shared/asv_analyzable.rb`, `extensors/asv_blob_metadatable.rb` |
+| Content-type sniffers | `analyzer/content_type_analyzer/{file,magika}.rb` |
 | Error / I18n options | `shared/asv_errorable.rb`, `config/locales/en.yml` |
 | Form `accept` inference | `form_builder.rb` |
 | Matcher API | `matchers.rb` + `matchers/<name>_validator_matcher.rb` |
@@ -214,6 +229,8 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Marcel rejects types like `image/jpg` — use `image/jpeg` (and Marcel shorthands where registered)
 - Railtie must not use `after: :load_config_initializers` (stack overflow; see comment in `railtie.rb`)
 - `processable_file` may reject formats with libvips untrusted loaders (e.g. SVG) when Rails sets `Vips.block_untrusted(true)`
+- Preserve content-type cache backend semantics: legacy `asv_content_type` without `asv_content_type_backend` must keep hitting the `:file` cache; switching `:file` ↔ `:magika` must re-analyze
+- Magika / `file` are optional system CLIs (not Ruby gems); override paths with `ActiveStorage.paths[:magika]` / `ActiveStorage.paths[:file]` when needed
 - Do not reintroduce a Minitest suite for the gem; keep consumer matcher docs for both RSpec and Minitest/shoulda
 
 ## Read First When Contributing
@@ -224,5 +241,6 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 4. A simple validator: `attached_validator.rb`
 5. Comparison path: `base_comparison_validator.rb` + `size_validator.rb`
 6. Shared core: `shared/asv_attachable.rb`, `shared/asv_analyzable.rb`, `shared/asv_errorable.rb`
-7. `spec/rails_helper.rb` + one validator spec and its `shared_examples/`
-8. `.github/workflows/main.yml`
+7. Spoofing / sniffers: `content_type_validator.rb` + `analyzer/content_type_analyzer/`
+8. `spec/rails_helper.rb` + one validator spec and its `shared_examples/`
+9. `.github/workflows/main.yml`
