@@ -88,10 +88,6 @@ RSpec/ContextWording:
     - that
     - but
 
-# Validators create analyzers internally — allow_any_instance_of is the seam
-RSpec/AnyInstance:
-  Enabled: false
-
 # Custom helpers (is_expected_to_be_valid, etc.) wrap expect — RuboCop cannot see them
 RSpec/NoExpectationExample:
   Enabled: false

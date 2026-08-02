@@ -42,7 +42,9 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick do
         processor = ActiveStorage.variant_processor || ActiveStorageValidations::ASVAnalyzable::DEFAULT_IMAGE_PROCESSOR
         skip "requires the MiniMagick image processor" unless processor == :mini_magick
 
+        # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
         allow_any_instance_of(described_class).to receive(:identify_command).and_return(identify_argv)
+        # rubocop:enable RSpec/AnyInstance
       end
 
       context "with processable_file validation" do

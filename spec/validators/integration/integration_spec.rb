@@ -100,7 +100,9 @@ RSpec.describe "Integration tests" do
         end
 
         it "only calls once a media analyzer (expensive operation) on the new attachable" do
+          # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
           expect_any_instance_of(ActiveStorageValidations::Analyzer::ImageAnalyzer).to receive(:metadata).once.and_return({ width: 150, height: 150 })
+          # rubocop:enable RSpec/AnyInstance
           model.pictures.attach(attachable_2)
         end
       end
@@ -137,8 +139,10 @@ RSpec.describe "Integration tests" do
         end
 
         it "calls once the corresponding media analyzers (expensive operation) on the new attachable" do
+          # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
           expect_any_instance_of(ActiveStorageValidations::Analyzer::VideoAnalyzer).to receive(:metadata).once.and_return({ width: 150, height: 150, duration: 1.7, audio: false, video: true })
           expect_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer).to receive(:content_type).once.and_return({ content_type: "video/mp4" })
+          # rubocop:enable RSpec/AnyInstance
           model.videos.attach(attachable_2)
         end
 

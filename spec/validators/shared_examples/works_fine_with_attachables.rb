@@ -380,7 +380,9 @@ RSpec.shared_examples "works fine with attachables" do
       it { is_expected_to_be_valid }
 
       it "does not perform any validation" do
+        # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
         allow_any_instance_of(validator_class).to receive(:is_valid?) { raise "shouldn't be called" }
+        # rubocop:enable RSpec/AnyInstance
         subject.valid?
       end
     end
@@ -444,7 +446,9 @@ RSpec.shared_examples "works fine with attachables" do
       before { subject.using_attachables.attach([ attachable, attachable ]) }
 
       it "only performs the validation once for these files" do
+        # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
         expect_any_instance_of(validator_class).to receive(:is_valid?).once
+        # rubocop:enable RSpec/AnyInstance
         subject.valid?
       end
     end

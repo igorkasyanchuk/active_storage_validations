@@ -33,7 +33,9 @@ RSpec.shared_examples "is performance optimized" do
     before { model.is_performance_optimized.attach(attachable) }
 
     it "calls the corresponding media analyzer (expensive operation) once" do
+      # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
       expect_any_instance_of(validator_class).to receive(:generate_metadata_for).once.and_return({})
+      # rubocop:enable RSpec/AnyInstance
       model.valid?
     end
   end
@@ -45,7 +47,9 @@ RSpec.shared_examples "is performance optimized" do
     end
 
     it "only calls the corresponding media analyzer (expensive operation) on the new attachable" do
+      # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
       expect_any_instance_of(validator_class).to receive(:generate_metadata_for).once.and_return({})
+      # rubocop:enable RSpec/AnyInstance
       model.is_performance_optimizeds.attach(attachable)
     end
   end

@@ -100,8 +100,10 @@ RSpec.describe "command timeout integration" do
     subject(:valid) { model.valid? }
 
     before do
+      # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
       allow_any_instance_of(ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick).to receive(:metadata).and_return({})
       allow_any_instance_of(ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips).to receive(:metadata).and_return({})
+      # rubocop:enable RSpec/AnyInstance
       model.has_to_be_processable.attach(image_150x150_file)
     end
 
@@ -123,8 +125,10 @@ RSpec.describe "command timeout integration" do
     subject(:valid) { model.valid? }
 
     before do
+      # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
       allow_any_instance_of(ActiveStorageValidations::Analyzer::VideoAnalyzer).to receive(:metadata).and_return({})
       allow_any_instance_of(ActiveStorageValidations::Analyzer::AudioAnalyzer).to receive(:metadata).and_return({})
+      # rubocop:enable RSpec/AnyInstance
       model.less_than.attach(audio_file)
     end
 
@@ -149,8 +153,10 @@ RSpec.describe "command timeout integration" do
 
     before do
       model.width_min.attach(image_500x500_file)
+      # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
       allow_any_instance_of(ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick).to receive(:metadata).and_return({})
       allow_any_instance_of(ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips).to receive(:metadata).and_return({})
+      # rubocop:enable RSpec/AnyInstance
     end
 
     it "is invalid" do
@@ -167,8 +173,10 @@ RSpec.describe "command timeout integration" do
     context "when analysis succeeds on a later validation" do
       before do
         valid
+        # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
         allow_any_instance_of(ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick).to receive(:metadata).and_call_original
         allow_any_instance_of(ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips).to receive(:metadata).and_call_original
+        # rubocop:enable RSpec/AnyInstance
         model.errors.clear
       end
 
@@ -185,7 +193,9 @@ RSpec.describe "command timeout integration" do
 
     before do
       model.spoofing_protection.attach(jpeg_file)
+      # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
       allow_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer).to receive(:content_type).and_return(nil)
+      # rubocop:enable RSpec/AnyInstance
     end
 
     it "does not raise" do
