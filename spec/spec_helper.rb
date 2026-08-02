@@ -4,9 +4,14 @@ require "simplecov"
 
 SimpleCov.start do
   command_name "RSpec"
-  skip "/spec/"
-  skip "/test/"
-  skip "/vendor/"
+  # `skip` is SimpleCov >= 1.0; older gemfiles (Rails 7.0/7.1) still resolve 0.22
+  %w[/spec/ /test/ /vendor/].each do |path|
+    if respond_to?(:skip)
+      skip path
+    else
+      add_filter path
+    end
+  end
 end
 
 require "webmock/rspec"
