@@ -15,6 +15,7 @@ AllCops:
 
 plugins:
   - rubocop-performance
+  - rubocop-rspec
 
 # ==============================================================================
 # Cops
@@ -35,10 +36,60 @@ Metrics/MethodLength:
 Metrics/BlockLength:
   Exclude:
     - test/**/*
+    - spec/**/*
 
+# ==============================================================================
+# RSpec cops
+#
+# Re-enabled where the suite is clean or cheap to keep clean.
+# Remaining disables are intentional for this suite's shape / DSL.
 
-Rails/AssertNot:
+RSpec/DescribeClass:
+  Exclude:
+    - spec/**/integration/**/*
+    - spec/integration/**/*
+
+# Suite boot banner (not an example)
+RSpec/Output:
+  Exclude:
+    - spec/rails_helper.rb
+
+# Comparison matrices nest deeply; default Max 3 is too low for this suite
+RSpec/NestedGroups:
+  Max: 7
+
+RSpec/MultipleExpectations:
   Enabled: false
 
-Rails/RefuteMethods:
+RSpec/ExampleLength:
+  Max: 15
+  CountAsOne:
+    - array
+    - hash
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+# Nested contexts continue with and/which/that/but (see .cursor/rules/spec.mdc)
+RSpec/ContextWording:
+  Prefixes:
+    - when
+    - with
+    - without
+    - and
+    - which
+    - that
+    - but
+
+# Custom helpers wrap expect; treat is_expected_* as expectations
+RSpec/NoExpectationExample:
+  AllowedPatterns:
+    - ^is_expected_
+
+# Flat layout: spec/validators/size_validator_spec.rb (not nested by module path)
+RSpec/SpecFilePathFormat:
+  Enabled: false
+
+# file_1 / file_2 style lets are clearer than renaming for this suite
+RSpec/IndexedLet:
   Enabled: false

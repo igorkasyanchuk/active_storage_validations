@@ -33,6 +33,10 @@ class Duration::Validator::Check < ApplicationRecord
   validates :less_than_or_equal_to_proc, duration: { less_than_or_equal_to: ->(record) { 2.seconds } }
   validates :greater_than_proc, duration: { greater_than: ->(record) { 7.seconds } }
   validates :greater_than_or_equal_to_proc, duration: { greater_than_or_equal_to: ->(record) { 7.seconds } }
-  validates :between_proc, duration: { between: -> { 2.seconds..7.seconds } }
+  validates :between_proc, duration: { between: ->(record) { 2.seconds..7.seconds } }
   validates :equal_to_proc, duration: { equal_to: ->(record) { 5.seconds } }
+
+  # Edge cases
+  has_one_attached :with_invalid_media_file
+  validates :with_invalid_media_file, duration: { less_than: 2.seconds }
 end

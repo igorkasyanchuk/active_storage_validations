@@ -13,7 +13,7 @@ gemspec
 # Git. Remember to move these dependencies to your gemspec before releasing
 # your gem to rubygems.org.
 
-# This Rails version will be the one used when running `bundle exec rake test` locally
+# This Rails version will be the one used when running `bundle exec rake spec` locally
 # Uncomment the line then run `bundle install`
 gem "rails", "8.1.2"
 # gem "sqlite3", ">= 2.5"
@@ -30,6 +30,7 @@ group :development, :test do
   gem "rubocop", "~> 1.85", require: false
   gem "rubocop-performance", "~> 1.26", require: false
   gem "rubocop-rails-omakase", "~> 1.1", require: false
+  gem "rubocop-rspec", "~> 3.0", require: false
 end
 
 # Optional: performance suite under benchmark/

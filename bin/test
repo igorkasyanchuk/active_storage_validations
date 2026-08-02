@@ -1,7 +1,0 @@
-#!/usr/bin/env ruby
-# frozen_string_literal: true
-
-$LOAD_PATH << File.expand_path('../test', __dir__)
-
-require 'bundler/setup'
-require 'rails/plugin/test'

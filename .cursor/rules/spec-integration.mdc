@@ -1,0 +1,22 @@
+---
+description: Conventions for integration specs
+globs: spec/**/integration/**/*.rb
+alwaysApply: false
+---
+
+# Integration specs
+
+- Follow shared conventions in `spec.mdc` (named `subject`, `describe`/`context`, `described_class`).
+
+Use integration specs only for behavior that unit/validator specs cannot express cleanly:
+
+- Several validators stacked on one model (especially legacy demo models with `proc_*` twins)
+- Cross-validator interactions (metadata cache sharing, Proc options based on another attachment property, nested attributes)
+- Persistence lifecycles (attach → save → purge → reload blob counts)
+- Cross-cutting fail-closed timeout behavior → `spec/validators/integration/command_timeout_spec.rb` (not a single-validator file)
+
+Do **not** duplicate single-validator option matrices here — those belong in `spec/validators/*_spec.rb` via shared examples.
+
+Prefer focused, named examples over one giant smoke file. When removing an old smoke assertion, confirm coverage exists elsewhere first.
+
+Use `describe` for named units/topics (`User presence`, `#less_than`) and `context` for situations (`when …`, `with …`, `without …`).
