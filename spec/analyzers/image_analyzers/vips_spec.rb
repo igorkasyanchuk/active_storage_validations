@@ -3,24 +3,12 @@
 require "rails_helper"
 require "analyzers/support/analyzer_helpers"
 
-RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips do
+RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips, image_processor: :vips do
   def self.test_rotatable_media?
     true
   end
 
   let(:analyzer) { described_class.new(attachable) }
-
-  # Uncomment these lines in development, or launch test with ENV['IMAGE_PROCESSOR'] = :vips
-  # before do
-  #   @original_variant_processor = Rails.application.config.active_storage.variant_processor
-  #   Rails.application.config.active_storage.variant_processor = :vips
-  #   ActiveStorage.variant_processor = :vips
-  # end
-
-  # after do
-  #   Rails.application.config.active_storage.variant_processor = @original_variant_processor
-  #   ActiveStorage.variant_processor = @original_variant_processor
-  # end
 
   # Using a jpg file to test rotation because the behaviour is uniform among OS,
   # we tried doing it with a png file but the result was different
@@ -55,8 +43,6 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips do
     after { ActiveStorageValidations.command_timeout = 10.seconds }
 
     it "returns empty metadata and emits timeout when the load exceeds the deadline" do
-      skip "requires the ruby-vips gem" unless analyzer.send(:supported?)
-
       release = Queue.new
       events = []
       subscriber = ActiveSupport::Notifications.subscribe("timeout.active_storage_validations") do |*args|
@@ -75,8 +61,6 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips do
     end
 
     it "returns empty metadata for unsupported files without raising" do
-      skip "requires the ruby-vips gem" unless analyzer.send(:supported?)
-
       allow(analyzer).to receive(:open_vips_image).and_return(nil)
       expect(analyzer.metadata).to eq({})
     end

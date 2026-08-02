@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick do
+RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, image_processor: :mini_magick do
   let(:path) { Rails.root.join("public", "image_150x150.png").to_s }
   let(:attachable) do
     {
@@ -39,9 +39,6 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick do
       let(:identify_argv) { [ missing_binary, path ] }
 
       before do
-        processor = ActiveStorage.variant_processor || ActiveStorageValidations::ASVAnalyzable::DEFAULT_IMAGE_PROCESSOR
-        skip "requires the MiniMagick image processor" unless processor == :mini_magick
-
         # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
         allow_any_instance_of(described_class).to receive(:identify_command).and_return(identify_argv)
         # rubocop:enable RSpec/AnyInstance

@@ -986,6 +986,7 @@ BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake spec
 Tips:
 - To focus examples, tag them with `:focus` (or use `fit` / `fdescribe`); RSpec is configured with `filter_run_when_matching :focus`
 - To run a specific file: `bundle exec rspec spec/validators/size_validator_spec.rb`
+- Image processor: CI runs both via `IMAGE_PROCESSOR=vips` / `IMAGE_PROCESSOR=mini_magick`. Locally, unset means validators use MiniMagick (ASV default) and both analyzer unit specs run; setting the env selects that processor for validators and excludes the other processor’s tagged examples (so they do not show as pending)
 
 ### Benchmarks
 

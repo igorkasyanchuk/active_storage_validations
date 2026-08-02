@@ -43,6 +43,13 @@ RSpec.configure do |config|
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
 
+  # CI matrix sets IMAGE_PROCESSOR; omit mismatched :image_processor examples
+  # entirely (not pending). Unset locally so a targeted file path still runs.
+  if ENV.key?("IMAGE_PROCESSOR")
+    processor = ENV["IMAGE_PROCESSOR"].to_sym
+    config.filter_run_excluding image_processor: ->(value) { value && value != processor }
+  end
+
   config.include ValidatorHelpers, file_path: %r{spec/validators}
   config.include MatcherHelpers, file_path: %r{spec/matchers}
   config.include AnalyzerHelpers, file_path: %r{spec/analyzers}
