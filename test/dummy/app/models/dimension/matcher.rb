@@ -62,13 +62,15 @@ class Dimension::Matcher < ApplicationRecord
   validates :with_several_validators_and_contexts, dimension: { width: 150, height: 150 }, on: :update
   validates :with_several_validators_and_contexts, dimension: { width: 150, height: 150 }, on: :custom
 
-  has_one_attached :with_except_on_symbol
-  validates :with_except_on_symbol, dimension: { width: 150, height: 150 }, except_on: :update
-  has_one_attached :with_except_on_array
-  validates :with_except_on_array, dimension: { width: 150, height: 150 }, except_on: %i[update custom]
-  has_one_attached :with_several_validators_and_except_on
-  validates :with_several_validators_and_except_on, dimension: { width: 150, height: 150 }, except_on: :update
-  validates :with_several_validators_and_except_on, dimension: { width: 150, height: 150 }, except_on: :custom
+  if Rails.gem_version >= Gem::Version.new("8.0.0")
+    has_one_attached :with_except_on_symbol
+    validates :with_except_on_symbol, dimension: { width: 150, height: 150 }, except_on: :update
+    has_one_attached :with_except_on_array
+    validates :with_except_on_array, dimension: { width: 150, height: 150 }, except_on: %i[update custom]
+    has_one_attached :with_several_validators_and_except_on
+    validates :with_several_validators_and_except_on, dimension: { width: 150, height: 150 }, except_on: :update
+    validates :with_several_validators_and_except_on, dimension: { width: 150, height: 150 }, except_on: :custom
+  end
 
   has_one_attached :as_instance
   validates :as_instance, dimension: { width: 150, height: 150 }

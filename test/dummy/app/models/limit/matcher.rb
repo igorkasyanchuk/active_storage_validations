@@ -37,13 +37,15 @@ class Limit::Matcher < ApplicationRecord
   validates :with_several_validators_and_contexts, limit: { min: 1, max: 5 }, on: :update
   validates :with_several_validators_and_contexts, limit: { min: 1, max: 5 }, on: :custom
 
-  has_many_attached :with_except_on_symbol
-  validates :with_except_on_symbol, limit: { min: 1, max: 5 }, except_on: :update
-  has_many_attached :with_except_on_array
-  validates :with_except_on_array, limit: { min: 1, max: 5 }, except_on: %i[update custom]
-  has_many_attached :with_several_validators_and_except_on
-  validates :with_several_validators_and_except_on, limit: { min: 1, max: 5 }, except_on: :update
-  validates :with_several_validators_and_except_on, limit: { min: 1, max: 5 }, except_on: :custom
+  if Rails.gem_version >= Gem::Version.new("8.0.0")
+    has_many_attached :with_except_on_symbol
+    validates :with_except_on_symbol, limit: { min: 1, max: 5 }, except_on: :update
+    has_many_attached :with_except_on_array
+    validates :with_except_on_array, limit: { min: 1, max: 5 }, except_on: %i[update custom]
+    has_many_attached :with_several_validators_and_except_on
+    validates :with_several_validators_and_except_on, limit: { min: 1, max: 5 }, except_on: :update
+    validates :with_several_validators_and_except_on, limit: { min: 1, max: 5 }, except_on: :custom
+  end
 
   has_many_attached :as_instance
   validates :as_instance, limit: { min: 1, max: 5 }

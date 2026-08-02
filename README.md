@@ -880,7 +880,7 @@ describe User do
   it { is_expected.to validate_attached_of(:avatar).on(:update) }
   it { is_expected.to validate_attached_of(:avatar).on(%i[update custom]) }
 
-  # :except_on
+  # :except_on (Rails >= 8.0)
   it { is_expected.to validate_attached_of(:avatar).except_on(:update) }
   it { is_expected.to validate_attached_of(:avatar).except_on(%i[update custom]) }
 

@@ -60,13 +60,15 @@ class Pages::Matcher < ApplicationRecord
   validates :with_several_validators_and_contexts, pages: { less_than_or_equal_to: 5 }, on: :update
   validates :with_several_validators_and_contexts, pages: { less_than_or_equal_to: 5 }, on: :custom
 
-  has_one_attached :with_except_on_symbol
-  validates :with_except_on_symbol, pages: { less_than_or_equal_to: 5 }, except_on: :update
-  has_one_attached :with_except_on_array
-  validates :with_except_on_array, pages: { less_than_or_equal_to: 5 }, except_on: %i[update custom]
-  has_one_attached :with_several_validators_and_except_on
-  validates :with_several_validators_and_except_on, pages: { less_than_or_equal_to: 5 }, except_on: :update
-  validates :with_several_validators_and_except_on, pages: { less_than_or_equal_to: 5 }, except_on: :custom
+  if Rails.gem_version >= Gem::Version.new("8.0.0")
+    has_one_attached :with_except_on_symbol
+    validates :with_except_on_symbol, pages: { less_than_or_equal_to: 5 }, except_on: :update
+    has_one_attached :with_except_on_array
+    validates :with_except_on_array, pages: { less_than_or_equal_to: 5 }, except_on: %i[update custom]
+    has_one_attached :with_several_validators_and_except_on
+    validates :with_several_validators_and_except_on, pages: { less_than_or_equal_to: 5 }, except_on: :update
+    validates :with_several_validators_and_except_on, pages: { less_than_or_equal_to: 5 }, except_on: :custom
+  end
 
   has_one_attached :as_instance
   validates :as_instance, pages: { less_than_or_equal_to: 5 }

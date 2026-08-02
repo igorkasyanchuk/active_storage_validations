@@ -42,13 +42,15 @@ class ContentType::Matcher < ApplicationRecord
   validates :with_several_validators_and_contexts, content_type: :png, on: :update
   validates :with_several_validators_and_contexts, content_type: :png, on: :custom
 
-  has_one_attached :with_except_on_symbol
-  validates :with_except_on_symbol, content_type: :png, except_on: :update
-  has_one_attached :with_except_on_array
-  validates :with_except_on_array, content_type: :png, except_on: %i[update custom]
-  has_one_attached :with_several_validators_and_except_on
-  validates :with_several_validators_and_except_on, content_type: :png, except_on: :update
-  validates :with_several_validators_and_except_on, content_type: :png, except_on: :custom
+  if Rails.gem_version >= Gem::Version.new("8.0.0")
+    has_one_attached :with_except_on_symbol
+    validates :with_except_on_symbol, content_type: :png, except_on: :update
+    has_one_attached :with_except_on_array
+    validates :with_except_on_array, content_type: :png, except_on: %i[update custom]
+    has_one_attached :with_several_validators_and_except_on
+    validates :with_several_validators_and_except_on, content_type: :png, except_on: :update
+    validates :with_several_validators_and_except_on, content_type: :png, except_on: :custom
+  end
 
   has_one_attached :as_instance
   validates :as_instance, content_type: :png

@@ -41,13 +41,15 @@ class AspectRatio::Matcher < ApplicationRecord
   validates :with_several_validators_and_contexts, aspect_ratio: :square, on: :update
   validates :with_several_validators_and_contexts, aspect_ratio: :square, on: :custom
 
-  has_one_attached :with_except_on_symbol
-  validates :with_except_on_symbol, aspect_ratio: :square, except_on: :update
-  has_one_attached :with_except_on_array
-  validates :with_except_on_array, aspect_ratio: :square, except_on: %i[update custom]
-  has_one_attached :with_several_validators_and_except_on
-  validates :with_several_validators_and_except_on, aspect_ratio: :square, except_on: :update
-  validates :with_several_validators_and_except_on, aspect_ratio: :square, except_on: :custom
+  if Rails.gem_version >= Gem::Version.new("8.0.0")
+    has_one_attached :with_except_on_symbol
+    validates :with_except_on_symbol, aspect_ratio: :square, except_on: :update
+    has_one_attached :with_except_on_array
+    validates :with_except_on_array, aspect_ratio: :square, except_on: %i[update custom]
+    has_one_attached :with_several_validators_and_except_on
+    validates :with_several_validators_and_except_on, aspect_ratio: :square, except_on: :update
+    validates :with_several_validators_and_except_on, aspect_ratio: :square, except_on: :custom
+  end
 
   has_one_attached :as_instance
   validates :as_instance, aspect_ratio: :square

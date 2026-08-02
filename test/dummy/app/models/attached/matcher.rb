@@ -30,13 +30,15 @@ class Attached::Matcher < ApplicationRecord
   validates :with_several_validators_and_contexts, attached: true, on: :update
   validates :with_several_validators_and_contexts, attached: true, on: :custom
 
-  has_one_attached :with_except_on_symbol
-  validates :with_except_on_symbol, attached: true, except_on: :update
-  has_one_attached :with_except_on_array
-  validates :with_except_on_array, attached: true, except_on: %i[update custom]
-  has_one_attached :with_several_validators_and_except_on
-  validates :with_several_validators_and_except_on, attached: true, except_on: :update
-  validates :with_several_validators_and_except_on, attached: true, except_on: :custom
+  if Rails.gem_version >= Gem::Version.new("8.0.0")
+    has_one_attached :with_except_on_symbol
+    validates :with_except_on_symbol, attached: true, except_on: :update
+    has_one_attached :with_except_on_array
+    validates :with_except_on_array, attached: true, except_on: %i[update custom]
+    has_one_attached :with_several_validators_and_except_on
+    validates :with_several_validators_and_except_on, attached: true, except_on: :update
+    validates :with_several_validators_and_except_on, attached: true, except_on: :custom
+  end
 
   has_one_attached :as_instance
   validates :as_instance, attached: true

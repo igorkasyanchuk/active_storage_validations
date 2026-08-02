@@ -30,13 +30,15 @@ class ProcessableFile::Matcher < ApplicationRecord
   validates :with_several_validators_and_contexts, processable_file: true, on: :update
   validates :with_several_validators_and_contexts, processable_file: true, on: :custom
 
-  has_one_attached :with_except_on_symbol
-  validates :with_except_on_symbol, processable_file: true, except_on: :update
-  has_one_attached :with_except_on_array
-  validates :with_except_on_array, processable_file: true, except_on: %i[update custom]
-  has_one_attached :with_several_validators_and_except_on
-  validates :with_several_validators_and_except_on, processable_file: true, except_on: :update
-  validates :with_several_validators_and_except_on, processable_file: true, except_on: :custom
+  if Rails.gem_version >= Gem::Version.new("8.0.0")
+    has_one_attached :with_except_on_symbol
+    validates :with_except_on_symbol, processable_file: true, except_on: :update
+    has_one_attached :with_except_on_array
+    validates :with_except_on_array, processable_file: true, except_on: %i[update custom]
+    has_one_attached :with_several_validators_and_except_on
+    validates :with_several_validators_and_except_on, processable_file: true, except_on: :update
+    validates :with_several_validators_and_except_on, processable_file: true, except_on: :custom
+  end
 
   has_one_attached :as_instance
   validates :as_instance, processable_file: true
