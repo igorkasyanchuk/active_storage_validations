@@ -117,10 +117,12 @@ describe ActiveStorageValidations::ASVCommandable do
     end
 
     describe "when the command ignores TERM" do
-      let(:timeout) { 0.2 }
-      # IGNORE (not an empty trap): an empty trap still interrupts sleep on some
-      # platforms/Rubies, so the script exits before the grace period elapses.
-      let(:argv) { [ "ruby", "-e", "Signal.trap(:TERM, 'IGNORE'); sleep 30" ] }
+      let(:timeout) { 0.3 }
+      # Use the shell: Ruby -e may still be booting when the short timeout fires,
+      # so TERM arrives before Signal.trap(:TERM, "IGNORE") is installed and the
+      # process dies immediately (flake under CI load). `trap "" TERM` is set
+      # before exec, and IGNORE is inherited by sleep.
+      let(:argv) { [ "sh", "-c", 'trap "" TERM; exec sleep 30' ] }
 
       it "escalates to KILL after the grace period" do
         started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -130,7 +132,8 @@ describe ActiveStorageValidations::ASVCommandable do
 
         assert result.timed_out
         refute result.success?
-        assert_in_delta timeout + grace, elapsed, 0.4
+        # Must wait the full grace period — dying on TERM would finish near @timeout.
+        assert_operator elapsed, :>=, timeout + grace - 0.2
         assert_operator elapsed, :<, timeout + grace + 1
       end
     end
