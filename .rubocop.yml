@@ -45,7 +45,25 @@ Rails/AssertNot:
 Rails/RefuteMethods:
   Enabled: false
 
-# RSpec cops — nested describe/context trees and custom helper DSLs are intentional
+# ==============================================================================
+# RSpec cops
+#
+# Re-enabled where the suite is clean or cheap to keep clean.
+# Remaining disables are intentional for this suite's shape / DSL.
+
+RSpec/DescribeClass:
+  Exclude:
+    - spec/**/integration/**/*
+    - spec/integration/**/*
+
+# Suite boot banner (not an example)
+RSpec/Output:
+  Exclude:
+    - spec/rails_helper.rb
+
+# Nested describe/context trees and shared comparison matrices are intentional
+RSpec/NestedGroups:
+  Enabled: false
 
 RSpec/MultipleExpectations:
   Enabled: false
@@ -53,40 +71,19 @@ RSpec/MultipleExpectations:
 RSpec/ExampleLength:
   Enabled: false
 
-RSpec/NestedGroups:
-  Enabled: false
-
 RSpec/MultipleMemoizedHelpers:
   Enabled: false
 
+# Project contexts also use "and when…", "which is…" (see .cursor/rules/spec.mdc)
 RSpec/ContextWording:
   Enabled: false
 
+# Helpers still call `subject`; examples often use `subject` alias after naming
 RSpec/NamedSubject:
   Enabled: false
 
-RSpec/MessageExpectation:
-  Enabled: false
-
-RSpec/StubbedMock:
-  Enabled: false
-
+# Validators create analyzers internally — allow_any_instance_of is the seam
 RSpec/AnyInstance:
-  Enabled: false
-
-RSpec/VerifiedDoubles:
-  Enabled: false
-
-RSpec/ExpectChange:
-  Enabled: false
-
-RSpec/ScatteredSetup:
-  Enabled: false
-
-RSpec/BeforeAfterAll:
-  Enabled: false
-
-RSpec/InstanceVariable:
   Enabled: false
 
 # Custom helpers (is_expected_to_be_valid, etc.) wrap expect — RuboCop cannot see them
@@ -97,35 +94,14 @@ RSpec/NoExpectationExample:
 RSpec/SpecFilePathFormat:
   Enabled: false
 
-RSpec/SpecFilePathSuffix:
-  Enabled: false
-
-RSpec/DescribeClass:
-  Enabled: false
-
-RSpec/IndexedLet:
-  Enabled: false
-
-RSpec/DescribedClass:
-  Enabled: false
-
+# Shared example modules / dynamic groups look empty to the cop
 RSpec/EmptyExampleGroup:
   Enabled: false
 
+# Comparison option matrices repeat similar bodies by design
 RSpec/RepeatedExampleGroupBody:
   Enabled: false
 
-RSpec/LetBeforeExamples:
-  Enabled: false
-
-RSpec/LeadingSubject:
-  Enabled: false
-
-RSpec/Output:
-  Enabled: false
-
-RSpec/IteratedExpectation:
-  Enabled: false
-
-RSpec/BeEq:
+# file_1 / file_2 style lets are clearer than renaming for this suite
+RSpec/IndexedLet:
   Enabled: false

@@ -4,6 +4,8 @@ RSpec.shared_examples "checks if is valid" do
   describe "Edge cases" do
     context "when the validator is used several times on the same attributes" do
       context "and is provided with different error messages" do
+        subject(:configured_matcher) { matcher }
+
         before do
           case validator_sym
           when :aspect_ratio then matcher.allowing(:square)
@@ -18,7 +20,6 @@ RSpec.shared_examples "checks if is valid" do
           end
         end
 
-        subject(:configured_matcher) { matcher }
 
         let(:model_attribute) { :validatable_different_error_messages }
         let(:instance) { klass.new(title: "American Psycho") }

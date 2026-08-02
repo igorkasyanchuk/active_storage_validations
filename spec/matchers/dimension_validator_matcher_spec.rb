@@ -133,14 +133,15 @@ module DimensionValidatorMatcherTest
 end
 
 RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
+  let(:klass) { Dimension::Matcher }
+  let(:matcher) { described_class.new(model_attribute) }
+
   it_behaves_like "checks if is a valid active storage attribute"
   it_behaves_like "checks if is valid"
   it_behaves_like "has custom matcher"
   it_behaves_like "has valid rspec message methods"
   it_behaves_like "works with both instance and class"
 
-  let(:matcher) { ActiveStorageValidations::Matchers::DimensionValidatorMatcher.new(model_attribute) }
-  let(:klass) { Dimension::Matcher }
 
   describe "#validate_dimensions_of" do
     it_behaves_like "has custom matcher"

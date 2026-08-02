@@ -29,14 +29,15 @@ module LimitValidatorMatcherTest
 end
 
 RSpec.describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
+  let(:klass) { Limit::Matcher }
+  let(:matcher) { described_class.new(model_attribute) }
+
   it_behaves_like "checks if is a valid active storage attribute"
   it_behaves_like "checks if is valid"
   it_behaves_like "has custom matcher"
   it_behaves_like "has valid rspec message methods"
   it_behaves_like "works with both instance and class"
 
-  let(:matcher) { ActiveStorageValidations::Matchers::LimitValidatorMatcher.new(model_attribute) }
-  let(:klass) { Limit::Matcher }
 
   describe "#validate_limits_of" do
     it_behaves_like "has custom matcher"

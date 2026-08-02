@@ -15,9 +15,10 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
   end
 
   describe "Validator checks" do
+    let(:model) { validator_test_class::Check.new(params) }
+
     it_behaves_like "works fine with attachables"
 
-    let(:model) { validator_test_class::Check.new(params) }
 
     %w[image video audio].each do |media_type|
       context "when provided with a #{media_type} that is processable" do
@@ -62,6 +63,8 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
       # Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call Vips.block_untrusted(true), so
       # analysis of formats with untrusted loaders returns empty metadata by design.
       # https://github.com/rails/rails/security/advisories/GHSA-xr9x-r78c-5hrm
+      let(:vips_block_state) { {} }
+
       before do
         skip "requires the Vips image processor" unless ActiveStorage.variant_processor == :vips
 
@@ -73,18 +76,19 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
 
         skip "requires Vips.block_untrusted (ruby-vips >= 2.2.1)" unless Vips.respond_to?(:block_untrusted)
 
-        ActiveStorageValidations::ProcessableFileValidator.reset_vips_untrusted_operations_blocked_cache!
-        @untrusted_was_blocked = ActiveStorageValidations::ProcessableFileValidator.vips_untrusted_operations_blocked?
-        ActiveStorageValidations::ProcessableFileValidator.reset_vips_untrusted_operations_blocked_cache!
+        described_class.reset_vips_untrusted_operations_blocked_cache!
+        vips_block_state[:was_blocked] = described_class.vips_untrusted_operations_blocked?
+        described_class.reset_vips_untrusted_operations_blocked_cache!
         Vips.block_untrusted(true)
-        ActiveStorageValidations::ProcessableFileValidator.reset_vips_untrusted_operations_blocked_cache!
+        described_class.reset_vips_untrusted_operations_blocked_cache!
       end
 
       after do
-        if defined?(Vips) && Vips.respond_to?(:block_untrusted)
-          Vips.block_untrusted(!!@untrusted_was_blocked)
-          ActiveStorageValidations::ProcessableFileValidator.reset_vips_untrusted_operations_blocked_cache!
-        end
+        next unless vips_block_state.key?(:was_blocked)
+        next unless defined?(Vips) && Vips.respond_to?(:block_untrusted)
+
+        Vips.block_untrusted(!!vips_block_state[:was_blocked])
+        described_class.reset_vips_untrusted_operations_blocked_cache!
       end
 
       context "when provided with an SVG" do

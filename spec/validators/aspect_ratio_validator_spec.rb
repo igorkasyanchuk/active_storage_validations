@@ -77,20 +77,16 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
     end
 
     it "accepts ratios like 'is_16_9'" do
-      accepted_is_x_y_strings.each do |accepted_is_x_y_string|
-        expect(accepted_is_x_y_string).to match(aspect_ratio_regex)
-      end
-
-      not_accepted_is_x_y_strings.each do |not_accepted_is_x_y_string|
-        expect(not_accepted_is_x_y_string).not_to match(aspect_ratio_regex)
-      end
+      expect(accepted_is_x_y_strings).to all(match(aspect_ratio_regex))
+      expect(not_accepted_is_x_y_strings).to all(satisfy { |value| !value.match?(aspect_ratio_regex) })
     end
   end
 
   describe "Validator checks" do
+    let(:model) { validator_test_class::Check.new(params) }
+
     it_behaves_like "works fine with attachables"
 
-    let(:model) { validator_test_class::Check.new(params) }
 
     describe ":with" do
       # validates :with_named_square, aspect_ratio: :square

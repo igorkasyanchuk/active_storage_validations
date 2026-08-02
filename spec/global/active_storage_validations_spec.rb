@@ -6,7 +6,7 @@ RSpec.describe ActiveStorageValidations do
   let(:instance) { ActiveStorageValidations::Check.new }
 
   it "is part of the app's modules" do
-    expect(ActiveStorageValidations).to be_a(Module)
+    expect(described_class).to be_a(Module)
   end
 
   describe "concerns" do

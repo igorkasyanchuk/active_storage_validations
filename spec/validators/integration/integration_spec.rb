@@ -165,11 +165,11 @@ RSpec.describe "Integration tests" do
         end
 
         it "does not allow to update the parent model" do
-          expect(subject).to eq(false)
+          expect(result).to be(false)
         end
 
         it "adds the child model's error to the parent model's errors" do
-          subject
+          result
 
           expect(parent_model.errors.any?).to be(true)
         end

@@ -340,6 +340,8 @@ RSpec.shared_examples "works fine with attachables" do
     end
 
     describe "rewinding the attachable io" do
+      subject(:record) { model.using_attachable.attach(attachable) and model }
+
       let(:attachable) do
         if validator_test_class.name == "Duration::Validator"
           {
@@ -362,16 +364,15 @@ RSpec.shared_examples "works fine with attachables" do
         end
       end
 
-      before do
-        @io = attachable[:io].read
+      let!(:io_content) do
+        content = attachable[:io].read
         attachable[:io].rewind
+        content
       end
 
-      subject(:record) { model.using_attachable.attach(attachable) and model }
-
       it "rewinds the attachable io" do
-        subject.save!
-        expect(subject.using_attachable.blob.download).to eq(@io)
+        record.save!
+        expect(record.using_attachable.blob.download).to eq(io_content)
       end
     end
 

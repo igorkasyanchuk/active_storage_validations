@@ -3,14 +3,15 @@
 require "rails_helper"
 
 RSpec.describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher do
+  let(:klass) { ContentType::Matcher }
+  let(:matcher) { described_class.new(model_attribute) }
+
   it_behaves_like "checks if is a valid active storage attribute"
   it_behaves_like "checks if is valid"
   it_behaves_like "has custom matcher"
   it_behaves_like "has valid rspec message methods"
   it_behaves_like "works with both instance and class"
 
-  let(:matcher) { ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher.new(model_attribute) }
-  let(:klass) { ContentType::Matcher }
 
   describe "#validate_content_type_of" do
     it_behaves_like "has custom matcher"

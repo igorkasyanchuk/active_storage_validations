@@ -19,9 +19,10 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
   end
 
   describe "Validator checks" do
+    let(:model) { validator_test_class::Check.new(params) }
+
     it_behaves_like "works fine with attachables"
 
-    let(:model) { validator_test_class::Check.new(params) }
 
     describe ":less_than" do
       let(:file_having_lower_than_less_than_option) { audio_1s }

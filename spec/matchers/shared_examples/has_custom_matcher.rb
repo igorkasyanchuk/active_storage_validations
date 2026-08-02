@@ -4,6 +4,8 @@ RSpec.shared_examples "has custom matcher" do
   let(:model_attribute) { :custom_matcher }
 
   describe "using custom matcher" do
+    subject(:configured_matcher) { matcher } # to be able to use validator_sym method
+
     before do
       class ActiveSupport::TestCase
         extend ActiveStorageValidations::Matchers
@@ -23,7 +25,6 @@ RSpec.shared_examples "has custom matcher" do
       end
     end
 
-    subject(:configured_matcher) { matcher } # to be able to use validator_sym method
 
     let(:custom_matcher_builder) { ActiveSupport::TestCase }
 

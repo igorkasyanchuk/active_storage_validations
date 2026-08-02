@@ -109,9 +109,9 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
   end
 
   describe "Validator checks" do
+    let(:model) { validator_test_class::Check.new(params) }
     it_behaves_like "works fine with attachables" # when using spoofing_protection
 
-    let(:model) { validator_test_class::Check.new(params) }
 
     # Dead code that we keep here for some time, maybe we will find a solution
     # to this check later? (November 2024)

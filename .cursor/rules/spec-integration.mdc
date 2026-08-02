@@ -13,6 +13,7 @@ Use integration specs only for behavior that unit/validator specs cannot express
 - Several validators stacked on one model (especially legacy demo models with `proc_*` twins)
 - Cross-validator interactions (metadata cache sharing, Proc options based on another attachment property, nested attributes)
 - Persistence lifecycles (attach → save → purge → reload blob counts)
+- Cross-cutting fail-closed timeout behavior → `spec/validators/integration/command_timeout_spec.rb` (not a single-validator file)
 
 Do **not** duplicate single-validator option matrices here — those belong in `spec/validators/*_spec.rb` via shared examples.
 

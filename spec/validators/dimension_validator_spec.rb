@@ -77,9 +77,10 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
   end
 
   describe "Validator checks" do
+    let(:model) { validator_test_class::Check.new(params) }
+
     it_behaves_like "works fine with attachables"
 
-    let(:model) { validator_test_class::Check.new(params) }
 
     %w[width height].each do |dimension|
       describe ":#{dimension} option" do

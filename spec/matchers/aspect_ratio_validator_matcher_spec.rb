@@ -3,14 +3,15 @@
 require "rails_helper"
 
 RSpec.describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher do
+  let(:klass) { AspectRatio::Matcher }
+  let(:matcher) { described_class.new(model_attribute) }
+
   it_behaves_like "checks if is a valid active storage attribute"
   it_behaves_like "checks if is valid"
   it_behaves_like "has custom matcher"
   it_behaves_like "has valid rspec message methods"
   it_behaves_like "works with both instance and class"
 
-  let(:matcher) { ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher.new(model_attribute) }
-  let(:klass) { AspectRatio::Matcher }
 
   describe "#validate_aspect_ratio_of" do
     it_behaves_like "has custom matcher"
@@ -102,25 +103,28 @@ RSpec.describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher d
 
     describe "several" do
       context "when all specified aspect ratios exactly match the allowed list" do
+        subject(:configured_matcher) { matcher.allowing(:portrait, :square) }
+
         let(:model_attribute) { :allowing_several }
 
-        subject(:configured_matcher) { matcher.allowing(:portrait, :square) }
 
         it { is_expected_to_match_for(klass) }
       end
 
       context "when some specified aspect ratios match but not all" do
+        subject(:configured_matcher) { matcher.allowing(:landscape, :square) }
+
         let(:model_attribute) { :allowing_several }
 
-        subject(:configured_matcher) { matcher.allowing(:landscape, :square) }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
       context "when none of the specified aspect ratios match" do
+        subject(:configured_matcher) { matcher.allowing(:landscape, :is_4_3) }
+
         let(:model_attribute) { :allowing_several }
 
-        subject(:configured_matcher) { matcher.allowing(:landscape, :is_4_3) }
 
         it { is_expected_not_to_match_for(klass) }
       end
@@ -191,25 +195,28 @@ RSpec.describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher d
 
     describe "several" do
       context "when rejecting aspect ratios that are not in the allowed list" do
+        subject(:configured_matcher) { matcher.rejecting(:is_16_9, :landscape) }
+
         let(:model_attribute) { :allowing_several }
 
-        subject(:configured_matcher) { matcher.rejecting(:is_16_9, :landscape) }
 
         it { is_expected_to_match_for(klass) }
       end
 
       context "when rejecting some aspect ratios that overlap with the allowed list" do
+        subject(:configured_matcher) { matcher.rejecting(:landscape, :square) }
+
         let(:model_attribute) { :allowing_several }
 
-        subject(:configured_matcher) { matcher.rejecting(:landscape, :square) }
 
         it { is_expected_not_to_match_for(klass) }
       end
 
       context "when rejecting aspect ratios that are in the allowed list" do
+        subject(:configured_matcher) { matcher.rejecting(:square, :portrait) }
+
         let(:model_attribute) { :allowing_several }
 
-        subject(:configured_matcher) { matcher.rejecting(:square, :portrait) }
 
         it { is_expected_not_to_match_for(klass) }
       end

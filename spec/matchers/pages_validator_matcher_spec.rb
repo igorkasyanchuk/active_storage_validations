@@ -3,14 +3,15 @@
 require "rails_helper"
 
 RSpec.describe ActiveStorageValidations::Matchers::PagesValidatorMatcher do
+  let(:klass) { Pages::Matcher }
+  let(:matcher) { described_class.new(model_attribute) }
+
   it_behaves_like "checks if is a valid active storage attribute"
   it_behaves_like "checks if is valid"
   it_behaves_like "has custom matcher"
   it_behaves_like "has valid rspec message methods"
   it_behaves_like "works with both instance and class"
 
-  let(:matcher) { ActiveStorageValidations::Matchers::PagesValidatorMatcher.new(model_attribute) }
-  let(:klass) { Pages::Matcher }
 
   describe "#validate_pages_of" do
     it_behaves_like "has custom matcher"

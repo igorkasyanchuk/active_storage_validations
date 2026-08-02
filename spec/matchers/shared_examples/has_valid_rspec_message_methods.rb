@@ -2,6 +2,8 @@
 
 RSpec.shared_examples "has valid rspec message methods" do
   context "when the matcher returns a failure message to the dev" do
+    subject(:configured_matcher) { matcher }
+
     before do
       case validator_sym
       when :aspect_ratio then matcher.rejecting(:square)
@@ -17,7 +19,6 @@ RSpec.shared_examples "has valid rspec message methods" do
       end
     end
 
-    subject(:configured_matcher) { matcher }
 
     let(:model_attribute) { :failure_message }
     let(:expected_failure_message) do
@@ -91,6 +92,8 @@ RSpec.shared_examples "has valid rspec message methods" do
   end
 
   context "when the matcher returns a negated failure message to the dev" do
+    subject(:configured_matcher) { matcher }
+
     before do
       case validator_sym
       when :aspect_ratio then matcher.allowing(:square)
@@ -106,7 +109,6 @@ RSpec.shared_examples "has valid rspec message methods" do
       end
     end
 
-    subject(:configured_matcher) { matcher }
 
     let(:model_attribute) { :failure_message_when_negated }
     let(:expected_failure_message) do
