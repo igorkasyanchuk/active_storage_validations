@@ -69,7 +69,10 @@ RSpec/MultipleExpectations:
   Enabled: false
 
 RSpec/ExampleLength:
-  Enabled: false
+  Max: 15
+  CountAsOne:
+    - array
+    - hash
 
 RSpec/MultipleMemoizedHelpers:
   Enabled: false

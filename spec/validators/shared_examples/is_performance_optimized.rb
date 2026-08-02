@@ -5,112 +5,93 @@ RSpec.shared_examples "is performance optimized" do
 
   let(:validator_class) { "ActiveStorageValidations::#{validator_test_class.name.delete('::')}".constantize }
 
+  def with_debug_logging
+    log_output = StringIO.new
+    test_logger = Logger.new(log_output, level: Logger::DEBUG)
+
+    rails_logger_was = Rails.logger
+    active_record_logger_was = ActiveRecord::Base.logger
+    active_storage_logger_was = ActiveStorage.logger
+
+    Rails.logger = test_logger
+    ActiveRecord::Base.logger = test_logger
+    ActiveStorage.logger = test_logger
+
+    yield log_output
+  ensure
+    Rails.logger = rails_logger_was
+    ActiveRecord::Base.logger = active_record_logger_was
+    ActiveStorage.logger = active_storage_logger_was
+  end
+
+  def clear_log(log_output)
+    log_output.truncate(0)
+    log_output.rewind
+  end
+
   context "when the attachable blob has not been analyzed by our gem yet" do
-    before { subject.is_performance_optimized.attach(attachable) }
+    before { model.is_performance_optimized.attach(attachable) }
 
     it "calls the corresponding media analyzer (expensive operation) once" do
       expect_any_instance_of(validator_class).to receive(:generate_metadata_for).once.and_return({})
-      subject.valid?
+      model.valid?
     end
   end
 
   context "when an attachable blob has already been analyzed by our gem" do
     before do
-      subject.is_performance_optimizeds.attach(attachable)
-      subject.save!
+      model.is_performance_optimizeds.attach(attachable)
+      model.save!
     end
 
     it "only calls the corresponding media analyzer (expensive operation) on the new attachable" do
       expect_any_instance_of(validator_class).to receive(:generate_metadata_for).once.and_return({})
-      subject.is_performance_optimizeds.attach(attachable)
+      model.is_performance_optimizeds.attach(attachable)
     end
   end
 
   describe "persistance of the active_storage_validations metadata" do
     context "with an already saved attachable without active_storage_validations metadata (like an attachable saved before v2 of the gem)" do
       before do
-        subject.is_performance_optimized.attach(attachable)
-        subject.save!
-        subject.is_performance_optimized.blob.update!(metadata: {})
+        model.is_performance_optimized.attach(attachable)
+        model.save!
+        model.is_performance_optimized.blob.update!(metadata: {})
       end
 
       it "persists the active_storage_validations metadata" do
-        expect(subject.is_performance_optimized.blob.metadata).to eq({})
+        expect(model.is_performance_optimized.blob.metadata).to eq({})
 
-        log_output = StringIO.new
+        with_debug_logging do |log_output|
+          model.valid?
+          expect(log_output.string).to include("Downloaded file from key:")
 
-        rails_logger_was = Rails.logger
-        active_record_logger_was = ActiveRecord::Base.logger
-        active_storage_logger_was = ActiveStorage.logger
+          clear_log(log_output)
+          model.valid?
+          expect(log_output.string).not_to include("Downloaded file from key:")
 
-        test_logger = Logger.new(log_output, level: Logger::DEBUG)
-
-        Rails.logger = test_logger
-        ActiveRecord::Base.logger = test_logger
-        ActiveStorage.logger = test_logger
-
-        begin
-          # First validation should download the file
-          subject.valid?
-          expect(log_output.string).to include('Downloaded file from key:')
-
-          log_output.truncate(0)
-          log_output.rewind
-
-          # Second validation should not log another download (in-memory validation)
-          subject.valid?
-          expect(log_output.string).not_to include('Downloaded file from key:')
-
-          log_output.truncate(0)
-          log_output.rewind
-
-          # When we reload the instance, still not downloading the file (in-database validation)
-          subject.reload
-          subject.valid?
-          expect(log_output.string).not_to include('Downloaded file from key:')
-        ensure
-          Rails.logger = rails_logger_was
-          ActiveRecord::Base.logger = active_record_logger_was
-          ActiveStorage.logger = active_storage_logger_was
+          clear_log(log_output)
+          model.reload
+          model.valid?
+          expect(log_output.string).not_to include("Downloaded file from key:")
         end
       end
     end
 
     context "with a record saved after the v2 upgrade" do
       before do
-        subject.is_performance_optimized.attach(attachable)
-        subject.save!
+        model.is_performance_optimized.attach(attachable)
+        model.save!
       end
 
       it "persists the active_storage_validations metadata" do
-        log_output = StringIO.new
+        with_debug_logging do |log_output|
+          model.valid?
+          expect(log_output.string).not_to include("Downloaded file from key:")
 
-        rails_logger_was = Rails.logger
-        active_record_logger_was = ActiveRecord::Base.logger
-        active_storage_logger_was = ActiveStorage.logger
-
-        test_logger = Logger.new(log_output, level: Logger::DEBUG)
-
-        Rails.logger = test_logger
-        ActiveRecord::Base.logger = test_logger
-        ActiveStorage.logger = test_logger
-
-        begin
-          # First validation should not log another download (in-memory validation)
-          subject.valid?
-          expect(log_output.string).not_to include('Downloaded file from key:')
-
-          log_output.truncate(0)
-          log_output.rewind
-
-          # When we reload the instance, still not downloading the file (in-database validation)
-          subject.reload
-          subject.valid?
-          expect(log_output.string).not_to include('Downloaded file from key:')
-        ensure
-          Rails.logger = rails_logger_was
-          ActiveRecord::Base.logger = active_record_logger_was
-          ActiveStorage.logger = active_storage_logger_was
+          clear_log(log_output)
+          model.reload
+          model.valid?
+          expect(log_output.string).not_to include("Downloaded file from key:")
         end
       end
     end
