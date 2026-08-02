@@ -3,7 +3,7 @@
 - 4.0.0
   - **BREAKING**
     - Drop support for Rails 6.1.4, 7.0.0 (we keep support for Rails >= 7.0.1)
-    - Drop support for Ruby 3.1, 3.2 in CI matrix, since the recommended version for Rails >= 7.0.1 is >= 3.3
+    - Drop support for Ruby < 3.3 (`required_ruby_version` is now `>= 3.3.0`)
     - `FormBuilder#file_field` now automatically sets the HTML `accept` attribute from `content_type` validators (https://github.com/igorkasyanchuk/active_storage_validations/pull/415). Disable globally with `ActiveStorageValidations.infer_file_field_accept = false`, or per field with `infer_accept: false`
   - Add support for Ruby 4.0 in CI matrix
   - To upgrade from version 3.x to 4.x, please read the [upgrade guide](docs/upgrade_to_4.md)

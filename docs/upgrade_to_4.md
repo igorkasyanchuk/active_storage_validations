@@ -5,7 +5,7 @@ Version 4 updates the supported Rails and Ruby versions, and adds automatic HTML
 ## Breaking changes
 
 - Drop support for Rails 6.1.4 and 7.0.0 (we keep support for Rails >= 7.0.1)
-- Drop support for Ruby 3.1 and 3.2 in the CI matrix, since the recommended version for Rails >= 7.0.1 is Ruby >= 3.3
+- Drop support for Ruby < 3.3 (`required_ruby_version` is now `>= 3.3.0`)
 - `FormBuilder#file_field` now automatically sets the HTML `accept` attribute from `content_type` validators
 
 Make sure your application runs on Rails >= 7.0.1 and Ruby >= 3.3 before upgrading.

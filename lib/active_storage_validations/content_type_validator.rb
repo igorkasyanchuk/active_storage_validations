@@ -134,10 +134,9 @@ module ActiveStorageValidations
     end
 
     def attachable_content_type_intersects_detected_content_type?
-      # Ruby intersects? method is only available from 3.1
-      enlarged_content_type(content_type_without_parameters(@attachable_content_type)).any? do |item|
-        enlarged_content_type(content_type_without_parameters(@detected_content_type)).include?(item)
-      end
+      enlarged_content_type(content_type_without_parameters(@attachable_content_type)).intersect?(
+        enlarged_content_type(content_type_without_parameters(@detected_content_type))
+      )
     end
 
     def enlarged_content_type(content_type)
