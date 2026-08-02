@@ -1,0 +1,125 @@
+---
+description: Conventional commit message format for git commits
+alwaysApply: true
+---
+
+# Git — Commit Messages
+
+When creating a commit, follow this rule — **not** ad-hoc styles from `git log` history.
+
+## Commit workflow
+
+When the user asks to **commit** (or commit and push):
+
+1. **Message format** — use **this file only**. Do **not** run `git log` or infer style from existing commits (many are merge commits or legacy types).
+2. **Inspect changes** — in parallel: `git status`, `git diff` (and `git diff --staged` if needed).
+3. **Draft** — write subject (+ optional body) per the rules below; validate against [Validations](#validations).
+4. **Commit** — stage relevant files, commit via HEREDOC, then `git status` to confirm.
+5. **Push** — only when explicitly requested.
+
+Format: [Conventional Commits](https://www.conventionalcommits.org/)
+
+```
+<type>(<scope>): <brief description>
+```
+
+| Part | Rule |
+|------|------|
+| `<type>` | **Required.** One of: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `build`, `ci` |
+| `<scope>` | **Optional.** Area affected — see [Scope glossary](#scope-glossary) |
+| `<description>` | **Required.** Imperative mood, lowercase start, ≤ 72 characters, no trailing punctuation |
+
+## Subject line rules
+
+- **Imperative mood** — write as a command: `add`, `fix`, `remove`, `update` — not `added`, `fixes`, `removing`
+- **Length** — keep the subject ≤ 72 characters (Git and GitHub truncate longer lines)
+- **No trailing punctuation** — no period, exclamation mark, etc.
+
+## Examples
+
+```
+feat(matchers): add #except_on option for Rails :except_on
+fix(content_type): reject spoofed mime types without file magic
+refactor(attachable): drop obsolete download_chunk Rails version check
+test(validators): cover size equal_to boundary
+docs(readme): document form_builder accept inference
+chore(deps): bump marcel to 1.0
+ci(gemfiles): pin sqlite3 >= 2.9 for Ruby 4.0
+```
+
+## Validations
+
+Before committing, verify the subject line:
+
+1. **Pattern** — `^(feat|fix|docs|style|refactor|test|chore|perf|build|ci)(\(.+\))?: .+$`
+2. **Imperative, ≤ 72 chars, no trailing punctuation**
+3. **Optional body** — blank line, then paragraphs with more context
+
+## Body (optional)
+
+Use when the *why* or trade-offs are not obvious from the subject:
+
+```
+fix(processable_file): reject SVG under libvips untrusted mode
+
+Rails may set Vips.block_untrusted(true), which blocks SVG loaders.
+Surface a clear validation error instead of a low-level Vips failure.
+```
+
+## Breaking changes
+
+For incompatible API, schema, or behavior changes:
+
+- Add `!` after the type/scope: `feat(rails)!: drop support for Rails < 7.0.1`, or
+- Add a footer: `BREAKING CHANGE: infer_file_field_accept is enabled by default`
+
+## Legacy types (do not use)
+
+Older commits used non-standard types. Use these instead:
+
+| Legacy | Use instead |
+|--------|-------------|
+| `refacto` | `refactor` |
+| `dep` | `chore(deps)` |
+| `lint` | `style` or `chore` |
+| `new` / `add` / `adds` / `adding` | `feat` (or `docs` / `test` as appropriate) |
+
+## PRs, merges, and Dependabot
+
+- **Squash-merge PR titles** — must follow this format (the title becomes the commit subject)
+- **Merge commits** from GitHub (`Merge pull request #…`) — leave as-is; do not rewrite
+- **Dependabot bumps** — when squashing, prefer `chore(deps): bump <gem> from x to y`
+
+## Scope glossary
+
+| Scope | Area |
+|-------|------|
+| `attached` | `AttachedValidator` |
+| `content_type` | `ContentTypeValidator` and spoofing checks |
+| `size` | `SizeValidator` / total size |
+| `dimension` | `DimensionValidator` |
+| `duration` | `DurationValidator` |
+| `aspect_ratio` | `AspectRatioValidator` |
+| `pages` | PDF pages validator |
+| `processable_file` | `ProcessableFileValidator` |
+| `limit` | `LimitValidator` |
+| `validators` | Shared validator behavior spanning several validators |
+| `matchers` | RSpec/Minitest matchers (`lib/.../matchers/`) |
+| `analyzer` | Media/metadata analyzers (`lib/.../analyzer/`) |
+| `attachable` | `ASVAttachable` and attachable/blob loop |
+| `analyzable` | `ASVAnalyzable` and metadata caching |
+| `errorable` | `ASVErrorable` / error option shaping |
+| `shared` | Other `ASV*` shared concerns |
+| `form_builder` | HTML `accept` inference on `file_field` |
+| `locales` | I18n files under `config/locales/` |
+| `rails` | Rails version support / railtie / engine |
+| `ruby` | Ruby version requirement or language-level changes |
+| `gemfiles` | Bundler Gemfiles under `gemfiles/` |
+| `dummy` | Combustion dummy app under `test/dummy/` |
+| `tests` | Test suite (prefer a more specific scope when clear) |
+| `deps` | Gem dependency updates |
+| `ci` | GitHub Actions, lint/test pipeline |
+| `readme` | `README.md` |
+| `changelog` | `CHANGES.md` |
+| `docs` | Upgrade guides and other docs under `docs/` |
+| `agents` | `AGENTS.md` and `.cursor/rules/` |

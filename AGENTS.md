@@ -168,6 +168,7 @@ IMAGE_PROCESSOR=mini_magick bundle exec rake test
 - `gemfiles/` — Rails version matrix for local/CI runs
 - `docs/` — upgrade guides for humans consuming the gem
 - `AGENTS.md` — this file; agent-oriented contributor guidance (humans can use it too)
+- `.cursor/rules/` — Cursor project rules (e.g. commit message format); referenced from this file
 - Do not invent an Appraisal setup; keep using `BUNDLE_GEMFILE=`
 
 ## Documentation
@@ -177,6 +178,11 @@ IMAGE_PROCESSOR=mini_magick bundle exec rake test
 | User guide | `README.md` |
 | Changelog | `CHANGES.md` |
 | Upgrade to 2.x / 3.x / 4.x | `docs/upgrade_to_2.md`, `docs/upgrade_to_3.md`, `docs/upgrade_to_4.md` |
+| Commit messages | [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) (Conventional Commits; always apply for agents) |
+
+## Git / commit messages
+
+Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title format. Do not infer style from `git log`.
 
 ## Pitfalls
 
@@ -190,9 +196,10 @@ IMAGE_PROCESSOR=mini_magick bundle exec rake test
 ## Read First When Contributing
 
 1. `README.md` (Contributing section) and `docs/upgrade_to_4.md`
-2. `lib/active_storage_validations.rb` + `railtie.rb`
-3. A simple validator: `attached_validator.rb`
-4. Comparison path: `base_comparison_validator.rb` + `size_validator.rb`
-5. Shared core: `shared/asv_attachable.rb`, `shared/asv_analyzable.rb`, `shared/asv_errorable.rb`
-6. `test/test_helper.rb` + one validator test and its `shared_examples/`
-7. `.github/workflows/main.yml`
+2. `.cursor/rules/git.mdc` (commit / PR title format)
+3. `lib/active_storage_validations.rb` + `railtie.rb`
+4. A simple validator: `attached_validator.rb`
+5. Comparison path: `base_comparison_validator.rb` + `size_validator.rb`
+6. Shared core: `shared/asv_attachable.rb`, `shared/asv_analyzable.rb`, `shared/asv_errorable.rb`
+7. `test/test_helper.rb` + one validator test and its `shared_examples/`
+8. `.github/workflows/main.yml`
