@@ -5,6 +5,7 @@
     - Drop support for Rails 6.1.4, 7.0.0 (we keep support for Rails >= 7.0.1)
     - Drop support for Ruby 3.1, 3.2 in CI matrix, since the recommended version for Rails >= 7.0.1 is >= 3.3
   - Add support for Ruby 4.0 in CI matrix
+  - To upgrade from version 3.x to 4.x, please read the [upgrade guide](docs/upgrade_to_4.md)
 
 # Released
 
@@ -35,15 +36,7 @@
   - Allow to perform dimension / aspect_ratio validations on single page pdf (https://github.com/igorkasyanchuk/active_storage_validations/pull/374)
   - Added `pages` validator to validate pdf number of pages (https://github.com/igorkasyanchuk/active_storage_validations/pull/374)
   - Added `equal_to` option to `duration`, `size`and `total_size` validators (https://github.com/igorkasyanchuk/active_storage_validations/pull/386)
-
-  Version 3 comes with the ability to support single page pdf dimension / aspect_ratio analysis, we had to make a breaking change:
-  - To analyze PDFs, you must install the `poppler` PDF processing dependency
-    - It's a  Rails-supported PDF processing dependency (https://guides.rubyonrails.org/active_storage_overview.html#requirements)
-    - To install it, check their documentation at this [link](https://pdf2image.readthedocs.io/en/latest/installation.html).
-    - To check if it's installed, execute `pdftoppm -h`.
-    - To install this tool in your CI / production environments, you can check how we do it in our own CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
-
-  Note that, if you do not perform dimension / aspect_ratio validations on pdf, the gem will work the same as in version 2 without any breaking change.
+  - To upgrade from version 2.x to 3.x, please read the [upgrade guide](docs/upgrade_to_3.md)
 
 - 2.0.4
   - Fix issue when updating a child record through a parent (like: parent_model.update(child_attributes: { image: file })) for Rails >= 8.0.2 (https://github.com/igorkasyanchuk/active_storage_validations/pull/378)
@@ -73,7 +66,7 @@
     - Major performance improvement have been added: we now only perform the expensive io analysis operation on the newly attached files
     - All error messages have been given an upgrade and new variables that you can use
     - Complete rewrite of gem README
-  - To upgrade from version 1.x to 2.x, please read the [upgrade guide](https://github.com/igorkasyanchuk/active_storage_validations#upgrading-from-1x-to-2x) in the readme
+  - To upgrade from version 1.x to 2.x, please read the [upgrade guide](docs/upgrade_to_2.md)
   - Find the associated PRs here:
     - https://github.com/igorkasyanchuk/active_storage_validations/pull/310
     - https://github.com/igorkasyanchuk/active_storage_validations/pull/341
