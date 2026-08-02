@@ -87,9 +87,9 @@ To use the pdf metadata validators (`dimension`, `aspect_ratio`, `processable_fi
 To use the `spoofing_protection` option with the `content_type` validator:
 
 - Default backend (`true` / `:file`): the UNIX [`file`](https://en.wikipedia.org/wiki/File_(command)) command (usually preinstalled on UNIX systems)
-- Magika backend (`:magika`): the [Google Magika](https://github.com/google/magika) CLI — install via their [install script](https://securityresearch.google/magika/), `cargo install --locked magika-cli`, or `pipx install magika`
+- Magika backend (`:magika`): the [Google Magika](https://github.com/google/magika) CLI — install via `brew install magika`, their [install script](https://securityresearch.google/magika/getting-started/installation/), `cargo install --locked magika-cli`, or `pipx install magika`
 
-Both backends are optional system tools (not Ruby gems). Be sure to install Magika in CI / production if you enable `:magika`.
+Both backends are optional system tools (not Ruby gems). Prefer `:magika` when you can install the CLI — it is generally more accurate than `file`, especially on textual / ambiguous formats. Be sure to install Magika in CI / production if you enable `:magika`.
 
 If you want some inspiration about how to add `imagemagick`, `libvips`, `ffmpeg`, `poppler` or `magika` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
 
@@ -846,7 +846,7 @@ describe User do
   it { is_expected.to validate_limits_of(:avatar).max(5) }
 
   # content_type:
-  # #allowing, #rejecting
+  # #allowing, #rejecting, #spoofing_protection
   it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') } # possible to use an Array or *splatted array
   it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') } # possible to use an Array or *splatted array
   it { is_expected.to validate_content_type_of(:avatar).allowing('image/png').spoofing_protection } # true / :file
