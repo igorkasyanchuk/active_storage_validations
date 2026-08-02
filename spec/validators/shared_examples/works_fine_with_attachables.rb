@@ -93,6 +93,7 @@ RSpec.shared_examples "works fine with attachables" do
                 })
               elsif validator_test_class.name == "WithAudio::Validator"
                 tempfile = Tempfile.new([ "video_with_audio", ".mp4" ])
+                tempfile.binmode
                 tempfile.write(File.binread(video_with_audio))
                 tempfile.rewind
 
