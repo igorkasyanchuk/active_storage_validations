@@ -74,7 +74,7 @@ RSpec.describe ActiveStorageValidations::Matchers::TotalSizeValidatorMatcher do
 
     context "when provided with a lower size than the size specified in the model validations" do
       describe "for the highest possible size" do
-        subject(:configured_matcher) { matcher.between 1.kilobytes..7.kilobytes }
+        subject(:configured_matcher) { matcher.between 2.kilobytes..6.kilobytes }
 
         it { is_expected_not_to_match_for(klass) }
       end

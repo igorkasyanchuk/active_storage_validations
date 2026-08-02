@@ -31,6 +31,7 @@ RSpec.describe ActiveStorageValidations do
     end
   end
 
+  # rubocop:disable RSpec/EmptyExampleGroup -- optional S3 integration stub
   describe "services" do
     # Uncomment this after having uncommented the S3 service in rails_helper.rb
     #
@@ -42,4 +43,5 @@ RSpec.describe ActiveStorageValidations do
     #   end
     # end
   end
+  # rubocop:enable RSpec/EmptyExampleGroup
 end

@@ -83,7 +83,7 @@ RSpec.describe ActiveStorageValidations::Matchers::DurationValidatorMatcher do
 
     context "when provided with a lower duration than the duration specified in the model validations" do
       describe "for the highest possible duration" do
-        subject(:configured_matcher) { matcher.between 1.seconds..7.seconds }
+        subject(:configured_matcher) { matcher.between 2.seconds..6.seconds }
 
         it { is_expected_not_to_match_for(klass) }
       end

@@ -2,132 +2,102 @@
 
 require "rails_helper"
 
-module DimensionValidatorMatcherTest
-  module DoesNotMatchWithAnyValues
-    extend ActiveSupport::Concern
+RSpec.shared_examples "dimension matcher does not match when lower value than lower range bound" do
+  let(:lower_than_lower_range_bound_value) { matcher_method.match?(/_between/) ? 150..200 : 150 }
 
-    included do
-      include DimensionValidatorMatcherTest::DoesNotMatchWhenLowerValueThanLowerRangeBoundValue
-      include DimensionValidatorMatcherTest::DoesNotMatchWhenValueEqualToLowerRangeBoundValue
-      include DimensionValidatorMatcherTest::DoesNotMatchWhenValueEqualToHigherRangeBoundValue
-      include DimensionValidatorMatcherTest::DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
+  context "when provided with a lower width than the lower range bound width specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, lower_than_lower_range_bound_value) }
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+end
+
+RSpec.shared_examples "dimension matcher does not match when value equal to lower range bound" do
+  let(:lower_range_bound_value) { matcher_method.match?(/_between/) ? 800..1000 : 800 }
+
+  context "when provided with the exact lower range bound width specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, lower_range_bound_value) }
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+end
+
+RSpec.shared_examples "dimension matcher does not match when value equal to higher range bound" do
+  let(:higher_range_bound_value) { matcher_method.match?(/_between/) ? 1200..1500 : 1200 }
+
+  context "when provided with the exact higher range bound width specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, higher_range_bound_value) }
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+end
+
+RSpec.shared_examples "dimension matcher does not match when higher value than higher range bound" do
+  let(:higher_than_higher_range_bound_value) { matcher_method.match?(/_between/) ? 9999..10000 : 9999 }
+
+  context "when provided with a higher width than the higher range bound width specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, higher_than_higher_range_bound_value) }
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+end
+
+RSpec.shared_examples "dimension matcher does not match with any values" do
+  it_behaves_like "dimension matcher does not match when lower value than lower range bound"
+  it_behaves_like "dimension matcher does not match when value equal to lower range bound"
+  it_behaves_like "dimension matcher does not match when value equal to higher range bound"
+  it_behaves_like "dimension matcher does not match when higher value than higher range bound"
+end
+
+RSpec.shared_examples "dimension matcher only match when exact value" do
+  context "when provided with a lower width than the width specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, 1) }
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+
+  context "when provided with the exact width specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, validator_value) }
+
+    it { is_expected_to_match_for(klass) }
+  end
+
+  context "when provided with a higher width than the width specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, 9999) }
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+end
+
+RSpec.shared_examples "dimension matcher only match when exact values" do
+  %i[width height].each do |dimension|
+    context "when provided with a lower #{dimension} than the #{dimension} specified in the model validations" do
+      subject(:configured_matcher) do
+        matcher.width(dimension == :width ? 1 : 150)
+        matcher.height(dimension == :height ? 1 : 150)
+      end
+
+      it { is_expected_not_to_match_for(klass) }
     end
   end
 
-  module DoesNotMatchWhenLowerValueThanLowerRangeBoundValue
-    extend ActiveSupport::Concern
-
-    included do
-      let(:lower_than_lower_range_bound_value) { matcher_method.match?(/_between/) ? 150..200 : 150 }
-
-      context "when provided with a lower width than the lower range bound width specified in the model validations" do
-        subject(:configured_matcher) { matcher.public_send(matcher_method, lower_than_lower_range_bound_value) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
+  context "when provided with the exact width and height specified in the model validations" do
+    subject(:configured_matcher) do
+      matcher.width(150)
+      matcher.height(150)
     end
+
+    it { is_expected_to_match_for(klass) }
   end
 
-  module DoesNotMatchWhenValueEqualToLowerRangeBoundValue
-    extend ActiveSupport::Concern
-
-    included do
-      let(:lower_range_bound_value) { matcher_method.match?(/_between/) ? 800..1000 : 800 }
-
-      context "when provided with the exact lower range bound width specified in the model validations" do
-        subject(:configured_matcher) { matcher.public_send(matcher_method, lower_range_bound_value) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
-  end
-
-  module DoesNotMatchWhenValueEqualToHigherRangeBoundValue
-    extend ActiveSupport::Concern
-
-    included do
-      let(:higher_range_bound_value) { matcher_method.match?(/_between/) ? 1200..1500 : 1200 }
-
-      context "when provided with the exact higher range bound width specified in the model validations" do
-        subject(:configured_matcher) { matcher.public_send(matcher_method, higher_range_bound_value) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
-  end
-
-  module DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
-    extend ActiveSupport::Concern
-
-    included do
-      let(:higher_than_higher_range_bound_value) { matcher_method.match?(/_between/) ? 9999..10000 : 9999 }
-
-      context "when provided with a higher width than the higher range bound width specified in the model validations" do
-        subject(:configured_matcher) { matcher.public_send(matcher_method, higher_than_higher_range_bound_value) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
-  end
-
-  module OnlyMatchWhenExactValue
-    extend ActiveSupport::Concern
-
-    included do
-      context "when provided with a lower width than the width specified in the model validations" do
-        subject(:configured_matcher) { matcher.public_send(matcher_method, 1) }
-
-        it { is_expected_not_to_match_for(klass) }
+  %i[width height].each do |dimension|
+    context "when provided with a higher #{dimension} than the #{dimension} specified in the model validations" do
+      subject(:configured_matcher) do
+        matcher.width(dimension == :width ? 9999 : 150)
+        matcher.height(dimension == :height ? 9999 : 150)
       end
 
-      context "when provided with the exact width specified in the model validations" do
-        subject(:configured_matcher) { matcher.public_send(matcher_method, validator_value) }
-
-        it { is_expected_to_match_for(klass) }
-      end
-
-      context "when provided with a higher width than the width specified in the model validations" do
-        subject(:configured_matcher) { matcher.public_send(matcher_method, 9999) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
-  end
-
-  module OnlyMatchWhenExactValues
-    extend ActiveSupport::Concern
-
-    included do
-      %i[width height].each do |dimension|
-        context "when provided with a lower #{dimension} than the #{dimension} specified in the model validations" do
-          subject(:configured_matcher) do
-            matcher.width(dimension == :width ? 1 : 150)
-            matcher.height(dimension == :height ? 1 : 150)
-          end
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-      end
-
-      context "when provided with the exact width and height specified in the model validations" do
-        subject(:configured_matcher) do
-          matcher.width(150)
-          matcher.height(150)
-        end
-
-        it { is_expected_to_match_for(klass) }
-      end
-
-      %i[width height].each do |dimension|
-        context "when provided with a higher #{dimension} than the #{dimension} specified in the model validations" do
-          subject(:configured_matcher) do
-            matcher.width(dimension == :width ? 9999 : 150)
-            matcher.height(dimension == :height ? 9999 : 150)
-          end
-
-          it { is_expected_not_to_match_for(klass) }
-        end
-      end
+      it { is_expected_not_to_match_for(klass) }
     end
   end
 end
@@ -155,25 +125,25 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
         let(:model_attribute) { :"#{dimension}_exact" }
         let(:validator_value) { 150 }
 
-        include DimensionValidatorMatcherTest::OnlyMatchWhenExactValue
+        it_behaves_like "dimension matcher only match when exact value"
       end
 
       context "when used on a #{dimension} in validator (e.g. dimension: { #{dimension}: { in: 800..1200 } })" do
         let(:model_attribute) { :"#{dimension}_in" }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWithAnyValues
+        it_behaves_like "dimension matcher does not match with any values"
       end
 
       context "when used on a #{dimension} min validator (e.g. dimension: { #{dimension}: { min: 800 } })" do
         let(:model_attribute) { :"#{dimension}_min" }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWithAnyValues
+        it_behaves_like "dimension matcher does not match with any values"
       end
 
       context "when used on a #{dimension} max validator (e.g. dimension: { #{dimension}: { max: 1200 } })" do
         let(:model_attribute) { :"#{dimension}_max" }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWithAnyValues
+        it_behaves_like "dimension matcher does not match with any values"
       end
     end
 
@@ -184,7 +154,7 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
         let(:model_attribute) { :width_exact }
         let(:validator_value) { 150 }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWithAnyValues
+        it_behaves_like "dimension matcher does not match with any values"
       end
 
       context "when used on a #{dimension} in validator (e.g. dimension: { #{dimension}: { in: 800..1200 } })" do
@@ -234,13 +204,13 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
       context "when used on a #{dimension} min validator (e.g. dimension: { #{dimension}: { min: 1200 } })" do
         let(:model_attribute) { :"#{dimension}_min" }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWithAnyValues
+        it_behaves_like "dimension matcher does not match with any values"
       end
 
       context "when used on a #{dimension} max validator (e.g. dimension: { #{dimension}: { max: 1200 } })" do
         let(:model_attribute) { :"#{dimension}_max" }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWithAnyValues
+        it_behaves_like "dimension matcher does not match with any values"
       end
     end
 
@@ -250,14 +220,14 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
       context "when used on a #{dimension} exact validator (e.g. dimension: { #{dimension}: 150 })" do
         let(:model_attribute) { :"#{dimension}_exact" }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWithAnyValues
+        it_behaves_like "dimension matcher does not match with any values"
       end
 
       context "when used on a #{dimension} in validator (e.g. dimension: { #{dimension}: { in: 800..1200 } })" do
         let(:model_attribute) { :"#{dimension}_in" }
         let(:validator_lower_range_bound_value) { 800 }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWhenLowerValueThanLowerRangeBoundValue
+        it_behaves_like "dimension matcher does not match when lower value than lower range bound"
 
         context "when provided with the exact lower range bound #{dimension} specified in the model validations" do
           subject(:configured_matcher) { matcher.public_send(matcher_method, validator_lower_range_bound_value) }
@@ -265,21 +235,21 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
           it { is_expected_to_match_for(klass) }
         end
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWhenValueEqualToHigherRangeBoundValue
-        include DimensionValidatorMatcherTest::DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
+        it_behaves_like "dimension matcher does not match when value equal to higher range bound"
+        it_behaves_like "dimension matcher does not match when higher value than higher range bound"
       end
 
       context "when used on a #{dimension} min validator (e.g. dimension: { #{dimension}: { min: 800 } })" do
         let(:model_attribute) { :"#{dimension}_min" }
         let(:validator_value) { 800 }
 
-        include DimensionValidatorMatcherTest::OnlyMatchWhenExactValue
+        it_behaves_like "dimension matcher only match when exact value"
       end
 
       context "when used on a #{dimension} max validator (e.g. dimension: { #{dimension}: { max: 1200 } })" do
         let(:model_attribute) { :"#{dimension}_max" }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWithAnyValues
+        it_behaves_like "dimension matcher does not match with any values"
       end
     end
 
@@ -289,15 +259,15 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
       context "when used on a #{dimension} exact validator (e.g. dimension: { #{dimension}: 150 })" do
         let(:model_attribute) { :"#{dimension}_exact" }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWithAnyValues
+        it_behaves_like "dimension matcher does not match with any values"
       end
 
       context "when used on a #{dimension} in validator (e.g. dimension: { #{dimension}: { in: 800..1200 } })" do
         let(:model_attribute) { :"#{dimension}_in" }
         let(:validator_higher_range_bound_value) { 1200 }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWhenLowerValueThanLowerRangeBoundValue
-        include DimensionValidatorMatcherTest::DoesNotMatchWhenValueEqualToLowerRangeBoundValue
+        it_behaves_like "dimension matcher does not match when lower value than lower range bound"
+        it_behaves_like "dimension matcher does not match when value equal to lower range bound"
 
         context "when provided with the exact higher range bound #{dimension} specified in the model validations" do
           subject(:configured_matcher) { matcher.public_send(matcher_method, validator_higher_range_bound_value) }
@@ -305,20 +275,20 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
           it { is_expected_to_match_for(klass) }
         end
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWhenHigherValueThanHigherRangeBoundValue
+        it_behaves_like "dimension matcher does not match when higher value than higher range bound"
       end
 
       context "when used on a #{dimension} min validator (e.g. dimension: { #{dimension}: { min: 800 } })" do
         let(:model_attribute) { :"#{dimension}_min" }
 
-        include DimensionValidatorMatcherTest::DoesNotMatchWithAnyValues
+        it_behaves_like "dimension matcher does not match with any values"
       end
 
       context "when used on a #{dimension} max validator (e.g. dimension: { #{dimension}: { max: 1200 } })" do
         let(:model_attribute) { :"#{dimension}_max" }
         let(:validator_value) { 1200 }
 
-        include DimensionValidatorMatcherTest::OnlyMatchWhenExactValue
+        it_behaves_like "dimension matcher only match when exact value"
       end
     end
   end
@@ -481,7 +451,7 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
       context "when used on a width exact and height exact validator (e.g. dimension: { width: 150, height: 150 })" do
         let(:model_attribute) { :width_and_height_exact }
 
-        include DimensionValidatorMatcherTest::OnlyMatchWhenExactValues
+        it_behaves_like "dimension matcher only match when exact values"
       end
     end
 

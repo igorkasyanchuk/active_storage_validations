@@ -2,29 +2,23 @@
 
 require "rails_helper"
 
-module LimitValidatorMatcherTest
-  module OnlyMatchWhenExactValue
-    extend ActiveSupport::Concern
+RSpec.shared_examples "limit matcher only match when exact value" do
+  context "when provided with a lower file count than the bound file count specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, 1) }
 
-    included do
-      context "when provided with a lower file count than the bound file count specified in the model validations" do
-        subject(:configured_matcher) { matcher.public_send(matcher_method, 1) }
+    it { is_expected_not_to_match_for(klass) }
+  end
 
-        it { is_expected_not_to_match_for(klass) }
-      end
+  context "when provided with the exact bound file count specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, validator_value) }
 
-      context "when provided with the exact bound file count specified in the model validations" do
-        subject(:configured_matcher) { matcher.public_send(matcher_method, validator_value) }
+    it { is_expected_to_match_for(klass) }
+  end
 
-        it { is_expected_to_match_for(klass) }
-      end
+  context "when provided with a higher file count than the bound file count specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, 9) }
 
-      context "when provided with a higher file count than the bound file count specified in the model validations" do
-        subject(:configured_matcher) { matcher.public_send(matcher_method, 9) }
-
-        it { is_expected_not_to_match_for(klass) }
-      end
-    end
+    it { is_expected_not_to_match_for(klass) }
   end
 end
 
@@ -51,7 +45,7 @@ RSpec.describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
         let(:model_attribute) { bound }
         let(:validator_value) { 3 }
 
-        include LimitValidatorMatcherTest::OnlyMatchWhenExactValue
+        it_behaves_like "limit matcher only match when exact value"
       end
     end
   end

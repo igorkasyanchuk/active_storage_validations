@@ -97,14 +97,6 @@ RSpec/NoExpectationExample:
 RSpec/SpecFilePathFormat:
   Enabled: false
 
-# Shared example modules / dynamic groups look empty to the cop
-RSpec/EmptyExampleGroup:
-  Enabled: false
-
-# Comparison option matrices repeat similar bodies by design
-RSpec/RepeatedExampleGroupBody:
-  Enabled: false
-
 # file_1 / file_2 style lets are clearer than renaming for this suite
 RSpec/IndexedLet:
   Enabled: false

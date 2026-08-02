@@ -6,9 +6,11 @@ RSpec.describe ActiveStorageValidations::AttachedValidator do
   let(:validator_test_class) { Attached::Validator }
   let(:params) { {} }
 
+  # rubocop:disable RSpec/EmptyExampleGroup -- covered by Rails options shared examples
   describe "#check_validity!" do
     # Checked by Rails options tests
   end
+  # rubocop:enable RSpec/EmptyExampleGroup
 
   describe "Validator checks" do
     let(:model) { validator_test_class::Check.new(params) }

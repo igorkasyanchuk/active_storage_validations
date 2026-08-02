@@ -83,7 +83,7 @@ RSpec.describe ActiveStorageValidations::Matchers::PagesValidatorMatcher do
 
     context "when provided with a lower page number than the page number specified in the model validations" do
       describe "for the highest possible page number" do
-        subject(:configured_matcher) { matcher.between 1..7 }
+        subject(:configured_matcher) { matcher.between 2..6 }
 
         it { is_expected_not_to_match_for(klass) }
       end
