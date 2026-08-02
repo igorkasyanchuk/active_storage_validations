@@ -118,7 +118,9 @@ describe ActiveStorageValidations::ASVCommandable do
 
     describe "when the command ignores TERM" do
       let(:timeout) { 0.2 }
-      let(:argv) { [ "ruby", "-e", "Signal.trap(:TERM) {}; sleep 30" ] }
+      # IGNORE (not an empty trap): an empty trap still interrupts sleep on some
+      # platforms/Rubies, so the script exits before the grace period elapses.
+      let(:argv) { [ "ruby", "-e", "Signal.trap(:TERM, 'IGNORE'); sleep 30" ] }
 
       it "escalates to KILL after the grace period" do
         started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -135,17 +137,37 @@ describe ActiveStorageValidations::ASVCommandable do
 
     describe "when the command spawns process-group grandchildren" do
       let(:timeout) { 0.3 }
-      # Distinctive sleep duration so pgrep does not collide with other tests.
-      let(:argv) { [ "sh", "-c", "sleep 37.137 & echo started; wait" ] }
+      # Spawn via ruby so the grandchild shares the timed command's process group.
+      # Print the grandchild pid so we can assert it was killed without pgrep
+      # (pgrep -f races with the shell wrapper whose argv also contains the pattern).
+      let(:argv) do
+        [
+          "ruby", "-e",
+          'child = Process.spawn("sleep", "30"); puts "started #{child}"; STDOUT.flush; sleep 30'
+        ]
+      end
 
       it "kills grandchildren in the process group" do
+        child_pid = nil
         result = subject
-        sleep 0.3
-        leftover = `pgrep -f "sleep 37.137" 2>/dev/null`.lines.map(&:strip).reject(&:empty?)
+        child_pid = result.stdout[/\Astarted (\d+)\n\z/, 1].to_i
 
         assert result.timed_out
-        assert_equal "started\n", result.stdout
-        assert_empty leftover, "expected process-group kill to reap grandchildren, leftover=#{leftover.inspect}"
+        assert_operator child_pid, :>, 0, "expected grandchild pid in stdout, got #{result.stdout.inspect}"
+
+        alive = process_alive?(child_pid)
+        # Brief retry: kernel may need a tick to reap after KILL.
+        5.times do
+          break unless alive
+          sleep 0.05
+          alive = process_alive?(child_pid)
+        end
+
+        refute alive, "expected process-group kill to reap grandchild pid=#{child_pid}"
+      ensure
+        if child_pid&.positive? && process_alive?(child_pid)
+          Process.kill(:KILL, child_pid) rescue nil
+        end
       end
     end
 
@@ -223,5 +245,16 @@ describe ActiveStorageValidations::ASVCommandable do
 
       assert_equal 4.seconds, ActiveStorageValidations.command_timeout
     end
+  end
+
+  private
+
+  def process_alive?(pid)
+    Process.kill(0, pid)
+    true
+  rescue Errno::ESRCH
+    false
+  rescue Errno::EPERM
+    true
   end
 end

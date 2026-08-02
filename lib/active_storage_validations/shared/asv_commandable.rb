@@ -49,8 +49,10 @@ module ActiveStorageValidations
     end
 
     # Waits via a reaper thread + Thread#join(timeout) so fast commands return
-    # as soon as they exit (no polling sleep). On timeout, TERM then KILL the
-    # process group; the same waiter reaps so we never leave zombies.
+    # as soon as they exit (no polling sleep). On timeout, TERM then always KILL
+    # the process group — KILL is unconditional because the direct child can exit
+    # on TERM while a grandchild forked after the group signal is still alive.
+    # The same waiter reaps so we never leave zombies.
     def wait_for_command(pid, timeout)
       return [ Process.wait2(pid)[1], false ] if timeout.nil?
 
@@ -65,10 +67,9 @@ module ActiveStorageValidations
       end
 
       signal_process_group(pid, :TERM)
-      unless waiter.join(TERM_GRACE_SECONDS)
-        signal_process_group(pid, :KILL)
-        waiter.join
-      end
+      waiter.join(TERM_GRACE_SECONDS)
+      signal_process_group(pid, :KILL)
+      waiter.join
 
       [ wait_status_from(waiter), true ]
     end
