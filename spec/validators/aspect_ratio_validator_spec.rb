@@ -31,7 +31,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
           subject(:model) { validator_test_class::CheckValidityInvalidNamedArgument.new(params) }
 
           it "raises an error at model initialization" do
-            expect { subject }.to raise_error(ArgumentError, error_message)
+            expect { model }.to raise_error(ArgumentError, error_message)
           end
         end
 
@@ -39,7 +39,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
           subject(:model) { validator_test_class::CheckValidityInvalidIsXyArgument.new(params) }
 
           it "raises an error at model initialization" do
-            expect { subject }.to raise_error(ArgumentError, error_message)
+            expect { model }.to raise_error(ArgumentError, error_message)
           end
         end
       end
@@ -48,7 +48,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
         subject(:model) { validator_test_class::CheckValidityProcOption.new(params) }
 
         it "does not perform a check, and therefore is valid" do
-          expect { subject }.not_to raise_error
+          expect { model }.not_to raise_error
         end
       end
     end

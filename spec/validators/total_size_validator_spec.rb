@@ -19,7 +19,7 @@ RSpec.describe ActiveStorageValidations::TotalSizeValidator do
       let(:instance) { validator_test_class::CheckValidityHasManyAttachedOnly.new(params) }
 
       it "raises an error at model initialization" do
-        expect { subject.valid? }.to raise_error(ArgumentError, "This validator is only available for has_many_attached relations")
+        expect { result.valid? }.to raise_error(ArgumentError, "This validator is only available for has_many_attached relations")
       end
     end
   end

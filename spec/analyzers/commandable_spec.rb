@@ -20,7 +20,7 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
   end
 
   describe "#run_command" do
-    subject(:result) { analyzer.send(:run_command, *argv, payload: payload) }
+    subject(:command_result) { analyzer.send(:run_command, *argv, payload: payload) }
 
     let(:payload) { { analyzer: "test", timed_out: false } }
 
@@ -28,11 +28,9 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
       let(:argv) { [ "echo", "asv-ok" ] }
 
       it "returns a successful result with stdout" do
-        result = subject
-
-        expect(result.success?).to be(true)
-        expect(result.stdout).to eq("asv-ok\n")
-        expect(result.timed_out).to be(false)
+        expect(command_result.success?).to be(true)
+        expect(command_result.stdout).to eq("asv-ok\n")
+        expect(command_result.timed_out).to be(false)
       end
     end
 
@@ -46,10 +44,8 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
           events << ActiveSupport::Notifications::Event.new(*args)
         end
 
-        result = subject
-
-        expect(result.success?).to be(false)
-        expect(result.timed_out).to be(true)
+        expect(command_result.success?).to be(false)
+        expect(command_result.timed_out).to be(true)
         expect(payload[:timed_out]).to be(true)
         expect(events.size).to eq(1)
         expect(events.first.payload[:command]).to eq("ruby")
@@ -66,10 +62,10 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
       let(:argv) { [ "ruby", "-e", "print('x' * (1024 * 1024)); STDOUT.flush; sleep 10" ] }
 
       it "times out instead of deadlocking on a full pipe" do
-        result, elapsed = measure { subject }
+        _measured, elapsed = measure { command_result }
 
-        expect(result.timed_out).to be(true)
-        expect(result.success?).to be(false)
+        expect(command_result.timed_out).to be(true)
+        expect(command_result.success?).to be(false)
         expect(elapsed).to be < 3.0
       end
     end
@@ -79,10 +75,10 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
       let(:argv) { [ "ruby", "-e", "STDERR.write('y' * (1024 * 1024)); STDERR.flush; sleep 10" ] }
 
       it "times out instead of deadlocking on a full stderr pipe" do
-        result, elapsed = measure { subject }
+        _measured, elapsed = measure { command_result }
 
-        expect(result.timed_out).to be(true)
-        expect(result.success?).to be(false)
+        expect(command_result.timed_out).to be(true)
+        expect(command_result.success?).to be(false)
         expect(elapsed).to be < 3.0
       end
     end
@@ -92,10 +88,8 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
       let(:argv) { [ "ruby", "-e", "print('x' * (1024 * 1024))" ] }
 
       it "captures the full stdout without hanging" do
-        result = subject
-
-        expect(result.success?).to be(true)
-        expect(result.stdout.bytesize).to eq(1024 * 1024)
+        expect(command_result.success?).to be(true)
+        expect(command_result.stdout.bytesize).to eq(1024 * 1024)
       end
     end
 
@@ -103,12 +97,10 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
       let(:argv) { [ "ruby", "-e", "STDERR.print('nope'); exit 7" ] }
 
       it "is unsuccessful but not timed out" do
-        result = subject
-
-        expect(result.success?).to be(false)
-        expect(result.timed_out).to be(false)
-        expect(result.status.exitstatus).to eq(7)
-        expect(result.stderr).to eq("nope")
+        expect(command_result.success?).to be(false)
+        expect(command_result.timed_out).to be(false)
+        expect(command_result.status.exitstatus).to eq(7)
+        expect(command_result.stderr).to eq("nope")
       end
     end
 
@@ -121,11 +113,11 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
       let(:argv) { [ "sh", "-c", 'trap "" TERM; exec sleep 30' ] }
 
       it "escalates to KILL after the grace period" do
-        result, elapsed = measure { subject }
+        _measured, elapsed = measure { command_result }
         grace = ActiveStorageValidations::ASVCommandable::TERM_GRACE_SECONDS
 
-        expect(result.timed_out).to be(true)
-        expect(result.success?).to be(false)
+        expect(command_result.timed_out).to be(true)
+        expect(command_result.success?).to be(false)
         # Must wait the full grace period — dying on TERM would finish near @timeout.
         expect(elapsed).to be >= timeout + grace - 0.2
         expect(elapsed).to be < timeout + grace + 1
@@ -146,11 +138,10 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
 
       it "kills grandchildren in the process group" do
         child_pid = nil
-        result = subject
-        child_pid = result.stdout[/\Astarted (\d+)\n\z/, 1].to_i
+        child_pid = command_result.stdout[/\Astarted (\d+)\n\z/, 1].to_i
 
-        expect(result.timed_out).to be(true)
-        expect(child_pid).to be > 0, "expected grandchild pid in stdout, got #{result.stdout.inspect}"
+        expect(command_result.timed_out).to be(true)
+        expect(child_pid).to be > 0, "expected grandchild pid in stdout, got #{command_result.stdout.inspect}"
 
         alive = process_alive?(child_pid)
         # Brief retry: kernel may need a tick to reap after KILL.
@@ -173,11 +164,9 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
       let(:argv) { [ "echo", "no-timeout" ] }
 
       it "runs the command without a deadline" do
-        result = subject
-
-        expect(result.success?).to be(true)
-        expect(result.stdout).to eq("no-timeout\n")
-        expect(result.timed_out).to be(false)
+        expect(command_result.success?).to be(true)
+        expect(command_result.stdout).to eq("no-timeout\n")
+        expect(command_result.timed_out).to be(false)
       end
     end
 
@@ -185,7 +174,7 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
       let(:argv) { [ "asv_definitely_missing_binary_#{Process.pid}" ] }
 
       it "raises Errno::ENOENT" do
-        expect { subject }.to raise_error(Errno::ENOENT)
+        expect { command_result }.to raise_error(Errno::ENOENT)
       end
     end
   end

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Intentionally uses RSpec's `subject` API so shared helpers work with any named
+# subject (`:configured_matcher`, …). RSpec/NamedSubject only scans examples/hooks,
+# not helper methods — no RuboCop disable needed here.
 module MatcherHelpers
   require "active_storage_validations/matchers"
 

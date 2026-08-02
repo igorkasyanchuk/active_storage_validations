@@ -95,13 +95,13 @@ RSpec.describe "Integration tests" do
         end
 
         before do
-          subject.pictures.attach(attachable_1)
-          subject.save!
+          model.pictures.attach(attachable_1)
+          model.save!
         end
 
         it "only calls once a media analyzer (expensive operation) on the new attachable" do
           expect_any_instance_of(ActiveStorageValidations::Analyzer::ImageAnalyzer).to receive(:metadata).once.and_return({ width: 150, height: 150 })
-          subject.pictures.attach(attachable_2)
+          model.pictures.attach(attachable_2)
         end
       end
 
@@ -132,19 +132,19 @@ RSpec.describe "Integration tests" do
         end
 
         before do
-          subject.videos.attach(attachable_1)
-          subject.save!
+          model.videos.attach(attachable_1)
+          model.save!
         end
 
         it "calls once the corresponding media analyzers (expensive operation) on the new attachable" do
           expect_any_instance_of(ActiveStorageValidations::Analyzer::VideoAnalyzer).to receive(:metadata).once.and_return({ width: 150, height: 150, duration: 1.7, audio: false, video: true })
           expect_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer).to receive(:content_type).once.and_return({ content_type: "video/mp4" })
-          subject.videos.attach(attachable_2)
+          model.videos.attach(attachable_2)
         end
 
         it "save metadata keys from both analyses on the new attachable" do
-          subject.valid?
-          subject.videos.blobs.each do |blob|
+          model.valid?
+          model.videos.blobs.each do |blob|
             expect(blob.active_storage_validations_metadata).to eq(expected_saved_metadata)
           end
         end

@@ -17,7 +17,7 @@ RSpec.describe ActiveStorageValidations do
     let(:expected_clients_method_returned_value) { "client's concern method returned value" }
 
     it "does not override the app's concerns" do
-      expect(subject).to eq(expected_clients_method_returned_value)
+      expect(result).to eq(expected_clients_method_returned_value)
     end
   end
 

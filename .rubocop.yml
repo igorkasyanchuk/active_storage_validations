@@ -78,10 +78,6 @@ RSpec/MultipleMemoizedHelpers:
 RSpec/ContextWording:
   Enabled: false
 
-# Helpers still call `subject`; examples often use `subject` alias after naming
-RSpec/NamedSubject:
-  Enabled: false
-
 # Validators create analyzers internally — allow_any_instance_of is the seam
 RSpec/AnyInstance:
   Enabled: false

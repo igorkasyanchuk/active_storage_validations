@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Intentionally uses RSpec's `subject` API so shared helpers work with any named
+# subject (`:model`, `:record`, …). RSpec/NamedSubject only scans examples/hooks,
+# not helper methods — no RuboCop disable needed here.
 module ValidatorHelpers
   def is_expected_to_be_valid(**kwargs)
     expect(subject.valid?(kwargs[:context])).to be(true)

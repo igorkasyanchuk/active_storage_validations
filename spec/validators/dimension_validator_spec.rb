@@ -22,7 +22,7 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
         subject(:model) { validator_test_class::CheckValidityDimensionInRange.new(params) }
 
         it "does not perform a check, and therefore is valid" do
-          expect { subject }.not_to raise_error
+          expect { model }.not_to raise_error
         end
       end
 
@@ -30,7 +30,7 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
         subject(:model) { validator_test_class::CheckValidityDimensionInProc.new(params) }
 
         it "does not perform a check, and therefore is valid" do
-          expect { subject }.not_to raise_error
+          expect { model }.not_to raise_error
         end
       end
 
@@ -40,7 +40,7 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
         let(:error_message) { "{ width: { in: value } } value must be a Range (min..max)" }
 
         it "raises an error at model initialization" do
-          expect { subject }.to raise_error(ArgumentError, error_message)
+          expect { model }.to raise_error(ArgumentError, error_message)
         end
       end
     end
@@ -51,7 +51,7 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
           subject(:model) { "#{validator_test_class}::CheckValidity#{bound.to_s.capitalize}Range".constantize.new(params) }
 
           it "does not perform a check, and therefore is valid" do
-            expect { subject }.not_to raise_error
+            expect { model }.not_to raise_error
           end
         end
 
@@ -59,7 +59,7 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
           subject(:model) { "#{validator_test_class}::CheckValidity#{bound.to_s.capitalize}Proc".constantize.new(params) }
 
           it "does not perform a check, and therefore is valid" do
-            expect { subject }.not_to raise_error
+            expect { model }.not_to raise_error
           end
         end
 
@@ -69,7 +69,7 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
           let(:error_message) { "{ #{bound}: value } value must be a Range (#{bound}_width..#{bound}_height)" }
 
           it "raises an error at model initialization" do
-            expect { subject }.to raise_error(ArgumentError, error_message)
+            expect { model }.to raise_error(ArgumentError, error_message)
           end
         end
       end

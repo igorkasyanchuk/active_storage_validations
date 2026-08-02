@@ -8,7 +8,7 @@ alwaysApply: false
 
 - Boot via `rails_helper` / `.rspec`; prefer `described_class` over repeating the described constant.
 - Always use a **named** `subject` — never anonymous `subject { ... }` / `subject do`.
-- Prefer referencing the name in expectations (`expect(metadata)`), not bare `subject`. Helpers may still call `subject` (it aliases the named subject).
+- Prefer referencing the name in expectations (`expect(metadata)`), not bare `subject`. Shared helpers under `spec/**/support/` may call `subject` (aliases any named subject); `RSpec/NamedSubject` does not scan helper methods.
 - Prefer these names (avoid clashing with an existing `let` of the same name — that causes recursion):
 
 | Situation | Name |

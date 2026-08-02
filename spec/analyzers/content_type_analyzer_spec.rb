@@ -8,11 +8,11 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
 
   describe "#content_type" do
     def is_expected_to_return_the_right_content_type
-      expect(subject).to eq(expected_content_type)
+      expect(content_type).to eq(expected_content_type)
     end
 
     def is_expected_to_return_empty_content_type
-      expect(subject).to eq({ content_type: "inode/x-empty" })
+      expect(content_type).to eq({ content_type: "inode/x-empty" })
     end
 
     subject(:content_type) { analyzer.content_type }
@@ -203,7 +203,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer do
 
       it "raises an explicit error" do
         allow(Process).to receive(:spawn).and_raise(Errno::ENOENT)
-        expect { subject }.to raise_error(analyzer_error, "file command-line tool is not installed")
+        expect { content_type }.to raise_error(analyzer_error, "file command-line tool is not installed")
       end
     end
   end
