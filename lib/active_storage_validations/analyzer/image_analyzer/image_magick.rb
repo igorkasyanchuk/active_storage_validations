@@ -48,7 +48,9 @@ module ActiveStorageValidations
     end
 
     def identify_command(path)
-      tool = MiniMagick::Tool.new("identify")
+      require "mini_magick"
+
+      tool = ::MiniMagick::Tool.new("identify")
       tool.format("%w\t%h\t%[orientation]")
       tool << path
       tool.command

@@ -30,11 +30,8 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'combustion', "~> 1.3"
   s.add_development_dependency 'mini_magick', ">= 4.9.5"
-  s.add_development_dependency 'minitest', '>= 5.0', '< 6.0'
-  s.add_development_dependency 'minitest-focus', '~> 1.4'
-  s.add_development_dependency 'minitest-mock_expectations', '~> 1.2', '>= 1.2.0'
-  s.add_development_dependency 'minitest-stub_any_instance', '~> 1.0', '>= 1.0.3'
   s.add_development_dependency 'pry'
+  s.add_development_dependency 'rspec-rails', '~> 7.0'
   s.add_development_dependency 'ruby-vips', ">= 2.1.0"
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'sqlite3'

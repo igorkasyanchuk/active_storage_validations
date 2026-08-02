@@ -22,7 +22,11 @@ module ActiveStorageValidations
       when Array
         options.map { |option| flatten_options(record, option, available_checks) }
       else
-        options.is_a?(Proc) ? options.call(record) : options
+        if options.is_a?(Proc)
+          options.arity == 0 ? options.call : options.call(record)
+        else
+          options
+        end
       end
     end
   end

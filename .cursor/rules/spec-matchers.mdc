@@ -1,0 +1,16 @@
+---
+description: Conventions for matcher specs
+globs: spec/matchers/**/*.rb
+alwaysApply: false
+---
+
+# Matcher specs
+
+- Follow shared conventions in `spec.mdc` (named `subject`, `describe`/`context`, `described_class`).
+- Boot via `rails_helper`; `MatcherHelpers` is auto-included for `spec/matchers`.
+- Prefer `RSpec.describe ActiveStorageValidations::Matchers::SomeValidatorMatcher`.
+- Use shared examples: `"checks if is a valid active storage attribute"`, `"checks if is valid"`, `"has custom matcher"`, `"has valid rspec message methods"`, `"works with both instance and class"`, `"works with allow_blank"`, `"works with custom message"`, `"works with context"`, `"works with except_on"`, `"base comparison validator matcher only match when exact value"`.
+- Assertions go through helpers: `is_expected_to_match_for(klass)`, `is_expected_not_to_match_for(klass)`, failure/negated message helpers.
+- Matcher `#description` / `#failure_message` / `#failure_message_when_negated` protect the public RSpec matcher API for gem consumers — keep those examples.
+- Dummy matcher models live under `test/dummy/app/models/<validator>/matcher.rb`.
+- Ship-facing matchers remain usable from Minitest/shoulda; do not require RSpec in production matcher code paths.

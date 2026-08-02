@@ -33,6 +33,6 @@ class Size::Validator::Check < ApplicationRecord
   validates :less_than_or_equal_to_proc, size: { less_than_or_equal_to: ->(record) { 2.kilobytes } }
   validates :greater_than_proc, size: { greater_than: ->(record) { 7.kilobytes } }
   validates :greater_than_or_equal_to_proc, size: { greater_than_or_equal_to: ->(record) { 7.kilobytes } }
-  validates :between_proc, size: { between: -> { 2.kilobytes..7.kilobytes } }
+  validates :between_proc, size: { between: ->(record) { 2.kilobytes..7.kilobytes } }
   validates :equal_to_proc, size: { equal_to: ->(record) { 5.kilobytes } }
 end

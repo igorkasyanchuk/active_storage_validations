@@ -1,0 +1,21 @@
+---
+description: Conventions for validator specs
+globs: spec/validators/**/*.rb
+alwaysApply: false
+---
+
+# Validator specs
+
+- Follow shared conventions in `spec.mdc` (named `subject`, `describe`/`context`, `described_class`).
+- Boot via `require "rails_helper"` (or rely on `.rspec`); helpers are auto-included for `spec/validators`.
+- Prefer `RSpec.describe ActiveStorageValidations::SomeValidator`.
+- Set `let(:validator_test_class)` to the dummy namespace (e.g. `Size::Validator`) and `let(:params) { {} }`.
+- Compose shared behavior with `it_behaves_like`, not Concern modules:
+  - `"ASVAttachable"`, `"ASVErrorable"`, `"checks validator validity"`
+  - `"works fine with attachables"`, `"is performance optimized"`
+  - `"works with all rails common validation options"`
+  - comparison: `"comparison less_than option"`, `less_than_or_equal_to`, `greater_than`, `greater_than_or_equal_to`, `between`, `equal_to`
+- Use `ValidatorHelpers` expectations: `is_expected_to_be_valid`, `is_expected_not_to_be_valid`, `is_expected_to_include_error_message`, `is_expected_to_have_error_options`.
+- Dummy models live under `test/dummy/app/models/<validator>/`.
+- Cross-validator stacking belongs in `spec/validators/integration/` or `spec/integration/`, not in a single-validator file.
+- Use `describe` for named units/topics (`#check_validity!`, `:less_than`) and `context` for situations (`when …`, `with …`, `without …`).

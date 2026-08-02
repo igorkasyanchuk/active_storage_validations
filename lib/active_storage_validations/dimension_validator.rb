@@ -215,8 +215,10 @@ module ActiveStorageValidations
 
       %i[min max].each do |bound|
         if (range = flat_options[bound])
-          flat_options[:width] = { bound => range.first }
-          flat_options[:height] = { bound => range.last }
+          flat_options[:width] ||= {}
+          flat_options[:height] ||= {}
+          flat_options[:width][bound] = range.first
+          flat_options[:height][bound] = range.last
         end
       end
 

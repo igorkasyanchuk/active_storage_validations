@@ -42,6 +42,11 @@ class Dimension::Validator::Check < ApplicationRecord
     validates :"#{bound}_proc", dimension: { "#{bound}": ->(record) { 500..500 } }
   end
 
+  has_one_attached :min_max
+  validates :min_max, dimension: { min: 400..500, max: 600..700 }
+  has_one_attached :min_max_proc
+  validates :min_max_proc, dimension: { min: ->(record) { 400..500 }, max: ->(record) { 600..700 } }
+
   # Integration tests
   has_one_attached :width_height_exact
   validates :width_height_exact, dimension: { width: 600, height: 600 }

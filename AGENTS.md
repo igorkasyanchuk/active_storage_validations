@@ -2,7 +2,7 @@
 
 This is the codebase of the [active_storage_validations](https://github.com/igorkasyanchuk/active_storage_validations) gem: Active Model validators for Rails Active Storage attachments (presence, content type, size, dimensions, duration, aspect ratio, PDF pages, etc.).
 
-It is a **gem**, not a Rails application. Tests boot a Combustion dummy app under `test/dummy/`.
+It is a **gem**, not a Rails application. Specs boot a Combustion dummy app under `test/dummy/`.
 
 ## Architecture Overview
 
@@ -14,14 +14,12 @@ lib/active_storage_validations/
   shared/asv_*.rb                          # Shared concerns used by validators
   analyzer/                                # Media metadata extractors (image/video/audio/pdf/content type)
   extensors/                               # Blob metadata + Marcel helpers
-  matchers/                                # Opt-in RSpec/Minitest matchers
+  matchers/                                # Opt-in RSpec/Minitest matchers (consumer-facing)
   form_builder.rb                          # Infers HTML accept from content_type validators
   railtie.rb / engine.rb                   # Rails integration + locale loading
 config/locales/*.yml                       # I18n error messages (all locales must stay in sync)
-test/
-  dummy/                                   # Combustion Rails app + per-validator models
-  validators/                              # Validator tests + shared_examples/
-  matchers/                                # Matcher tests
+spec/                                      # RSpec suite (validators, matchers, analyzers, integration)
+test/dummy/                                # Combustion Rails app + per-validator models
 gemfiles/                                  # Per-Rails-version Bundler Gemfiles (not Appraisal)
 docs/upgrade_to_*.md                       # Upgrade guides
 ```
@@ -72,18 +70,18 @@ External analyzer commands default to a 10s deadline (`ActiveStorageValidations.
 
 ## Testing Commands
 
-Default task is `rake test` (Minitest, pattern `test/**/*_test.rb`).
+Default task is `rake spec` (RSpec, pattern `spec/**/*_spec.rb`).
 
 ### Local default Gemfile
 
 ```bash
 bundle install
-bundle exec rake test
-bundle exec rake test TEST=test/validators/size_validator_test.rb
+bundle exec rake spec
+bundle exec rspec spec/validators/size_validator_spec.rb
 bundle exec rubocop --parallel
 ```
 
-Use `focus` from [minitest-focus](https://github.com/minitest/minitest-focus) to run a single test method.
+Focus examples with `:focus` / `fit` / `fdescribe` (`filter_run_when_matching :focus` is enabled).
 
 ### Multi-Rails testing via `BUNDLE_GEMFILE`
 
@@ -97,12 +95,12 @@ BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle
 BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle
 
-BUNDLE_GEMFILE=gemfiles/rails_7_0_1.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle exec rake test
-BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
+BUNDLE_GEMFILE=gemfiles/rails_7_0_1.gemfile bundle exec rake spec
+BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle exec rake spec
+BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rake spec
+BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rake spec
+BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle exec rake spec
+BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake spec
 ```
 
 ### Image processors
@@ -110,11 +108,11 @@ BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 CI runs both processors. Locally:
 
 ```bash
-IMAGE_PROCESSOR=vips bundle exec rake test
-IMAGE_PROCESSOR=mini_magick bundle exec rake test
+IMAGE_PROCESSOR=vips bundle exec rake spec
+IMAGE_PROCESSOR=mini_magick bundle exec rake spec
 ```
 
-`test/test_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem).
+`spec/rails_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem).
 
 ### Benchmarks
 
@@ -133,13 +131,14 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 ## Code Conventions
 
 - `# frozen_string_literal: true` at the top of Ruby files
-- RuboCop via `rubocop-rails-omakase` (see `.rubocop.yml`); method length max 15
+- RuboCop via `rubocop-rails-omakase` + `rubocop-rspec` (see `.rubocop.yml`); method length max 15
 - Shared modules are prefixed `ASV*`
 - Validators define `ERROR_TYPES` (and often `METADATA_KEYS`); add errors through `ASVErrorable#add_error`
 - Comparison validators inherit `BaseComparisonValidator` — prefer extending that over duplicating option parsing
 - New / changed I18n keys must be updated in **every** file under `config/locales/`
 - User-facing changes: update `README.md` and add an entry under Unreleased in `CHANGES.md`
 - Breaking changes: also add/update `docs/upgrade_to_X.md`
+- Spec conventions: see `.cursor/rules/spec-*.mdc` (validators, matchers, analyzers, integration)
 
 ## Common Contribution Workflows
 
@@ -147,17 +146,17 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 
 1. Implement in `lib/active_storage_validations/<name>_validator.rb`
 2. Reuse `shared/asv_*.rb` and/or `BaseComparisonValidator` when possible
-3. Update tests under `test/validators/` (prefer existing `shared_examples/`)
+3. Update specs under `spec/validators/` (prefer existing `shared_examples/` via `it_behaves_like`)
 4. Update or add dummy models under `test/dummy/app/models/<validator>/`
 5. If error types change, sync all locale files
 6. If the public API changes, update README + CHANGES
-7. Behavior or API changes almost always require updating the related matcher under `lib/active_storage_validations/matchers/` and its tests under `test/matchers/`
+7. Behavior or API changes almost always require updating the related matcher under `lib/active_storage_validations/matchers/` and its specs under `spec/matchers/`
 
 ### Changing a matcher
 
 1. Implement under `lib/active_storage_validations/matchers/`
 2. Compose concerns from `matchers/shared/`
-3. Add/update tests under `test/matchers/`
+3. Add/update specs under `spec/matchers/`
 4. Matchers filter errors using `validator_type` — keep that aligned with the validator
 
 ### Changing analyzers / metadata
@@ -165,7 +164,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 1. Analyzers live under `lib/active_storage_validations/analyzer/`
 2. Results are cached on the blob via `ASVBlobMetadatable` as string keys `asv_*` (S3 metadata constraints)
 3. Blobs are treated as immutable: once metadata keys exist, re-analysis is skipped
-4. Run tests with both `IMAGE_PROCESSOR=vips` and `IMAGE_PROCESSOR=mini_magick` when touching image analysis
+4. Run specs with both `IMAGE_PROCESSOR=vips` and `IMAGE_PROCESSOR=mini_magick` when touching image analysis
 
 ### Finding related code
 
@@ -183,13 +182,15 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 ## File Organization Principles
 
 - `lib/` — production code only
-- `test/` — Minitest (not RSpec for the gem suite); Combustion dummy in `test/dummy/`
+- `spec/` — RSpec suite for the gem (validators, matchers, analyzers, form_builder, integration)
+- `test/dummy/` — Combustion Rails app used by specs
 - `benchmark/` — optional ips / require suite for metadata validators (not shipped in the gem)
 - `gemfiles/` — Rails version matrix for local/CI runs
 - `docs/` — upgrade guides for humans consuming the gem
 - `AGENTS.md` — this file; agent-oriented contributor guidance (humans can use it too)
-- `.cursor/rules/` — Cursor project rules (e.g. commit message format); referenced from this file
+- `.cursor/rules/` — Cursor project rules (commit messages, spec conventions); referenced from this file
 - Do not invent an Appraisal setup; keep using `BUNDLE_GEMFILE=`
+- Do not reintroduce a Minitest suite for the gem itself (consumer matchers may still support Minitest)
 
 ## Documentation
 
@@ -199,6 +200,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 | Changelog | `CHANGES.md` |
 | Upgrade to 2.x / 3.x / 4.x | `docs/upgrade_to_2.md`, `docs/upgrade_to_3.md`, `docs/upgrade_to_4.md` |
 | Commit messages | [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) (Conventional Commits; always apply for agents) |
+| Spec conventions | [`.cursor/rules/spec.mdc`](.cursor/rules/spec.mdc) (shared; named `subject`), plus [`spec-validators.mdc`](.cursor/rules/spec-validators.mdc), [`spec-matchers.mdc`](.cursor/rules/spec-matchers.mdc), [`spec-analyzers.mdc`](.cursor/rules/spec-analyzers.mdc), [`spec-integration.mdc`](.cursor/rules/spec-integration.mdc) |
 
 ## Git / commit messages
 
@@ -212,6 +214,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Marcel rejects types like `image/jpg` — use `image/jpeg` (and Marcel shorthands where registered)
 - Railtie must not use `after: :load_config_initializers` (stack overflow; see comment in `railtie.rb`)
 - `processable_file` may reject formats with libvips untrusted loaders (e.g. SVG) when Rails sets `Vips.block_untrusted(true)`
+- Do not reintroduce a Minitest suite for the gem; keep consumer matcher docs for both RSpec and Minitest/shoulda
 
 ## Read First When Contributing
 
@@ -221,5 +224,5 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 4. A simple validator: `attached_validator.rb`
 5. Comparison path: `base_comparison_validator.rb` + `size_validator.rb`
 6. Shared core: `shared/asv_attachable.rb`, `shared/asv_analyzable.rb`, `shared/asv_errorable.rb`
-7. `test/test_helper.rb` + one validator test and its `shared_examples/`
+7. `spec/rails_helper.rb` + one validator spec and its `shared_examples/`
 8. `.github/workflows/main.yml`

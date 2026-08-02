@@ -74,7 +74,7 @@ ActiveRecord::Schema.define do
       t.datetime :updated_at, null: false
     end
 
-    %i[allow_nil allow_blank if on strict unless message].each do |option|
+    %i[allow_nil allow_blank if on strict unless message except_on].each do |option|
       create_table :"#{validator}_validator_with_#{option.to_s.pluralize}", force: :cascade do |t|
         t.string :title if option == :if
         t.integer :rating if option == :unless
