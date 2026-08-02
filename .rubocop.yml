@@ -38,13 +38,6 @@ Metrics/BlockLength:
     - test/**/*
     - spec/**/*
 
-
-Rails/AssertNot:
-  Enabled: false
-
-Rails/RefuteMethods:
-  Enabled: false
-
 # ==============================================================================
 # RSpec cops
 #
