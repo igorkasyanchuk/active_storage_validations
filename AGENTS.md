@@ -116,6 +116,20 @@ IMAGE_PROCESSOR=mini_magick bundle exec rake test
 
 `test/test_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem).
 
+### Benchmarks
+
+Optional metadata-validator performance suite under `benchmark/` (`benchmark-ips`, informational CI job). Install the `:benchmark` group, then:
+
+```bash
+bundle config set --local with benchmark
+bundle install
+bundle exec ruby benchmark/require.rb
+IMAGE_PROCESSOR=vips bundle exec ruby benchmark/metadata_validators.rb
+bundle exec ruby benchmark/image_processors.rb
+```
+
+See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md`](benchmark/BASELINE.md) (and the libvips recommendation in `README.md` if the ratio changes) when changing analyzer / metadata hot paths.
+
 ## Code Conventions
 
 - `# frozen_string_literal: true` at the top of Ruby files
@@ -170,6 +184,7 @@ IMAGE_PROCESSOR=mini_magick bundle exec rake test
 
 - `lib/` — production code only
 - `test/` — Minitest (not RSpec for the gem suite); Combustion dummy in `test/dummy/`
+- `benchmark/` — optional ips / require suite for metadata validators (not shipped in the gem)
 - `gemfiles/` — Rails version matrix for local/CI runs
 - `docs/` — upgrade guides for humans consuming the gem
 - `AGENTS.md` — this file; agent-oriented contributor guidance (humans can use it too)

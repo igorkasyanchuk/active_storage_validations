@@ -65,12 +65,14 @@ Once you have installed the gem, I18n error messages will be added automatically
 Optionally, to use the image metadata validators (`dimension`, `aspect_ratio` and `processable_file`), you will have to add one of the corresponding gems:
 
 ```ruby
-gem 'mini_magick', '>= 4.9.5'
-# Or
 gem 'ruby-vips', '>= 2.1.0'
+# Or
+gem 'mini_magick', '>= 4.9.5'
 ```
 
-Plus, you have to be sure to have the corresponding command-line tool installed on your system. For example, to use `mini_magick` gem, you need to have `imagemagick` installed on your system (both on your local and in your CI / production environments).
+Plus, you have to be sure to have the corresponding command-line tool installed on your system (`libvips` for `ruby-vips`, or ImageMagick for `mini_magick` — both locally and in CI / production).
+
+We recommend **libvips** (`ruby-vips` + `config.active_storage.variant_processor = :vips`) for these validators. Rails already defaults Active Storage variants to libvips ([`ActiveStorage::Variant`](https://api.rubyonrails.org/classes/ActiveStorage/Variant.html)), and our [image processor benchmarks](benchmark/BASELINE.md#image-processors--vips-vs-mini_magick) show cold metadata analysis is about **8× faster** than MiniMagick/ImageMagick on the same machine and fixtures. Warm validations (cached `asv_*` metadata) are similar for both.
 
 ### Using video and audio metadata validators
 
@@ -947,6 +949,10 @@ BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake test
 Tips:
 - To focus a specific test, use the `focus` class method provided by [minitest-focus](https://github.com/minitest/minitest-focus)
 - To focus a specific file, use the TEST option provided by minitest, e.g. to only run `size_validator_test.rb` file you will launch the following command: `bundle exec rake test TEST=test/validators/size_validator_test.rb`
+
+### Benchmarks
+
+Optional wall-clock / ips suite for metadata validators (cold analysis vs cached `asv_*` hits) lives under [`benchmark/`](benchmark/). See [`benchmark/README.md`](benchmark/README.md) for setup, how to run, and how to refresh [`benchmark/BASELINE.md`](benchmark/BASELINE.md). CI runs the suite informationally (no fail-on-regression).
 
 
 ## Additional information

@@ -1,0 +1,82 @@
+name: Bench
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmarks:
+    name: Benchmarks (${{ matrix.image_processor }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image_processor:
+          - vips
+          - mini_magick
+    env:
+      IMAGE_PROCESSOR: ${{ matrix.image_processor }}
+      BENCH_TIME: "3"
+      BENCH_WARMUP: "1"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install imagemagick
+        uses: mfinelli/setup-imagemagick@v8
+        with:
+          cache: true
+
+      - name: Install libvips
+        run: sudo apt-get update && sudo apt-get -y install libvips libvips-tools
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get -y install ffmpeg
+
+      - name: Install poppler
+        run: sudo apt-get update && sudo apt-get -y install poppler-utils
+
+      - name: Setup Ruby and install gems
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Ensure benchmark gems
+        run: |
+          bundle config set --local with benchmark
+          bundle install
+
+      - name: Run require benchmark
+        run: bundle exec ruby benchmark/require.rb | tee require-${{ matrix.image_processor }}.txt
+
+      - name: Run metadata validator benchmarks
+        run: bundle exec ruby benchmark/metadata_validators.rb | tee metadata-${{ matrix.image_processor }}.txt
+
+      - name: Run image processor comparison
+        if: matrix.image_processor == 'vips'
+        run: bundle exec ruby benchmark/image_processors.rb | tee image-processors.txt
+
+      - name: Upload benchmark report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report-${{ matrix.image_processor }}
+          path: |
+            require-${{ matrix.image_processor }}.txt
+            metadata-${{ matrix.image_processor }}.txt
+
+      - name: Upload image processor comparison
+        if: matrix.image_processor == 'vips'
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report-image-processors
+          path: image-processors.txt

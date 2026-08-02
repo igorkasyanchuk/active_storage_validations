@@ -31,3 +31,11 @@ group :development, :test do
   gem "rubocop-performance", "~> 1.26", require: false
   gem "rubocop-rails-omakase", "~> 1.1", require: false
 end
+
+# Optional: performance suite under benchmark/
+# Install with: bundle config set --local with benchmark && bundle install
+# (or omit BUNDLE_WITHOUT=benchmark). See benchmark/README.md.
+group :benchmark do
+  gem "benchmark-ips"
+  gem "vernier", require: false
+end
