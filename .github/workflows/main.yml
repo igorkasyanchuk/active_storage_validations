@@ -73,6 +73,15 @@ jobs:
       - name: Verify poppler
         run: pdftoppm -h
 
+      - name: Install Magika CLI
+        run: |
+          curl -LsSf https://securityresearch.google/magika/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/.magika/bin" >> $GITHUB_PATH
+
+      - name: Verify Magika
+        run: magika --version || (ls -la "$HOME/.local/bin" "$HOME/.magika/bin" 2>/dev/null; which magika; exit 1)
+
       - name: Check out code
         uses: actions/checkout@v4
 

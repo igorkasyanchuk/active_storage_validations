@@ -129,7 +129,8 @@ RSpec.describe "Integration tests" do
             "duration" => 1.7,
             "audio" => false,
             "video" => true,
-            "content_type" => "video/mp4"
+            "content_type" => "video/mp4",
+            "content_type_backend" => "file"
           }
         end
 
@@ -141,7 +142,7 @@ RSpec.describe "Integration tests" do
         it "calls once the corresponding media analyzers (expensive operation) on the new attachable" do
           # rubocop:disable RSpec/AnyInstance -- analyzer created internally by the validator
           expect_any_instance_of(ActiveStorageValidations::Analyzer::VideoAnalyzer).to receive(:metadata).once.and_return({ width: 150, height: 150, duration: 1.7, audio: false, video: true })
-          expect_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer).to receive(:content_type).once.and_return({ content_type: "video/mp4" })
+          expect_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File).to receive(:content_type).once.and_return({ content_type: "video/mp4", content_type_backend: "file" })
           # rubocop:enable RSpec/AnyInstance
           model.videos.attach(attachable_2)
         end

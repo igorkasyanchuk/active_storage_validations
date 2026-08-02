@@ -84,9 +84,14 @@ To use the pdf metadata validators (`dimension`, `aspect_ratio`, `processable_fi
 
 ### Using content type spoofing protection validator option
 
-To use the `spoofing_protection` option with the `content_type` validator, you only need to have the UNIX `file` command on your system.
+To use the `spoofing_protection` option with the `content_type` validator:
 
-If you want some inspiration about how to add `imagemagick`, `libvips`, `ffmpeg` or `poppler` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
+- Default backend (`true` / `:file`): the UNIX [`file`](https://en.wikipedia.org/wiki/File_(command)) command (usually preinstalled on UNIX systems)
+- Magika backend (`:magika`): the [Google Magika](https://github.com/google/magika) CLI — install via their [install script](https://securityresearch.google/magika/), `cargo install --locked magika-cli`, or `pipx install magika`
+
+Both backends are optional system tools (not Ruby gems). Be sure to install Magika in CI / production if you enable `:magika`.
+
+If you want some inspiration about how to add `imagemagick`, `libvips`, `ffmpeg`, `poppler` or `magika` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
 
 ### Configuration
 
@@ -98,7 +103,7 @@ ActiveStorageValidations.configure do |config|
   # Infer HTML accept= on file_field from content_type validators (default: true)
   # config.infer_file_field_accept = false
 
-  # Max time for external analyzer commands: ffprobe, pdfinfo, file, ImageMagick identify, libvips
+  # Max time for external analyzer commands: ffprobe, pdfinfo, file, magika, ImageMagick identify, libvips
   # (default: 10.seconds; set to nil to disable)
   # config.command_timeout = 10.seconds
 end
@@ -110,7 +115,7 @@ end
 # end
 ```
 
-`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection: true`). When a command times out, analysis fails closed and the validator adds its usual error (`file_not_processable` / `media_metadata_missing` / content-type errors) — there is no separate timeout error message.
+`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection`). When a command times out, analysis fails closed and the validator adds its usual error (`file_not_processable` / `media_metadata_missing` / content-type errors) — there is no separate timeout error message.
 
 The 10s default is enough for typical uploads. Raise it (or set `nil`) if you analyze very large videos/PDFs, especially on slow or network storage — otherwise those files can start failing validation after upgrade. See [upgrade to 4.x](docs/upgrade_to_4.md#analyzer-command-timeout).
 
@@ -247,8 +252,8 @@ Validates if the attachment has an allowed content type.
 The `content_type` validator has several possible options:
 - `with`: defines the allowed content type (string, symbol or regex)
 - `in`: defines the allowed content types (array of strings or symbols)
-- `spoofing_protection`: enables content type spoofing protection (boolean, defaults to `false`)
-- `timeout`: overrides the global analyzer [command timeout](#configuration) when spoofing protection runs the `file` command
+- `spoofing_protection`: enables content type spoofing protection (`false` by default). Allowed values: `true` / `:file` (UNIX `file` CLI), `:magika` (Google Magika CLI)
+- `timeout`: overrides the global analyzer [command timeout](#configuration) when spoofing protection runs `file` or `magika`
 
 As mentioned above, this validator can define content types in several ways:
 - String: `image/png` or `png`
@@ -266,7 +271,10 @@ class User < ApplicationRecord
   validates :avatar, content_type: :png # only allows PNG images, same as { with: :png }
   validates :avatar, content_type: /\Avideo\/.*\z/ # only allows video files
   validates :avatar, content_type: ['image/png', 'image/jpeg'] # only allows PNG and JPEG images
-  validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true } # only allows PNG, JPEG and their variants, with spoofing protection enabled
+  validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true } # UNIX `file` backend (same as :file)
+  validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: :magika } # Google Magika CLI backend
+  # Stronger protection for media/PDF: sniff + parse
+  validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true }, processable_file: true
 end
 ```
 
@@ -323,7 +331,15 @@ Be sure to at least include one the `extensions`, `parents` or `magic` option, o
 
 #### Content type spoofing protection
 
-By default, the gem does not prevent content type spoofing. You can enable it by setting the `spoofing_protection` option to `true` in your validator options.
+By default, the gem does not prevent content type spoofing. Enable it with `spoofing_protection`:
+
+```ruby
+validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true }     # => :file (UNIX file CLI)
+validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: :file }    # explicit
+validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: :magika }  # Google Magika CLI
+```
+
+Override binary paths with `ActiveStorage.paths[:file]` / `ActiveStorage.paths[:magika]` if needed.
 
 <details>
 <summary>
@@ -338,11 +354,22 @@ File content type spoofing happens when an ill-intentioned user uploads a file w
 How do we prevent it?
 </summary>
 
-The spoofing protection relies on both the UNIX `file` command and `Marcel` gem. The `file` command (via libmagic) mostly inspects magic bytes / headers — similar in spirit to Active Storage / Marcel identifying content type from the first few kilobytes — so it does **not** load the whole file into RAM.
+Spoofing protection compares the declared Active Storage content type to a type detected by a sniffer CLI, then uses `Marcel` parent types so near-matches still pass:
 
-For already-persisted blobs (e.g. remote storage), the analyzer still downloads the blob to a local tempfile before running `file`. That download is streamed in chunks to disk (not held as one big in-memory string), but it can still be costly for very large files. Uploaded files that already have a local path are analyzed in place. For large remote uploads, you may prefer to skip `spoofing_protection` or combine it with a `size` validator.
+- `:file` (default) — UNIX `file` / libmagic, mostly magic bytes / headers. Zero extra install on most UNIX systems.
+- `:magika` — [Google Magika](https://github.com/google/magika) CLI (ML sniffer; samples begin/middle/end of the file). Generally more accurate than `file`, especially on textual / ambiguous formats (Google reports ~99% F1 vs ~88% for `file --mime` on overlapping types). Prefer `:magika` when you can install the CLI.
 
-Take note that the `file` analyzer will not find the exactly same content type as the ActiveStorage blob (ActiveStorage content type detection relies on a different logic using first 4kb of content + filename + extension). To handle this issue, we consider a close parent content type to be a match. For example, for an ActiveStorage blob which content type is `video/x-ms-wmv`, the `file` analyzer will probably detect a `video/x-ms-asf` content type, this will be considered as a valid match because these 2 content types are closely related. The correlation mapping is based on `Marcel::TYPE_PARENTS` table.
+Neither backend fully parses the file. They do **not** load the whole file into RAM. For already-persisted blobs (e.g. remote storage), the analyzer still downloads the blob to a local tempfile before sniffing. That download is streamed in chunks to disk, but it can still be costly for very large files. Local path uploads are analyzed in place.
+
+Detected types are cached on the blob as `asv_content_type` + `asv_content_type_backend`. Switching backend re-analyzes. Legacy blobs that only have `asv_content_type` (no backend key) are treated as `:file` and keep using the cache — they are not re-analyzed.
+
+Sniffers will not always return the exact same MIME as Active Storage (AS uses first ~4kb + filename + extension). Close parent types are accepted via `Marcel::TYPE_PARENTS` (e.g. `video/x-ms-wmv` vs `video/x-ms-asf`).
+
+For stronger protection on images / video / audio / PDF, combine sniffing with parse validation:
+
+```ruby
+validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true }, processable_file: true
+```
 </details>
 
 <details>
@@ -350,9 +377,11 @@ Take note that the `file` analyzer will not find the exactly same content type a
 Edge cases
 </summary>
 
-The difficulty to accurately predict a mime type may generate false positives, if so there are two solutions available:
-- If the ActiveStorage blob content type is closely related to the detected content type using the `file` analyzer, you can enhance `Marcel::TYPE_PARENTS` mapping using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `config/initializers/mime_types.rb` file. (Please drop an issue so we can add it to the gem for everyone!)
-- If the ActiveStorage blob content type is not closely related, you still can disable the content type spoofing protection in the validator, if so, please drop us an issue so we can fix it for everyone!
+The difficulty to accurately predict a mime type may generate false positives, if so there are several solutions available:
+- Try the other sniffer backend (`:file` vs `:magika`)
+- For media/PDF that sniffers misidentify but that open correctly, add `processable_file: true`
+- If the ActiveStorage blob content type is closely related to the detected content type, enhance `Marcel::TYPE_PARENTS` mapping using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `config/initializers/mime_types.rb` file. (Please drop an issue so we can add it to the gem for everyone!)
+- If needed, disable spoofing protection in the validator, and please drop us an issue so we can fix it for everyone!
 </details>
 
 
@@ -820,6 +849,8 @@ describe User do
   # #allowing, #rejecting
   it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') } # possible to use an Array or *splatted array
   it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') } # possible to use an Array or *splatted array
+  it { is_expected.to validate_content_type_of(:avatar).allowing('image/png').spoofing_protection } # true / :file
+  it { is_expected.to validate_content_type_of(:avatar).allowing('image/png').spoofing_protection(:magika) }
 
   # dimension:
   # #width, #height, #width_min, #height_min, #width_max, #height_max, #width_between, #height_between

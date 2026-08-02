@@ -6,7 +6,6 @@ require_relative "shared/asv_attachable"
 require_relative "shared/asv_errorable"
 require_relative "shared/asv_optionable"
 require_relative "shared/asv_symbolizable"
-require_relative "analyzer/content_type_analyzer"
 
 module ActiveStorageValidations
   class ContentTypeValidator < ActiveModel::EachValidator # :nodoc:
@@ -18,6 +17,7 @@ module ActiveStorageValidations
     include ASVSymbolizable
 
     AVAILABLE_CHECKS = %i[with in].freeze
+    AVAILABLE_SPOOFING_PROTECTION_VALUES = [ true, false, :file, :magika ].freeze
     ERROR_TYPES = %i[
       content_type_invalid
       content_type_spoofed
@@ -27,6 +27,7 @@ module ActiveStorageValidations
     def check_validity!
       ensure_exactly_one_validator_option
       ensure_content_types_validity
+      ensure_spoofing_protection_validity
     end
 
     def validate_each(record, attribute, _value)
@@ -125,7 +126,25 @@ module ActiveStorageValidations
     end
 
     def enable_spoofing_protection?
-      options[:spoofing_protection] == true
+      spoofing_protection_backend.present?
+    end
+
+    # +true+ and +:file+ both select the UNIX +file+ CLI; +:magika+ selects Magika.
+    def spoofing_protection_backend
+      case options[:spoofing_protection]
+      when true, :file then :file
+      when :magika then :magika
+      end
+    end
+
+    def ensure_spoofing_protection_validity
+      return unless options.key?(:spoofing_protection)
+      return if AVAILABLE_SPOOFING_PROTECTION_VALUES.include?(options[:spoofing_protection])
+
+      raise ArgumentError, <<~ERROR_MESSAGE
+        Unknown spoofing_protection option: #{options[:spoofing_protection].inspect}.
+        Allowed values: #{AVAILABLE_SPOOFING_PROTECTION_VALUES.map(&:inspect).join(", ")}
+      ERROR_MESSAGE
     end
 
     def attachable_content_type_vs_detected_content_type_mismatch?

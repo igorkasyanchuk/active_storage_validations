@@ -17,6 +17,10 @@ module ActiveStorageValidations
     # attachable with the corresponding analyzer and set the metadata in the
     # blob.
     def metadata_for(blob, attachable, metadata_keys)
+      if content_type_metadata_keys?(metadata_keys)
+        return content_type_metadata_for(blob, attachable)
+      end
+
       return blob.active_storage_validations_metadata if blob_has_asv_metadata?(blob, metadata_keys)
 
       new_metadata = generate_metadata_for(attachable, metadata_keys) || {}
@@ -26,6 +30,49 @@ module ActiveStorageValidations
       blob.active_storage_validations_metadata
     end
 
+    def content_type_metadata_keys?(metadata_keys)
+      metadata_keys == ActiveStorageValidations::ContentTypeValidator::METADATA_KEYS
+    end
+
+    # Same cache semantics as +metadata_for+, plus backend matching.
+    # Legacy blobs that only have +asv_content_type+ (no backend key) are treated
+    # as +:file+ — so existing file-backend analyses keep hitting the cache and
+    # are not re-analyzed / rewritten.
+    def content_type_metadata_for(blob, attachable)
+      backend = spoofing_protection_backend
+      cached = blob.active_storage_validations_metadata
+      return cached if content_type_cache_hit?(cached, backend)
+
+      metadata_keys = ActiveStorageValidations::ContentTypeValidator::METADATA_KEYS
+      new_metadata = generate_metadata_for(attachable, metadata_keys)
+      return failed_content_type_metadata(backend) if content_type_analysis_failed?(new_metadata)
+
+      blob.merge_into_active_storage_validations_metadata(new_metadata)
+      blob.save!
+
+      blob.active_storage_validations_metadata
+    end
+
+    def content_type_analysis_failed?(new_metadata)
+      new_metadata.blank? || new_metadata[:content_type].blank?
+    end
+
+    # Do not return / persist another backend's cached type after a failed sniff
+    # (timeout, unsupported file, invalid Magika JSON, …). Fail closed for this
+    # request; leave blob metadata unchanged so a later attempt can retry.
+    def failed_content_type_metadata(backend)
+      { content_type: nil, content_type_backend: backend.to_s }
+    end
+
+    def content_type_cache_hit?(cached, backend)
+      return false unless cached.present? && cached[:content_type].present?
+
+      # Missing / blank backend => legacy file analysis (pre-Magika support).
+      # Those blobs keep hitting the cache for +:file+ and are not rewritten.
+      stored_backend = (cached[:content_type_backend].presence || "file").to_s
+      stored_backend == backend.to_s
+    end
+
     def blob_has_asv_metadata?(blob, metadata_keys)
       return false unless blob.active_storage_validations_metadata.present?
 
@@ -33,7 +80,7 @@ module ActiveStorageValidations
     end
 
     def generate_metadata_for(attachable, metadata_keys)
-      if metadata_keys == ActiveStorageValidations::ContentTypeValidator::METADATA_KEYS
+      if content_type_metadata_keys?(metadata_keys)
         content_type_analyzer_for(attachable).content_type
       else
         metadata_analyzer_for(attachable).metadata
@@ -83,7 +130,12 @@ module ActiveStorageValidations
     end
 
     def content_type_analyzer_for(attachable)
-      ActiveStorageValidations::Analyzer::ContentTypeAnalyzer.new(attachable, **analyzer_timeout_options)
+      case spoofing_protection_backend
+      when :magika
+        ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::Magika.new(attachable, **analyzer_timeout_options)
+      else
+        ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File.new(attachable, **analyzer_timeout_options)
+      end
     end
 
     # Passes raw validator +timeout:+ through to analyzers. Kept out of
