@@ -56,6 +56,7 @@ fr:
       aspect_ratio_invalid: "a un rapport d'aspect invalide (les rapports d'aspect valides sont %{authorized_aspect_ratios})"
       file_not_processable: "n'est pas identifié comme un fichier média valide"
       audio_missing: "doit contenir une piste audio"
+      audio_present: "ne doit pas contenir de piste audio"
       pages_not_less_than: "le nombre de pages doit être inférieur à %{max} (le nombre actuel est de %{pages})"
       pages_not_less_than_or_equal_to: "le nombre de pages doit être inférieur ou égal à %{max} (le nombre actuel est de %{pages})"
       pages_not_greater_than: "le nombre de pages doit être supérieur à %{min} (le nombre actuel est de %{pages})"

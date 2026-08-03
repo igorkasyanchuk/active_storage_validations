@@ -56,6 +56,7 @@ ja:
       aspect_ratio_invalid: "のアスペクト比を検出できません (許可されたアスペクト比は%{authorized_aspect_ratios})"
       file_not_processable: "のメディアを処理できません"
       audio_missing: "には音声トラックが必要です"
+      audio_present: "に音声トラックを含めることはできません"
       pages_not_less_than: "のページ数は%{max}未満にしてください (添付されたファイルは%{pages}ページ)"
       pages_not_less_than_or_equal_to: "のページ数は%{max}以下にしてください (添付されたファイルは%{pages}ページ)"
       pages_not_greater_than: "のページ数は%{min}より大きくしてください (添付されたファイルは%{pages}ページ)"

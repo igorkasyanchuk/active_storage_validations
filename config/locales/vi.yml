@@ -56,6 +56,7 @@ vi:
       aspect_ratio_invalid: "có tỷ lệ khung hình không hợp lệ (tỷ lệ khung hình hợp lệ là %{authorized_aspect_ratios})"
       file_not_processable: "không được xác định là tệp phương tiện hợp lệ"
       audio_missing: "phải có một bản âm thanh"
+      audio_present: "không được chứa bản âm thanh"
       pages_not_less_than: "số trang phải nhỏ hơn %{max} (số trang hiện tại là %{pages})"
       pages_not_less_than_or_equal_to: "số trang phải nhỏ hơn hoặc bằng %{max} (số trang hiện tại là %{pages})"
       pages_not_greater_than: "số trang phải lớn hơn %{min} (số trang hiện tại là %{pages})"

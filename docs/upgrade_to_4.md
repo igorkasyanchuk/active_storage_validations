@@ -1,6 +1,6 @@
 # Upgrading to 4.x
 
-Version 4 updates the supported Rails and Ruby versions, adds automatic HTML `accept` inference for file fields, analyzer command timeouts, the `with_audio` validator, and matcher support for Rails `:except_on`.
+Version 4 updates the supported Rails and Ruby versions, adds automatic HTML `accept` inference for file fields, analyzer command timeouts, and matcher support for Rails `:except_on`.
 
 ## Breaking changes
 
@@ -33,11 +33,11 @@ Explicit `accept:` values are never overridden.
 
 Without a deadline, a single pathological or crafted upload can stall an analyzer binary (`ffprobe`, ImageMagick, …) indefinitely and tie up a request or background worker. A default timeout closes that hang/DoS class of failure while keeping normal uploads fast: analysis either finishes or fails closed with the validator’s existing error.
 
-Metadata analysis (`ffprobe`, `pdfinfo`, `file`, `magika`, ImageMagick `identify`, libvips) now defaults to a **10 second** command timeout (`ActiveStorageValidations.command_timeout`). Commands that previously could hang forever now fail closed after that deadline; validators then add their usual errors (`file_not_processable`, `media_metadata_missing`, `audio_missing`, etc.).
+Metadata analysis (`ffprobe`, `pdfinfo`, `file`, `magika`, ImageMagick `identify`, libvips) now defaults to a **10 second** command timeout (`ActiveStorageValidations.command_timeout`). Commands that previously could hang forever now fail closed after that deadline; validators then add their usual errors (`file_not_processable`, `media_metadata_missing`, etc.).
 
 **Who is affected?** Most apps are not. Typical image / audio / short-video / PDF metadata extraction finishes in milliseconds to a couple of seconds. This is a breaking change only if legitimate uploads need more than 10s to analyze — for example:
 
-- Very large videos analyzed with `duration` / `with_audio` / `processable_file` (especially on slow disks or network-mounted / remote storage)
+- Very large videos analyzed with `duration` / `processable_file` (especially on slow disks or network-mounted / remote storage)
 - Unusually large PDFs with `pages`
 - Environments where analyzer binaries are cold-started or heavily CPU-contended
 
@@ -61,9 +61,8 @@ See the README [Configuration](../README.md#configuration) section for the full 
 ### Added
 
 - `#except_on` matcher option to support Rails `:except_on` (available since Rails 8.0), e.g. `validate_attached_of(:avatar).except_on(:update)`
-- `with_audio` validator and `validate_with_audio_of` matcher for requiring an audio track in video files
 - Optional per-validator `timeout:` for analyzer commands, plus `timeout.active_storage_validations` instrumentation (timed-out analysis fails closed using existing validation errors)
-- `#timeout` matcher option for metadata validators and `content_type`, e.g. `validate_duration_of(:video).less_than(5.minutes).timeout(30.seconds)` or `validate_with_audio_of(:video).timeout(5.seconds)`
+- `#timeout` matcher option for metadata validators and `content_type`, e.g. `validate_duration_of(:video).less_than(5.minutes).timeout(30.seconds)`
 - `content_type` `spoofing_protection: :magika` (Google Magika CLI). `spoofing_protection: true` still means the UNIX `file` backend (`:file` is also accepted). Magika is generally more accurate than `file` (especially on text / ambiguous types). Detected types are cached with `asv_content_type_backend`; switching backend re-analyzes. Legacy blobs that only have `asv_content_type` keep working with `:file` (treated as the file backend). Matcher: `validate_content_type_of(:avatar).spoofing_protection` / `.spoofing_protection(:magika)`
 
 Both sniff backends only guess MIME from file content samples — they are not full parsers. For stronger checks on image / video / audio / PDF, combine with `processable_file`:

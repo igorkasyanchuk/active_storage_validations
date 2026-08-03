@@ -56,6 +56,7 @@ nl:
       aspect_ratio_invalid: "heeft een ongeldige beeldverhouding (geldige beeldverhoudingen zijn %{authorized_aspect_ratios})"
       file_not_processable: "wordt niet geïdentificeerd als een geldig mediabestand"
       audio_missing: "moet een audiotrack bevatten"
+      audio_present: "mag geen audiotrack bevatten"
       pages_not_less_than: "het aantal pagina's moet kleiner zijn dan %{max} (het huidige aantal pagina's is %{pages})"
       pages_not_less_than_or_equal_to: "het aantal pagina's moet kleiner zijn dan of gelijk zijn aan %{max} (het huidige aantal pagina's is %{pages})"
       pages_not_greater_than: "het aantal pagina's moet groter zijn dan %{min} (het huidige aantal pagina's is %{pages})"

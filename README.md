@@ -141,7 +141,7 @@ Notes:
 - [Total size](#total-size): validates total file size for several files
 - [Dimension](#dimension): validates image / video dimensions
 - [Duration](#duration): validates video / audio duration
-- [With audio](#with-audio): validates that a video contains an audio track
+- [With audio](#with-audio): validates whether a video contains an audio track
 - [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
 - [Processable file](#processable-file): validates if a file can be processed
 - [Pages](#pages): validates pdf number of pages
@@ -648,12 +648,13 @@ The `duration` validator error messages expose 4 values that you can use:
 
 ### With audio
 
-Validates that attached video files contain an audio track.
+Validates whether attached video files contain an audio track.
 (be sure to have the right dependencies installed as mentioned in [Using video and audio metadata validators](#using-video-and-audio-metadata-validators))
 
 #### Options
 
 The `with_audio` validator supports:
+- `with`: `true` requires an audio track and `false` rejects one
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 #### Examples
@@ -662,11 +663,15 @@ Use it like this:
 ```ruby
 class User < ApplicationRecord
   has_one_attached :video
+  has_one_attached :silent_video
 
   validates :video, with_audio: true
+  validates :silent_video, with_audio: { with: false }
   validates :video, with_audio: { timeout: 5.seconds }
 end
 ```
+
+Rails treats a bare `with_audio: false` as a disabled validator. Use the hash form `with_audio: { with: false }` to reject videos that contain audio.
 
 #### Error messages (I18n)
 
@@ -675,6 +680,7 @@ en:
   errors:
     messages:
       audio_missing: "must have an audio track"
+      audio_present: "must not have an audio track"
 ```
 
 The `with_audio` validator error message exposes the `filename` value containing the current file name.
@@ -934,6 +940,7 @@ describe User do
 
   # with_audio
   it { is_expected.to validate_with_audio_of(:video) }
+  it { is_expected.to validate_with_audio_of(:silent_video).without_audio }
 
   # pages:
   # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to

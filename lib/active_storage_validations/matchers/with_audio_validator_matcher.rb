@@ -35,14 +35,20 @@ module ActiveStorageValidations
         initialize_rspecable
         initialize_timeoutable
         @attribute_name = attribute_name
+        @expected_audio = true
       end
 
       def description
-        "validate that :#{@attribute_name} has an audio track"
+        "validate that :#{@attribute_name} #{audio_expectation}"
       end
 
       def failure_message
-        "is expected to validate that :#{@attribute_name} has an audio track"
+        "is expected to validate that :#{@attribute_name} #{audio_expectation}"
+      end
+
+      def without_audio
+        @expected_audio = false
+        self
       end
 
       def matches?(subject)
@@ -54,18 +60,22 @@ module ActiveStorageValidations
           is_allowing_blank? &&
           is_timeout_valid? &&
           is_custom_message_valid? &&
-          is_valid_when_audio_track_present? &&
-          is_invalid_when_audio_track_missing?
+          is_valid_with_expected_audio? &&
+          is_invalid_with_unexpected_audio?
       end
 
       private
 
-      def is_valid_when_audio_track_present?
-        validation_passes_with_audio?(true)
+      def audio_expectation
+        @expected_audio ? "has an audio track" : "has no audio track"
       end
 
-      def is_invalid_when_audio_track_missing?
-        !validation_passes_with_audio?(false)
+      def is_valid_with_expected_audio?
+        validation_passes_with_audio?(@expected_audio)
+      end
+
+      def is_invalid_with_unexpected_audio?
+        !validation_passes_with_audio?(!@expected_audio)
       end
 
       def is_custom_message_valid?

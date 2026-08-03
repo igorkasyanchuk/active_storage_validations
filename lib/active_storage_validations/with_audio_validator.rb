@@ -14,7 +14,7 @@ module ActiveStorageValidations
     include ASVErrorable
     include ASVSymbolizable
 
-    ERROR_TYPES = %i[audio_missing].freeze
+    ERROR_TYPES = %i[audio_missing audio_present].freeze
     METADATA_KEYS = %i[audio].freeze
 
     def validate_each(record, attribute, _value)
@@ -26,10 +26,12 @@ module ActiveStorageValidations
     private
 
     def is_valid?(record, attribute, attachable, metadata)
-      return if metadata&.fetch(:audio, false)
+      expected_audio = options.fetch(:with, true)
+      return if metadata&.fetch(:audio, false) == expected_audio
 
       errors_options = initialize_error_options(options, attachable)
-      add_error(record, attribute, ERROR_TYPES.first, **errors_options)
+      error_type = expected_audio ? :audio_missing : :audio_present
+      add_error(record, attribute, error_type, **errors_options)
     end
   end
 end

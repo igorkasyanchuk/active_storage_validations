@@ -48,5 +48,8 @@ class WithAudio::Matcher < ApplicationRecord
   has_one_attached :failure_message_when_negated
   validates :failure_message_when_negated, with_audio: true
 
-  has_one_attached :without_audio
+  has_one_attached :silent_video
+  validates :silent_video, with_audio: { with: false }
+
+  has_one_attached :not_validated
 end

@@ -1,5 +1,9 @@
 # Unreleased
 
+- 4.1.0
+  - **ADDED**
+    - Add `with_audio` validator and `validate_with_audio_of` matcher for requiring or forbidding an audio track in video files (https://github.com/igorkasyanchuk/active_storage_validations/issues/303). Use `with_audio: true` to require audio or `with_audio: { with: false }` to forbid it. Supports per-validator `timeout:` and matcher `#timeout`.
+
 # Released
 - 4.0.0
   - **BREAKING**
@@ -9,9 +13,8 @@
     - Analyzer commands (`ffprobe`, `pdfinfo`, `file`, ImageMagick `identify`, libvips) now default to a 10s `command_timeout` (https://github.com/igorkasyanchuk/active_storage_validations/issues/410). Most apps are unaffected; this is breaking for uploads whose metadata analysis legitimately takes longer than 10s (e.g. very large videos on slow/network storage). Raise globally, per validator with `timeout:`, or set `nil` to restore unbounded waits — see [upgrade guide](docs/upgrade_to_4.md)
   - **ADDED**
     - Add `#except_on` matcher option to support Rails `:except_on` validation option (available since Rails 8.0) (https://github.com/igorkasyanchuk/active_storage_validations/issues/380)
-    - Add `with_audio` validator and `validate_with_audio_of` matcher for requiring an audio track in video files (https://github.com/igorkasyanchuk/active_storage_validations/issues/303). Supports per-validator `timeout:` and matcher `#timeout`.
     - Add optional per-validator `timeout:` and `timeout.active_storage_validations` instrumentation for analyzer commands. Timed-out analysis fails closed using existing validation errors
-    - Add `#timeout` matcher option for metadata validators (`dimension`, `aspect_ratio`, `duration`, `with_audio`, `pages`, `processable_file`) and `content_type`
+    - Add `#timeout` matcher option for metadata validators (`dimension`, `aspect_ratio`, `duration`, `pages`, `processable_file`) and `content_type`
     - Add `spoofing_protection: :magika` backend (Google Magika CLI) for `content_type`; `true` still means `:file`. Cache stores `asv_content_type_backend`. Matcher: `#spoofing_protection` / `#spoofing_protection(:magika)` (https://github.com/igorkasyanchuk/active_storage_validations/issues/404)
   - **FIXED**
     - Fix `dimension: { min:, max: }` when both top-level bounds are set together (previously the second bound overwrote the first in `process_options`)

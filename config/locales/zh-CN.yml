@@ -56,6 +56,7 @@ zh-CN:
       aspect_ratio_invalid: "具有无效的长宽比（有效长宽比为 %{authorized_aspect_ratios})"
       file_not_processable: "未标识为有效的媒体文件"
       audio_missing: "必须包含音轨"
+      audio_present: "不得包含音轨"
       pages_not_less_than: "页数必须小于 %{max}（当前页数为 %{pages})"
       pages_not_less_than_or_equal_to: "页数必须小于或等于 %{max}（当前页数为 %{pages})"
       pages_not_greater_than: "页数必须大于 %{min}（当前页数为 %{pages})"

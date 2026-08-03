@@ -16,12 +16,20 @@ RSpec.describe ActiveStorageValidations::Matchers::WithAudioValidatorMatcher do
     it_behaves_like "has custom matcher"
   end
 
-  context "when the passed model attribute does not have a `with_audio: true` constraint" do
+  context "when the passed model attribute does not have a `with_audio` constraint" do
     subject(:configured_matcher) { matcher }
 
-    let(:model_attribute) { :without_audio }
+    let(:model_attribute) { :not_validated }
 
     it { is_expected_not_to_match_for(klass) }
+  end
+
+  describe "#without_audio" do
+    subject(:configured_matcher) { matcher.without_audio }
+
+    let(:model_attribute) { :silent_video }
+
+    it { is_expected_to_match_for(klass) }
   end
 
   describe "#allow_blank" do

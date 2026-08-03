@@ -56,6 +56,7 @@ tr:
       aspect_ratio_invalid: "geçersiz bir en boy oranına sahiptir (geçerli en boy oranları %{authorized_aspect_ratios})"
       file_not_processable: "geçerli bir medya dosyası olarak tanımlanmadı"
       audio_missing: "bir ses parçası içermelidir"
+      audio_present: "bir ses parçası içermemelidir"
       pages_not_less_than: "sayfa sayısı %{max} değerinden az olmalıdır (geçerli sayfa sayısı %{pages})"
       pages_not_less_than_or_equal_to: "sayfa sayısı %{max} değerinden az veya eşit olmalıdır (geçerli sayfa sayısı %{pages})"
       pages_not_greater_than: "sayfa sayısı %{min} değerinden fazla olmalıdır (geçerli sayfa sayısı %{pages})"
