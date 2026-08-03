@@ -1,5 +1,6 @@
 # Unreleased
 
+# Released
 - 4.0.0
   - **BREAKING**
     - Drop support for Rails 6.1.4, 7.0.0 (we keep support for Rails >= 7.0.1)
@@ -24,8 +25,6 @@
     - Correct `spoofing_protection` docs: `file`/libmagic does not load the whole file into RAM; remote blobs are still streamed to a tempfile (https://github.com/igorkasyanchuk/active_storage_validations/issues/376)
 
   - To upgrade from version 3.x to 4.x, please read the [upgrade guide](docs/upgrade_to_4.md)
-
-# Released
 
 - 3.0.6
   - Fix `processable_file` rejecting formats with libvips untrusted loaders (e.g. SVG) after Rails enables `Vips.block_untrusted(true)` (https://github.com/igorkasyanchuk/active_storage_validations/issues/423). No impact on Rails versions that do not enable this Vips change (before 7.2.3.2 / 8.0.5.1 / 8.1.3.1, unless the app blocks untrusted loaders itself).
