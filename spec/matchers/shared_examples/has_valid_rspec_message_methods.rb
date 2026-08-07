@@ -13,6 +13,7 @@ RSpec.shared_examples "has valid rspec message methods" do
       when :content_type then matcher.rejecting("image/png")
       when :dimension then matcher.width(75).height(75)
       when :duration then matcher.less_than_or_equal_to(7.minutes)
+      when :with_audio then matcher
       when :size then matcher.less_than_or_equal_to(7.megabytes)
       when :total_size then matcher.less_than_or_equal_to(7.megabytes)
       when :pages then matcher.less_than_or_equal_to(7)
@@ -64,6 +65,10 @@ RSpec.shared_examples "has valid rspec message methods" do
             validation failed when provided with a 419 seconds test file
             whereas it should have passed
         FAILURE_MESSAGE
+      when :with_audio
+        <<~FAILURE_MESSAGE
+          is expected to validate that :#{model_attribute} has an audio track
+        FAILURE_MESSAGE
       when :size
         <<~FAILURE_MESSAGE
           is expected to validate file size of :#{model_attribute}
@@ -103,6 +108,7 @@ RSpec.shared_examples "has valid rspec message methods" do
       when :content_type then matcher.allowing("image/png")
       when :dimension then matcher.width(150).height(150)
       when :duration then matcher.less_than_or_equal_to(5.minutes)
+      when :with_audio then matcher
       when :size then matcher.less_than_or_equal_to(5.megabytes)
       when :total_size then matcher.less_than_or_equal_to(5.megabytes)
       when :pages then matcher.less_than_or_equal_to(5)
@@ -153,6 +159,10 @@ RSpec.shared_examples "has valid rspec message methods" do
             but there seem to have issues with the matcher methods you used, since:
             validation failed when provided with a 301 seconds test file
             whereas it should have passed
+        FAILURE_MESSAGE
+      when :with_audio
+        <<~FAILURE_MESSAGE
+          is expected not to validate that :#{model_attribute} has an audio track
         FAILURE_MESSAGE
       when :size
         <<~FAILURE_MESSAGE

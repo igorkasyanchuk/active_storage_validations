@@ -43,6 +43,7 @@ ActiveRecord::Schema.define do
     content_type
     dimension
     duration
+    with_audio
     limit
     processable_file
     size
@@ -89,6 +90,7 @@ ActiveRecord::Schema.define do
     content_type
     dimension
     duration
+    with_audio
     processable_file
     pages
   ].each do |validator|
@@ -103,6 +105,7 @@ ActiveRecord::Schema.define do
     content_type
     dimension
     duration
+    with_audio
     processable_file
     pages
   ].each do |validator|
@@ -117,6 +120,7 @@ ActiveRecord::Schema.define do
     content_type
     dimension
     duration
+    with_audio
     processable_file
     size
     total_size

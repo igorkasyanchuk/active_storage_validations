@@ -9,6 +9,7 @@ RSpec.shared_examples "ASVErrorable" do
     when :content_type then html_file
     when :dimension then image_700x500_file
     when :duration then audio_5s
+    when :with_audio then video_file
     when :processable_file then tar_file_with_image_content_type
     when :size then file_5ko
     when :pages then pdf_7_pages_file

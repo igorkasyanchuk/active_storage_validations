@@ -1,5 +1,9 @@
 # Unreleased
 
+- 4.1.0
+  - **ADDED**
+    - Add `with_audio` validator and `validate_with_audio_of` matcher for requiring or forbidding an audio track in video files (https://github.com/igorkasyanchuk/active_storage_validations/issues/303). Use `with_audio: true` to require audio or `with_audio: { with: false }` to forbid it. Supports per-validator `timeout:` and matcher `#timeout`.
+
 # Released
 - 4.0.0
   - **BREAKING**

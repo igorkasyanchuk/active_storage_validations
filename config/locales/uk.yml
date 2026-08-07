@@ -55,6 +55,8 @@ uk:
       aspect_ratio_not_x_y: "повинен бути %{authorized_aspect_ratios} (поточний файл становить %{width}x%{height} пікселям)"
       aspect_ratio_invalid: "має недійсне співвідношення сторін (дійсні співвідношення сторін %{authorized_aspect_ratios})"
       file_not_processable: "не ідентифікується як дійсний медіа-файл"
+      audio_missing: "має містити аудіодоріжку"
+      audio_present: "не має містити аудіодоріжку"
       pages_not_less_than: "кількість сторінок має бути менше %{max} (поточна кількість сторінок %{pages})"
       pages_not_less_than_or_equal_to: "кількість сторінок має бути меншою або дорівнювати %{max} (поточна кількість сторінок становить %{pages})"
       pages_not_greater_than: "кількість сторінок має бути більшою за %{min} (поточна кількість сторінок становить %{pages})"
