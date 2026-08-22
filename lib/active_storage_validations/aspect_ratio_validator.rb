@@ -38,14 +38,19 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      flat_options = set_flat_options(record)
-      @authorized_aspect_ratios = authorized_aspect_ratios_from_options(flat_options).compact
-      return if @authorized_aspect_ratios.empty?
+      return if authorized_aspect_ratios(record).empty?
 
       validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
     end
 
     private
+
+    # Recomputed for every attachable rather than memoized on the validator:
+    # Active Model reuses one validator instance across records and threads, so
+    # per-validation state cannot live in an instance variable.
+    def authorized_aspect_ratios(record)
+      authorized_aspect_ratios_from_options(set_flat_options(record)).compact
+    end
 
     def is_valid?(record, attribute, attachable, metadata)
       media_metadata_present?(record, attribute, attachable, metadata) &&
@@ -53,7 +58,8 @@ module ActiveStorageValidations
     end
 
     def authorized_aspect_ratio?(record, attribute, attachable, metadata)
-      attachable_aspect_ratio_is_authorized = @authorized_aspect_ratios.any? do |authorized_aspect_ratio|
+      aspect_ratios = authorized_aspect_ratios(record)
+      attachable_aspect_ratio_is_authorized = aspect_ratios.any? do |authorized_aspect_ratio|
         case authorized_aspect_ratio
         when :square then valid_square_aspect_ratio?(metadata)
         when :portrait then valid_portrait_aspect_ratio?(metadata)
@@ -64,18 +70,18 @@ module ActiveStorageValidations
 
       return true if attachable_aspect_ratio_is_authorized
 
-      errors_options = initialize_and_populate_error_options(options, attachable)
+      errors_options = initialize_and_populate_error_options(options, attachable, aspect_ratios)
       errors_options[:width] = metadata[:width]
       errors_options[:height] = metadata[:height]
-      error_type = aspect_ratio_error_mapping
+      error_type = aspect_ratio_error_mapping(aspect_ratios)
       add_error(record, attribute, error_type, **errors_options)
       false
     end
 
-    def aspect_ratio_error_mapping
-      return :aspect_ratio_invalid if @authorized_aspect_ratios.many?
+    def aspect_ratio_error_mapping(aspect_ratios)
+      return :aspect_ratio_invalid if aspect_ratios.many?
 
-      aspect_ratio = @authorized_aspect_ratios.first
+      aspect_ratio = aspect_ratios.first
       NAMED_ASPECT_RATIOS.include?(aspect_ratio) ? :"aspect_ratio_not_#{aspect_ratio}" : :aspect_ratio_not_x_y
     end
 
@@ -86,9 +92,9 @@ module ActiveStorageValidations
       false
     end
 
-    def initialize_and_populate_error_options(options, attachable)
+    def initialize_and_populate_error_options(options, attachable, aspect_ratios)
       errors_options = initialize_error_options(options, attachable)
-      errors_options[:authorized_aspect_ratios] = string_aspect_ratios
+      errors_options[:authorized_aspect_ratios] = string_aspect_ratios(aspect_ratios)
       errors_options
     end
 
@@ -140,8 +146,8 @@ module ActiveStorageValidations
       (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in]))
     end
 
-    def string_aspect_ratios
-      @authorized_aspect_ratios.map do |aspect_ratio|
+    def string_aspect_ratios(aspect_ratios)
+      aspect_ratios.map do |aspect_ratio|
         if NAMED_ASPECT_RATIOS.include?(aspect_ratio)
           aspect_ratio
         else

@@ -24,6 +24,11 @@ module ActiveStorageValidations
     ].freeze
     METADATA_KEYS = %i[content_type].freeze
 
+    # State for a single attachable check. Active Model builds one validator per
+    # class and reuses it for every record and every thread, so this must travel
+    # through arguments rather than instance variables.
+    Context = Struct.new(:authorized_content_types, :content_type, :filename)
+
     def check_validity!
       ensure_exactly_one_validator_option
       ensure_content_types_validity
@@ -33,12 +38,12 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      @authorized_content_types = authorized_content_types_from_options(record)
-      return if @authorized_content_types.empty?
+      authorized_content_types = authorized_content_types_from_options(record)
+      return if authorized_content_types.empty?
 
       attachables_and_blobs(record, attribute).each do |attachable, blob|
-        set_attachable_cached_values(blob)
-        is_valid?(record, attribute, attachable, blob)
+        context = Context.new(authorized_content_types, blob.content_type, blob.filename.to_s)
+        is_valid?(record, attribute, attachable, blob, context)
       end
     end
 
@@ -55,47 +60,42 @@ module ActiveStorageValidations
       end
     end
 
-    def set_attachable_cached_values(blob)
-      @attachable_content_type = blob.content_type
-      @attachable_filename = blob.filename.to_s
-    end
-
     # Check if the provided content_type is authorized and not spoofed against
     # the file io.
-    def is_valid?(record, attribute, attachable, blob)
-      authorized_content_type?(record, attribute, attachable) &&
-        not_spoofing_content_type?(record, attribute, attachable, blob)
+    def is_valid?(record, attribute, attachable, blob, context)
+      authorized_content_type?(record, attribute, attachable, context) &&
+        not_spoofing_content_type?(record, attribute, attachable, blob, context)
     end
 
-    def authorized_content_type?(record, attribute, attachable)
-      attachable_content_type_is_authorized = @authorized_content_types.any? do |authorized_content_type|
+    def authorized_content_type?(record, attribute, attachable, context)
+      attachable_content_type_is_authorized = context.authorized_content_types.any? do |authorized_content_type|
         case authorized_content_type
-        when String then authorized_content_type == marcel_attachable_content_type(attachable)
-        when Regexp then authorized_content_type.match?(marcel_attachable_content_type(attachable).to_s)
+        when String then authorized_content_type == marcel_attachable_content_type(context)
+        when Regexp then authorized_content_type.match?(marcel_attachable_content_type(context).to_s)
         end
       end
 
       return true if attachable_content_type_is_authorized
 
-      add_content_type_invalid_error(record, attribute, attachable)
+      add_content_type_invalid_error(record, attribute, attachable, context)
     end
 
-    def marcel_attachable_content_type(attachable)
-      Marcel::MimeType.for(declared_type: @attachable_content_type, name: @attachable_filename)
+    def marcel_attachable_content_type(context)
+      Marcel::MimeType.for(declared_type: context.content_type, name: context.filename)
     end
 
-    def not_spoofing_content_type?(record, attribute, attachable, blob)
+    def not_spoofing_content_type?(record, attribute, attachable, blob, context)
       return true unless enable_spoofing_protection?
 
-      @detected_content_type = begin
+      detected_content_type = begin
         metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:content_type, nil)
       rescue ActiveStorage::FileNotFoundError
         add_attachment_missing_error(record, attribute, attachable)
         return false
       end
 
-      if attachable_content_type_vs_detected_content_type_mismatch?
-        add_content_type_spoofed_error(record, attribute, attachable, @detected_content_type)
+      if content_type_mismatch?(context.content_type, detected_content_type)
+        add_content_type_spoofed_error(record, attribute, attachable, context, detected_content_type)
       else
         true
       end
@@ -123,14 +123,14 @@ module ActiveStorageValidations
       ERROR_MESSAGE
     end
 
-    def attachable_content_type_vs_detected_content_type_mismatch?
-      @attachable_content_type.present? &&
-        !attachable_content_type_intersects_detected_content_type?
+    def content_type_mismatch?(attachable_content_type, detected_content_type)
+      attachable_content_type.present? &&
+        !content_types_intersect?(attachable_content_type, detected_content_type)
     end
 
-    def attachable_content_type_intersects_detected_content_type?
-      enlarged_content_type(content_type_without_parameters(@attachable_content_type)).intersect?(
-        enlarged_content_type(content_type_without_parameters(@detected_content_type))
+    def content_types_intersect?(attachable_content_type, detected_content_type)
+      enlarged_content_type(content_type_without_parameters(attachable_content_type)).intersect?(
+        enlarged_content_type(content_type_without_parameters(detected_content_type))
       )
     end
 
@@ -142,26 +142,26 @@ module ActiveStorageValidations
       Marcel::TYPE_PARENTS[content_type] || []
     end
 
-    def add_content_type_invalid_error(record, attribute, attachable)
-      errors_options = initialize_and_populate_error_options(options, attachable)
+    def add_content_type_invalid_error(record, attribute, attachable, context)
+      errors_options = initialize_and_populate_error_options(options, attachable, context)
       add_error(record, attribute, ERROR_TYPES.first, **errors_options)
       false
     end
 
-    def add_content_type_spoofed_error(record, attribute, attachable, detected_content_type)
-      errors_options = initialize_and_populate_error_options(options, attachable)
-      errors_options[:detected_content_type] = @detected_content_type
-      errors_options[:detected_human_content_type] = content_type_to_human_format(@detected_content_type)
+    def add_content_type_spoofed_error(record, attribute, attachable, context, detected_content_type)
+      errors_options = initialize_and_populate_error_options(options, attachable, context)
+      errors_options[:detected_content_type] = detected_content_type
+      errors_options[:detected_human_content_type] = content_type_to_human_format(detected_content_type)
       add_error(record, attribute, ERROR_TYPES.second, **errors_options)
       false
     end
 
-    def initialize_and_populate_error_options(options, attachable)
+    def initialize_and_populate_error_options(options, attachable, context)
       errors_options = initialize_error_options(options, attachable)
-      errors_options[:content_type] = @attachable_content_type
-      errors_options[:human_content_type] = content_type_to_human_format(@attachable_content_type)
-      errors_options[:authorized_human_content_types] = content_type_to_human_format(@authorized_content_types)
-      errors_options[:count] = @authorized_content_types.size
+      errors_options[:content_type] = context.content_type
+      errors_options[:human_content_type] = content_type_to_human_format(context.content_type)
+      errors_options[:authorized_human_content_types] = content_type_to_human_format(context.authorized_content_types)
+      errors_options[:count] = context.authorized_content_types.size
       errors_options
     end
 
