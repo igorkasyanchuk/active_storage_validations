@@ -7,6 +7,7 @@
 - **MISC**
   - Add a locale key / interpolation contract spec; include `ru` in `I18n.available_locales`
   - Clarify why `file_field` skips Proc `content_type` options when inferring the HTML `accept` attribute
+  - Document the `analyze.active_storage_validations` notification alongside `timeout.active_storage_validations`
 
 # Released
 - 4.1.0

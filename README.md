@@ -114,7 +114,20 @@ end
 #   event = ActiveSupport::Notifications::Event.new(*args)
 #   Rails.logger.warn("[ASV] command timeout: #{event.payload}")
 # end
+
+# Optional: monitor how long metadata / content type analysis takes
+# ActiveSupport::Notifications.subscribe("analyze.active_storage_validations") do |*args|
+#   event = ActiveSupport::Notifications::Event.new(*args)
+#   Rails.logger.info("[ASV] analyzed: #{event.payload}")
+# end
 ```
+
+The gem emits two `ActiveSupport::Notifications` events:
+
+| Event | Payload | Emitted |
+|---|---|---|
+| `analyze.active_storage_validations` | `analyzer`, `command`, `timeout`, `timed_out`, `duration` | Every time an analyzer command runs (i.e. on a cache miss) |
+| `timeout.active_storage_validations` | `analyzer`, `command`, `timeout` | Only when a command exceeds its deadline |
 
 `command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `with_audio`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection`). When a command times out, analysis fails closed and the validator adds its usual error (`file_not_processable` / `media_metadata_missing` / `audio_missing` / content-type errors) — there is no separate timeout error message.
 
