@@ -190,6 +190,7 @@ ActiveRecord::Schema.define do
     based_on_a_file_property
     performance
     nested_error_parent
+    spoofing_protection_and_processable_file
     zero_byte_image
   ].each do |integration_test|
     create_table :"integration_validator_#{integration_test.pluralize}", force: :cascade do |t|

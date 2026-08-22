@@ -15,6 +15,16 @@ def image_150x150_file
 end
 alias :square_image_file :image_150x150_file
 
+# A PNG cut short after its header: the magic bytes still identify it as a PNG,
+# but no image processor can decode it.
+def image_150x150_truncated_file
+  {
+    io: File.open(Rails.root.join("public", "image_150x150_truncated.png")),
+    filename: "image_150x150_truncated.png",
+    content_type: "image/png"
+  }
+end
+
 def image_500x500_file
   {
     io: File.open(Rails.root.join("public", "image_500x500.png")),

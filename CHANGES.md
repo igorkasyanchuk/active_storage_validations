@@ -5,6 +5,7 @@
   - Fix `filename` error option for `UploadedFile` / `File` / `Pathname` attachables
   - Fix `with_audio` rejecting audio files: the audio analyzer now reports an `audio` metadata key, so `with_audio` works on audio attachments and not only on videos
   - Fix metadata analysis running again on every validation when the analyzer cannot extract the requested key (e.g. `duration` on an image). Unavailable metadata is now memoized on the blob, so those files are analyzed once. Files that yield no metadata at all (missing command-line tool, timed out command, unreadable file) are still retried
+  - Fix `processable_file` accepting unprocessable files when `content_type` with `spoofing_protection` was declared on the same attribute. The cached `asv_content_type` counted as a successful analysis, so the media analyzer never ran. Content-type keys are no longer visible to the metadata validators
 - **MISC**
   - Add a locale key / interpolation contract spec; include `ru` in `I18n.available_locales`
   - Clarify why `file_field` skips Proc `content_type` options when inferring the HTML `accept` attribute

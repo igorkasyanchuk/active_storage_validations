@@ -26,6 +26,43 @@ RSpec.describe "Integration tests" do
     end
   end
 
+  describe "spoofing protection and processable file" do
+    let(:model) { integration_test_class::SpoofingProtectionAndProcessableFile.new(params) }
+
+    context "when the content_type validator cached its analysis before the processable_file one" do
+      subject(:record) { model.spoofing_protection_first.attach(image_150x150_truncated_file) and model }
+
+      let(:error_options) do
+        {
+          filename: image_150x150_truncated_file[:filename]
+        }
+      end
+
+      it { is_expected_not_to_be_valid }
+      it { is_expected_to_include_error_message("file_not_processable", error_options: error_options, validator: :processable_file) }
+
+      it "does not let the cached content_type stand in for a media analysis" do
+        record.valid?
+
+        expect(record.spoofing_protection_first.blob.active_storage_validations_metadata)
+          .to eq({ "content_type" => "image/png", "content_type_backend" => "file" })
+      end
+    end
+
+    context "when the processable_file validator runs before the content_type one" do
+      subject(:record) { model.processable_file_first.attach(image_150x150_truncated_file) and model }
+
+      let(:error_options) do
+        {
+          filename: image_150x150_truncated_file[:filename]
+        }
+      end
+
+      it { is_expected_not_to_be_valid }
+      it { is_expected_to_include_error_message("file_not_processable", error_options: error_options, validator: :processable_file) }
+    end
+  end
+
   describe "based on a file property" do
     let(:model) { integration_test_class::BasedOnAFileProperty.new(params) }
 
