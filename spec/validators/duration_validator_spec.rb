@@ -201,6 +201,28 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
     end
 
     it_behaves_like "is performance optimized"
+
+    context "when the analyzer cannot extract the requested metadata" do
+      subject(:model) { Duration::Validator::IsPerformanceOptimized.new }
+
+      before { model.is_performance_optimized.attach(pdf_150x150_file) }
+
+      it "memoizes the unavailable duration on the blob" do
+        model.valid?
+
+        expect(model.is_performance_optimized.blob.active_storage_validations_metadata).to include(duration: "")
+      end
+
+      it "does not analyze the file again on the next validation" do
+        analyzer = instance_double(ActiveStorageValidations::Analyzer::PdfAnalyzer)
+        allow(ActiveStorageValidations::Analyzer::PdfAnalyzer).to receive(:new).and_return(analyzer)
+        allow(analyzer).to receive(:metadata).and_return({ width: 150, height: 150, pages: 1 })
+
+        2.times { model.valid? }
+
+        expect(analyzer).to have_received(:metadata).once
+      end
+    end
   end
 
   describe "Rails options" do

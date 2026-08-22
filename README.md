@@ -176,6 +176,8 @@ Some validators rely on an expensive operation (metadata analysis and content ty
 
 As stated in the Rails documentation: "Blobs are intended to be immutable in so far as their reference to a specific file goes". We based our performance optimization on the same assumption, so if you do not follow it, the gem will not work as expected.
 
+This also covers metadata the analyzer cannot extract from a given file (e.g. a `duration` validation on an image): the gem remembers that the value is unavailable, so the validation keeps failing with `media_metadata_missing` but the file is only analyzed once. Files that yield no metadata at all — missing command-line tool, [timed out](#configuration) command, unreadable file — are not remembered and get analyzed again on the next validation.
+
 ---
 
 ### Attached

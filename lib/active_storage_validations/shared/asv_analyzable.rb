@@ -24,10 +24,30 @@ module ActiveStorageValidations
       return blob.active_storage_validations_metadata if blob_has_asv_metadata?(blob, metadata_keys)
 
       new_metadata = generate_metadata_for(attachable, metadata_keys) || {}
-      blob.merge_into_active_storage_validations_metadata(new_metadata)
+      blob.merge_into_active_storage_validations_metadata(memoize_unavailable_keys(new_metadata, metadata_keys))
       blob.save!
 
       blob.active_storage_validations_metadata
+    end
+
+    # Analyzers only return the keys they could extract, so a requested key the
+    # analyzer cannot produce for this file (e.g. :duration for an image) would
+    # never be cached and the expensive analysis would run again on every
+    # validation. Store those keys as blank to memoize the miss: the validator
+    # still sees no usable value and adds its usual error, but only analyzes once.
+    #
+    # An entirely empty result means no analysis happened at all — missing CLI,
+    # timed out command, unreadable file — so it is left unmemoized and retried
+    # on the next validation.
+    #
+    # Teaching an existing analyzer a new metadata key therefore requires
+    # clearing the misses memoized by previous versions of the gem, see
+    # ASVBlobMetadatable#remove_active_storage_validations_metadata!.
+    def memoize_unavailable_keys(new_metadata, metadata_keys)
+      return new_metadata if new_metadata.blank?
+
+      unavailable_keys = metadata_keys.reject { |key| new_metadata.key?(key) }
+      new_metadata.merge(unavailable_keys.index_with(nil))
     end
 
     def content_type_metadata_keys?(metadata_keys)
