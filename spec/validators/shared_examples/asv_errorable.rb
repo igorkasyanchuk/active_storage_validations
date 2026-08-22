@@ -15,12 +15,113 @@ RSpec.shared_examples "ASVErrorable" do
     when :pages then pdf_7_pages_file
     end
   end
-  let(:error_options) { { filename: file_not_matching_requirements[:filename] } }
+  let(:source_path) { file_not_matching_requirements[:io].path }
+  let(:declared_filename) { file_not_matching_requirements[:filename] }
+  let(:path_filename) { File.basename(source_path) }
+  let(:error_options) { { filename: expected_filename } }
 
-  context "when passed a file not matching validation requirements" do
-    before { subject.asv_errorable.attach(file_not_matching_requirements) }
+  # As stated in ActiveStorage documentation, attachables can either be a:
+  #   ActiveStorage::Blob object
+  #   ActionDispatch::Http::UploadedFile object
+  #   Rack::Test::UploadedFile object
+  #   Hash object representing the io / filename / content_type
+  #   String object representing the signed reference to blob
+  #   File object
+  #   Pathname object
+
+  describe "Hash object representing the io / filename / content_type" do
+    before { model.asv_errorable.attach(attachable) }
+
+    let(:attachable) { file_not_matching_requirements }
+    let(:expected_filename) { declared_filename }
 
     it { is_expected_not_to_be_valid(context: :create) }
     it { is_expected_to_have_error_options(error_options, context: :create) }
+  end
+
+  describe "ActionDispatch::Http::UploadedFile object" do
+    before { model.asv_errorable.attach(attachable) }
+
+    let(:attachable) { uploaded_file_from(file_not_matching_requirements) }
+    let(:expected_filename) { declared_filename }
+
+    it { is_expected_not_to_be_valid(context: :create) }
+    it { is_expected_to_have_error_options(error_options, context: :create) }
+  end
+
+  describe "Rack::Test::UploadedFile object" do
+    before { model.asv_errorable.attach(attachable) }
+
+    let(:attachable) { Rack::Test::UploadedFile.new(source_path, file_not_matching_requirements[:content_type]) }
+    let(:expected_filename) { path_filename }
+
+    it { is_expected_not_to_be_valid(context: :create) }
+    it { is_expected_to_have_error_options(error_options, context: :create) }
+  end
+
+  describe "ActiveStorage::Blob object" do
+    before { model.asv_errorable.attach(attachable) }
+
+    let(:attachable) { create_blob_from_file(file_not_matching_requirements) }
+    let(:expected_filename) { declared_filename }
+
+    it { is_expected_not_to_be_valid(context: :create) }
+    it { is_expected_to_have_error_options(error_options, context: :create) }
+  end
+
+  describe "String object representing the signed reference to blob" do
+    before { model.asv_errorable.attach(attachable) }
+
+    let(:attachable) { create_blob_from_file(file_not_matching_requirements).signed_id }
+    let(:expected_filename) { declared_filename }
+
+    it { is_expected_not_to_be_valid(context: :create) }
+    it { is_expected_to_have_error_options(error_options, context: :create) }
+  end
+
+  describe "File object" do
+    let(:attachable) { File.open(source_path) }
+    let(:expected_filename) { path_filename }
+
+    if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
+      before { model.asv_errorable.attach(attachable) }
+
+      it { is_expected_not_to_be_valid(context: :create) }
+      it { is_expected_to_have_error_options(error_options, context: :create) }
+    else
+      it "raises Rails' attachable error" do
+        expect { model.asv_errorable.attach(attachable) }.to raise_error(ArgumentError, /Could not find or build blob/)
+      end
+    end
+  end
+
+  describe "Pathname object" do
+    let(:attachable) { Pathname.new(source_path) }
+    let(:expected_filename) { path_filename }
+
+    if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
+      before { model.asv_errorable.attach(attachable) }
+
+      it { is_expected_not_to_be_valid(context: :create) }
+      it { is_expected_to_have_error_options(error_options, context: :create) }
+    else
+      it "raises Rails' attachable error" do
+        expect { model.asv_errorable.attach(attachable) }.to raise_error(ArgumentError, /Could not find or build blob/)
+      end
+    end
+  end
+
+  def uploaded_file_from(hash)
+    tempfile = Tempfile.new
+    tempfile.binmode
+    IO.copy_stream(hash[:io], tempfile)
+    hash[:io].rewind
+    tempfile.rewind
+
+    ActionDispatch::Http::UploadedFile.new(
+      tempfile: tempfile,
+      filename: hash[:filename],
+      type: hash[:content_type]
+    )
   end
 end

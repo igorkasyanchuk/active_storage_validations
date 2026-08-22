@@ -2,6 +2,7 @@
 
 - **FIXED**
   - Fix Swedish `aspect_ratio` interpolation placeholders (`authorized_aspect_ratios`)
+  - Fix `filename` error option for `UploadedFile` / `File` / `Pathname` attachables
 - **MISC**
   - Add a locale key / interpolation contract spec; include `ru` in `I18n.available_locales`
 
