@@ -319,7 +319,8 @@ ActiveStorageValidations.configure { |config| config.infer_file_field_accept = f
 
 Notes:
 - Only broad MIME-type regexes of the form `/\Aimage\/.*\z/` (or `video` / `audio` / etc.) are inferred, as `image/*`
-- Other regexes (e.g. `/\Aimage\/(png|gif)\z/`) and Proc / dynamic `content_type` options are skipped, since they cannot be reliably represented in `accept`
+- Other regexes (e.g. `/\Aimage\/(png|gif)\z/`) are skipped, since they cannot be reliably represented in `accept`
+- Proc / dynamic `content_type` options are skipped: they are not called while the form renders, because their result can depend on record state that is only set on submit, and a raising proc would break the whole view for what is merely a frontend hint. Backend validation is unchanged; pass a custom `accept:` on those fields if you want the picker filtered
 - Conditional validators (`if:` / `unless:`) are not evaluated: their content types are always included in `accept`, even when the condition would skip the validator for that record. Backend validation is unchanged; use `infer_accept: false` (or a custom `accept:`) if the picker must match the active conditions
 
 #### Content type shorthands

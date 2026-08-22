@@ -5,6 +5,7 @@
   - Fix `filename` error option for `UploadedFile` / `File` / `Pathname` attachables
 - **MISC**
   - Add a locale key / interpolation contract spec; include `ru` in `I18n.available_locales`
+  - Clarify why `file_field` skips Proc `content_type` options when inferring the HTML `accept` attribute
 
 # Released
 - 4.1.0
