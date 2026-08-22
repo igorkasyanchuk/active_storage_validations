@@ -148,7 +148,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 - Shared modules are prefixed `ASV*`
 - Validators define `ERROR_TYPES` (and often `METADATA_KEYS`); add errors through `ASVErrorable#add_error`
 - Comparison validators inherit `BaseComparisonValidator` — prefer extending that over duplicating option parsing
-- New / changed I18n keys must be updated in **every** file under `config/locales/`
+- New / changed I18n keys must be updated in **every** file under `config/locales/` (`spec/global/locales_spec.rb` asserts keys and English interpolation placeholders)
 - User-facing changes: update `README.md` and add an entry under Unreleased in `CHANGES.md`
 - Breaking changes: also add/update `docs/upgrade_to_X.md`
 - Spec conventions: see `.cursor/rules/spec-*.mdc` (validators, matchers, analyzers, integration)

@@ -2,6 +2,8 @@
 
 - **FIXED**
   - Fix Swedish `aspect_ratio` interpolation placeholders (`authorized_aspect_ratios`)
+- **MISC**
+  - Add a locale key / interpolation contract spec; include `ru` in `I18n.available_locales`
 
 # Released
 - 4.1.0
