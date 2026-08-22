@@ -5,7 +5,6 @@ def bad_dummy_file
     content_type: "text/plain"
   }
 end
-alias :extension_content_type_mismatch_file :bad_dummy_file
 
 def image_150x150_file
   {

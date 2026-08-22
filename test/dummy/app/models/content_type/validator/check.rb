@@ -21,17 +21,6 @@ class ContentType::Validator::Check < ApplicationRecord
     end
   end
 
-  has_one_attached :extension_content_type_mismatch
-  validates :extension_content_type_mismatch, content_type: :png
-  has_one_attached :extension_two_extensions_docx
-  validates :extension_two_extensions_docx, content_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  has_one_attached :extension_two_extensions_pdf
-  validates :extension_two_extensions_pdf, content_type: "application/pdf"
-  has_one_attached :extension_upcase_extension
-  validates :extension_upcase_extension, content_type: "application/pdf"
-  has_one_attached :extension_missing_extension
-  validates :extension_missing_extension, content_type: "application/pdf"
-
   %w[symbol string regex].each do |type|
     has_one_attached :"with_#{type}"
     has_one_attached :"with_#{type}_proc"
