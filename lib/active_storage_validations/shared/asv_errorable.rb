@@ -17,9 +17,9 @@ module ActiveStorageValidations
       curated_options.merge(active_storage_validations_options)
     end
 
+    # Every offending file gets its own error, so a has_many_attached relation
+    # reports each invalid filename rather than only the first one.
     def add_error(record, attribute, error_type, **errors_options)
-      return if record.errors.added?(attribute, error_type)
-
       # You can read https://api.rubyonrails.org/classes/ActiveModel/Errors.html#method-i-add
       # to better understand how Rails model errors work
       record.errors.add(attribute, error_type, **errors_options)
