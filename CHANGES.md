@@ -1,5 +1,8 @@
 # Unreleased
 
+- **FIXED**
+  - Fix Swedish `aspect_ratio` interpolation placeholders (`authorized_aspect_ratios`)
+
 # Released
 - 4.1.0
   - **ADDED**
