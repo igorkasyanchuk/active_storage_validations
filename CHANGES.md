@@ -6,6 +6,7 @@
   - Fix `with_audio` rejecting audio files: the audio analyzer now reports an `audio` metadata key, so `with_audio` works on audio attachments and not only on videos
   - Fix metadata analysis running again on every validation when the analyzer cannot extract the requested key (e.g. `duration` on an image). Unavailable metadata is now memoized on the blob, so those files are analyzed once. Files that yield no metadata at all (missing command-line tool, timed out command, unreadable file) are still retried
   - Fix `processable_file` accepting unprocessable files when `content_type` with `spoofing_protection` was declared on the same attribute. The cached `asv_content_type` counted as a successful analysis, so the media analyzer never ran. Content-type keys are no longer visible to the metadata validators
+  - Fix `duration` rejecting media shorter than one second. The guard meant to catch unreadable metadata truncated the duration to an integer, so a 0.5s file reported `media_metadata_missing` instead of being compared against the bounds
   - Fix `content_type` and `aspect_ratio` keeping per-validation state on the validator instance. Active Model reuses one validator per class across threads, so concurrent validations could report another record's content type or aspect ratio — and, with `spoofing_protection`, compare a file against another file's detected type
 - **MISC**
   - Add a locale key / interpolation contract spec; include `ru` in `I18n.available_locales`

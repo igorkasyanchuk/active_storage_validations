@@ -30,7 +30,9 @@ module ActiveStorageValidations
           next
         end
 
-        if duration.to_i <= 0
+        # to_f, not to_i: durations are floats, and truncating would treat any
+        # file shorter than a second as unanalyzable.
+        if duration.to_f <= 0
           add_media_metadata_missing_error(record, attribute, attachable)
           next
         end

@@ -302,6 +302,14 @@ def audio_file
 end
 alias :audio_1s :audio_file
 
+def audio_0_5s
+  {
+    io: File.open(Rails.root.join("public", "audio_0_5s.mp3")),
+    filename: "audio_0_5s",
+    content_type: "audio/mp3"
+  }
+end
+
 def audio_2s
   {
     io: File.open(Rails.root.join("public", "audio_2s.mp3")),

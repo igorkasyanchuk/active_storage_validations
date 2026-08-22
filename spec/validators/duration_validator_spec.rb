@@ -182,6 +182,26 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
         it { is_expected_to_have_error_options(error_options) }
       end
 
+      context "when the passed file lasts less than a second" do
+        # validates :less_than, duration: { less_than: 2.seconds }
+        subject(:record) { model.less_than.attach(audio_0_5s) and model }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when a file lasting less than a second breaks the constraint" do
+        # validates :greater_than, duration: { greater_than: 7.seconds }
+        subject(:record) { model.greater_than.attach(audio_0_5s) and model }
+
+        it { is_expected_not_to_be_valid }
+
+        it "reports a duration error rather than unreadable metadata" do
+          record.valid?
+
+          expect(record.errors.map(&:type)).to eq([ :duration_not_greater_than ])
+        end
+      end
+
       describe "when the attached file is missing from storage" do
         let(:attribute) { :less_than }
         let(:file_for_attachment_missing) { audio_1s }
