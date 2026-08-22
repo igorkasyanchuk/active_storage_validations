@@ -27,11 +27,17 @@ module ActiveStorageValidations
 
     def is_valid?(record, attribute, attachable, metadata)
       expected_audio = options.fetch(:with, true)
-      return if metadata&.fetch(:audio, false) == expected_audio
+      return if audio_track?(metadata) == expected_audio
 
       errors_options = initialize_error_options(options, attachable)
       error_type = expected_audio ? :audio_missing : :audio_present
       add_error(record, attribute, error_type, **errors_options)
+    end
+
+    # Files the analyzer cannot inspect for audio streams (images, pdfs) have no
+    # audio metadata, or a memoized unavailable value. Both mean no audio track.
+    def audio_track?(metadata)
+      metadata&.fetch(:audio, false) == true
     end
   end
 end

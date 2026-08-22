@@ -141,7 +141,7 @@ Notes:
 - [Total size](#total-size): validates total file size for several files
 - [Dimension](#dimension): validates image / video dimensions
 - [Duration](#duration): validates video / audio duration
-- [With audio](#with-audio): validates whether a video contains an audio track
+- [With audio](#with-audio): validates whether a video / audio file contains an audio track
 - [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
 - [Processable file](#processable-file): validates if a file can be processed
 - [Pages](#pages): validates pdf number of pages
@@ -649,7 +649,7 @@ The `duration` validator error messages expose 4 values that you can use:
 
 ### With audio
 
-Validates whether attached video files contain an audio track.
+Validates whether attached video / audio files contain an audio track.
 (be sure to have the right dependencies installed as mentioned in [Using video and audio metadata validators](#using-video-and-audio-metadata-validators))
 
 #### Options
@@ -672,7 +672,9 @@ class User < ApplicationRecord
 end
 ```
 
-Rails treats a bare `with_audio: false` as a disabled validator. Use the hash form `with_audio: { with: false }` to reject videos that contain audio.
+Rails treats a bare `with_audio: false` as a disabled validator. Use the hash form `with_audio: { with: false }` to reject files that contain audio.
+
+Files that cannot contain an audio stream at all (images, pdfs) are treated as having no audio track: they fail `with_audio: true` and pass `with_audio: { with: false }`.
 
 #### Error messages (I18n)
 

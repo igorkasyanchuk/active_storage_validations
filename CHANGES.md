@@ -3,6 +3,7 @@
 - **FIXED**
   - Fix Swedish `aspect_ratio` interpolation placeholders (`authorized_aspect_ratios`)
   - Fix `filename` error option for `UploadedFile` / `File` / `Pathname` attachables
+  - Fix `with_audio` rejecting audio files: the audio analyzer now reports an `audio` metadata key, so `with_audio` works on audio attachments and not only on videos
 - **MISC**
   - Add a locale key / interpolation contract spec; include `ru` in `I18n.available_locales`
   - Clarify why `file_field` skips Proc `content_type` options when inferring the HTML `accept` attribute

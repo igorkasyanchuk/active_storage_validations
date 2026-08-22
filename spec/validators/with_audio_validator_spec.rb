@@ -46,9 +46,39 @@ RSpec.describe ActiveStorageValidations::WithAudioValidator do
       end
     end
 
+    context "when an audio file is attached" do
+      subject(:record) { model.video.attach(audio_5s) and model }
+
+      it { is_expected_to_be_valid }
+    end
+
+    context "when a file without any audio stream is attached" do
+      subject(:record) { model.video.attach(image_150x150_file) and model }
+
+      let(:error_options) { { filename: image_150x150_file[:filename] } }
+
+      it { is_expected_not_to_be_valid }
+      it { is_expected_to_include_error_message("audio_missing", error_options: error_options) }
+    end
+
     context "when audio is forbidden" do
       context "when the video has no audio track" do
         subject(:record) { model.silent_video.attach(video_file) and model }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when an audio file is attached" do
+        subject(:record) { model.silent_video.attach(audio_5s) and model }
+
+        let(:error_options) { { filename: "audio_5s" } }
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("audio_present", error_options: error_options) }
+      end
+
+      context "when a file without any audio stream is attached" do
+        subject(:record) { model.silent_video.attach(image_150x150_file) and model }
 
         it { is_expected_to_be_valid }
       end

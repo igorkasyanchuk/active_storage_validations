@@ -10,12 +10,13 @@ module ActiveStorageValidations
   # * Duration (seconds)
   # * Bit rate (bits/s)
   # * Sample rate (hertz)
+  # * Audio (true if file has an audio channel, false if not)
   # * Tags (internal metadata)
   #
   # Example:
   #
   #   ActiveStorageValidations::Analyzer::AudioAnalyzer.new(attachable).metadata
-  #   # => { duration: 5.0, bit_rate: 320340, sample_rate: 44100, tags: { encoder: "Lavc57.64", ... } }
+  #   # => { duration: 5.0, bit_rate: 320340, sample_rate: 44100, audio: true, tags: { encoder: "Lavc57.64", ... } }
   #
   # This analyzer requires the {FFmpeg}[https://www.ffmpeg.org] system library, which is not provided by \Rails.
   class Analyzer::AudioAnalyzer < Analyzer
@@ -27,12 +28,17 @@ module ActiveStorageValidations
           duration: duration,
           bit_rate: bit_rate,
           sample_rate: sample_rate,
+          audio: audio?,
           tags: tags
         }.compact
       end
     end
 
     private
+
+    def audio?
+      audio_stream.present?
+    end
 
     def duration
       duration = audio_stream["duration"]
