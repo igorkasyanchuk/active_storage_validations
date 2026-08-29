@@ -19,8 +19,6 @@ This gem is doing it right for you! Just use `validates :avatar, attached: true,
   - [Installation](#installation)
   - [Error messages (I18n)](#error-messages-i18n)
   - [Using image metadata validators](#using-image-metadata-validators)
-  - [Using video and audio metadata validators](#using-video-and-audio-metadata-validators)
-  - [Using pdf metadata validators](#using-pdf-metadata-validators)
   - [Using content type spoofing protection validator option](#using-content-type-spoofing-protection-validator-option)
   - [Configuration](#configuration)
 - [Validators](#validators)
@@ -63,25 +61,16 @@ Once you have installed the gem, I18n error messages will be added automatically
 
 ### Using image metadata validators
 
-Optionally, to use the image metadata validators (`dimension`, `aspect_ratio` and `processable_file`), you will have to add one of the corresponding gems:
+The following table shows the additional dependencies required by each metadata validator:
 
-```ruby
-gem 'ruby-vips', '>= 2.1.0'
-# Or
-gem 'mini_magick', '>= 4.9.5'
-```
+| Use | Validator | Ruby gem | OS package / command |
+| --- | --- | --- | --- |
+| Image dimensions and aspect ratios | `dimension`, `aspect_ratio` | `ruby-vips` or `mini_magick` | `libvips` or ImageMagick |
+| Image processing check | `processable_file` | Selected image backend | `libvips` or ImageMagick |
+| Video and audio metadata | `dimension`, `aspect_ratio`, `duration`, `with_audio`, `processable_file` | None | `ffmpeg` |
+| PDF metadata | `dimension`, `aspect_ratio`, `pages`, `processable_file` | None | `poppler` |
 
-Plus, you have to be sure to have the corresponding command-line tool installed on your system (`libvips` for `ruby-vips`, or ImageMagick for `mini_magick` — both locally and in CI / production).
-
-We recommend **libvips** (`ruby-vips` + `config.active_storage.variant_processor = :vips`) for these validators. Rails already defaults Active Storage variants to libvips ([`ActiveStorage::Variant`](https://api.rubyonrails.org/classes/ActiveStorage/Variant.html)), and our [image processor benchmarks](benchmark/BASELINE.md#image-processors--vips-vs-mini_magick) show cold metadata analysis is about **8× faster** than MiniMagick/ImageMagick on the same machine and fixtures. Warm validations (cached `asv_*` metadata) are similar for both.
-
-### Using video and audio metadata validators
-
-To use the video and audio metadata validators (`dimension`, `aspect_ratio`, `processable_file`, `duration` and `with_audio`), you will not need to add any gems. However you will need to have the `ffmpeg` command-line tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
-
-### Using pdf metadata validators
-
-To use the pdf metadata validators (`dimension`, `aspect_ratio`, `processable_file` and `pages`), you will not need to add any gems. However you will need to have the `poppler` tool installed on your system (once again, be sure to have it installed both on your local and in your CI / production environments).
+The `attached`, `limit`, `content_type`, `size`, and `total_size` validators do not require an image-processing gem or image-processing OS package.
 
 ### Using content type spoofing protection validator option
 
@@ -91,8 +80,6 @@ To use the `spoofing_protection` option with the `content_type` validator:
 - Magika backend (`:magika`): the [Google Magika](https://github.com/google/magika) CLI — install via `brew install magika`, their [install script](https://securityresearch.google/magika/getting-started/installation/), `cargo install --locked magika-cli`, or `pipx install magika`
 
 Both backends are optional system tools (not Ruby gems). Prefer `:magika` when you can install the CLI — it is generally more accurate than `file`, especially on textual / ambiguous formats. Be sure to install Magika in CI / production if you enable `:magika`.
-
-If you want some inspiration about how to add `imagemagick`, `libvips`, `ffmpeg`, `poppler` or `magika` to your docker image, you can check how we do it for the gem CI (https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml)
 
 ### Configuration
 
@@ -543,8 +530,6 @@ The `total_size` validator error messages expose 4 values that you can use:
 
 Validates the dimension of the attached image / video files.
 It can also be used for pdf files, but it will only analyze the pdf first page, and will assume a DPI of 72.
-(be sure to have the right dependencies installed as mentioned in [Getting started](#getting-started))
-
 #### Options
 
 The `dimension` validator has several possible options:
@@ -609,8 +594,6 @@ The `dimension` validator error messages expose 6 values that you can use:
 ### Duration
 
 Validates the duration of the attached audio / video files.
-(be sure to have the right dependencies installed as mentioned in [Using video and audio metadata validators](#using-video-and-audio-metadata-validators))
-
 #### Options
 
 The `duration` validator has several possible options:
@@ -665,8 +648,6 @@ The `duration` validator error messages expose 4 values that you can use:
 ### With audio
 
 Validates whether attached video / audio files contain an audio track.
-(be sure to have the right dependencies installed as mentioned in [Using video and audio metadata validators](#using-video-and-audio-metadata-validators))
-
 #### Options
 
 The `with_audio` validator supports:
@@ -709,8 +690,6 @@ The `with_audio` validator error message exposes the `filename` value containing
 
 Validates the aspect ratio of the attached image / video files.
 It can also be used for pdf files, but it will only analyze the pdf first page.
-(be sure to have the right dependencies installed as mentioned in [Getting started](#getting-started))
-
 #### Options
 
 The `aspect_ratio` validator has several options:
@@ -763,8 +742,6 @@ The `aspect_ratio` validator error messages expose 4 values that you can use:
 ### Processable file
 
 Validates if the attached files can be processed by MiniMagick or Vips (image), ffmpeg (video/audio) or poppler (pdf).
-(be sure to have the right dependencies installed as mentioned in [Getting started](#getting-started))
-
 #### Options
 
 The `processable_file` validator supports:
@@ -803,8 +780,6 @@ The `processable_file` validator error messages expose 1 value that you can use:
 ### Pages
 
 Validates each attached pdf file number of pages.
-(be sure to have the right dependencies installed as mentioned in [Using pdf metadata validators](#using-pdf-metadata-validators))
-
 #### Options
 
 The `pages` validator has several possible options:
