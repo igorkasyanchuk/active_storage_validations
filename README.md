@@ -65,12 +65,16 @@ The following table shows the additional dependencies required by each metadata 
 
 | Use | Validator | Ruby gem | OS package / command |
 | --- | --- | --- | --- |
-| Image dimensions and aspect ratios | `dimension`, `aspect_ratio` | `ruby-vips` or `mini_magick` | `libvips` or ImageMagick |
+| Image dimensions and aspect ratios | `dimension`, `aspect_ratio` | `ruby-vips` (`>= 2.1.0`) or `mini_magick` (`>= 4.9.5`) | `libvips` or ImageMagick |
 | Image processing check | `processable_file` | Selected image backend | `libvips` or ImageMagick |
 | Video and audio metadata | `dimension`, `aspect_ratio`, `duration`, `with_audio`, `processable_file` | None | `ffmpeg` |
 | PDF metadata | `dimension`, `aspect_ratio`, `pages`, `processable_file` | None | `poppler` |
 
 The `attached`, `limit`, `content_type`, `size`, and `total_size` validators do not require an image-processing gem or image-processing OS package.
+
+We recommend **libvips** (`ruby-vips` + `config.active_storage.variant_processor = :vips`) for image metadata validators. Rails already defaults Active Storage variants to libvips ([`ActiveStorage::Variant`](https://api.rubyonrails.org/classes/ActiveStorage/Variant.html)), and our [image processor benchmarks](benchmark/BASELINE.md#image-processors--vips-vs-mini_magick) show cold metadata analysis is about **8× faster** than MiniMagick/ImageMagick on the same machine and fixtures. Warm validations (cached `asv_*` metadata) are similar for both.
+
+For examples of installing these OS dependencies in CI, see [the gem's CI configuration](https://github.com/igorkasyanchuk/active_storage_validations/blob/master/.github/workflows/main.yml).
 
 ### Using content type spoofing protection validator option
 
