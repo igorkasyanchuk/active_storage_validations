@@ -4,7 +4,8 @@ inherit_gem:
   rubocop-rails-omakase: rubocop.yml
 
 AllCops:
-  TargetRubyVersion: 3.4.9 # same as .github/workflows/main.yml
+  # Match gemspec required_ruby_version (>= 3.3).
+  TargetRubyVersion: 3.3
   Exclude:
     - 'bin/*'
     - 'config/locales/*'
