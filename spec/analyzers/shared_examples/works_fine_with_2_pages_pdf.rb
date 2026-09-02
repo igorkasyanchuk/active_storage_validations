@@ -35,4 +35,22 @@ RSpec.shared_examples "works fine with 2 pages pdf" do
       expect(metadata).to eq(expected_metadata)
     end
   end
+
+  describe "working with an A4 pdf (two or more fractional digits)" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) do
+      {
+        io: File.open(Rails.root.join("public", "most_common_mime_types", "example.pdf")),
+        filename: "example.pdf",
+        content_type: "application/pdf"
+      }
+    end
+
+    let(:expected_metadata) { { width: 595, height: 841, pages: 1 } }
+
+    it "reports the first-page size without splitting extra fractional digits" do
+      expect(metadata).to eq(expected_metadata)
+    end
+  end
 end

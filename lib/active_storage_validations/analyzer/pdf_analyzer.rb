@@ -16,6 +16,11 @@ module ActiveStorageValidations
   #
   # This analyzer requires the {poppler}[https://pdf2image.readthedocs.io/en/latest/installation.html] system library, which is not provided by \Rails.
   class Analyzer::PdfAnalyzer < Analyzer
+    # pdfinfo reports e.g. "595.276 x 841.89 pts (A4)". Capture the full
+    # integer or decimal so extra fractional digits are not split into a
+    # second number (which would make height 8 for A4).
+    PAGE_SIZE_NUMBER = /\d+(?:\.\d+)?/
+
     def metadata
       read_media do |media|
         {
@@ -69,11 +74,15 @@ module ActiveStorageValidations
     end
 
     def width
-      @media["page_size"].scan(/\d+\.?\d?/)[0].to_i
+      page_size_in_points[0]
     end
 
     def height
-      @media["page_size"].scan(/\d+\.?\d?/)[1].to_i
+      page_size_in_points[1]
+    end
+
+    def page_size_in_points
+      @media["page_size"].to_s.scan(PAGE_SIZE_NUMBER).map(&:to_i)
     end
 
     def pages

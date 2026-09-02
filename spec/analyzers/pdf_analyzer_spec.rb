@@ -23,6 +23,39 @@ RSpec.describe ActiveStorageValidations::Analyzer::PdfAnalyzer do
   it_behaves_like "returns the right metadata for any attachable"
   it_behaves_like "works fine with 2 pages pdf"
 
+  describe "page size parsing" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) do
+      {
+        io: File.open(Rails.root.join("public", "pdf_150x150.pdf")),
+        filename: "pdf_150x150.pdf",
+        content_type: "application/pdf"
+      }
+    end
+
+    before do
+      allow(analyzer).to receive(:media_from_path).and_return(
+        { "page_size" => page_size, "pages" => "1" }
+      )
+    end
+
+    [
+      [ "612 x 792 pts (letter)", 612, 792 ],
+      [ "123.4 x 200.7 pts", 123, 200 ],
+      [ "595.28 x 841.89 pts (A4)", 595, 841 ],
+      [ "595.276 x 841.89 pts (A4)", 595, 841 ]
+    ].each do |reported_page_size, width, height|
+      context "when pdfinfo reports #{reported_page_size}" do
+        let(:page_size) { reported_page_size }
+
+        it "returns truncated integer dimensions" do
+          expect(metadata).to eq({ width: width, height: height, pages: 1 })
+        end
+      end
+    end
+  end
+
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "pdf_150x150.pdf").to_s }
     let(:attachable) do
