@@ -9,7 +9,7 @@ RSpec.describe ActiveStorageValidations::Matchers do
         described_class.stub_method(io, :size, 123) { io.size }
       end
 
-      let(:io) { Tempfile.new("stub_method") }
+      let(:io) { register_fixture_io(Tempfile.new("stub_method")) }
 
       after { io.close! }
 

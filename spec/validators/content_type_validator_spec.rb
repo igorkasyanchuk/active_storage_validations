@@ -222,7 +222,7 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
           let(:attribute) { [ media, content ].join("_") } # e.g. image_jpeg
           let(:allowed_file) do
             {
-              io: File.open(Rails.root.join("public", "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
+              io: open_fixture(Rails.root.join("public", "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
               filename: "example.#{common_mime_type[:extension]}",
               content_type: common_mime_type[:mime_type]
             }
@@ -323,7 +323,7 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
               let(:attribute) { [ media, content, "spoof" ].join("_") } # e.g. image_jpeg_spoof
               let(:okay_file) do
                 {
-                  io: File.open(Rails.root.join("public", "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
+                  io: open_fixture(Rails.root.join("public", "most_common_mime_types", "example.#{common_mime_type[:extension]}")),
                   filename: "example.#{common_mime_type[:extension]}",
                   content_type: common_mime_type[:mime_type]
                 }
@@ -537,7 +537,7 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
   describe "Blob Metadata" do
     let(:attachable) do
       {
-        io: File.open(Rails.root.join("public", "image_150x150.png")),
+        io: open_fixture(Rails.root.join("public", "image_150x150.png")),
         filename: "image_150x150.png",
         content_type: "image/png"
       }

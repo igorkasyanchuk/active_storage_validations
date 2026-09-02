@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 # Lists partially based on
 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
 
-# rubocop:disable Metrics/MethodLength
-def most_common_mime_types
-  [
+module FixtureFiles
+  MOST_COMMON_MIME_TYPES = [
     # Image
     { mime_type: "image/jpeg", extension: "jpg" },
     { mime_type: "image/jpeg", extension: "jpeg" },
@@ -65,64 +66,20 @@ def most_common_mime_types
     { mime_type: "application/x-rar-compressed", extension: "rar" },
     { mime_type: "application/gzip", extension: "gz" },
     { mime_type: "application/x-tar", extension: "tar" }
-  ]
-end
+  ].freeze
 
-# Defines
-# def jpg_file
-# def jpeg_file
-# def png_file
-# def gif_file
-# def webp_file
-# def svg_file
-# def bmp_file
-# def psd_file
-# def tiff_file
-# def heic_file
-# def mp4_file
-# def avi_file
-# def wmv_file
-# def mov_file
-# def mkv_file
-# def ogv_file
-# def webm_file
-# def mp3_file
-# def m4a_file
-# def wav_file
-# def ogg_file
-# def aac_file
-# def flac_file
-# def txt_file
-# def csv_file
-# def html_file
-# def css_file
-# def json_file
-# def xml_file
-# def pdf_file
-# def doc_file
-# def docx_file
-# def xls_file
-# def xlsx_file
-# def ppt_file
-# def pptx_file
-# def ppsx_file
-# def odt_file
-# def ods_file
-# def odp_file
-# def pages_file
-# def numbers_file
-# def key_file
-# def zip_file
-# def 7z_file
-# def rar_file
-# def gz_file
-# def tar_file
-most_common_mime_types.each do |mime_type|
-  define_method(:"#{mime_type[:extension]}_file") do
-    {
-      io: File.open(Rails.root.join("public", "most_common_mime_types", "example.#{mime_type[:extension]}")),
-      filename: "example.#{mime_type[:extension]}",
-      content_type: mime_type[:mime_type]
-    }
+  def most_common_mime_types
+    MOST_COMMON_MIME_TYPES
+  end
+
+  # Defines jpg_file, jpeg_file, png_file, … (see most_common_mime_types)
+  MOST_COMMON_MIME_TYPES.each do |mime_type|
+    define_method(:"#{mime_type[:extension]}_file") do
+      fixture_file(
+        File.join("most_common_mime_types", "example.#{mime_type[:extension]}"),
+        filename: "example.#{mime_type[:extension]}",
+        content_type: mime_type[:mime_type]
+      )
+    end
   end
 end

@@ -118,14 +118,14 @@ RSpec.describe "Integration tests" do
       context "which uses the same metadata keys (e.g. width & height)" do
         let(:attachable_1) do
           {
-            io: File.open(Rails.root.join("public", "image_150x150.png")),
+            io: open_fixture(Rails.root.join("public", "image_150x150.png")),
             filename: "image_150x150.png",
             content_type: "image/png"
           }
         end
         let(:attachable_2) do
           {
-            io: File.open(Rails.root.join("public", "image_150x150.png")),
+            io: open_fixture(Rails.root.join("public", "image_150x150.png")),
             filename: "image_150x150_2.png",
             content_type: "image/png"
           }
@@ -147,14 +147,14 @@ RSpec.describe "Integration tests" do
       context "which uses different metadata keys (e.g. width & height + duration)" do
         let(:attachable_1) do
           {
-            io: File.open(Rails.root.join("public", "video_150x150.mp4")),
+            io: open_fixture(Rails.root.join("public", "video_150x150.mp4")),
             filename: "video_150x150.mp4",
             content_type: "video/mp4"
           }
         end
         let(:attachable_2) do
           {
-            io: File.open(Rails.root.join("public", "video_150x150.mp4")),
+            io: open_fixture(Rails.root.join("public", "video_150x150.mp4")),
             filename: "video_150x150_2.mp4",
             content_type: "video/mp4"
           }

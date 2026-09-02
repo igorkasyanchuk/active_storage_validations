@@ -52,7 +52,7 @@ RSpec.shared_examples "ASVErrorable" do
   describe "Rack::Test::UploadedFile object" do
     before { model.asv_errorable.attach(attachable) }
 
-    let(:attachable) { Rack::Test::UploadedFile.new(source_path, file_not_matching_requirements[:content_type]) }
+    let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(source_path, file_not_matching_requirements[:content_type])) }
     let(:expected_filename) { path_filename }
 
     it { is_expected_not_to_be_valid(context: :create) }
@@ -80,7 +80,7 @@ RSpec.shared_examples "ASVErrorable" do
   end
 
   describe "File object" do
-    let(:attachable) { File.open(source_path) }
+    let(:attachable) { open_fixture(source_path) }
     let(:expected_filename) { path_filename }
 
     if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
@@ -112,7 +112,7 @@ RSpec.shared_examples "ASVErrorable" do
   end
 
   def uploaded_file_from(hash)
-    tempfile = Tempfile.new
+    tempfile = register_fixture_io(Tempfile.new)
     tempfile.binmode
     IO.copy_stream(hash[:io], tempfile)
     hash[:io].rewind

@@ -15,7 +15,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::PdfAnalyzer do
   let(:media_filename_over_10ko) { "pdf_150x150_79ko#{media_extension}" }
   let(:media_filename_0ko) { "pdf_file_0ko#{media_extension}" }
   let(:media_path) { Rails.root.join("public", media_filename) }
-  let(:media_io) { File.open(media_path) }
+  let(:media_io) { open_fixture(media_path) }
   let(:media_content_type) { "application/pdf" }
   let(:expected_metadata) { { width: 150, height: 150, pages: 1 } }
   let(:expected_metadata_over_10ko) { { width: 36, height: 36, pages: 1 } }
@@ -28,7 +28,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::PdfAnalyzer do
 
     let(:attachable) do
       {
-        io: File.open(Rails.root.join("public", "pdf_150x150.pdf")),
+        io: open_fixture(Rails.root.join("public", "pdf_150x150.pdf")),
         filename: "pdf_150x150.pdf",
         content_type: "application/pdf"
       }
@@ -60,7 +60,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::PdfAnalyzer do
     let(:path) { Rails.root.join("public", "pdf_150x150.pdf").to_s }
     let(:attachable) do
       {
-        io: File.open(path),
+        io: open_fixture(path),
         filename: "pdf_150x150.pdf",
         content_type: "application/pdf"
       }

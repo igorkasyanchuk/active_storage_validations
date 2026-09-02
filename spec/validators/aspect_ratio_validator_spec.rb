@@ -284,7 +284,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
   describe "Blob Metadata" do
     let(:attachable) do
       {
-        io: File.open(Rails.root.join("public", "image_150x150.png")),
+        io: open_fixture(Rails.root.join("public", "image_150x150.png")),
         filename: "image_150x150.png",
         content_type: "image/png"
       }

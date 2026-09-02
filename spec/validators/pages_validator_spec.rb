@@ -194,7 +194,7 @@ RSpec.describe ActiveStorageValidations::PagesValidator do
   describe "Blob Metadata" do
     let(:attachable) do
       {
-        io: File.open(Rails.root.join("public", "pdf_5_pages.pdf")),
+        io: open_fixture(Rails.root.join("public", "pdf_5_pages.pdf")),
         filename: "pdf_5_pages.pdf",
         content_type: "application/pdf"
       }

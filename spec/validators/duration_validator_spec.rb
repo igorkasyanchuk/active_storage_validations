@@ -214,7 +214,7 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
   describe "Blob Metadata" do
     let(:attachable) do
       {
-        io: File.open(Rails.root.join("public", "audio.mp3")),
+        io: open_fixture(Rails.root.join("public", "audio.mp3")),
         filename: "audio.mp3",
         content_type: "audio/mp3"
       }

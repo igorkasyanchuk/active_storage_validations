@@ -6,7 +6,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::Magika d
   let(:analyzer) { described_class.new(attachable) }
   let(:attachable) do
     {
-      io: File.open(Rails.root.join("public", "image_150x150.png")),
+      io: open_fixture(Rails.root.join("public", "image_150x150.png")),
       filename: "image_150x150.png",
       content_type: "image/png"
     }

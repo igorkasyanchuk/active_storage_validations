@@ -6,7 +6,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
   let(:path) { Rails.root.join("public", "image_150x150.png").to_s }
   let(:attachable) do
     {
-      io: File.open(path),
+      io: open_fixture(path),
       filename: "image_150x150.png",
       content_type: "image/png"
     }

@@ -12,8 +12,8 @@ RSpec.describe ActiveStorageValidations::ASVErrorable do
 
     context "when the attachable is an ActionDispatch::Http::UploadedFile" do
       let(:attachable) do
-        tempfile = Tempfile.new([ "image_150x150", ".png" ])
-        IO.copy_stream(File.open(png_path), tempfile)
+        tempfile = register_fixture_io(Tempfile.new([ "image_150x150", ".png" ]))
+        IO.copy_stream(open_fixture(png_path), tempfile)
         tempfile.rewind
 
         ActionDispatch::Http::UploadedFile.new(
@@ -29,7 +29,7 @@ RSpec.describe ActiveStorageValidations::ASVErrorable do
     end
 
     context "when the attachable is a Rack::Test::UploadedFile" do
-      let(:attachable) { Rack::Test::UploadedFile.new(png_path, "image/png") }
+      let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(png_path, "image/png")) }
 
       it "includes the original filename" do
         expect(error_options[:filename]).to eq(expected_filename)
@@ -39,7 +39,7 @@ RSpec.describe ActiveStorageValidations::ASVErrorable do
     context "when the attachable is a Hash" do
       let(:attachable) do
         {
-          io: File.open(png_path),
+          io: open_fixture(png_path),
           filename: expected_filename,
           content_type: "image/png"
         }
@@ -51,7 +51,7 @@ RSpec.describe ActiveStorageValidations::ASVErrorable do
     end
 
     context "when the attachable is a File" do
-      let(:attachable) { File.open(png_path) }
+      let(:attachable) { open_fixture(png_path) }
 
       it "includes the file basename" do
         expect(error_options[:filename]).to eq(expected_filename)
@@ -69,7 +69,7 @@ RSpec.describe ActiveStorageValidations::ASVErrorable do
     context "when the attachable is an ActiveStorage::Blob" do
       let(:attachable) do
         ActiveStorage::Blob.create_and_upload!(
-          io: File.open(png_path),
+          io: open_fixture(png_path),
           filename: expected_filename,
           content_type: "image/png"
         )

@@ -6,7 +6,7 @@ RSpec.shared_examples "works fine with 2 pages pdf" do
 
     let(:attachable) do
       {
-        io: File.open(Rails.root.join("public", "pdf_150x150_2_pages.pdf")),
+        io: open_fixture(Rails.root.join("public", "pdf_150x150_2_pages.pdf")),
         filename: "pdf_150x150_2_pages.pdf",
         content_type: "application/pdf"
       }
@@ -23,7 +23,7 @@ RSpec.shared_examples "works fine with 2 pages pdf" do
 
     let(:attachable) do
       {
-        io: File.open(Rails.root.join("public", "pdf_123.4x200.7.pdf")),
+        io: open_fixture(Rails.root.join("public", "pdf_123.4x200.7.pdf")),
         filename: "pdf_123.4x200.7.pdf",
         content_type: "application/pdf"
       }
@@ -41,7 +41,7 @@ RSpec.shared_examples "works fine with 2 pages pdf" do
 
     let(:attachable) do
       {
-        io: File.open(Rails.root.join("public", "most_common_mime_types", "example.pdf")),
+        io: open_fixture(Rails.root.join("public", "most_common_mime_types", "example.pdf")),
         filename: "example.pdf",
         content_type: "application/pdf"
       }

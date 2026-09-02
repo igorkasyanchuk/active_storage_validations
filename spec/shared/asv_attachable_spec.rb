@@ -9,15 +9,15 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
   let(:png_bytes) { File.binread(png_path) }
   let(:blob) do
     ActiveStorage::Blob.create_and_upload!(
-      io: File.open(png_path),
+      io: open_fixture(png_path),
       filename: png_filename,
       content_type: "image/png"
     )
   end
 
   def uploaded_file
-    tempfile = Tempfile.new([ "image_150x150", ".png" ])
-    IO.copy_stream(File.open(png_path), tempfile)
+    tempfile = register_fixture_io(Tempfile.new([ "image_150x150", ".png" ]))
+    IO.copy_stream(open_fixture(png_path), tempfile)
     tempfile.rewind
 
     ActionDispatch::Http::UploadedFile.new(
@@ -29,7 +29,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
 
   def hash_attachable
     {
-      io: File.open(png_path, "rb"),
+      io: open_fixture(png_path, "rb"),
       filename: png_filename,
       content_type: "image/png"
     }
@@ -61,7 +61,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
       end
 
       describe "File object" do
-        let(:attachable) { File.open(png_path, "rb") }
+        let(:attachable) { open_fixture(png_path, "rb") }
 
         after { close_io(attachable) }
 
@@ -102,7 +102,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "Rack::Test::UploadedFile object" do
-      let(:attachable) { Rack::Test::UploadedFile.new(png_path, "image/png") }
+      let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(png_path, "image/png")) }
 
       it_behaves_like "detects a png content type"
     end
@@ -122,7 +122,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "File object" do
-      let(:attachable) { File.open(png_path, "rb") }
+      let(:attachable) { open_fixture(png_path, "rb") }
 
       after { close_io(attachable) }
 
@@ -173,7 +173,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "Rack::Test::UploadedFile object" do
-      let(:attachable) { Rack::Test::UploadedFile.new(png_path, "image/png") }
+      let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(png_path, "image/png")) }
 
       it_behaves_like "returns the png content type"
     end
@@ -193,7 +193,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "File object" do
-      let(:attachable) { File.open(png_path, "rb") }
+      let(:attachable) { open_fixture(png_path, "rb") }
 
       after { close_io(attachable) }
 
@@ -244,7 +244,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "Rack::Test::UploadedFile object" do
-      let(:attachable) { Rack::Test::UploadedFile.new(png_path, "image/png") }
+      let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(png_path, "image/png")) }
 
       it_behaves_like "returns the png content type without parameters"
     end
@@ -280,7 +280,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "File object" do
-      let(:attachable) { File.open(png_path, "rb") }
+      let(:attachable) { open_fixture(png_path, "rb") }
 
       after { close_io(attachable) }
 
@@ -331,7 +331,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "Rack::Test::UploadedFile object" do
-      let(:attachable) { Rack::Test::UploadedFile.new(png_path, "image/png") }
+      let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(png_path, "image/png")) }
 
       it_behaves_like "returns the image media type"
     end
@@ -359,7 +359,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "File object" do
-      let(:attachable) { File.open(png_path, "rb") }
+      let(:attachable) { open_fixture(png_path, "rb") }
 
       after { close_io(attachable) }
 
@@ -462,7 +462,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "Rack::Test::UploadedFile object" do
-      let(:attachable) { Rack::Test::UploadedFile.new(png_path, "image/png") }
+      let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(png_path, "image/png")) }
 
       it_behaves_like "returns the png filename"
     end
@@ -482,7 +482,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "File object" do
-      let(:attachable) { File.open(png_path, "rb") }
+      let(:attachable) { open_fixture(png_path, "rb") }
 
       after { close_io(attachable) }
 
@@ -549,7 +549,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "Rack::Test::UploadedFile object" do
-      let(:attachable) { Rack::Test::UploadedFile.new(png_path, "image/png") }
+      let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(png_path, "image/png")) }
 
       it_behaves_like "reads the png bytes", rewindable: true
     end
@@ -569,7 +569,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "File object" do
-      let(:attachable) { File.open(png_path, "rb") }
+      let(:attachable) { open_fixture(png_path, "rb") }
 
       after { close_io(attachable) }
 
@@ -631,7 +631,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "Rack::Test::UploadedFile object" do
-      let(:attachable) { Rack::Test::UploadedFile.new(png_path, "image/png") }
+      let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(png_path, "image/png")) }
 
       it_behaves_like "rewinds the readable io"
     end
@@ -651,7 +651,7 @@ RSpec.describe ActiveStorageValidations::ASVAttachable do
     end
 
     describe "File object" do
-      let(:attachable) { File.open(png_path, "rb") }
+      let(:attachable) { open_fixture(png_path, "rb") }
 
       after { close_io(attachable) }
 

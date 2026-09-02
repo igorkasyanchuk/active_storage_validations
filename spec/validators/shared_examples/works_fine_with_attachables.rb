@@ -7,7 +7,7 @@ RSpec.shared_examples "works fine with attachables" do
 
   def fixture_file_upload(filename, mime_type = nil, binary = false)
     path = File.join(Rails.root.join("test/fixtures/files").to_s, filename)
-    Rack::Test::UploadedFile.new(path, mime_type, binary)
+    register_uploaded_file(Rack::Test::UploadedFile.new(path, mime_type, binary))
   end
   alias_method :file_fixture_upload, :fixture_file_upload
 
@@ -45,28 +45,28 @@ RSpec.shared_examples "works fine with attachables" do
             let(:attachable) do
               if validator_test_class.name == "Duration::Validator"
                 ActiveStorage::Blob.create_and_upload!(
-                  io: File.open(mp3_audio),
+                  io: open_fixture(mp3_audio),
                   filename: "audio_2s.mp3",
                   content_type: "audio/mpeg",
                   service_name: "test"
                 )
               elsif validator_test_class.name == "WithAudio::Validator"
                 ActiveStorage::Blob.create_and_upload!(
-                  io: File.open(video_with_audio),
+                  io: open_fixture(video_with_audio),
                   filename: "video_with_audio.mp4",
                   content_type: "video/mp4",
                   service_name: "test"
                 )
               elsif validator_test_class.name == "Pages::Validator"
                 ActiveStorage::Blob.create_and_upload!(
-                  io: File.open(pdf_5_pages),
+                  io: open_fixture(pdf_5_pages),
                   filename: "pdf_5_pages.pdf",
                   content_type: "application/pdf",
                   service_name: "test"
                 )
               else
                 ActiveStorage::Blob.create_and_upload!(
-                  io: File.open(png_image),
+                  io: open_fixture(png_image),
                   filename: "image_150x150.png",
                   content_type: "image/png",
                   service_name: "test"
@@ -82,7 +82,7 @@ RSpec.shared_examples "works fine with attachables" do
 
             let(:attachable) do
               if validator_test_class.name == "Duration::Validator"
-                tempfile = Tempfile.new([ "audio_2s", ".mp3" ])
+                tempfile = register_fixture_io(Tempfile.new([ "audio_2s", ".mp3" ]))
                 tempfile.write(File.read(mp3_audio))
                 tempfile.rewind
 
@@ -92,7 +92,7 @@ RSpec.shared_examples "works fine with attachables" do
                   type: "audio/mpeg"
                 })
               elsif validator_test_class.name == "WithAudio::Validator"
-                tempfile = Tempfile.new([ "video_with_audio", ".mp4" ])
+                tempfile = register_fixture_io(Tempfile.new([ "video_with_audio", ".mp4" ]))
                 tempfile.binmode
                 tempfile.write(File.binread(video_with_audio))
                 tempfile.rewind
@@ -103,7 +103,7 @@ RSpec.shared_examples "works fine with attachables" do
                   type: "video/mp4"
                 })
               elsif validator_test_class.name == "Pages::Validator"
-                tempfile = Tempfile.new([ "pdf_5_pages", ".pdf" ])
+                tempfile = register_fixture_io(Tempfile.new([ "pdf_5_pages", ".pdf" ]))
                 tempfile.write(File.read(pdf_5_pages))
                 tempfile.rewind
 
@@ -113,7 +113,7 @@ RSpec.shared_examples "works fine with attachables" do
                   type: "application/pdf"
                 })
               else
-                tempfile = Tempfile.new([ "image_150x150", ".png" ])
+                tempfile = register_fixture_io(Tempfile.new([ "image_150x150", ".png" ]))
                 tempfile.write(File.read(png_image))
                 tempfile.rewind
 
@@ -133,13 +133,13 @@ RSpec.shared_examples "works fine with attachables" do
 
             let(:attachable) do
               if validator_test_class.name == "Duration::Validator"
-                Rack::Test::UploadedFile.new(mp3_audio, "audio/mpeg")
+                register_uploaded_file(Rack::Test::UploadedFile.new(mp3_audio, "audio/mpeg"))
               elsif validator_test_class.name == "WithAudio::Validator"
-                Rack::Test::UploadedFile.new(video_with_audio, "video/mp4")
+                register_uploaded_file(Rack::Test::UploadedFile.new(video_with_audio, "video/mp4"))
               elsif validator_test_class.name == "Pages::Validator"
-                Rack::Test::UploadedFile.new(pdf_5_pages, "application/pdf")
+                register_uploaded_file(Rack::Test::UploadedFile.new(pdf_5_pages, "application/pdf"))
               else
-                Rack::Test::UploadedFile.new(png_image, "image/png")
+                register_uploaded_file(Rack::Test::UploadedFile.new(png_image, "image/png"))
               end
             end
 
@@ -152,25 +152,25 @@ RSpec.shared_examples "works fine with attachables" do
             let(:attachable) do
               if validator_test_class.name == "Duration::Validator"
                 {
-                  io: File.open(mp3_audio),
+                  io: open_fixture(mp3_audio),
                   filename: "audio_2s.mp3",
                   content_type: "audio/mpeg"
                 }
               elsif validator_test_class.name == "WithAudio::Validator"
                 {
-                  io: File.open(video_with_audio),
+                  io: open_fixture(video_with_audio),
                   filename: "video_with_audio.mp4",
                   content_type: "video/mp4"
                 }
               elsif validator_test_class.name == "Pages::Validator"
                 {
-                  io: File.open(pdf_5_pages),
+                  io: open_fixture(pdf_5_pages),
                   filename: "pdf_5_pages.pdf",
                   content_type: "application/pdf"
                 }
               else
                 {
-                  io: File.open(png_image),
+                  io: open_fixture(png_image),
                   filename: "image_150x150.png",
                   content_type: "image/png"
                 }
@@ -183,22 +183,22 @@ RSpec.shared_examples "works fine with attachables" do
               let(:attachable) do
                 if validator_test_class.name == "Duration::Validator"
                   {
-                    io: File.open(mp3_audio),
+                    io: open_fixture(mp3_audio),
                     filename: "audio_2s.mp3"
                   }
                 elsif validator_test_class.name == "WithAudio::Validator"
                   {
-                    io: File.open(video_with_audio),
+                    io: open_fixture(video_with_audio),
                     filename: "video_with_audio.mp4"
                   }
                 elsif validator_test_class.name == "Pages::Validator"
                   {
-                    io: File.open(pdf_5_pages),
+                    io: open_fixture(pdf_5_pages),
                     filename: "pdf_5_pages.pdf"
                   }
                 else
                   {
-                    io: File.open(png_image),
+                    io: open_fixture(png_image),
                     filename: "image_150x150.png"
                   }
                 end
@@ -210,7 +210,7 @@ RSpec.shared_examples "works fine with attachables" do
             describe "Remote file" do
               before do
                 stub_request(:get, url)
-                  .to_return(body: File.open(Rails.root.join("public", fetched_file), "rb"), status: 200)
+                  .to_return(body: open_fixture(Rails.root.join("public", fetched_file), "rb"), status: 200)
               end
 
               let(:url) { "https://example_image.jpg" }
@@ -262,7 +262,7 @@ RSpec.shared_examples "works fine with attachables" do
               end
 
               describe "using URI.open constructor as io" do
-                let(:io) { uri.open }
+                let(:io) { register_fixture_io(uri.open) }
 
                 describe "Opening small images (< 10ko) resulting in OpenUri returning a StringIO" do
                   let(:fetched_file) do
@@ -305,28 +305,28 @@ RSpec.shared_examples "works fine with attachables" do
             let(:attachable) do
               blob = if validator_test_class.name == "Duration::Validator"
                 ActiveStorage::Blob.create_and_upload!(
-                  io: File.open(mp3_audio),
+                  io: open_fixture(mp3_audio),
                   filename: "audio_2s.mp3",
                   content_type: "audio/mpeg",
                   service_name: "test"
                 )
               elsif validator_test_class.name == "WithAudio::Validator"
                 ActiveStorage::Blob.create_and_upload!(
-                  io: File.open(video_with_audio),
+                  io: open_fixture(video_with_audio),
                   filename: "video_with_audio.mp4",
                   content_type: "video/mp4",
                   service_name: "test"
                 )
               elsif validator_test_class.name == "Pages::Validator"
                 ActiveStorage::Blob.create_and_upload!(
-                  io: File.open(pdf_5_pages),
+                  io: open_fixture(pdf_5_pages),
                   filename: "pdf_5_pages.pdf",
                   content_type: "application/pdf",
                   service_name: "test"
                 )
               else
                 ActiveStorage::Blob.create_and_upload!(
-                  io: File.open(png_image),
+                  io: open_fixture(png_image),
                   filename: "image_150x150.png",
                   content_type: "image/png",
                   service_name: "test"
@@ -344,13 +344,13 @@ RSpec.shared_examples "works fine with attachables" do
 
             let(:attachable) do
               if validator_test_class.name == "Duration::Validator"
-                File.open(mp3_audio)
+                open_fixture(mp3_audio)
               elsif validator_test_class.name == "WithAudio::Validator"
-                File.open(video_with_audio)
+                open_fixture(video_with_audio)
               elsif validator_test_class.name == "Pages::Validator"
-                File.open(pdf_5_pages)
+                open_fixture(pdf_5_pages)
               else
-                File.open(png_image)
+                open_fixture(png_image)
               end
             end
 
@@ -400,25 +400,25 @@ RSpec.shared_examples "works fine with attachables" do
       let(:attachable) do
         if validator_test_class.name == "Duration::Validator"
           {
-            io: File.open(mp3_audio, "rb"), # read as binary to prevent encoding mismatch
+            io: open_fixture(mp3_audio, "rb"), # read as binary to prevent encoding mismatch
             filename: "audio_2s.mp3",
             content_type: "audio/mpeg"
           }
         elsif validator_test_class.name == "WithAudio::Validator"
           {
-            io: File.open(video_with_audio, "rb"),
+            io: open_fixture(video_with_audio, "rb"),
             filename: "video_with_audio.mp4",
             content_type: "video/mp4"
           }
         elsif validator_test_class.name == "Pages::Validator"
           {
-            io: File.open(pdf_5_pages, "rb"), # read as binary to prevent encoding mismatch
+            io: open_fixture(pdf_5_pages, "rb"), # read as binary to prevent encoding mismatch
             filename: "pdf_5_pages.pdf",
             content_type: "application/pdf"
           }
         else
           {
-            io: File.open(png_image, "rb"), # read as binary to prevent encoding mismatch
+            io: open_fixture(png_image, "rb"), # read as binary to prevent encoding mismatch
             filename: "image_150x150.png",
             content_type: "image/png"
           }
@@ -457,25 +457,25 @@ RSpec.shared_examples "works fine with attachables" do
       let(:attachable) do
         if validator_test_class.name == "Duration::Validator"
           {
-            io: File.open(mp3_audio),
+            io: open_fixture(mp3_audio),
             filename: "audio_2s.mp3",
             content_type: "audio/mpeg"
           }
         elsif validator_test_class.name == "WithAudio::Validator"
           {
-            io: File.open(video_with_audio),
+            io: open_fixture(video_with_audio),
             filename: "video_with_audio.mp4",
             content_type: "video/mp4"
           }
         elsif validator_test_class.name == "Pages::Validator"
           {
-            io: File.open(pdf_5_pages),
+            io: open_fixture(pdf_5_pages),
             filename: "pdf_5_pages.pdf",
             content_type: "application/pdf"
           }
         else
           {
-            io: File.open(png_image),
+            io: open_fixture(png_image),
             filename: "image_150x150.png",
             content_type: "image/png"
           }
@@ -496,25 +496,25 @@ RSpec.shared_examples "works fine with attachables" do
       let(:attachable) do
         if validator_test_class.name == "Duration::Validator"
           {
-            io: File.open(mp3_audio),
+            io: open_fixture(mp3_audio),
             filename: "audio_2s.mp3",
             content_type: "audio/mpeg"
           }
         elsif validator_test_class.name == "WithAudio::Validator"
           {
-            io: File.open(video_with_audio),
+            io: open_fixture(video_with_audio),
             filename: "video_with_audio.mp4",
             content_type: "video/mp4"
           }
         elsif validator_test_class.name == "Pages::Validator"
           {
-            io: File.open(pdf_5_pages),
+            io: open_fixture(pdf_5_pages),
             filename: "pdf_5_pages.pdf",
             content_type: "application/pdf"
           }
         else
           {
-            io: File.open(png_image),
+            io: open_fixture(png_image),
             filename: "image_150x150.png",
             content_type: "image/png"
           }
@@ -540,25 +540,25 @@ RSpec.shared_examples "works fine with attachables" do
       let(:attachable_1) do
         if validator_test_class.name == "Duration::Validator"
           {
-            io: File.open(mp3_audio),
+            io: open_fixture(mp3_audio),
             filename: "audio_2s.mp3",
             content_type: "audio/mpeg"
           }
         elsif validator_test_class.name == "WithAudio::Validator"
           {
-            io: File.open(video_with_audio),
+            io: open_fixture(video_with_audio),
             filename: "video_with_audio.mp4",
             content_type: "video/mp4"
           }
         elsif validator_test_class.name == "Pages::Validator"
           {
-            io: File.open(pdf_5_pages),
+            io: open_fixture(pdf_5_pages),
             filename: "pdf_5_pages.pdf",
             content_type: "application/pdf"
           }
         else
           {
-            io: File.open(png_image),
+            io: open_fixture(png_image),
             filename: "image_150x150.png",
             content_type: "image/png"
           }
@@ -568,28 +568,28 @@ RSpec.shared_examples "works fine with attachables" do
       let(:attachable_2) do
         if validator_test_class.name == "Duration::Validator"
           ActiveStorage::Blob.create_and_upload!(
-            io: File.open(mp3_audio),
+            io: open_fixture(mp3_audio),
             filename: "audio_2s.mp3",
             content_type: "audio/mpeg",
             service_name: "test"
           )
         elsif validator_test_class.name == "WithAudio::Validator"
           ActiveStorage::Blob.create_and_upload!(
-            io: File.open(video_with_audio),
+            io: open_fixture(video_with_audio),
             filename: "video_with_audio.mp4",
             content_type: "video/mp4",
             service_name: "test"
           )
         elsif validator_test_class.name == "Pages::Validator"
           ActiveStorage::Blob.create_and_upload!(
-            io: File.open(pdf_5_pages),
+            io: open_fixture(pdf_5_pages),
             filename: "pdf_5_pages.pdf",
             content_type: "application/pdf",
             service_name: "test"
           )
         else
           ActiveStorage::Blob.create_and_upload!(
-            io: File.open(png_image),
+            io: open_fixture(png_image),
             filename: "image_150x150.png",
             content_type: "image/png",
             service_name: "test"

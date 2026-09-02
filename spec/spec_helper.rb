@@ -1,16 +1,5 @@
 # frozen_string_literal: true
 
-# macOS (especially GUI-launched terminals / Cursor) often has a soft NOFILE
-# of 256. GitHub Actions is typically ~64k. This suite opens many fixture IOs;
-# SimpleCov then needs another FD for coverage/.resultset.json.lock at exit.
-begin
-  soft, hard = Process.getrlimit(:NOFILE)
-  desired = 4096
-  Process.setrlimit(:NOFILE, [ desired, hard ].min, hard) if soft < desired
-rescue Errno::EINVAL, Errno::EPERM, NotImplementedError
-  # Keep the inherited limit when the OS rejects the raise.
-end
-
 unless ENV["NO_COVERAGE"]
   require "simplecov"
 

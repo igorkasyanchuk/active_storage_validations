@@ -39,7 +39,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
 
       describe "ActionDispatch::Http::UploadedFile object" do
         let(:attachable) do
-          tempfile = Tempfile.new([ media_filename, media_extension ])
+          tempfile = register_fixture_io(Tempfile.new([ media_filename, media_extension ]))
           tempfile.write(File.read(media_path))
           tempfile.rewind
 
@@ -54,7 +54,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
       end
 
       describe "Rack::Test::UploadedFile object" do
-        let(:attachable) { Rack::Test::UploadedFile.new(media_path, media_content_type) }
+        let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(media_path, media_content_type)) }
 
         it { is_expected_to_return_the_right_metadata }
       end
@@ -84,7 +84,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
         describe "Remote file" do
           before do
             stub_request(:get, url)
-              .to_return(body: File.open(Rails.root.join("public", fetched_file)), status: 200)
+              .to_return(body: open_fixture(Rails.root.join("public", fetched_file)), status: 200)
           end
 
           let(:url) { "https://example_image.jpg" }
@@ -106,7 +106,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
           end
 
           describe "using URI.open constructor as io" do
-            let(:io) { uri.open }
+            let(:io) { register_fixture_io(uri.open) }
 
             describe "Opening small media (< 10ko) resulting in OpenUri returning a StringIO" do
               let(:fetched_file) { media_filename }
@@ -170,7 +170,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
         describe "rotated media" do
           let(:attachable) do
             ActiveStorage::Blob.create_and_upload!(
-              io: File.open(Rails.root.join("public", media_filename_rotated)),
+              io: open_fixture(Rails.root.join("public", media_filename_rotated)),
               filename: media_filename_rotated,
               content_type: media_content_type_rotated,
               service_name: "test"
@@ -185,7 +185,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
       describe "0 byte size file" do
         let(:attachable) do
           ActiveStorage::Blob.create_and_upload!(
-            io: File.open(Rails.root.join("public", media_filename_0ko)),
+            io: open_fixture(Rails.root.join("public", media_filename_0ko)),
             filename: media_filename_0ko,
             content_type: media_content_type,
             service_name: "test"

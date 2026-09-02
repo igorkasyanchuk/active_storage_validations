@@ -16,7 +16,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
   let(:media_filename_rotated) { "audio#{media_extension}" }
   let(:media_filename_0ko) { "audio_0ko#{media_extension}" }
   let(:media_path) { Rails.root.join("public", media_filename) }
-  let(:media_io) { File.open(media_path) }
+  let(:media_io) { open_fixture(media_path) }
   let(:media_content_type) { "audio/mp3" }
   let(:media_content_type_rotated) { media_content_type }
   let(:expected_metadata) { { duration: 1.0, bit_rate: 32000, sample_rate: 44100, audio: true, tags: { "encoder" => "Lavc60.3." } } }
@@ -29,7 +29,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
     let(:path) { Rails.root.join("public", "audio_2s.mp3").to_s }
     let(:attachable) do
       {
-        io: File.open(path),
+        io: open_fixture(path),
         filename: "audio_2s.mp3",
         content_type: "audio/mpeg"
       }

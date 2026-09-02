@@ -140,7 +140,7 @@ IMAGE_PROCESSOR=mini_magick bundle exec rake spec
 
 `spec/rails_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem). Unset locally: validators use MiniMagick (ASV default) and both image-analyzer unit specs run. When `IMAGE_PROCESSOR` is set, examples tagged `image_processor: :vips` / `:mini_magick` for the other processor are excluded (not pending).
 
-Live Magika examples are gated with `magika_cli_available?` (`spec/support/files.rb`); most Magika unit specs stub the CLI.
+Live Magika examples are gated with `magika_cli_available?` (`FixtureFiles` in `spec/support/files.rb`); most Magika unit specs stub the CLI. Fixture IOs go through `open_fixture` / `register_fixture_io` and are closed after each example.
 
 ### Benchmarks
 
@@ -258,6 +258,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Do not reintroduce a Minitest suite for the gem; keep consumer matcher docs for both RSpec and Minitest/shoulda
 - Matcher `stub_method` uses a singleton-method wrap (not `Minitest::Mock` / `Object#stub`). Minitest 6 extracted mock to `minitest-mock`; do not reintroduce that dependency
 - Do not add `ActiveStorageValidations::Attachable` (or other short names that apps use as concerns). The gem module is included into Active Record, so `include Attachable` in an app model under this namespace would resolve to the gem constant. Use the `ASV*` prefix (`spec/global/active_storage_validations_spec.rb`)
+- Do not `File.open` dummy fixtures and leave the FD for GC. Use `open_fixture` / `register_fixture_io` (`FixtureFiles`); do not reintroduce an `ObjectSpace` sweep or a raised `NOFILE` rlimit to mask leaks
 
 ## Read First When Contributing
 

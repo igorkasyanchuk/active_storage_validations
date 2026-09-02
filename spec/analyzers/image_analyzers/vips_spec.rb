@@ -20,7 +20,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips, image_pr
   let(:media_filename_rotated) { "image_700x500_rotated_90#{media_extension_rotated}" }
   let(:media_filename_0ko) { "image_file_0ko#{media_extension}" }
   let(:media_path) { Rails.root.join("public", media_filename) }
-  let(:media_io) { File.open(media_path) }
+  let(:media_io) { open_fixture(media_path) }
   let(:media_content_type) { "image/png" }
   let(:media_content_type_rotated) { "image/jpeg" }
   let(:expected_metadata) { { width: 150, height: 150 } }
@@ -33,7 +33,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips, image_pr
     let(:path) { Rails.root.join("public", "image_150x150.png").to_s }
     let(:attachable) do
       {
-        io: File.open(path),
+        io: open_fixture(path),
         filename: "image_150x150.png",
         content_type: "image/png"
       }
