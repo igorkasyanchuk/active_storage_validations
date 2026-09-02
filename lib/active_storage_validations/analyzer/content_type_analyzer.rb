@@ -12,6 +12,9 @@ module ActiveStorageValidations
   #   ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::Magika.new(attachable).content_type
   #   # => { content_type: "image/png", content_type_backend: "magika" }
   class Analyzer::ContentTypeAnalyzer < Analyzer
+    # Shared by File and Magika backends so consumers can rescue either missing CLI.
+    class CommandLineToolNotInstalledError < StandardError; end
+
     def content_type
       read_media do |media|
         {

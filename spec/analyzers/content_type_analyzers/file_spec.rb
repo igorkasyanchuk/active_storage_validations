@@ -204,6 +204,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File do
       before { allow(Process).to receive(:spawn).and_raise(Errno::ENOENT) }
 
       it "raises an explicit error" do
+        expect(analyzer_error).to eq(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::CommandLineToolNotInstalledError)
         expect { content_type }.to raise_error(analyzer_error, "file command-line tool is not installed")
       end
     end

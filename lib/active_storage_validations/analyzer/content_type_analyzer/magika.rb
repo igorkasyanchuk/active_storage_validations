@@ -7,8 +7,6 @@ module ActiveStorageValidations
   #
   # Override the binary path with +ActiveStorage.paths[:magika]+.
   class Analyzer::ContentTypeAnalyzer::Magika < Analyzer::ContentTypeAnalyzer
-    class CommandLineToolNotInstalledError < StandardError; end
-
     private
 
     def backend

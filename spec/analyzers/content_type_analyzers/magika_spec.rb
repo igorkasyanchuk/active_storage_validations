@@ -77,6 +77,9 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::Magika d
       before { allow(Process).to receive(:spawn).and_raise(Errno::ENOENT) }
 
       it "raises an explicit error" do
+        expect(described_class::CommandLineToolNotInstalledError).to eq(
+          ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::CommandLineToolNotInstalledError
+        )
         expect { content_type }.to raise_error(
           described_class::CommandLineToolNotInstalledError,
           "magika command-line tool is not installed"

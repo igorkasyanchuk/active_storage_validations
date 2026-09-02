@@ -5,8 +5,6 @@ module ActiveStorageValidations
   #
   # Override the binary path with +ActiveStorage.paths[:file]+.
   class Analyzer::ContentTypeAnalyzer::File < Analyzer::ContentTypeAnalyzer
-    class CommandLineToolNotInstalledError < StandardError; end
-
     private
 
     def backend
