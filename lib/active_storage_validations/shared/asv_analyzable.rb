@@ -8,7 +8,7 @@ module ActiveStorageValidations
   module ASVAnalyzable
     extend ActiveSupport::Concern
 
-    DEFAULT_IMAGE_PROCESSOR = :mini_magick.freeze
+    DEFAULT_IMAGE_PROCESSOR = :mini_magick
     # Keys written by the content-type sniffers. They record what the file
     # claims to be, not whether an analyzer could decode it, so they must never
     # count as evidence that a media analysis happened.

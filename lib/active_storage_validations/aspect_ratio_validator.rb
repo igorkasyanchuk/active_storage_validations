@@ -18,7 +18,7 @@ module ActiveStorageValidations
 
     AVAILABLE_CHECKS = %i[with in].freeze
     NAMED_ASPECT_RATIOS = %i[square portrait landscape].freeze
-    ASPECT_RATIO_REGEX = /is_([1-9]\d*)_([1-9]\d*)/.freeze
+    ASPECT_RATIO_REGEX = /is_([1-9]\d*)_([1-9]\d*)/
     ERROR_TYPES = %i[
       aspect_ratio_not_square
       aspect_ratio_not_portrait
@@ -27,7 +27,7 @@ module ActiveStorageValidations
       aspect_ratio_invalid
       media_metadata_missing
     ].freeze
-    PRECISION = 3.freeze
+    PRECISION = 3
     METADATA_KEYS = %i[width height].freeze
 
     def check_validity!
