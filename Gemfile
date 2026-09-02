@@ -13,8 +13,7 @@ gemspec
 # Git. Remember to move these dependencies to your gemspec before releasing
 # your gem to rubygems.org.
 
-# This Rails version will be the one used when running `bundle exec rake spec` locally
-# Uncomment the line then run `bundle install`
+# Local default Gemfile: used by `bundle exec rake spec` without BUNDLE_GEMFILE.
 gem "rails", "8.1.3.1"
 # gem "sqlite3", ">= 2.5"
 # gem "nokogiri", ">= 1.18"
