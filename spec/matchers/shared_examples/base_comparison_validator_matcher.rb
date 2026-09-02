@@ -56,3 +56,37 @@ RSpec.shared_examples "base comparison validator matcher equal_to rejects looser
     it { is_expected_not_to_match_for(klass) }
   end
 end
+
+RSpec.shared_examples "base comparison validator matcher less_than_or_equal_to rejects less_than" do
+  context "when the validator uses :less_than rather than :less_than_or_equal_to" do
+    subject(:configured_matcher) { matcher.less_than_or_equal_to(exclusive_bound) }
+
+    let(:model_attribute) { :less_than }
+    let(:exclusive_bound) do
+      case described_class.name
+      when /Size/ then 2.kilobytes
+      when /Duration/ then 2.seconds
+      when /Pages/ then 2
+      end
+    end
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+end
+
+RSpec.shared_examples "base comparison validator matcher greater_than_or_equal_to rejects greater_than" do
+  context "when the validator uses :greater_than rather than :greater_than_or_equal_to" do
+    subject(:configured_matcher) { matcher.greater_than_or_equal_to(exclusive_bound) }
+
+    let(:model_attribute) { :greater_than }
+    let(:exclusive_bound) do
+      case described_class.name
+      when /Size/ then 7.kilobytes
+      when /Duration/ then 7.seconds
+      when /Pages/ then 7
+      end
+    end
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+end

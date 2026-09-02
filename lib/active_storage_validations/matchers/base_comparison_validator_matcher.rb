@@ -107,12 +107,15 @@ module ActiveStorageValidations
         @min.nil? || !passes_validation_with_value(@min - 1)
       end
 
+      # Probe the inclusive bound itself. Checking only min+1 / max-1 lets
+      # less_than(n) satisfy less_than_or_equal_to(n) (and greater_than
+      # satisfy greater_than_or_equal_to).
       def higher_than_min?
-        @min.nil? || passes_validation_with_value(@min + 1)
+        @min.nil? || passes_validation_with_value(@min)
       end
 
       def lower_than_max?
-        @max.nil? || @max == Float::INFINITY || passes_validation_with_value(@max - 1)
+        @max.nil? || @max == Float::INFINITY || passes_validation_with_value(@max)
       end
 
       def not_higher_than_max?
