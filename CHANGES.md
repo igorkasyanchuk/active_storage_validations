@@ -20,7 +20,8 @@
   - Remove an unreachable de-duplication guard in `ASVErrorable#add_error`; every offending file already gets its own error
   - Resolve the declared content type once per attachable instead of twice, saving a `find_signed!` query for attachables passed as a signed id
   - Collapse attachable type dispatch (Blob / UploadedFile / Hash / File / Pathname / signed id) into `ASVAttachableAdapter` used by validators, analyzers, and error filenames
-  - Add Dependabot for GitHub Actions and the root Gemfile; upload SimpleCov from the Ruby 3.4 / Rails 8.1 / vips CI job
+  - Add Dependabot for GitHub Actions and the root Gemfile; upload SimpleCov from the Ruby 3.4 / Rails 8.1 / vips CI job (artifact only; Codecov upload removed)
+  - Bump CI GitHub Actions to latest majors (`actions/checkout@v7`, `actions/upload-artifact@v7`)
   - Bump development gems (mini_magick, rubocop, rubocop-performance, simplecov, sqlite3, webmock, vernier) and the local Rails pin to 8.1.3.1
 
 # Released

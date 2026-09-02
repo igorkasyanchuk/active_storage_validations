@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Ruby and install gems
         uses: ruby/setup-ruby@v1
@@ -83,7 +83,7 @@ jobs:
         run: magika --version || (ls -la "$HOME/.local/bin" "$HOME/.magika/bin" 2>/dev/null; which magika; exit 1)
 
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set BUNDLE_GEMFILE
         run: echo 'BUNDLE_GEMFILE=${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile' >> $GITHUB_ENV
@@ -102,15 +102,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: matrix.ruby == '3.4' && matrix.gemfile == 'rails_8_1' && matrix.image_processor == 'vips'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage/
-
-      - name: Upload coverage to Codecov
-        if: matrix.ruby == '3.4' && matrix.gemfile == 'rails_8_1' && matrix.image_processor == 'vips'
-        uses: codecov/codecov-action@v5
-        with:
-          files: coverage/coverage.json
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
