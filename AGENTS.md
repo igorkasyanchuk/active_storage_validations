@@ -11,6 +11,7 @@ lib/active_storage_validations.rb          # Entry point + infer_file_field_acce
 lib/active_storage_validations/
   *_validator.rb                           # Validators (ActiveModel::EachValidator)
   base_comparison_validator.rb             # Shared comparison options (<, <=, >, >=, between, equal_to)
+  asv_attachable_adapter.rb                # Per-type wrappers for Blob / UploadedFile / Hash / File / Pathname / signed id
   shared/asv_*.rb                          # Shared concerns used by validators
   analyzer/                                # Media metadata extractors (image/video/audio/pdf)
   analyzer/content_type_analyzer/          # Spoofing sniffers: File + Magika backends
@@ -186,6 +187,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 |--------------|------------|
 | Validator behavior | `lib/active_storage_validations/<name>_validator.rb` |
 | Shared attachable/blob loop | `shared/asv_attachable.rb` |
+| Attachable type dispatch | `asv_attachable_adapter.rb` (`ASVAttachableAdapter`) |
 | Analysis + caching | `shared/asv_analyzable.rb`, `extensors/asv_blob_metadatable.rb` |
 | Content-type sniffers | `analyzer/content_type_analyzer/{file,magika}.rb` |
 | Error / I18n options | `shared/asv_errorable.rb`, `config/locales/en.yml` |
@@ -235,6 +237,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Magika / `file` are optional system CLIs (not Ruby gems); override paths with `ActiveStorage.paths[:magika]` / `ActiveStorage.paths[:file]` when needed
 - Do not reintroduce a Minitest suite for the gem; keep consumer matcher docs for both RSpec and Minitest/shoulda
 - Matcher `stub_method` uses a singleton-method wrap (not `Minitest::Mock` / `Object#stub`). Minitest 6 extracted mock to `minitest-mock`; do not reintroduce that dependency
+- Do not add `ActiveStorageValidations::Attachable` (or other short names that apps use as concerns). The gem module is included into Active Record, so `include Attachable` in an app model under this namespace would resolve to the gem constant. Use the `ASV*` prefix (`spec/global/active_storage_validations_spec.rb`)
 
 ## Read First When Contributing
 
@@ -243,7 +246,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 3. `lib/active_storage_validations.rb` + `railtie.rb`
 4. A simple validator: `attached_validator.rb`
 5. Comparison path: `base_comparison_validator.rb` + `size_validator.rb`
-6. Shared core: `shared/asv_attachable.rb`, `shared/asv_analyzable.rb`, `shared/asv_errorable.rb`
+6. Shared core: `asv_attachable_adapter.rb`, `shared/asv_attachable.rb`, `shared/asv_analyzable.rb`, `shared/asv_errorable.rb`
 7. Spoofing / sniffers: `content_type_validator.rb` + `analyzer/content_type_analyzer/`
 8. `spec/rails_helper.rb` + one validator spec and its `shared_examples/`
 9. `.github/workflows/main.yml`

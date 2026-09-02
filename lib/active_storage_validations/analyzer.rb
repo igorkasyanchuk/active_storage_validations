@@ -40,43 +40,10 @@ module ActiveStorageValidations
       raise NotImplementedError
     end
 
-    # rubocop:disable Metrics/MethodLength
     def media(tempfile)
-      @media ||= case @attachable
-      when ActiveStorage::Blob, String
-        blob = @attachable.is_a?(String) ? ActiveStorage::Blob.find_signed!(@attachable) : @attachable
-        media_from_tempfile_path(tempfile, blob)
-      when Hash
-        io = @attachable[:io]
-        if io.is_a?(StringIO)
-          media_from_tempfile_path(tempfile, io)
-        else
-          File.open(io) do |file|
-            media_from_path(file.path)
-        end
-        end
-      when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
-        media_from_path(@attachable.path)
-      when File
-        supports_file_attachment? ? media_from_path(@attachable.path) : raise_rails_like_error(@attachable)
-      when Pathname
-        supports_pathname_attachment? ? media_from_path(@attachable.to_s) : raise_rails_like_error(@attachable)
-      else
-        raise_rails_like_error(@attachable)
+      @media ||= wrap_attachable(@attachable).with_media_path(tempfile) do |path|
+        media_from_path(path)
       end
-    end
-
-    def media_from_tempfile_path(tempfile, file_representation)
-      if file_representation.is_a?(ActiveStorage::Blob)
-        file_representation.download { |chunk| tempfile.write(chunk) }
-      else
-        IO.copy_stream(file_representation, tempfile)
-        file_representation.rewind
-      end
-
-      tempfile.flush
-      tempfile.rewind
-      media_from_path(tempfile.path)
     end
 
     # Override this method in a concrete subclass. Have it return a media object.

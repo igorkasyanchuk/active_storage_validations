@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../asv_attachable_adapter"
+
 module ActiveStorageValidations
   # ActiveStorageValidations::ASVAttachable
   #
@@ -66,30 +68,9 @@ module ActiveStorageValidations
       end
     end
 
-    # Retrieve the full declared content_type from attachable.
-    # rubocop:disable Metrics/MethodLength
     def full_attachable_content_type(attachable)
-      case attachable
-      when ActiveStorage::Blob
-        attachable.content_type
-      when ActionDispatch::Http::UploadedFile
-        attachable.content_type
-      when Rack::Test::UploadedFile
-        attachable.content_type
-      when String
-        blob = ActiveStorage::Blob.find_signed!(attachable)
-        blob.content_type
-      when Hash
-        attachable[:content_type]
-      when File
-        supports_file_attachment? ? marcel_content_type_from_filename(attachable) : raise_rails_like_error(attachable)
-      when Pathname
-        supports_pathname_attachment? ? marcel_content_type_from_filename(attachable) : raise_rails_like_error(attachable)
-      else
-        raise_rails_like_error(attachable)
-      end
+      wrap_attachable(attachable).content_type
     end
-    # rubocop:enable Metrics/MethodLength
 
     # Retrieve the declared content_type from attachable without potential mime
     # type parameters (e.g. 'application/x-rar-compressed;version=5')
@@ -123,90 +104,23 @@ module ActiveStorageValidations
       (full_attachable_content_type(attachable) || marcel_content_type_from_filename(attachable)).split("/").first
     end
 
-    # Retrieve the io from attachable.
-    # rubocop:disable Metrics/MethodLength
-    # rubocop:disable Metrics/AbcSize
     def attachable_io(attachable, max_byte_size: nil)
-      io = case attachable
-      when ActiveStorage::Blob
-        max_byte_size ? attachable.download_chunk(0...max_byte_size) : attachable.download
-      when ActionDispatch::Http::UploadedFile
-        max_byte_size ? attachable.read(max_byte_size) : attachable.read
-      when Rack::Test::UploadedFile
-        max_byte_size ? attachable.read(max_byte_size) : attachable.read
-      when String
-        blob = ActiveStorage::Blob.find_signed!(attachable)
-        max_byte_size ? blob.download_chunk(0...max_byte_size) : blob.download
-      when Hash
-        max_byte_size ? attachable[:io].read(max_byte_size) : attachable[:io].read
-      when File
-        raise_rails_like_error(attachable) unless supports_file_attachment?
-        max_byte_size ? attachable.read(max_byte_size) : attachable.read
-      when Pathname
-        raise_rails_like_error(attachable) unless supports_pathname_attachment?
-        max_byte_size ? attachable.read(max_byte_size) : attachable.read
-      else
-        raise_rails_like_error(attachable)
-      end
-
-      rewind_attachable_io(attachable)
+      wrapped = wrap_attachable(attachable)
+      io = wrapped.read(max_byte_size: max_byte_size)
+      wrapped.rewind
       io
     end
-    # rubocop:enable Metrics/MethodLength
-    # rubocop:enable Metrics/AbcSize
 
-    # Rewind the io attachable.
     def rewind_attachable_io(attachable)
-      case attachable
-      when ActiveStorage::Blob, String
-        # nothing to do
-      when ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
-        attachable.rewind
-      when Hash
-        attachable[:io].rewind
-      when File
-        raise_rails_like_error(attachable) unless supports_file_attachment?
-        attachable.rewind
-      when Pathname
-        raise_rails_like_error(attachable) unless supports_pathname_attachment?
-        File.open(attachable) { |f| f.rewind }
-      else
-        raise_rails_like_error(attachable)
-      end
+      wrap_attachable(attachable).rewind
     end
 
-    # Retrieve the declared filename from attachable.
-    # rubocop:disable Metrics/MethodLength
     def attachable_filename(attachable)
-      case attachable
-      when ActiveStorage::Blob
-        attachable.filename
-      when ActionDispatch::Http::UploadedFile
-        attachable.original_filename
-      when Rack::Test::UploadedFile
-        attachable.original_filename
-      when String
-        blob = ActiveStorage::Blob.find_signed!(attachable)
-        blob.filename
-      when Hash
-        attachable[:filename]
-      when File
-        supports_file_attachment? ? File.basename(attachable) : raise_rails_like_error(attachable)
-      when Pathname
-        supports_pathname_attachment? ? File.basename(attachable) : raise_rails_like_error(attachable)
-      else
-        raise_rails_like_error(attachable)
-      end
+      wrap_attachable(attachable).filename
     end
-    # rubocop:enable Metrics/MethodLength
 
-    # Raise the same Rails error for not-implemented file representations.
-    def raise_rails_like_error(attachable)
-      raise(
-        ArgumentError,
-        "Could not find or build blob: expected attachable, " \
-          "got #{attachable.inspect}"
-      )
+    def wrap_attachable(attachable)
+      ASVAttachableAdapter.wrap(attachable, file_supported: supports_file_attachment?)
     end
 
     # Check if the current Rails version supports File or Pathname attachment
