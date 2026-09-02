@@ -23,6 +23,7 @@
   - Add Dependabot for GitHub Actions and the root Gemfile; upload SimpleCov from the Ruby 3.4 / Rails 8.1 / vips CI job (artifact only; Codecov upload removed)
   - Bump CI GitHub Actions to latest majors (`actions/checkout@v7`, `actions/upload-artifact@v7`)
   - Bump development gems (mini_magick, rubocop, rubocop-performance, simplecov, sqlite3, webmock, vernier) and the local Rails pin to 8.1.3.1
+  - Remove invalid `validate_attached_of(...).allow_blank` matcher example (`attached` rejects `:allow_blank`)
 
 # Released
 - 4.1.0

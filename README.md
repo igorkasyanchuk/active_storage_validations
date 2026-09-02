@@ -976,9 +976,6 @@ All matchers can currently be customized with these options:
 
 ```ruby
 describe User do
-  # :allow_blank
-  it { is_expected.to validate_attached_of(:avatar).allow_blank }
-
   # :on
   it { is_expected.to validate_attached_of(:avatar).on(:update) }
   it { is_expected.to validate_attached_of(:avatar).on(%i[update custom]) }
