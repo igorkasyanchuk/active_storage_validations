@@ -1,6 +1,7 @@
 # Unreleased
 
 - **FIXED**
+  - Fix size / metadata matchers raising on Minitest 6 after `Minitest::Mock` was extracted (https://github.com/igorkasyanchuk/active_storage_validations/issues/430). Matchers now stub via a singleton method and do not need `minitest-mock`
   - Fix Swedish `aspect_ratio` interpolation placeholders (`authorized_aspect_ratios`)
   - Fix `filename` error option for `UploadedFile` / `File` / `Pathname` attachables
   - Fix `with_audio` rejecting audio files: the audio analyzer now reports an `audio` metadata key, so `with_audio` works on audio attachments and not only on videos

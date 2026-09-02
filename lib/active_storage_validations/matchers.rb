@@ -14,19 +14,30 @@ require "active_storage_validations/matchers/pages_validator_matcher"
 
 module ActiveStorageValidations
   module Matchers
-    # Helper to stub a method with either RSpec or Minitest (whatever is available)
+    # Temporary singleton-method wrap. Independent of RSpec::Mocks and of
+    # Minitest::Mock / Object#stub (extracted to minitest-mock in Minitest 6),
+    # so size / metadata matchers work on stock Minitest 5 and 6.
     def self.stub_method(object, method, result)
-      if defined?(Minitest::Mock)
-        object.stub(method, result) do
-          yield
-        end
-      elsif defined?(RSpec::Mocks)
-        RSpec::Mocks.allow_message(object, method) { result }
-        yield
-      else
-        raise "Need either Minitest::Mock or RSpec::Mocks to run this validator matcher"
+      singleton = object.singleton_class
+      owned = singleton.instance_methods(false).include?(method)
+      original = owned ? singleton.instance_method(method) : nil
+
+      singleton.define_method(method) { |*_args, **_kwargs| result }
+      yield
+    ensure
+      restore_stubbed_method(singleton, method, owned, original)
+    end
+
+    def self.restore_stubbed_method(singleton, method, owned, original)
+      return unless singleton
+
+      if owned
+        singleton.define_method(method, original)
+      elsif singleton.instance_methods(false).include?(method)
+        singleton.remove_method(method)
       end
     end
+    private_class_method :restore_stubbed_method
 
     def self.mock_metadata(attachment, metadata = {})
       asv_metadata_available_keys = { width: nil, height: nil, duration: nil, content_type: nil }

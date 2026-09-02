@@ -1000,7 +1000,7 @@ end
 ### Minitest
 
 #### Setup
-To use the matchers, make sure you have the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem up and running.
+To use the matchers, make sure you have the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem up and running. No extra mock library is required (`minitest-mock` is not needed on Minitest 6).
 
 You need to require the matchers:
 
