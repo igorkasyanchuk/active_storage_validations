@@ -5,4 +5,7 @@ source 'https://rubygems.org'
 # nokogiri < 1.18 requires ruby < 3.4.dev, which breaks CI on Ruby 3.4 / 4.0
 gem 'nokogiri', '>= 1.18'
 
+# Rails 7.0's sqlite3 adapter is pinned to ~> 1.4
+gem 'sqlite3', '~> 1.7'
+
 gemspec :path => '../'

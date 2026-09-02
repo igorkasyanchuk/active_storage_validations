@@ -15,7 +15,7 @@ gemspec
 
 # This Rails version will be the one used when running `bundle exec rake spec` locally
 # Uncomment the line then run `bundle install`
-gem "rails", "8.1.2"
+gem "rails", "8.1.3.1"
 # gem "sqlite3", ">= 2.5"
 # gem "nokogiri", ">= 1.18"
 
@@ -27,8 +27,8 @@ group :development, :test do
   # gem "aws-sdk-s3", require: false
 
   # Linters
-  gem "rubocop", "~> 1.85", require: false
-  gem "rubocop-performance", "~> 1.26", require: false
+  gem "rubocop", "~> 1.90", require: false
+  gem "rubocop-performance", "~> 1.27", require: false
   gem "rubocop-rails-omakase", "~> 1.1", require: false
   gem "rubocop-rspec", "~> 3.0", require: false
 end

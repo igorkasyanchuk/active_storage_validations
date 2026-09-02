@@ -16,14 +16,7 @@ unless ENV["NO_COVERAGE"]
 
   SimpleCov.start do
     command_name "RSpec"
-    # `skip` is SimpleCov >= 1.0; older gemfiles (Rails 7.0/7.1) still resolve 0.22
-    %w[/spec/ /test/ /vendor/].each do |path|
-      if respond_to?(:skip)
-        skip path
-      else
-        add_filter path
-      end
-    end
+    skip %w[/spec/ /test/ /vendor/]
   end
 end
 

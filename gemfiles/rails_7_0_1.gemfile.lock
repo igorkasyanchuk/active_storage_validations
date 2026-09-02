@@ -69,7 +69,6 @@ GEM
       rexml
     crass (1.0.7)
     diff-lcs (1.6.2)
-    docile (1.4.1)
     drb (2.2.3)
     erubi (1.13.1)
     ffi (1.17.4)
@@ -86,7 +85,7 @@ GEM
       nokogiri (>= 1.12.0)
     marcel (1.2.1)
     method_source (1.1.0)
-    mini_magick (5.3.2)
+    mini_magick (5.4.0)
       logger
     mini_mime (1.1.5)
     mini_portile2 (2.8.9)
@@ -101,7 +100,7 @@ GEM
       coderay (~> 1.1)
       method_source (~> 1.0)
       reline (>= 0.6.0)
-    public_suffix (6.0.2)
+    public_suffix (7.0.5)
     racc (1.8.1)
     rack (2.2.23)
     rack-test (2.2.0)
@@ -145,18 +144,13 @@ GEM
       ffi (~> 1.12)
       logger
     securerandom (0.4.1)
-    simplecov (0.22.0)
-      docile (~> 1.1)
-      simplecov-html (~> 0.11)
-      simplecov_json_formatter (~> 0.1)
-    simplecov-html (0.13.2)
-    simplecov_json_formatter (0.1.4)
+    simplecov (1.1.1)
     sqlite3 (1.7.3)
       mini_portile2 (~> 2.8.0)
     thor (1.5.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    webmock (3.26.2)
+    webmock (3.26.4)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
@@ -179,7 +173,7 @@ DEPENDENCIES
   rspec-rails (~> 7.0)
   ruby-vips (>= 2.1.0)
   simplecov
-  sqlite3
+  sqlite3 (~> 1.7)
   webmock (>= 3)
 
 BUNDLED WITH
