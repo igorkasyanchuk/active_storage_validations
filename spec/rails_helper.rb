@@ -54,8 +54,26 @@ RSpec.configure do |config|
   config.include MatcherHelpers, file_path: %r{spec/matchers}
   config.include AnalyzerHelpers, file_path: %r{spec/analyzers}
 
+  # Helpers return `{ io: File.open(...) }` and many examples open fixture
+  # Files directly. MRI only releases those FDs when GC runs, so a full
+  # local run can hit Errno::EMFILE when SimpleCov locks the resultset.
+  config.after { close_leaked_fixture_ios }
+
   config.after(:suite) do
     FileUtils.rm_rf(Rails.root.join("tmp/storage"))
+  end
+end
+
+def close_leaked_fixture_ios
+  public_root = Rails.root.join("public").to_s
+
+  ObjectSpace.each_object(File) do |file|
+    next if file.closed?
+
+    path = file.path
+    file.close if path&.start_with?(public_root)
+  rescue IOError, Errno::EBADF
+    # already closed between the check and close
   end
 end
 

@@ -122,4 +122,4 @@ Older commits used non-standard types. Use these instead:
 | `readme` | `README.md` |
 | `changelog` | `CHANGES.md` |
 | `docs` | Upgrade guides and other docs under `docs/` |
-| `agents` | `AGENTS.md` and `.cursor/rules/` |
+| `agents` | `AGENTS.md`, `.cursor/rules/`, and `.cursor/skills/` |
