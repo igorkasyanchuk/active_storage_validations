@@ -204,6 +204,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 - `docs/` — upgrade guides for humans consuming the gem
 - `AGENTS.md` — this file; agent-oriented contributor guidance (humans can use it too)
 - `.cursor/rules/` — Cursor project rules (commit messages, spec conventions); referenced from this file
+- `.cursor/skills/` — Cursor Agent skills (e.g. `/commit`); not shipped in the gem
 - Do not invent an Appraisal setup; keep using `BUNDLE_GEMFILE=`
 - Do not reintroduce a Minitest suite for the gem itself (consumer matchers may still support Minitest)
 
@@ -215,11 +216,12 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 | Changelog | `CHANGES.md` |
 | Upgrade to 2.x / 3.x / 4.x | `docs/upgrade_to_2.md`, `docs/upgrade_to_3.md`, `docs/upgrade_to_4.md` |
 | Commit messages | [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) (Conventional Commits; always apply for agents) |
+| `/commit` skill | [`.cursor/skills/commit/SKILL.md`](.cursor/skills/commit/SKILL.md) |
 | Spec conventions | [`.cursor/rules/spec.mdc`](.cursor/rules/spec.mdc) (shared; named `subject`), plus [`spec-validators.mdc`](.cursor/rules/spec-validators.mdc), [`spec-matchers.mdc`](.cursor/rules/spec-matchers.mdc), [`spec-analyzers.mdc`](.cursor/rules/spec-analyzers.mdc), [`spec-integration.mdc`](.cursor/rules/spec-integration.mdc) |
 
 ## Git / commit messages
 
-Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title format. Do not infer style from `git log`.
+Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title format. Do not infer style from `git log`. Slash `/commit` runs [`.cursor/skills/commit/SKILL.md`](.cursor/skills/commit/SKILL.md).
 
 ## Pitfalls
 
