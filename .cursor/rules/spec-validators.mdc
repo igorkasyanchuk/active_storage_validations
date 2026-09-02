@@ -15,7 +15,7 @@ alwaysApply: false
   - `"works fine with attachables"`, `"is performance optimized"`
   - `"works with all rails common validation options"`
   - comparison: `"comparison less_than option"`, `less_than_or_equal_to`, `greater_than`, `greater_than_or_equal_to`, `between`, `equal_to`
-- Use `ValidatorHelpers` expectations: `is_expected_to_be_valid`, `is_expected_not_to_be_valid`, `is_expected_to_include_error_message`, `is_expected_to_have_error_options`.
+- Use `ValidatorHelpers` expectations: `is_expected_to_be_valid`, `is_expected_not_to_be_valid`, `is_expected_to_include_error_message`, `is_expected_to_have_error_options`. Integration / stacked-validator examples must pass `validator:` (e.g. `validator: :size`). The filter is `error.options[:validator_type] == (kwargs[:validator] || validator_sym)` — keep the parentheses.
 - Dummy models live under `test/dummy/app/models/<validator>/`.
 - Cross-validator stacking belongs in `spec/validators/integration/` or `spec/integration/`, not in a single-validator file.
 - Use `describe` for named units/topics (`#check_validity!`, `:less_than`) and `context` for situations (`when …`, `with …`, `without …`).

@@ -27,6 +27,7 @@
   - Remove invalid `validate_attached_of(...).allow_blank` matcher example (`attached` rejects `:allow_blank`)
   - Align bench workflow Actions with CI (`checkout` / `upload-artifact` v7); pin Magika CLI to `cli/v1.1.0`; run `apt-get update` once per job
   - Raise `CommandLineToolNotInstalledError` from a shared `ContentTypeAnalyzer` ancestor so both `file` and `magika` backends can be rescued together
+  - Fail the suite when SimpleCov line coverage drops below 50% (`spec/spec_helper.rb`)
 
 # Released
 - 4.1.0

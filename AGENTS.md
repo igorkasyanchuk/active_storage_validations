@@ -27,11 +27,13 @@ benchmark/                                 # Optional ips / require suite (not s
 docs/upgrade_to_*.md                       # Upgrade guides
 ```
 
-**Key integration points** (`railtie.rb`):
+**Key integration points** (`railtie.rb` / `engine.rb`):
 
-- Includes `ActiveStorageValidations` into Active Record (so `validates :avatar, attached: true` resolves `AttachedValidator`)
-- Prepends `FormBuilder` onto `ActionView::Helpers::FormBuilder`
-- Includes `ASVBlobMetadatable` on `ActiveStorage::Blob`
+- `Engine` registers the gem so `config/locales/*.yml` is on the I18n load path
+- `Railtie` holds the initializers:
+  - Includes `ActiveStorageValidations` into Active Record (so `validates :avatar, attached: true` resolves `AttachedValidator`)
+  - Prepends `FormBuilder` onto `ActionView::Helpers::FormBuilder`
+  - Includes `ASVBlobMetadatable` on `ActiveStorage::Blob`
 
 **Shared concerns** (`lib/active_storage_validations/shared/`):
 
@@ -74,17 +76,27 @@ External analyzer commands (`ffprobe`, `pdfinfo`, `file`, `magika`, ImageMagick 
 
 ### Content-type spoofing backends (v4)
 
-`content_type` `spoofing_protection` accepts `true` / `:file` (UNIX `file` CLI) or `:magika` (Google Magika CLI). Detected types are cached as `asv_content_type` plus `asv_content_type_backend`; switching backend re-analyzes. Legacy blobs with only `asv_content_type` are treated as the `:file` backend. Matcher: `#spoofing_protection` / `#spoofing_protection(:magika)`. Install Magika in any environment that uses `:magika` (CI already installs it).
+`content_type` `spoofing_protection` accepts `true` / `:file` (UNIX `file` CLI) or `:magika` (Google Magika CLI). Detected types are cached as `asv_content_type` plus `asv_content_type_backend`; switching backend re-analyzes. Legacy blobs with only `asv_content_type` are treated as the `:file` backend. Matcher: `#spoofing_protection` / `#spoofing_protection(:magika)`. Install Magika in any environment that uses `:magika` (CI pins the CLI to `cli/v1.1.0` in `.github/workflows/main.yml`).
+
+A missing `file` or `magika` binary raises `ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::CommandLineToolNotInstalledError` (shared ancestor; both backends resolve that constant).
 
 ### Matcher `#except_on` (v4)
 
 Matchers support `#except_on` for Rails `:except_on` (available since Rails 8.0), e.g. `validate_attached_of(:avatar).except_on(:update)`. Specs that exercise it should guard for Rails < 8.0.
+
+### Matcher comparison bounds
+
+`BaseComparisonValidatorMatcher` (`#less_than`, `#less_than_or_equal_to`, `#greater_than`, `#greater_than_or_equal_to`, `#between`, `#equal_to`) must probe the inclusive endpoint itself. Checking only `min + 1` / `max - 1` lets `less_than(n)` satisfy `#less_than_or_equal_to(n)`. Shared examples: `"base comparison validator matcher less_than_or_equal_to rejects less_than"`, `"… greater_than_or_equal_to rejects greater_than"`, `"… equal_to rejects looser comparisons"`.
+
+`AttachedValidator` rejects `:allow_blank` / `:allow_nil`. Do not add `#allow_blank` to `validate_attached_of` or document that chain.
 
 ## Testing Commands
 
 Default task is `rake spec` (RSpec, pattern `spec/**/*_spec.rb`).
 
 ### Local default Gemfile
+
+The root `Gemfile` pins Rails for `bundle exec rake spec` without `BUNDLE_GEMFILE` (currently 8.1.x). Matrix pins live under `gemfiles/`.
 
 ```bash
 bundle install
@@ -94,6 +106,8 @@ bundle exec rubocop --parallel
 ```
 
 Focus examples with `:focus` / `fit` / `fdescribe` (`filter_run_when_matching :focus` is enabled).
+
+SimpleCov runs unless `NO_COVERAGE=1`. `minimum_coverage` is 50 (`spec/spec_helper.rb`) so a targeted file still finishes; the full suite is ~97%. CI uploads the coverage artifact from the Ruby 3.4 / Rails 8.1 / vips job.
 
 ### Multi-Rails testing via `BUNDLE_GEMFILE`
 
@@ -172,6 +186,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 2. Compose concerns from `matchers/shared/` (e.g. `ASVTimeoutable`, `ASVExceptOnable`, `ASVSpoofingProtectable`)
 3. Add/update specs under `spec/matchers/`
 4. Matchers filter errors using `validator_type` — keep that aligned with the validator
+5. Comparison matchers must keep rejecting exclusive validators from inclusive chains (see Matcher comparison bounds)
 
 ### Changing analyzers / metadata
 
@@ -180,6 +195,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 3. Blobs are treated as immutable: once metadata keys exist, re-analysis is skipped — except content-type spoofing, which also keys the cache on `asv_content_type_backend` (`file` vs `magika`)
 4. Run specs with both `IMAGE_PROCESSOR=vips` and `IMAGE_PROCESSOR=mini_magick` when touching image analysis
 5. Content-type sniffer changes usually need both `File` and `Magika` coverage under `spec/analyzers/content_type_analyzers/`
+6. Missing-CLI errors must keep raising the shared `ContentTypeAnalyzer::CommandLineToolNotInstalledError`
 
 ### Finding related code
 
@@ -189,7 +205,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 | Shared attachable/blob loop | `shared/asv_attachable.rb` |
 | Attachable type dispatch | `asv_attachable_adapter.rb` (`ASVAttachableAdapter`) |
 | Analysis + caching | `shared/asv_analyzable.rb`, `extensors/asv_blob_metadatable.rb` |
-| Content-type sniffers | `analyzer/content_type_analyzer/{file,magika}.rb` |
+| Content-type sniffers | `analyzer/content_type_analyzer/{file,magika}.rb` (`CommandLineToolNotInstalledError` on the parent) |
 | Error / I18n options | `shared/asv_errorable.rb`, `config/locales/en.yml` |
 | Form `accept` inference | `form_builder.rb` |
 | Matcher API | `matchers.rb` + `matchers/<name>_validator_matcher.rb` |
@@ -235,7 +251,10 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Railtie must not use `after: :load_config_initializers` (stack overflow; see comment in `railtie.rb`)
 - `processable_file` may reject formats with libvips untrusted loaders (e.g. SVG) when Rails sets `Vips.block_untrusted(true)`
 - Preserve content-type cache backend semantics: legacy `asv_content_type` without `asv_content_type_backend` must keep hitting the `:file` cache; switching `:file` ↔ `:magika` must re-analyze
-- Magika / `file` are optional system CLIs (not Ruby gems); override paths with `ActiveStorage.paths[:magika]` / `ActiveStorage.paths[:file]` when needed
+- Magika / `file` are optional system CLIs (not Ruby gems); override paths with `ActiveStorage.paths[:magika]` / `ActiveStorage.paths[:file]` when needed. Rescue missing tools via `ContentTypeAnalyzer::CommandLineToolNotInstalledError` (not a per-backend subclass)
+- `AttachedValidator#check_validity!` rejects `:allow_blank` / `:allow_nil`; the attached matcher has no `#allow_blank`
+- Comparison matcher inclusive chains (`#less_than_or_equal_to`, `#greater_than_or_equal_to`, `#between`) must fail when the validator is exclusive (`less_than` / `greater_than`)
+- `ValidatorHelpers` filter errors with `error.options[:validator_type] == (kwargs[:validator] || validator_sym)` — keep the parentheses; `==` binds tighter than `||`
 - Do not reintroduce a Minitest suite for the gem; keep consumer matcher docs for both RSpec and Minitest/shoulda
 - Matcher `stub_method` uses a singleton-method wrap (not `Minitest::Mock` / `Object#stub`). Minitest 6 extracted mock to `minitest-mock`; do not reintroduce that dependency
 - Do not add `ActiveStorageValidations::Attachable` (or other short names that apps use as concerns). The gem module is included into Active Record, so `include Attachable` in an app model under this namespace would resolve to the gem constant. Use the `ASV*` prefix (`spec/global/active_storage_validations_spec.rb`)
