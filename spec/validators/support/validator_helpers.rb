@@ -16,9 +16,7 @@ module ValidatorHelpers
     subject.valid?(kwargs[:context])
 
     validator_error_options =
-      subject.errors.find do |error|
-        error.options[:validator_type] == kwargs[:validator] || validator_sym
-      end&.options
+      subject.errors.find { |error| matching_validator_type?(error, **kwargs) }&.options
 
     expect(validator_error_options).not_to be_nil, "Expected validator error options to be present but got nil"
 
@@ -36,9 +34,7 @@ module ValidatorHelpers
         subject.valid?(kwargs[:context])
 
         validator_error_messages =
-          subject.errors.select do |error|
-            error.options[:validator_type] == kwargs[:validator] || validator_sym
-          end.map(&:message)
+          subject.errors.select { |error| matching_validator_type?(error, **kwargs) }.map(&:message)
 
         message = kwargs[:error_options][:custom_message] || I18n.t("errors.messages.#{message_key}", **kwargs[:error_options])
 
@@ -65,6 +61,10 @@ module ValidatorHelpers
   end
 
   private
+
+  def matching_validator_type?(error, **kwargs)
+    error.options[:validator_type] == (kwargs[:validator] || validator_sym)
+  end
 
   def value_is_equal_or_both_are_procs?(value_1, value_2)
     # Comparing Procs is tricky, let's just ensure that both values are procs
