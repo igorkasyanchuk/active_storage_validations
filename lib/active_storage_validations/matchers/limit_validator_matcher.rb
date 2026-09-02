@@ -61,6 +61,7 @@ module ActiveStorageValidations
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
           is_except_on_valid? &&
+          is_allowing_blank? &&
           is_custom_message_valid? &&
           file_count_not_smaller_than_min? &&
           file_count_equal_min? &&
@@ -83,7 +84,7 @@ module ActiveStorageValidations
       end
 
       def file_count_not_smaller_than_min?
-        @min.nil? || @min.zero? || !passes_validation_with_limits(@min - 1)
+        @min.nil? || @min.zero? || (@allow_blank && @min == 1) || !passes_validation_with_limits(@min - 1)
       end
 
       def file_count_equal_min?

@@ -33,7 +33,7 @@ module ActiveStorageValidations
         initialize_messageable
         initialize_rspecable
         @attribute_name = attribute_name
-        @min = @max = nil
+        @min = @max = @exact = nil
       end
 
       def less_than(value)
@@ -120,7 +120,11 @@ module ActiveStorageValidations
       end
 
       def equal_to_exact?
-        @exact.nil? || passes_validation_with_value(@exact)
+        return true if @exact.nil?
+
+        passes_validation_with_value(@exact) &&
+          !passes_validation_with_value(@exact - smallest_measurement) &&
+          !passes_validation_with_value(@exact + smallest_measurement)
       end
 
       def smallest_measurement

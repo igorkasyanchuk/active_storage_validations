@@ -43,6 +43,9 @@ class ProcessableFile::Matcher < ApplicationRecord
     validates :with_several_validators_and_except_on, processable_file: true, except_on: :custom
   end
 
+  has_one_attached :allow_blank
+  validates :allow_blank, processable_file: true, allow_blank: true
+
   has_one_attached :as_instance
   validates :as_instance, processable_file: true
 

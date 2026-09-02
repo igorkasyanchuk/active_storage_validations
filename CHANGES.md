@@ -11,6 +11,8 @@
   - Fix `content_type` and `aspect_ratio` keeping per-validation state on the validator instance. Active Model reuses one validator per class across threads, so concurrent validations could report another record's content type or aspect ratio — and, with `spoofing_protection`, compare a file against another file's detected type
   - Fix PDF first-page dimensions for sizes with two or more fractional digits (e.g. A4 `595.276 x 841.89`). The `pdfinfo` parser used to split extra digits into a second number, so height became `8`
   - Fix `ImageAnalyzer` support cache being keyed by instance. A new analyzer is built per attachable, so the cache never hit and retained every instance (and its attachable) for the process lifetime. It is now keyed by analyzer class
+  - Fix `validate_limits_of` / `validate_processable_file_of` `#allow_blank` being a no-op (the matchers included the concern but never called it). `#allow_blank` now checks the validator option
+  - Fix comparison matcher `#equal_to` matching looser bounds (e.g. `less_than_or_equal_to`). It now also requires `exact ±` the smallest unit to fail
 - **MISC**
   - Add a locale key / interpolation contract spec; include `ru` in `I18n.available_locales`
   - Clarify why `file_field` skips Proc `content_type` options when inferring the HTML `accept` attribute

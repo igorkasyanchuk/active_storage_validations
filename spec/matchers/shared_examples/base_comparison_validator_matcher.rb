@@ -39,3 +39,20 @@ RSpec.shared_examples "base comparison validator matcher only match when exact v
     end
   end
 end
+
+RSpec.shared_examples "base comparison validator matcher equal_to rejects looser comparisons" do
+  context "when the validator uses :less_than_or_equal_to rather than :equal_to" do
+    subject(:configured_matcher) { matcher.equal_to(looser_bound) }
+
+    let(:model_attribute) { :less_than_or_equal_to }
+    let(:looser_bound) do
+      case described_class.name
+      when /Size/ then 2.kilobytes
+      when /Duration/ then 2.seconds
+      when /Pages/ then 2
+      end
+    end
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+end

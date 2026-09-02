@@ -14,7 +14,7 @@ RSpec.shared_examples "works with both instance and class" do
       when :with_audio then nil
       when :size then matcher.less_than_or_equal_to(5.megabytes)
       when :total_size then matcher.less_than_or_equal_to(5.megabytes)
-      when :pages then matcher.equal_to(5)
+      when :pages then matcher.less_than_or_equal_to(5)
       end
     end
 

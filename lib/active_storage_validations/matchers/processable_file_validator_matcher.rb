@@ -51,6 +51,7 @@ module ActiveStorageValidations
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
           is_except_on_valid? &&
+          is_allowing_blank? &&
           is_timeout_valid? &&
           is_custom_message_valid? &&
           is_valid_when_image_processable? &&

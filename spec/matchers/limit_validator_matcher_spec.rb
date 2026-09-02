@@ -67,6 +67,18 @@ RSpec.describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
   end
 
   describe "Combinations" do
+    describe "#min + #max + #allow_blank" do
+      let(:model_attribute) { :allow_blank }
+
+      context "when used on a limit validator with :min, :max and :allow_blank" do
+        subject(:configured_matcher) do
+          matcher.min(1).max(5).allow_blank
+        end
+
+        it { is_expected_to_match_for(klass) }
+      end
+    end
+
     describe "#min + #max" do
       let(:model_attribute) { :min_max }
 

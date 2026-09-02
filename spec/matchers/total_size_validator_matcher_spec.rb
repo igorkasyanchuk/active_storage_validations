@@ -99,6 +99,7 @@ RSpec.describe ActiveStorageValidations::Matchers::TotalSizeValidatorMatcher do
     let(:validator_value) { 5.kilobytes }
 
     it_behaves_like "base comparison validator matcher only match when exact value"
+    it_behaves_like "base comparison validator matcher equal_to rejects looser comparisons"
   end
 
   describe "#allow_blank" do

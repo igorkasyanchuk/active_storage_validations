@@ -21,7 +21,7 @@ module ActiveStorageValidations
       def is_allowing_blank?
         return true unless @allow_blank
 
-        validate
+        attribute_validators.any? { |validator| validator.options[:allow_blank] }
       end
     end
   end

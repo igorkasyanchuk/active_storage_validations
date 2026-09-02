@@ -25,6 +25,10 @@ RSpec.describe ActiveStorageValidations::Matchers::ProcessableFileValidatorMatch
     it { is_expected_not_to_match_for(klass) }
   end
 
+  describe "#allow_blank" do
+    it_behaves_like "works with allow_blank"
+  end
+
   describe "#with_message" do
     it_behaves_like "works with custom message"
   end

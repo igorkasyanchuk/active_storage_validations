@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples "works with allow_blank" do
-  let(:model_attribute) { :allow_blank }
-
   context "when provided with the other validator requirements" do
     before do
       case validator_sym
@@ -13,20 +11,36 @@ RSpec.shared_examples "works with allow_blank" do
       when :with_audio then matcher
       when :size then matcher.less_than_or_equal_to(5.megabytes)
       when :total_size then matcher.less_than_or_equal_to(5.megabytes)
-      when :pages then matcher.equal_to(5)
+      when :pages then matcher.less_than_or_equal_to(5)
+      when :limit then matcher
+      when :processable_file then matcher
       end
     end
 
-    context "and when provided with #allow_blank method" do
-      subject(:configured_matcher) { matcher.allow_blank }
+    context "when the attribute allows blank" do
+      let(:model_attribute) { :allow_blank }
 
-      it { is_expected_to_match_for(klass) }
+      context "and when provided with #allow_blank method" do
+        subject(:configured_matcher) { matcher.allow_blank }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      context "and when not provided with #allow_blank method" do
+        subject(:configured_matcher) { matcher }
+
+        it { is_expected_to_match_for(klass) }
+      end
     end
 
-    context "and when not provided with #allow_blank method" do
-      subject(:configured_matcher) { matcher }
+    context "when the attribute does not allow blank" do
+      let(:model_attribute) { :as_instance }
 
-      it { is_expected_to_match_for(klass) }
+      context "and when provided with #allow_blank method" do
+        subject(:configured_matcher) { matcher.allow_blank }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
     end
   end
 end
