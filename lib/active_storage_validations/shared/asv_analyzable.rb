@@ -29,7 +29,7 @@ module ActiveStorageValidations
 
       new_metadata = generate_metadata_for(attachable, metadata_keys) || {}
       blob.merge_into_active_storage_validations_metadata(memoize_unavailable_keys(new_metadata, metadata_keys))
-      blob.save!
+      persist_asv_metadata(blob)
 
       media_metadata(blob)
     end
@@ -81,9 +81,18 @@ module ActiveStorageValidations
       return failed_content_type_metadata(backend) if content_type_analysis_failed?(new_metadata)
 
       blob.merge_into_active_storage_validations_metadata(new_metadata)
-      blob.save!
+      persist_asv_metadata(blob)
 
       blob.active_storage_validations_metadata
+    end
+
+    # A bare +valid?+ on a new record must not INSERT an +active_storage_blobs+
+    # row (no file on the service, orphaned if the record is never saved).
+    # In-memory +asv_*+ on the unsaved blob is persisted by Rails when the
+    # record is saved. Already-persisted blobs (re-validation, attach after
+    # save, pre-v2 blobs) still need +save!+ so the cache survives +reload+.
+    def persist_asv_metadata(blob)
+      blob.save! if blob.persisted?
     end
 
     def content_type_analysis_failed?(new_metadata)

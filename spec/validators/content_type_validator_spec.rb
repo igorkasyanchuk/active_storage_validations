@@ -457,7 +457,7 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
 
         before do
           model.public_send(attribute).attach(okay_file)
-          model.valid?
+          model.save!
         end
 
         context "when validating again with the file backend" do

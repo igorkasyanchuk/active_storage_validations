@@ -14,6 +14,7 @@
   - Fix `validate_limits_of` / `validate_processable_file_of` `#allow_blank` being a no-op (the matchers included the concern but never called it). `#allow_blank` now checks the validator option
   - Fix comparison matcher `#equal_to` matching looser bounds (e.g. `less_than_or_equal_to`). It now also requires `exact ±` the smallest unit to fail
   - Fix comparison matchers `#less_than_or_equal_to` / `#greater_than_or_equal_to` / `#between` matching exclusive bounds (e.g. `less_than`). They now require the inclusive endpoint itself to pass
+  - Stop inserting an `active_storage_blobs` row from a bare `valid?` on a new record. `asv_*` metadata stays in memory on the unsaved blob and is written when the record is saved. Already-persisted blobs still `save!` so the cache survives `reload`
 - **MISC**
   - Add a locale key / interpolation contract spec; include `ru` in `I18n.available_locales`
   - Clarify why `file_field` skips Proc `content_type` options when inferring the HTML `accept` attribute

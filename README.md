@@ -380,7 +380,7 @@ Spoofing protection compares the declared Active Storage content type to a type 
 
 Neither backend fully parses the file. They do **not** load the whole file into RAM. For already-persisted blobs (e.g. remote storage), the analyzer still downloads the blob to a local tempfile before sniffing. That download is streamed in chunks to disk, but it can still be costly for very large files. Local path uploads are analyzed in place.
 
-Detected types are cached on the blob as `asv_content_type` + `asv_content_type_backend`. Switching backend re-analyzes. Legacy blobs that only have `asv_content_type` (no backend key) are treated as `:file` and keep using the cache — they are not re-analyzed.
+Detected types are cached on the blob as `asv_content_type` + `asv_content_type_backend`. Switching backend re-analyzes. Legacy blobs that only have `asv_content_type` (no backend key) are treated as `:file` and keep using the cache — they are not re-analyzed. New (unsaved) blobs keep `asv_*` in memory until the record is saved; already-persisted blobs write the cache immediately so it survives `reload`.
 
 Sniffers will not always return the exact same MIME as Active Storage (AS uses first ~4kb + filename + extension). Close parent types are accepted via `Marcel::TYPE_PARENTS` (e.g. `video/x-ms-wmv` vs `video/x-ms-asf`).
 

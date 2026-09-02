@@ -32,6 +32,10 @@ RSpec.shared_examples "is performance optimized" do
   context "when the attachable blob has not been analyzed by our gem yet" do
     before { model.is_performance_optimized.attach(attachable) }
 
+    it "does not persist the blob as a side effect of validation" do
+      expect { model.valid? }.not_to change(ActiveStorage::Blob, :count)
+    end
+
     it "calls the corresponding media analyzer (expensive operation) once" do
       # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
       expect_any_instance_of(validator_class).to receive(:generate_metadata_for).once.and_return({})
