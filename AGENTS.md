@@ -194,6 +194,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 | Form `accept` inference | `form_builder.rb` |
 | Matcher API | `matchers.rb` + `matchers/<name>_validator_matcher.rb` |
 | CI matrix truth | `.github/workflows/main.yml` |
+| Dependabot | `.github/dependabot.yml` (root Gemfile + Actions; not `gemfiles/*.gemfile`) |
 | Version constraints | `active_storage_validations.gemspec` |
 
 ## File Organization Principles

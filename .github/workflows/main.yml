@@ -99,3 +99,18 @@ jobs:
 
       - name: Run tests
         run: bundle exec rake spec
+
+      - name: Upload coverage artifact
+        if: matrix.ruby == '3.4' && matrix.gemfile == 'rails_8_1' && matrix.image_processor == 'vips'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+      - name: Upload coverage to Codecov
+        if: matrix.ruby == '3.4' && matrix.gemfile == 'rails_8_1' && matrix.image_processor == 'vips'
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage/coverage.json
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}

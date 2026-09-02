@@ -1,0 +1,21 @@
+# Dependabot does not watch gemfiles/*.gemfile (non-standard filenames).
+# Bump those pins when changing the CI matrix.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: bundler
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 5
