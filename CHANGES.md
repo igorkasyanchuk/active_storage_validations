@@ -1,20 +1,22 @@
 # Unreleased
 
-- **FIXED**
-  - Fix size / metadata matchers raising on Minitest 6 after `Minitest::Mock` was extracted (https://github.com/igorkasyanchuk/active_storage_validations/issues/430). Matchers now stub via a singleton method and do not need `minitest-mock`
-  - Fix Swedish `aspect_ratio` interpolation placeholders (`authorized_aspect_ratios`)
-  - Fix `filename` error option for `UploadedFile` / `File` / `Pathname` attachables
-  - Fix `with_audio` rejecting audio files: the audio analyzer now reports an `audio` metadata key, so `with_audio` works on audio attachments and not only on videos
-  - Fix metadata analysis running again on every validation when the analyzer cannot extract the requested key (e.g. `duration` on an image). Unavailable metadata is now memoized on the blob, so those files are analyzed once. Files that yield no metadata at all (missing command-line tool, timed out command, unreadable file) are still retried
-  - Fix `processable_file` accepting unprocessable files when `content_type` with `spoofing_protection` was declared on the same attribute. The cached `asv_content_type` counted as a successful analysis, so the media analyzer never ran. Content-type keys are no longer visible to the metadata validators
-  - Fix `duration` rejecting media shorter than one second. The guard meant to catch unreadable metadata truncated the duration to an integer, so a 0.5s file reported `media_metadata_missing` instead of being compared against the bounds
-  - Fix `content_type` and `aspect_ratio` keeping per-validation state on the validator instance. Active Model reuses one validator per class across threads, so concurrent validations could report another record's content type or aspect ratio — and, with `spoofing_protection`, compare a file against another file's detected type
-  - Fix PDF first-page dimensions for sizes with two or more fractional digits (e.g. A4 `595.276 x 841.89`). The `pdfinfo` parser used to split extra digits into a second number, so height became `8`
-  - Fix `ImageAnalyzer` support cache being keyed by instance. A new analyzer is built per attachable, so the cache never hit and retained every instance (and its attachable) for the process lifetime. It is now keyed by analyzer class
-  - Fix `validate_limits_of` / `validate_processable_file_of` `#allow_blank` being a no-op (the matchers included the concern but never called it). `#allow_blank` now checks the validator option
-  - Fix comparison matcher `#equal_to` matching looser bounds (e.g. `less_than_or_equal_to`). It now also requires `exact ±` the smallest unit to fail
-  - Fix comparison matchers `#less_than_or_equal_to` / `#greater_than_or_equal_to` / `#between` matching exclusive bounds (e.g. `less_than`). They now require the inclusive endpoint itself to pass
-  - Stop inserting an `active_storage_blobs` row from a bare `valid?` on a new record. `asv_*` metadata stays in memory on the unsaved blob and is written when the record is saved. Already-persisted blobs still `save!` so the cache survives `reload`
+# Released
+- 4.1.1
+  - **FIXED**
+    - Fix size / metadata matchers raising on Minitest 6 after `Minitest::Mock` was extracted (https://github.com/igorkasyanchuk/active_storage_validations/issues/430). Matchers now stub via a singleton method and do not need `minitest-mock`
+    - Fix Swedish `aspect_ratio` interpolation placeholders (`authorized_aspect_ratios`)
+    - Fix `filename` error option for `UploadedFile` / `File` / `Pathname` attachables
+    - Fix `with_audio` rejecting audio files: the audio analyzer now reports an `audio` metadata key, so `with_audio` works on audio attachments and not only on videos
+    - Fix metadata analysis running again on every validation when the analyzer cannot extract the requested key (e.g. `duration` on an image). Unavailable metadata is now memoized on the blob, so those files are analyzed once. Files that yield no metadata at all (missing command-line tool, timed out command, unreadable file) are still retried
+    - Fix `processable_file` accepting unprocessable files when `content_type` with `spoofing_protection` was declared on the same attribute. The cached `asv_content_type` counted as a successful analysis, so the media analyzer never ran. Content-type keys are no longer visible to the metadata validators
+    - Fix `duration` rejecting media shorter than one second. The guard meant to catch unreadable metadata truncated the duration to an integer, so a 0.5s file reported `media_metadata_missing` instead of being compared against the bounds
+    - Fix `content_type` and `aspect_ratio` keeping per-validation state on the validator instance. Active Model reuses one validator per class across threads, so concurrent validations could report another record's content type or aspect ratio — and, with `spoofing_protection`, compare a file against another file's detected type
+    - Fix PDF first-page dimensions for sizes with two or more fractional digits (e.g. A4 `595.276 x 841.89`). The `pdfinfo` parser used to split extra digits into a second number, so height became `8`
+    - Fix `ImageAnalyzer` support cache being keyed by instance. A new analyzer is built per attachable, so the cache never hit and retained every instance (and its attachable) for the process lifetime. It is now keyed by analyzer class
+    - Fix `validate_limits_of` / `validate_processable_file_of` `#allow_blank` being a no-op (the matchers included the concern but never called it). `#allow_blank` now checks the validator option
+    - Fix comparison matcher `#equal_to` matching looser bounds (e.g. `less_than_or_equal_to`). It now also requires `exact ±` the smallest unit to fail
+    - Fix comparison matchers `#less_than_or_equal_to` / `#greater_than_or_equal_to` / `#between` matching exclusive bounds (e.g. `less_than`). They now require the inclusive endpoint itself to pass
+    - Stop inserting an `active_storage_blobs` row from a bare `valid?` on a new record. `asv_*` metadata stays in memory on the unsaved blob and is written when the record is saved. Already-persisted blobs still `save!` so the cache survives `reload`
 - **MISC**
   - Add a locale key / interpolation contract spec; include `ru` in `I18n.available_locales`
   - Clarify why `file_field` skips Proc `content_type` options when inferring the HTML `accept` attribute
@@ -29,8 +31,7 @@
   - Align bench workflow Actions with CI (`checkout` / `upload-artifact` v7); pin Magika CLI to `cli/v1.1.0`; run `apt-get update` once per job
   - Raise `CommandLineToolNotInstalledError` from a shared `ContentTypeAnalyzer` ancestor so both `file` and `magika` backends can be rescued together
   - Fail the suite when SimpleCov line coverage drops below 50% (`spec/spec_helper.rb`)
-
-# Released
+ 
 - 4.1.0
   - **ADDED**
     - Add `with_audio` validator and `validate_with_audio_of` matcher for requiring or forbidding an audio track in video files (https://github.com/igorkasyanchuk/active_storage_validations/issues/303). Use `with_audio: true` to require audio or `with_audio: { with: false }` to forbid it. Supports per-validator `timeout:` and matcher `#timeout`.
