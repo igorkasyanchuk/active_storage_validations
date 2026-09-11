@@ -234,6 +234,12 @@ module FixtureFiles
     fixture_file("audio_10s.mp3", filename: "audio_10s", content_type: "audio/mp3")
   end
 
+  # Ogg/Opus with ~4 KB of non-ASCII Vorbis comments (title, artist, comment)
+  # reported by ffprobe as audio stream tags.
+  def audio_1s_tagged
+    fixture_file("audio_1s_tagged.ogg", filename: "audio_1s_tagged.ogg", content_type: "audio/ogg")
+  end
+
   def video_file
     fixture_file("video.mp4", filename: "video", content_type: "video/mp4")
   end
