@@ -1,7 +1,9 @@
 # Unreleased
 - **FIXED**
   - Fix `content_type` on Marcel 2 / Rails main (8.2+) : `spoofing_protection` no longer rejects `audio/aac`, `application/xml`, or `audio/mp4` (`file` detections such as `audio/x-hx-aac-adts`, `text/xml`, `audio/x-m4a` are aliases), and options that were canonical in Marcel 1 (e.g. `audio/x-aac`) are still accepted
+  - Stop caching audio stream tags (ID3 / Vorbis comments) on the blob as `asv_tags`. No validator reads them, and Active Storage forwards blob custom metadata to the storage service as object metadata, where a free-form, possibly non-ASCII tag hash could exceed S3's 2 KB limit and fail the upload
 - **MISC**
+  - Add a storage-metadata contract spec: every analyzer is run over every dummy fixture and must return scalar values that, once cached as `asv_*` custom metadata, are ASCII-only and within S3's 2 KB user-defined metadata limit (`spec/analyzers/storage_metadata_constraints_spec.rb`)
   - Upgrade dev dependencies (simplecov from 1.1.0 to 1.2)
 
 # Released
