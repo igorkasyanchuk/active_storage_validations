@@ -100,6 +100,31 @@ RSpec.describe ActiveStorageValidations::WithAudioValidator do
       it { is_expected_to_be_valid }
     end
 
+    context "when the file could not be analyzed (ffprobe missing or timed out, unreadable file)" do
+      let(:error_options) { { filename: "audio_5s" } }
+
+      before do
+        analyzer = instance_double(ActiveStorageValidations::Analyzer::AudioAnalyzer, metadata: {})
+        allow(ActiveStorageValidations::Analyzer::AudioAnalyzer).to receive(:new).and_return(analyzer)
+      end
+
+      context "when an audio track is required" do
+        subject(:record) { model.video.attach(audio_5s) and model }
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+
+      context "when audio is forbidden" do
+        subject(:record) { model.silent_video.attach(audio_5s) and model }
+
+        # Fails closed: an uninspected file is not evidence of a silent file
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
+      end
+    end
+
     describe "when the attached file is missing from storage" do
       let(:attribute) { :video }
       let(:file_for_attachment_missing) { video_with_audio_file }
