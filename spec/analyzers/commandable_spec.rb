@@ -159,6 +159,37 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
       end
     end
 
+    context "when running on Windows" do
+      let(:timeout) { 0.2 }
+      let(:argv) { [ "ruby", "-e", "sleep 5" ] }
+      let(:spawn_options) { {} }
+
+      before do
+        allow(analyzer).to receive(:windows?).and_return(true)
+        # `new_pgroup:` only exists on Windows: record the options, then run the
+        # real spawn without it so the timeout path is exercised on this host.
+        allow(Process).to receive(:spawn).and_wrap_original do |original, *args, **options|
+          spawn_options.merge!(options)
+          original.call(*args, **options.except(:new_pgroup))
+        end
+        allow(Process).to receive(:kill).and_call_original
+      end
+
+      it "spawns without a POSIX process group" do
+        command_result
+
+        expect(spawn_options).to include(new_pgroup: true)
+        expect(spawn_options).not_to have_key(:pgroup)
+      end
+
+      it "kills the child pid directly instead of signalling a process group" do
+        expect(command_result.timed_out).to be(true)
+        expect(Process).to have_received(:kill).with(:KILL, a_value > 0).at_least(:once)
+        expect(Process).not_to have_received(:kill).with(anything, a_value < 0)
+        expect(Process).not_to have_received(:kill).with(:TERM, anything)
+      end
+    end
+
     context "when timeout is disabled" do
       let(:timeout) { nil }
       let(:argv) { [ "echo", "no-timeout" ] }
