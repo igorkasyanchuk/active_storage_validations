@@ -31,7 +31,7 @@ module ActiveStorageValidations
 
     def check_validity!
       ensure_exactly_one_validator_option
-      ensure_content_types_validity
+      ensure_content_types_validity(static_content_types) unless proc_content_types?
       ensure_spoofing_protection_validity
     end
 
@@ -51,8 +51,13 @@ module ActiveStorageValidations
 
     def authorized_content_types_from_options(record)
       flat_options = set_flat_options(record)
+      content_types = (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).compact
 
-      (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).compact.map do |type|
+      # Procs escape check_validity!; an unknown type they return (e.g.
+      # "image/jpg") would otherwise reject every file with a blank message.
+      ensure_content_types_validity(content_types) if proc_content_types?
+
+      content_types.map do |type|
         case type
         when String, Symbol then Marcel::MimeType.for(declared_type: type.to_s, extension: type.to_s)
         when Regexp then type
@@ -194,15 +199,22 @@ module ActiveStorageValidations
       Array(content_type)
         .map do |content_type|
           case content_type
-          when String, Symbol
-            content_type.to_s.match?(/\//) ? Marcel::TYPE_EXTS[canonical_marcel_content_type(content_type.to_s)]&.first&.upcase : content_type.upcase
-          when Regexp
-            content_type.source
+          when String, Symbol then human_content_type(content_type.to_s)
+          when Regexp then content_type.source
           end
         end
         .flatten
         .compact
         .join(", ")
+    end
+
+    # "image/png" => "PNG", "png" => "PNG". Types Marcel knows no extension for
+    # (e.g. "inode/x-empty" detected on an empty file) fall back to the type
+    # itself rather than disappearing from the message.
+    def human_content_type(content_type)
+      return content_type.upcase unless content_type.match?(/\//)
+
+      Marcel::TYPE_EXTS[canonical_marcel_content_type(content_type)]&.first&.upcase || content_type
     end
 
     def ensure_exactly_one_validator_option
@@ -211,10 +223,18 @@ module ActiveStorageValidations
       end
     end
 
-    def ensure_content_types_validity
-      return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
+    # Procs are resolved per record, so their result is checked at validation
+    # time (see #authorized_content_types_from_options) instead of at boot.
+    def proc_content_types?
+      options[:with].is_a?(Proc) || options[:in].is_a?(Proc)
+    end
 
-      (Array(options[:with]) + Array(options[:in])).each do |content_type|
+    def static_content_types
+      Array(options[:with]) + Array(options[:in])
+    end
+
+    def ensure_content_types_validity(content_types)
+      content_types.each do |content_type|
         raise ArgumentError, invalid_content_type_option_message(content_type) if invalid_option?(content_type)
       end
     end
