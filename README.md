@@ -143,6 +143,7 @@ Notes:
 - Setting `command_timeout` (or per-validator `timeout:`) to `nil` disables the deadline
 - ImageMagick analysis runs `identify` through the same killable command runner (MiniMagick is only used to build the argv)
 - For libvips, a timeout may not immediately free the Ruby thread stuck in FFI/C; the validation still fails closed and emits `timeout.active_storage_validations`
+- On Windows there are no POSIX process groups: a timed out command is killed directly (its own child processes, if any, are not), without the TERM grace period
 
 ## Validators
 
