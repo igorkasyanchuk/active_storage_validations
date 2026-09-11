@@ -1,4 +1,6 @@
 # Unreleased
+- **MISC**
+  - Upgrade dev dependencies (simplecov from 1.1.0 to 1.2)
 
 # Released
 - 4.1.1
