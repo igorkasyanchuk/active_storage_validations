@@ -412,6 +412,37 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
         it_behaves_like "reports attachment_missing"
       end
 
+      context "when the spoofing analysis fails (command timed out or produced no content type)" do
+        subject(:record) { model.public_send(attribute).attach(jpeg_file) and model }
+
+        let(:attribute) { :spoofing_protection }
+        let(:error_options) do
+          {
+            authorized_human_content_types: "JPG",
+            content_type: "image/jpeg",
+            human_content_type: "JPG",
+            count: 1,
+            filename: jpeg_file[:filename]
+          }
+        end
+
+        before do
+          allow_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File).to receive(:run_command).and_return( # rubocop:disable RSpec/AnyInstance
+            ActiveStorageValidations::ASVCommandable::CommandResult.new(stdout: "", stderr: "", status: nil, timed_out: true)
+          )
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("content_type_analysis_failed", error_options: error_options, validator: :content_type) }
+        it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+
+        it "does not report the file as spoofed" do
+          record.valid?
+
+          expect(record.errors.details[attribute].pluck(:error)).to eq([ :content_type_analysis_failed ])
+        end
+      end
+
       context "when the protection is enabled (spoofing_protection: :file option)" do
         let(:attribute) { :spoofing_protection_file }
 

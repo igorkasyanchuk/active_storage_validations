@@ -129,7 +129,7 @@ The gem emits two `ActiveSupport::Notifications` events:
 | `analyze.active_storage_validations` | `analyzer`, `command`, `timeout`, `timed_out`, `duration` | Every time an analyzer command runs (i.e. on a cache miss) |
 | `timeout.active_storage_validations` | `analyzer`, `command`, `timeout` | Only when a command exceeds its deadline |
 
-`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `with_audio`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection`). When a command times out, analysis fails closed and the validator adds its usual "could not analyze" error (`file_not_processable` / `media_metadata_missing` / content-type errors) — there is no separate timeout error message.
+`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `with_audio`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection`). When a command times out, analysis fails closed and the validator adds its usual "could not analyze" error (`file_not_processable` / `media_metadata_missing` / `content_type_analysis_failed`) — there is no separate timeout error message.
 
 The 10s default is enough for typical uploads. Raise it (or set `nil`) if you analyze very large videos/PDFs, especially on slow or network storage — otherwise those files can start failing validation after upgrade. See [upgrade to 4.x](docs/upgrade_to_4.md#analyzer-command-timeout).
 
@@ -418,7 +418,12 @@ en:
       content_type_spoofed:
         one: "has a content type that is not equivalent to the one that is detected through its content (authorized content type is %{authorized_human_content_types})"
         other: "has a content type that is not equivalent to the one that is detected through its content (authorized content types are %{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "has a content type that could not be verified through its content (authorized content type is %{authorized_human_content_types})"
+        other: "has a content type that could not be verified through its content (authorized content types are %{authorized_human_content_types})"
 ```
+
+`content_type_analysis_failed` is added when `spoofing_protection` is enabled but the sniffer produced no content type at all (`file` / `magika` command [timed out](#configuration), file the backend cannot read, invalid CLI output): the validation fails closed without claiming the file is spoofed. `detected_content_type` / `detected_human_content_type` are not available for this error.
 
 The `content_type` validator error messages expose 7 values that you can use:
 - `content_type` containing the content type of the sent file (e.g. `image/png`)
