@@ -23,7 +23,7 @@ module ActiveStorageValidations
       stdout_reader, stdout_writer = IO.pipe
       stderr_reader, stderr_writer = IO.pipe
 
-      pid = Process.spawn(*argv.map(&:to_s), out: stdout_writer, err: stderr_writer, pgroup: true)
+      pid = Process.spawn(*argv.map(&:to_s), out: stdout_writer, err: stderr_writer, **process_group_spawn_options)
       stdout_writer.close
       stderr_writer.close
 
@@ -78,10 +78,22 @@ module ActiveStorageValidations
       waiter.value&.last
     end
 
+    # Run the command in its own process group so a timeout can take down the
+    # whole tree. Windows has no POSIX process groups (`pgroup:` raises there):
+    # `new_pgroup:` is the closest equivalent, and only the direct child is
+    # killed (no TERM either — Ruby only implements KILL / INT on Windows).
+    def process_group_spawn_options
+      windows? ? { new_pgroup: true } : { pgroup: true }
+    end
+
     def signal_process_group(pid, signal)
-      Process.kill(signal, -pid)
+      windows? ? Process.kill(:KILL, pid) : Process.kill(signal, -pid)
     rescue Errno::ESRCH
       # Already exited; waiter will reap.
+    end
+
+    def windows?
+      Gem.win_platform?
     end
 
     def close_pipe(io)
