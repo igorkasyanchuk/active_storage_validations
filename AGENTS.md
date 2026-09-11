@@ -88,6 +88,8 @@ Matchers support `#except_on` for Rails `:except_on` (available since Rails 8.0)
 
 `BaseComparisonValidatorMatcher` (`#less_than`, `#less_than_or_equal_to`, `#greater_than`, `#greater_than_or_equal_to`, `#between`, `#equal_to`) must probe the inclusive endpoint itself. Checking only `min + 1` / `max - 1` lets `less_than(n)` satisfy `#less_than_or_equal_to(n)`. Shared examples: `"base comparison validator matcher less_than_or_equal_to rejects less_than"`, `"… greater_than_or_equal_to rejects greater_than"`, `"… equal_to rejects looser comparisons"`.
 
+`DimensionValidatorMatcher` probes one axis with a neutral value on the other axis derived from the declared bounds (`#neutral_dimension`). Do not reintroduce a fixed ceiling (the former 2000px default broke `width_min(2048).height_min(100)`).
+
 `AttachedValidator` rejects `:allow_blank` / `:allow_nil`. Do not add `#allow_blank` to `validate_attached_of` or document that chain.
 
 ## Testing Commands
