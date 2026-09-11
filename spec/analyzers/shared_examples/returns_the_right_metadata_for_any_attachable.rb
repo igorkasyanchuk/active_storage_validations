@@ -81,6 +81,20 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
           it { is_expected_to_return_the_right_metadata }
         end
 
+        context "when the io is an IO-like object without a filesystem path" do
+          # e.g. a streaming download wrapper: Rails only needs #read / #rewind
+          # / #size, so the io is neither a File nor a StringIO here.
+          let(:attachable) do
+            {
+              io: SimpleDelegator.new(StringIO.new(media_io.read)),
+              filename: media_filename,
+              content_type: media_content_type
+            }
+          end
+
+          it { is_expected_to_return_the_right_metadata }
+        end
+
         describe "Remote file" do
           before do
             stub_request(:get, url)
