@@ -524,5 +524,51 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
         it { is_expected_to_match_for(klass) }
       end
     end
+
+    describe "#width_min + #height_min" do
+      context "when used on a validator with a width min above 2000px (e.g. dimension: { width: { min: 2048 }, height: { min: 100 } })" do
+        let(:model_attribute) { :large_width_min_and_height_min }
+
+        context "when provided with the exact width and height min specified in the model validations" do
+          subject(:configured_matcher) do
+            matcher.width_min(2048)
+            matcher.height_min(100)
+          end
+
+          it { is_expected_to_match_for(klass) }
+        end
+
+        context "when provided with a lower height min than the height min specified in the model validations" do
+          subject(:configured_matcher) do
+            matcher.width_min(2048)
+            matcher.height_min(50)
+          end
+
+          it { is_expected_not_to_match_for(klass) }
+        end
+      end
+
+      context "when used on a validator with a height min above 2000px (e.g. dimension: { width: { min: 100 }, height: { min: 2048 } })" do
+        let(:model_attribute) { :large_height_min_and_width_min }
+
+        context "when provided with the exact width and height min specified in the model validations" do
+          subject(:configured_matcher) do
+            matcher.width_min(100)
+            matcher.height_min(2048)
+          end
+
+          it { is_expected_to_match_for(klass) }
+        end
+
+        context "when provided with a lower width min than the width min specified in the model validations" do
+          subject(:configured_matcher) do
+            matcher.width_min(50)
+            matcher.height_min(2048)
+          end
+
+          it { is_expected_not_to_match_for(klass) }
+        end
+      end
+    end
   end
 end

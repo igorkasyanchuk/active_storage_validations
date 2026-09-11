@@ -122,11 +122,23 @@ module ActiveStorageValidations
       end
 
       def valid_width
-        ((@width_min || 0) + (@width_max || 2000)) / 2
+        neutral_dimension(@width_min, @width_max)
       end
 
       def valid_height
-        ((@height_min || 0) + (@height_max || 2000)) / 2
+        neutral_dimension(@height_min, @height_max)
+      end
+
+      # A value satisfying the bounds declared on one axis, used while probing
+      # the other axis. It is derived from the declared bounds only: a fixed
+      # ceiling (the former 2000px default) fell below any larger min and made
+      # e.g. `width_min(2048).height_min(100)` fail its height probes.
+      def neutral_dimension(min, max)
+        return (min + max) / 2 if min && max
+        return min + 1 if min
+        return [ max - 1, 1 ].max if max
+
+        1000
       end
 
       def width_not_smaller_than_min?
