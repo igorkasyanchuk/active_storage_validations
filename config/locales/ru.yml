@@ -7,6 +7,9 @@ ru:
       content_type_spoofed:
         one: "имеет тип контента, который не эквивалентен тому, который обнаруживается через его контент (авторизованный тип контента %{authorized_human_content_types})"
         other: "имеет тип контента, который не эквивалентен тому, который обнаруживается через его контент (авторизованные типы контента %{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "имеет тип контента, который не удалось проверить по его содержимому (авторизованный тип контента %{authorized_human_content_types})"
+        other: "имеет тип контента, который не удалось проверить по его содержимому (авторизованные типы контента %{authorized_human_content_types})"
       file_size_not_less_than: "размер файла должен быть меньше %{max} (текущий размер %{file_size})"
       file_size_not_less_than_or_equal_to: "размер файла должен быть меньше или равен %{max} (текущий размер %{file_size})"
       file_size_not_greater_than: "размер файла должен быть больше %{min} (текущий размер %{file_size})"

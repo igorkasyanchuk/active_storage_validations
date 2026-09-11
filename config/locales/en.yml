@@ -7,6 +7,9 @@ en:
       content_type_spoofed:
         one: "has a content type that is not equivalent to the one that is detected through its content (authorized content type is %{authorized_human_content_types})"
         other: "has a content type that is not equivalent to the one that is detected through its content (authorized content types are %{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "has a content type that could not be verified through its content (authorized content type is %{authorized_human_content_types})"
+        other: "has a content type that could not be verified through its content (authorized content types are %{authorized_human_content_types})"
       file_size_not_less_than: "file size must be less than %{max} (current size is %{file_size})"
       file_size_not_less_than_or_equal_to: "file size must be less than or equal to %{max} (current size is %{file_size})"
       file_size_not_greater_than: "file size must be greater than %{min} (current size is %{file_size})"
@@ -63,3 +66,30 @@ en:
       pages_not_greater_than_or_equal_to: "page count must be greater than or equal to %{min} (current page count is %{pages})"
       pages_not_between: "page count must be between %{min} and %{max} (current page count is %{pages})"
       pages_not_equal_to: "page count must be equal to %{exact} (current page count is %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} year"
+        other: "%{count} years"
+      months:
+        one: "%{count} month"
+        other: "%{count} months"
+      weeks:
+        one: "%{count} week"
+        other: "%{count} weeks"
+      days:
+        one: "%{count} day"
+        other: "%{count} days"
+      hours:
+        one: "%{count} hour"
+        other: "%{count} hours"
+      minutes:
+        one: "%{count} minute"
+        other: "%{count} minutes"
+      seconds:
+        one: "%{count} second"
+        other: "%{count} seconds"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " and "
+        last_word_connector: ", and "

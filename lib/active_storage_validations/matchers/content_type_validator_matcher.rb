@@ -32,6 +32,9 @@ module ActiveStorageValidations
       include ASVTimeoutable
       include ASVValidatable
 
+      # Errors added by the spoofing analysis, see #validator_errors_for_attribute
+      SPOOFING_ERRORS = %i[content_type_spoofed content_type_analysis_failed].freeze
+
       def initialize(attribute_name)
         initialize_allow_blankable
         initialize_contextable
@@ -152,10 +155,10 @@ module ActiveStorageValidations
       end
 
       # Due to the way we build test attachments in #attachment_for
-      # (ie spoofed file basically), we need to ignore the error related to
+      # (ie spoofed file basically), we need to ignore the errors related to
       # content type spoofing in our matcher to pass the tests
       def validator_errors_for_attribute
-        super.reject { |hash| hash[:error] == :content_type_spoofed }
+        super.reject { |hash| SPOOFING_ERRORS.include?(hash[:error]) }
       end
     end
   end

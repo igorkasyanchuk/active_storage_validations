@@ -21,6 +21,7 @@ module ActiveStorageValidations
     ERROR_TYPES = %i[
       content_type_invalid
       content_type_spoofed
+      content_type_analysis_failed
     ].freeze
     METADATA_KEYS = %i[content_type].freeze
 
@@ -99,7 +100,12 @@ module ActiveStorageValidations
         return false
       end
 
-      if content_type_mismatch?(context.content_type, detected_content_type)
+      # A blank detected type means the sniffer produced nothing (command timed
+      # out, file the backend cannot read, invalid CLI output). That is not
+      # evidence of spoofing, so fail closed with a dedicated error instead.
+      if detected_content_type.blank?
+        add_content_type_analysis_failed_error(record, attribute, attachable, context)
+      elsif content_type_mismatch?(context.content_type, detected_content_type)
         add_content_type_spoofed_error(record, attribute, attachable, context, detected_content_type)
       else
         true
@@ -183,6 +189,12 @@ module ActiveStorageValidations
       errors_options[:detected_content_type] = detected_content_type
       errors_options[:detected_human_content_type] = content_type_to_human_format(detected_content_type)
       add_error(record, attribute, ERROR_TYPES.second, **errors_options)
+      false
+    end
+
+    def add_content_type_analysis_failed_error(record, attribute, attachable, context)
+      errors_options = initialize_and_populate_error_options(options, attachable, context)
+      add_error(record, attribute, ERROR_TYPES.third, **errors_options)
       false
     end
 

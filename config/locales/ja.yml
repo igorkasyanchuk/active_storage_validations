@@ -7,6 +7,9 @@ ja:
       content_type_spoofed:
         one: "のファイルタイプがファイル内容から検出されたものと異なります (許可されたファイルタイプは%{authorized_human_content_types})"
         other: "のファイルタイプがファイル内容から検出されたものと異なります (許可されたファイルタイプは%{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "のファイルタイプをファイル内容から検証できませんでした (許可されたファイルタイプは%{authorized_human_content_types})"
+        other: "のファイルタイプをファイル内容から検証できませんでした (許可されたファイルタイプは%{authorized_human_content_types})"
       file_size_not_less_than: "のファイルサイズは%{max}未満にしてください (添付ファイルのサイズは%{file_size})"
       file_size_not_less_than_or_equal_to: "のファイルサイズは%{max}以下にしてください (添付ファイルのサイズは%{file_size})"
       file_size_not_greater_than: "のファイルサイズは%{min}より大きくしてください (添付ファイルのサイズは%{file_size})"
