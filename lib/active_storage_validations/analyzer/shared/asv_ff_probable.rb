@@ -58,5 +58,9 @@ module ActiveStorageValidations
     def streams
       @streams ||= @media["streams"] || []
     end
+
+    def container
+      @container ||= @media["format"] || {}
+    end
   end
 end

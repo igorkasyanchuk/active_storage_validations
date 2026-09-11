@@ -112,6 +112,12 @@ module FixtureFiles
     fixture_file("pdf_200x300.pdf", filename: "pdf_200x300_file.pdf", content_type: "application/pdf")
   end
 
+  # pdf_200x300.pdf with /Rotate 90 on its page: pdfinfo still reports the
+  # 200 x 300 MediaBox, plus "Page rot: 90".
+  def pdf_200x300_rotated_90_file
+    fixture_file("pdf_200x300_rotated_90.pdf", filename: "pdf_200x300_rotated_90.pdf", content_type: "application/pdf")
+  end
+
   def pdf_2_pages_file
     fixture_file("pdf_2_pages.pdf", filename: "pdf_2_pages.pdf", content_type: "application/pdf")
   end
@@ -234,6 +240,12 @@ module FixtureFiles
     fixture_file("audio_10s.mp3", filename: "audio_10s", content_type: "audio/mp3")
   end
 
+  # Opus in a WebM container (what browser MediaRecorder produces): ffprobe
+  # reports the duration on the container only, not on the audio stream.
+  def audio_3s_webm
+    fixture_file("audio_3s.webm", filename: "audio_3s.webm", content_type: "audio/webm")
+  end
+
   # Ogg/Opus with ~4 KB of non-ASCII Vorbis comments (title, artist, comment)
   # reported by ffprobe as audio stream tags.
   def audio_1s_tagged
@@ -242,6 +254,12 @@ module FixtureFiles
 
   def video_file
     fixture_file("video.mp4", filename: "video", content_type: "video/mp4")
+  end
+
+  # Audio-only MP4 whose 150x150 PNG cover is a video stream flagged
+  # disposition.attached_pic.
+  def audio_with_cover_art_file
+    fixture_file("audio_2s_with_cover.mp4", filename: "audio_2s_with_cover.mp4", content_type: "video/mp4")
   end
 
   def video_with_audio_file

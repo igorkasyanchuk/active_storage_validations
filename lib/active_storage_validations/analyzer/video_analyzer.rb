@@ -121,9 +121,5 @@ module ActiveStorageValidations
     def side_data
       @side_data ||= video_stream["side_data_list"] || {}
     end
-
-    def container
-      @container ||= @media["format"] || {}
-    end
   end
 end

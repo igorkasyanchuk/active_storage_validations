@@ -28,6 +28,14 @@ RSpec.describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
   describe "#metadata" do
     subject(:metadata) { analyzer.metadata }
 
+    context "when the container carries the duration but the audio stream does not (WebM / Opus)" do
+      let(:attachable) { audio_3s_webm }
+
+      it "falls back to the container duration" do
+        expect(metadata).to eq({ duration: 3.0, sample_rate: 48000, audio: true })
+      end
+    end
+
     context "when the audio stream has tags (ID3 / Vorbis comments)" do
       let(:attachable) { audio_1s_tagged }
 
