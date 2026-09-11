@@ -164,12 +164,16 @@ module ActiveStorageValidations
         @attachable[:io].rewind
       end
 
+      # Rails only requires the io to respond to #read / #rewind / #size, so it
+      # may be a StringIO or any IO-like wrapper (streaming download, Zip entry,
+      # …) with no file behind it. Only path-backed IOs (File, Tempfile,
+      # uploaded files) can be handed to the analyzers' commands as they are.
       def with_media_path(tempfile, &block)
         io = @attachable[:io]
-        if io.is_a?(StringIO)
-          copy_to_tempfile(tempfile, io, &block)
-        else
+        if io.respond_to?(:to_path)
           File.open(io) { |file| yield file.path }
+        else
+          copy_to_tempfile(tempfile, io, &block)
         end
       end
     end
