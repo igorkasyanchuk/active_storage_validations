@@ -12,6 +12,7 @@
   - Fix `content_type` reporting a `content_type_spoofed` error when the spoofing analysis itself produced nothing (`file` / `magika` command timed out, unsupported file, invalid CLI output). The validator now adds a dedicated `content_type_analysis_failed` error instead (new I18n key in all bundled locales; it exposes the same values as `content_type_invalid`). The validation still fails closed
   - Fix analyzer commands (`ffprobe`, `pdfinfo`, `file`, `magika`, `identify`) raising on Windows since 4.0: `Process.spawn(pgroup: true)` is Unix-only. Windows now spawns with `new_pgroup: true` and, on timeout, kills the child process directly (no process-group kill / TERM grace on that platform)
   - Fix `VideoAnalyzer` raising `ArgumentError` from `valid?` when `ffprobe` reports a non-integer rotation (e.g. `rotate: "90.0"`). Rotation is now parsed as a rounded float, and an unparsable value is ignored instead of raising
+  - Fix `aspect_ratio` accepting options such as `:is_16_9_extra` at boot: `ASPECT_RATIO_REGEX` is now anchored, so only exact `is_x_y` values (or the named ratios) pass `check_validity!`
 - **MISC**
   - Add a storage-metadata contract spec: every analyzer is run over every dummy fixture and must return scalar values that, once cached as `asv_*` custom metadata, are ASCII-only and within S3's 2 KB user-defined metadata limit (`spec/analyzers/storage_metadata_constraints_spec.rb`)
   - Upgrade dev dependencies (simplecov from 1.1.0 to 1.2)
