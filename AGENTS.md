@@ -271,6 +271,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - `ContentTypeValidator`: Proc options bypass `check_validity!`, so `authorized_content_types_from_options` re-runs `ensure_content_types_validity` on the Proc result
 - `ContentTypeValidator`: a blank detected type from the sniffer is `content_type_analysis_failed`, never `content_type_spoofed`; the matcher ignores both (`ContentTypeValidatorMatcher::SPOOFING_ERRORS`) because its probe files are empty tempfiles
 - `ASVCommandable` must keep the `windows?` branch: `Process.spawn(pgroup: true)` and `Process.kill(sig, -pid)` raise on Windows (use `new_pgroup: true` and a direct `KILL`). The spec simulates it by stubbing `windows?`
+- `VideoAnalyzer#angle` parses rotation as a rounded float and rescues unparsable values (`"90.0"` is a real-world tag)
 - Keep `json` `< 3` on the Rails 8.1 Gemfile. json 3.0 made `JSON.parse` keyword-only; Rails 8.1.3.1 `ActiveSupport::JSON.decode` still passes a positional options hash (fixed on Rails 8.2 / main as rails/rails#58601)
 
 ## Read First When Contributing
