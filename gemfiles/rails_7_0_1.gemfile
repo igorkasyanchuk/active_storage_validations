@@ -8,4 +8,7 @@ gem 'nokogiri', '>= 1.18'
 # Rails 7.0's sqlite3 adapter is pinned to ~> 1.4
 gem 'sqlite3', '~> 1.7'
 
+# rspec-rails >= 8.0 requires rails 7.2
+gem 'rspec-rails', '~> 7.0'
+
 gemspec :path => '../'

@@ -248,6 +248,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Do not auto-require matchers from the main gem entrypoint
 - Do not re-enable Active Storage previewers in the dummy app without adding `image_processing`
 - Marcel rejects types like `image/jpg` — use `image/jpeg` (and Marcel shorthands where registered)
+- Marcel 2 (Rails main / 8.2+) treats `text/xml`, `audio/x-m4a`, and `audio/x-aac` as aliases (not `TYPE_EXTS` keys). `MimeType.extend` on an alias updates the canonical type, so `spoofing_protection` and `check_validity!` must consult `Marcel::TYPE_ALIASES` as well as `TYPE_PARENTS` / `TYPE_EXTS`
 - Railtie must not use `after: :load_config_initializers` (stack overflow; see comment in `railtie.rb`)
 - `processable_file` may reject formats with libvips untrusted loaders (e.g. SVG) when Rails sets `Vips.block_untrusted(true)`
 - Preserve content-type cache backend semantics: legacy `asv_content_type` without `asv_content_type_backend` must keep hitting the `:file` cache; switching `:file` ↔ `:magika` must re-analyze
@@ -259,6 +260,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Matcher `stub_method` uses a singleton-method wrap (not `Minitest::Mock` / `Object#stub`). Minitest 6 extracted mock to `minitest-mock`; do not reintroduce that dependency
 - Do not add `ActiveStorageValidations::Attachable` (or other short names that apps use as concerns). The gem module is included into Active Record, so `include Attachable` in an app model under this namespace would resolve to the gem constant. Use the `ASV*` prefix (`spec/global/active_storage_validations_spec.rb`)
 - Do not `File.open` dummy fixtures and leave the FD for GC. Use `open_fixture` / `register_fixture_io` (`FixtureFiles`); do not reintroduce an `ObjectSpace` sweep or a raised `NOFILE` rlimit to mask leaks
+- Keep `json` `< 3` on the Rails 8.1 Gemfile. json 3.0 made `JSON.parse` keyword-only; Rails 8.1.3.1 `ActiveSupport::JSON.decode` still passes a positional options hash (fixed on Rails 8.2 / main as rails/rails#58601)
 
 ## Read First When Contributing
 
