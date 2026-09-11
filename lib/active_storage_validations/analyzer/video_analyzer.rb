@@ -61,12 +61,15 @@ module ActiveStorageValidations
       Float(duration).round(1) if duration
     end
 
+    # ffprobe reports the rotation either as a stream tag (older encoders) or as
+    # Display Matrix side data. Encoders write it as "90", "90.0" or "-89.9"
+    # indifferently, so parse it as a float and round; an unparsable value
+    # means no known rotation rather than an exception escaping `valid?`.
     def angle
-      if tags["rotate"]
-        Integer(tags["rotate"])
-      elsif display_matrix && display_matrix["rotation"]
-        Integer(display_matrix["rotation"])
-      end
+      rotation = tags["rotate"] || display_matrix&.dig("rotation")
+      Float(rotation).round if rotation
+    rescue ArgumentError, TypeError
+      nil
     end
 
     def display_matrix

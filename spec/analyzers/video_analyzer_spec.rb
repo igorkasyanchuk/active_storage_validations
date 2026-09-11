@@ -25,6 +25,42 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
 
   it_behaves_like "returns the right metadata for any attachable"
 
+  describe "rotation" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) { video_file }
+    let(:video_stream) { { "codec_type" => "video", "width" => 700, "height" => 500 }.merge(rotation) }
+
+    before do
+      allow(analyzer).to receive(:media_from_path).and_return({ "streams" => [ video_stream ], "format" => { "duration" => "1.7" } })
+    end
+
+    context "when the rotate tag is a decimal string (e.g. \"90.0\")" do
+      let(:rotation) { { "tags" => { "rotate" => "90.0" } } }
+
+      it "swaps width and height" do
+        expect(metadata).to include(width: 500, height: 700, angle: 90)
+      end
+    end
+
+    context "when the Display Matrix rotation is a float" do
+      let(:rotation) { { "side_data_list" => [ { "side_data_type" => "Display Matrix", "rotation" => -90.0 } ] } }
+
+      it "swaps width and height" do
+        expect(metadata).to include(width: 500, height: 700, angle: -90)
+      end
+    end
+
+    context "when the rotation cannot be parsed" do
+      let(:rotation) { { "tags" => { "rotate" => "unknown" } } }
+
+      it "ignores it instead of raising" do
+        expect(metadata).to include(width: 700, height: 500)
+        expect(metadata).not_to have_key(:angle)
+      end
+    end
+  end
+
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "video_150x150.mp4").to_s }
     let(:attachable) do
