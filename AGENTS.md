@@ -265,6 +265,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Blob `asv_*` metadata is forwarded to the storage service as object metadata (S3: 2 KB, ASCII). Analyzers must only return small scalar values — never free-form hashes such as audio stream tags. Enforced over every dummy fixture by `spec/analyzers/storage_metadata_constraints_spec.rb`
 - `ffprobe` reports Matroska / WebM audio duration on the container only: `AudioAnalyzer#duration` (like `VideoAnalyzer`) must fall back to `container["duration"]` (shared `ASVFFProbable#container`)
 - ImageMagick `identify` must target the first frame (`path[0]`, see `ImageMagick#first_frame`); without it every frame of an animated GIF / multi-page TIFF is decoded
+- `BaseComparisonValidator#min` / `#max` must use `Range#begin` / `#end`, not `#min` / `#max` (`RangeError` on endless / beginless ranges); `check_validity!` rejects unbounded static `between:` ranges
 - Keep `json` `< 3` on the Rails 8.1 Gemfile. json 3.0 made `JSON.parse` keyword-only; Rails 8.1.3.1 `ActiveSupport::JSON.decode` still passes a positional options hash (fixed on Rails 8.2 / main as rails/rails#58601)
 
 ## Read First When Contributing

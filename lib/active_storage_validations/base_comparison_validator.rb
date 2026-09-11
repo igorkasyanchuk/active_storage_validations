@@ -32,6 +32,8 @@ module ActiveStorageValidations
       unless AVAILABLE_CHECKS.one? { |argument| options.key?(argument) }
         raise ArgumentError, "You must pass either :less_than(_or_equal_to), :greater_than(_or_equal_to), :between or :equal_to to the validator"
       end
+
+      ensure_between_range_is_bounded!
     end
 
     def validate_each(record, attribute, value)
@@ -39,6 +41,20 @@ module ActiveStorageValidations
     end
 
     private
+
+    # Endless / beginless ranges (`1.kilobyte..`, `..2.megabytes`) pass
+    # Range#include? but raise RangeError from Range#min / #max the first time
+    # an error message has to be built, i.e. on the first invalid record.
+    # Procs are evaluated per record and cannot be checked here.
+    def ensure_between_range_is_bounded!
+      return unless options.key?(:between)
+
+      between = options[:between]
+      return if between.is_a?(Proc)
+      return if between.is_a?(Range) && !between.begin.nil? && !between.end.nil?
+
+      raise ArgumentError, "You must pass a Range with both bounds to :between (use :greater_than_or_equal_to or :less_than_or_equal_to for a single bound)"
+    end
 
     def is_valid?(value, flat_options)
       return false if value < 0
@@ -68,8 +84,10 @@ module ActiveStorageValidations
       raise NotImplementedError
     end
 
+    # Range#begin / #end (rather than #min / #max) never raise, whatever the
+    # range: a Proc may still return an unbounded or exclusive non-integer range.
     def min(flat_options)
-      flat_options[:between]&.min || flat_options[:greater_than] || flat_options[:greater_than_or_equal_to]
+      flat_options[:between]&.begin || flat_options[:greater_than] || flat_options[:greater_than_or_equal_to]
     end
 
     def exact(flat_options)
@@ -77,7 +95,7 @@ module ActiveStorageValidations
     end
 
     def max(flat_options)
-      flat_options[:between]&.max || flat_options[:less_than] || flat_options[:less_than_or_equal_to]
+      flat_options[:between]&.end || flat_options[:less_than] || flat_options[:less_than_or_equal_to]
     end
   end
 end

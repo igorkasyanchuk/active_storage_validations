@@ -46,4 +46,48 @@ RSpec.shared_examples "checks validator validity" do
       end
     end
   end
+
+  if %i[size total_size duration pages].include? described_class.to_sym
+    context "when the validator has a :between range missing a bound" do
+      subject(:validator) { validator_klass.new(attributes: [ :file ], between: range) }
+
+      let(:bounded_range_error_message) do
+        "You must pass a Range with both bounds to :between (use :greater_than_or_equal_to or :less_than_or_equal_to for a single bound)"
+      end
+
+      context "when the range is endless (e.g. between: 1.kilobyte..)" do
+        let(:range) { 1.. }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, bounded_range_error_message)
+        end
+      end
+
+      context "when the range is beginless (e.g. between: ..2.megabytes)" do
+        let(:range) { ..2 }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, bounded_range_error_message)
+        end
+      end
+
+      context "when the range is returned by a Proc" do
+        let(:range) { ->(_record) { 1.. } }
+
+        it "cannot be checked at validator initialization" do
+          expect { validator }.not_to raise_error
+        end
+
+        # Range#min / #max raise RangeError on unbounded ranges; error bounds
+        # must rely on Range#begin / #end so the record fails validation
+        # instead of raising once it is out of range.
+        it "still resolves the error bounds without raising" do
+          flat_options = validator.send(:set_flat_options, nil)
+
+          expect(validator.send(:min, flat_options)).to eq(1)
+          expect(validator.send(:max, flat_options)).to be_nil
+        end
+      end
+    end
+  end
 end
