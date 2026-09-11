@@ -295,7 +295,7 @@ GEM
       ffi (~> 1.12)
       logger
     securerandom (0.4.1)
-    simplecov (1.1.1)
+    simplecov (1.2.0)
     sqlite3 (2.9.6-aarch64-linux-gnu)
     sqlite3 (2.9.6-aarch64-linux-musl)
     sqlite3 (2.9.6-arm-linux-gnu)
