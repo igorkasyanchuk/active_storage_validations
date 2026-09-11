@@ -14,7 +14,7 @@ module ActiveStorageValidations
     include ASVErrorable
     include ASVSymbolizable
 
-    ERROR_TYPES = %i[audio_missing audio_present].freeze
+    ERROR_TYPES = %i[audio_missing audio_present media_metadata_missing].freeze
     METADATA_KEYS = %i[audio].freeze
 
     def validate_each(record, attribute, _value)
@@ -26,6 +26,8 @@ module ActiveStorageValidations
     private
 
     def is_valid?(record, attribute, attachable, metadata)
+      return add_media_metadata_missing_error(record, attribute, attachable) unless media_analyzed?(metadata)
+
       expected_audio = options.fetch(:with, true)
       return if audio_track?(metadata) == expected_audio
 
@@ -34,10 +36,18 @@ module ActiveStorageValidations
       add_error(record, attribute, error_type, **errors_options)
     end
 
+    # Empty metadata means no analysis happened at all (ffprobe missing or
+    # timed out, unreadable file, unsupported media type). Fail closed rather
+    # than reading it as "no audio track", which would let `with: false` accept
+    # a file that was never inspected.
+    def media_analyzed?(metadata)
+      metadata.present?
+    end
+
     # Files the analyzer cannot inspect for audio streams (images, pdfs) have no
     # audio metadata, or a memoized unavailable value. Both mean no audio track.
     def audio_track?(metadata)
-      metadata&.fetch(:audio, false) == true
+      metadata.fetch(:audio, false) == true
     end
   end
 end

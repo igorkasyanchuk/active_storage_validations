@@ -129,7 +129,7 @@ The gem emits two `ActiveSupport::Notifications` events:
 | `analyze.active_storage_validations` | `analyzer`, `command`, `timeout`, `timed_out`, `duration` | Every time an analyzer command runs (i.e. on a cache miss) |
 | `timeout.active_storage_validations` | `analyzer`, `command`, `timeout` | Only when a command exceeds its deadline |
 
-`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `with_audio`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection`). When a command times out, analysis fails closed and the validator adds its usual error (`file_not_processable` / `media_metadata_missing` / `audio_missing` / content-type errors) — there is no separate timeout error message.
+`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `with_audio`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection`). When a command times out, analysis fails closed and the validator adds its usual "could not analyze" error (`file_not_processable` / `media_metadata_missing` / content-type errors) — there is no separate timeout error message.
 
 The 10s default is enough for typical uploads. Raise it (or set `nil`) if you analyze very large videos/PDFs, especially on slow or network storage — otherwise those files can start failing validation after upgrade. See [upgrade to 4.x](docs/upgrade_to_4.md#analyzer-command-timeout).
 
@@ -691,6 +691,8 @@ Rails treats a bare `with_audio: false` as a disabled validator. Use the hash fo
 
 Files that cannot contain an audio stream at all (images, pdfs) are treated as having no audio track: they fail `with_audio: true` and pass `with_audio: { with: false }`.
 
+Files that could not be analyzed at all (`ffmpeg` not installed, [timed out](#configuration) command, unreadable file, media type no analyzer handles) fail closed with `media_metadata_missing`, whatever the `with` option: a file that was never inspected is not evidence of a silent file.
+
 #### Error messages (I18n)
 
 ```yml
@@ -699,6 +701,7 @@ en:
     messages:
       audio_missing: "must have an audio track"
       audio_present: "must not have an audio track"
+      media_metadata_missing: "is not a valid media file"
 ```
 
 The `with_audio` validator error message exposes the `filename` value containing the current file name.
