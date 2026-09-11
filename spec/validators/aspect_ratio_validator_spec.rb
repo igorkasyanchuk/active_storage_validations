@@ -73,12 +73,20 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
         is_1_0
         is_0_0
         is_01_2
+        is_16_9_extra
+        not_is_16_9
+        is_16_9x
       ]
     end
 
     it "accepts ratios like 'is_16_9'" do
       expect(accepted_is_x_y_strings).to all(match(aspect_ratio_regex))
       expect(not_accepted_is_x_y_strings).to all(satisfy { |value| !value.match?(aspect_ratio_regex) })
+    end
+
+    it "rejects ratios with surrounding characters at boot" do
+      expect { described_class.new(attributes: [ :file ], with: :is_16_9_extra) }
+        .to raise_error(ArgumentError, /You must pass a valid aspect ratio to the validator/)
     end
   end
 

@@ -18,7 +18,7 @@ module ActiveStorageValidations
 
     AVAILABLE_CHECKS = %i[with in].freeze
     NAMED_ASPECT_RATIOS = %i[square portrait landscape].freeze
-    ASPECT_RATIO_REGEX = /is_([1-9]\d*)_([1-9]\d*)/
+    ASPECT_RATIO_REGEX = /\Ais_([1-9]\d*)_([1-9]\d*)\z/
     ERROR_TYPES = %i[
       aspect_ratio_not_square
       aspect_ratio_not_portrait
