@@ -202,6 +202,24 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
         end
       end
 
+      context "when the audio container carries the duration but the stream does not (WebM / Opus)" do
+        # validates :less_than, duration: { less_than: 2.seconds }
+        subject(:record) { model.less_than.attach(audio_3s_webm) and model }
+
+        let(:error_options) do
+          {
+            duration: "3 seconds",
+            filename: audio_3s_webm[:filename],
+            min: nil,
+            max: "2 seconds"
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("duration_not_less_than", error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+
       describe "when the attached file is missing from storage" do
         let(:attribute) { :less_than }
         let(:file_for_attachment_missing) { audio_1s }
