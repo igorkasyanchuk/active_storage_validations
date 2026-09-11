@@ -71,6 +71,15 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
               expect { model }.not_to raise_error
             end
           end
+
+          context "when the passed option is a historical type Marcel 2 stores as an alias (e.g. 'audio/x-aac')" do
+            # See: https://github.com/rails/marcel/releases#release-v2.0.0
+            subject(:validator) { described_class.new(attributes: :dummy, with: "audio/x-aac") }
+
+            it "does not raise an error at initialization" do
+              expect { validator }.not_to raise_error
+            end
+          end
         end
       end
 
@@ -245,6 +254,20 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
     end
 
     describe ":spoofing_protection" do
+      describe "detected vs declared type equivalence" do
+        subject(:validator) { described_class.new(attributes: :dummy, with: :png, spoofing_protection: true) }
+
+        it "accepts libmagic names that Marcel considers the same type" do
+          expect(validator.send(:content_types_intersect?, "application/xml", "text/xml")).to be(true)
+          expect(validator.send(:content_types_intersect?, "audio/mp4", "audio/x-m4a")).to be(true)
+          expect(validator.send(:content_types_intersect?, "audio/aac", "audio/x-hx-aac-adts")).to be(true)
+        end
+
+        it "resolves Marcel aliases when formatting human content types" do
+          expect(validator.send(:content_type_to_human_format, "audio/x-aac")).to eq("AAC")
+        end
+      end
+
       context "when the protection is enabled (spoofing_protection: true option)" do
         let(:attribute) { :spoofing_protection }
 

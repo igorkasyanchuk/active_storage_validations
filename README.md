@@ -340,7 +340,7 @@ Notes:
 
 #### Content type shorthands
 
-If you choose to use a content_type 'shorthand' (like `png`), note that it will be converted to a full content type using `Marcel::MimeType.for` under the hood. Therefore, you should check if the content_type is registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb). If it's not, you can register it by adding the following code to your `config/initializers/mime_types.rb` file:
+If you choose to use a content_type 'shorthand' (like `png`), note that it will be converted to a full content type using `Marcel::MimeType.for` under the hood. Therefore, you should check if the content_type is registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb). On Marcel 2 (Rails 8.2+), historical aliases such as `audio/x-aac` are still valid options and resolve to their canonical type (`audio/aac`). If the type is not registered, you can register it by adding the following code to your `config/initializers/mime_types.rb` file:
 
 ```ruby
 Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files
@@ -382,7 +382,7 @@ Neither backend fully parses the file. They do **not** load the whole file into 
 
 Detected types are cached on the blob as `asv_content_type` + `asv_content_type_backend`. Switching backend re-analyzes. Legacy blobs that only have `asv_content_type` (no backend key) are treated as `:file` and keep using the cache — they are not re-analyzed. New (unsaved) blobs keep `asv_*` in memory until the record is saved; already-persisted blobs write the cache immediately so it survives `reload`.
 
-Sniffers will not always return the exact same MIME as Active Storage (AS uses first ~4kb + filename + extension). Close parent types are accepted via `Marcel::TYPE_PARENTS` (e.g. `video/x-ms-wmv` vs `video/x-ms-asf`).
+Sniffers will not always return the exact same MIME as Active Storage (AS uses first ~4kb + filename + extension). Close parent types are accepted via `Marcel::TYPE_PARENTS` (e.g. `video/x-ms-wmv` vs `video/x-ms-asf`). On Marcel 2 (Rails 8.2+), aliased types such as `text/xml` / `application/xml` and `audio/x-m4a` / `audio/mp4` are also treated as equivalent.
 
 For stronger protection on images / video / audio / PDF, combine sniffing with parse validation:
 

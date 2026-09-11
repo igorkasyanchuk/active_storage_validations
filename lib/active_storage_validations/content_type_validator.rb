@@ -135,7 +135,32 @@ module ActiveStorageValidations
     end
 
     def enlarged_content_type(content_type)
-      [ content_type, *parent_content_types(content_type) ].compact.uniq
+      related = related_marcel_content_types(content_type)
+      [
+        content_type,
+        *related,
+        *parent_content_types(content_type),
+        *related.flat_map { |type| parent_content_types(type) }
+      ].compact.uniq
+    end
+
+    # Marcel 2 (Rails 8.2+) stores `text/xml`, `audio/x-m4a`, `audio/x-aac`, …
+    # as aliases of a canonical type. `MimeType.extend` on an alias updates the
+    # canonical entry, so spoofing must treat alias and canonical as the same
+    # family. Marcel 1 has no TYPE_ALIASES; parent links in asv_marcelable cover it.
+    def related_marcel_content_types(content_type)
+      return [] unless defined?(Marcel::TYPE_ALIASES)
+
+      canonical = canonical_marcel_content_type(content_type)
+      aliases = Marcel::TYPE_ALIASES.each_key.select { |type| Marcel::TYPE_ALIASES[type] == canonical }
+      [ canonical, *aliases ]
+    end
+
+    def canonical_marcel_content_type(content_type)
+      type = content_type_without_parameters(content_type)
+      return type unless defined?(Marcel::TYPE_ALIASES)
+
+      Marcel::TYPE_ALIASES.fetch(type, type)
     end
 
     def parent_content_types(content_type)
@@ -170,7 +195,7 @@ module ActiveStorageValidations
         .map do |content_type|
           case content_type
           when String, Symbol
-            content_type.to_s.match?(/\//) ? Marcel::TYPE_EXTS[content_type.to_s]&.first&.upcase : content_type.upcase
+            content_type.to_s.match?(/\//) ? Marcel::TYPE_EXTS[canonical_marcel_content_type(content_type.to_s)]&.first&.upcase : content_type.upcase
           when Regexp
             content_type.source
           end
@@ -218,18 +243,21 @@ module ActiveStorageValidations
     end
 
     def invalid_content_type?(content_type)
-      if content_type == "image/jpg"
+      type = content_type_without_parameters(content_type.to_s)
+      if type == "image/jpg"
         raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
       end
 
-      all_available_marcel_content_types.exclude?(content_type.to_s)
+      all_available_marcel_content_types.exclude?(type)
     end
 
     def all_available_marcel_content_types
-      @all_available_marcel_content_types ||= Marcel::TYPE_EXTS
-        .keys
-        .push(*Marcel::MAGIC.map(&:first))
-        .tap(&:uniq!)
+      @all_available_marcel_content_types ||= begin
+        types = Marcel::TYPE_EXTS.keys
+        types.concat(Marcel::MAGIC.map(&:first))
+        types.concat(Marcel::TYPE_ALIASES.keys) if defined?(Marcel::TYPE_ALIASES)
+        types.uniq
+      end
     end
 
     def invalid_extension?(content_type)

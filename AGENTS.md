@@ -248,6 +248,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Do not auto-require matchers from the main gem entrypoint
 - Do not re-enable Active Storage previewers in the dummy app without adding `image_processing`
 - Marcel rejects types like `image/jpg` — use `image/jpeg` (and Marcel shorthands where registered)
+- Marcel 2 (Rails main / 8.2+) treats `text/xml`, `audio/x-m4a`, and `audio/x-aac` as aliases (not `TYPE_EXTS` keys). `MimeType.extend` on an alias updates the canonical type, so `spoofing_protection` and `check_validity!` must consult `Marcel::TYPE_ALIASES` as well as `TYPE_PARENTS` / `TYPE_EXTS`
 - Railtie must not use `after: :load_config_initializers` (stack overflow; see comment in `railtie.rb`)
 - `processable_file` may reject formats with libvips untrusted loaders (e.g. SVG) when Rails sets `Vips.block_untrusted(true)`
 - Preserve content-type cache backend semantics: legacy `asv_content_type` without `asv_content_type_backend` must keep hitting the `:file` cache; switching `:file` ↔ `:magika` must re-analyze

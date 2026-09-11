@@ -140,7 +140,9 @@ module ActiveStorageValidations
       end
 
       def attachment_for(content_type)
-        suffix = Marcel::TYPE_EXTS[content_type.to_s]&.first || "fake"
+        type = content_type.to_s
+        type = Marcel::TYPE_ALIASES.fetch(type, type) if defined?(Marcel::TYPE_ALIASES)
+        suffix = Marcel::TYPE_EXTS[type]&.first || "fake"
 
         {
           io: Tempfile.new("."),
