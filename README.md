@@ -171,6 +171,8 @@ class User < ApplicationRecord
 end
 ```
 
+Static options are checked when the model class loads; a proc's result is only known at validation time, so an unsupported value returned by a `content_type` proc (e.g. `"image/jpg"`) raises the same `ArgumentError` from `valid?` instead of silently rejecting every file.
+
 **Performance optimization**<br>
 Some validators rely on an expensive operation (metadata analysis and content type analysis). To mitigate the performance cost, the gem leverages the `ActiveStorage::Blob.metadata` method to store retrieved metadata. Therefore, once the file has been analyzed by our gem, the expensive analysis operation will not be triggered again for new validations.
 

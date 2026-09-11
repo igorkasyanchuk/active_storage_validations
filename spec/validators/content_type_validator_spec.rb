@@ -113,6 +113,13 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
         it "does not perform a check, and therefore is valid" do
           expect { model }.not_to raise_error
         end
+
+        # validates :invalid, content_type: ->(record) { :invalid }
+        it "checks the content types returned by the Proc at validation time" do
+          model.invalid.attach(image_150x150_file)
+
+          expect { model.valid? }.to raise_error(ArgumentError, /'invalid' is not found in Marcel::EXTENSIONS/)
+        end
       end
     end
 
