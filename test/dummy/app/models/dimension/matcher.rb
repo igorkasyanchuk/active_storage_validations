@@ -102,4 +102,10 @@ class Dimension::Matcher < ApplicationRecord
   has_one_attached :width_and_height_min_max_with_message
   validates :width_and_height_min_max, dimension: { width: { min: 800, max: 1200 }, height: { min: 600, max: 900 } }
   validates :width_and_height_min_max_with_message, dimension: { width: { min: 800, max: 1200 }, height: { min: 600, max: 900 }, message: "Invalid dimensions." }
+
+  # Min bounds above the 2000px ceiling the matcher used to assume
+  has_one_attached :large_width_min_and_height_min
+  has_one_attached :large_height_min_and_width_min
+  validates :large_width_min_and_height_min, dimension: { width: { min: 2048 }, height: { min: 100 } }
+  validates :large_height_min_and_width_min, dimension: { width: { min: 100 }, height: { min: 2048 } }
 end
