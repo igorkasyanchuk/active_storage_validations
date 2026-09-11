@@ -70,6 +70,54 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
     end
   end
 
+  describe "multi-frame images" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:path) { Rails.root.join("public", "image_200x100_animated.gif").to_s }
+    let(:attachable) do
+      {
+        io: open_fixture(path),
+        filename: "image_200x100_animated.gif",
+        content_type: "image/gif"
+      }
+    end
+
+    it "returns the dimensions of the first frame" do
+      expect(metadata).to eq({ width: 200, height: 100 })
+    end
+
+    it "asks identify for the first frame only" do
+      seen_argv = nil
+      real_run = analyzer.method(:run_command)
+
+      allow(analyzer).to receive(:run_command) do |*args, **kwargs|
+        seen_argv = args
+        real_run.call(*args, **kwargs)
+      end
+
+      metadata
+
+      expect(seen_argv.last).to end_with("[0]")
+    end
+
+    it "does not print one dimension triplet per frame" do
+      stdout = nil
+      real_run = analyzer.method(:run_command)
+
+      allow(analyzer).to receive(:run_command) do |*args, **kwargs|
+        real_run.call(*args, **kwargs).tap { |result| stdout = result.stdout }
+      end
+
+      metadata
+
+      expect(stdout.strip.split("\t")).to eq(%w[200 100 Undefined])
+    end
+
+    it "leaves an explicit frame selector untouched" do
+      expect(analyzer.send(:first_frame, "/tmp/animated.gif[2]")).to eq("/tmp/animated.gif[2]")
+    end
+  end
+
   describe "#parse_identify_output" do
     let(:path) { Rails.root.join("public", "image_150x150.png").to_s }
     let(:attachable) do

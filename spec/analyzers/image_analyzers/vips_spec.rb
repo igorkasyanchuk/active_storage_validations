@@ -29,6 +29,23 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips, image_pr
 
   it_behaves_like "returns the right metadata for any attachable"
 
+  describe "multi-frame images" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:path) { Rails.root.join("public", "image_200x100_animated.gif").to_s }
+    let(:attachable) do
+      {
+        io: open_fixture(path),
+        filename: "image_200x100_animated.gif",
+        content_type: "image/gif"
+      }
+    end
+
+    it "returns the dimensions of the first frame" do
+      expect(metadata).to eq({ width: 200, height: 100 })
+    end
+  end
+
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "image_150x150.png").to_s }
     let(:attachable) do
