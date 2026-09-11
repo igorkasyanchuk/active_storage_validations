@@ -440,7 +440,7 @@ The `size` validator has 6 possible options:
 - `less_than_or_equal_to`: defines the maximum allowed file size
 - `greater_than`: defines the strict minimum allowed file size
 - `greater_than_or_equal_to`: defines the minimum allowed file size
-- `between`: defines the allowed file size range
+- `between`: defines the allowed file size range (a `Range` with both bounds)
 - `equal_to`: defines the allowed file size
 
 #### Examples
@@ -498,7 +498,7 @@ The `total_size` validator has 6 possible options:
 - `less_than_or_equal_to`: defines the maximum allowed total file size
 - `greater_than`: defines the strict minimum allowed total file size
 - `greater_than_or_equal_to`: defines the minimum allowed total file size
-- `between`: defines the allowed total file size range
+- `between`: defines the allowed total file size range (a `Range` with both bounds)
 - `equal_to`: defines the allowed total file size
 
 #### Examples
@@ -618,7 +618,7 @@ The `duration` validator has several possible options:
 - `less_than_or_equal_to`: defines the maximum allowed file duration
 - `greater_than`: defines the strict minimum allowed file duration
 - `greater_than_or_equal_to`: defines the minimum allowed file duration
-- `between`: defines the allowed file duration range
+- `between`: defines the allowed file duration range (a `Range` with both bounds)
 - `equal_to`: defines the allowed duration
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
@@ -812,7 +812,7 @@ The `pages` validator has several possible options:
 - `less_than_or_equal_to`: defines the maximum allowed number of pages
 - `greater_than`: defines the strict minimum allowed number of pages
 - `greater_than_or_equal_to`: defines the minimum allowed number of pages
-- `between`: defines the allowed number of pages range
+- `between`: defines the allowed number of pages range (a `Range` with both bounds)
 - `equal_to`: defines the allowed number of pages
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
