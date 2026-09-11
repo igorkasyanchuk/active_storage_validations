@@ -11,12 +11,16 @@ module ActiveStorageValidations
   # * Bit rate (bits/s)
   # * Sample rate (hertz)
   # * Audio (true if file has an audio channel, false if not)
-  # * Tags (internal metadata)
   #
   # Example:
   #
   #   ActiveStorageValidations::Analyzer::AudioAnalyzer.new(attachable).metadata
-  #   # => { duration: 5.0, bit_rate: 320340, sample_rate: 44100, audio: true, tags: { encoder: "Lavc57.64", ... } }
+  #   # => { duration: 5.0, bit_rate: 320340, sample_rate: 44100, audio: true }
+  #
+  # Unlike Rails' own audio analyzer, stream tags (ID3 / Vorbis comments) are
+  # not extracted: no validator reads them, and everything returned here is
+  # cached on the blob's custom metadata, which Active Storage forwards to the
+  # storage service (S3 caps object metadata at 2 KB and expects ASCII).
   #
   # This analyzer requires the {FFmpeg}[https://www.ffmpeg.org] system library, which is not provided by \Rails.
   class Analyzer::AudioAnalyzer < Analyzer
@@ -28,8 +32,7 @@ module ActiveStorageValidations
           duration: duration,
           bit_rate: bit_rate,
           sample_rate: sample_rate,
-          audio: audio?,
-          tags: tags
+          audio: audio?
         }.compact
       end
     end
@@ -53,11 +56,6 @@ module ActiveStorageValidations
     def sample_rate
       sample_rate = audio_stream["sample_rate"]
       Integer(sample_rate) if sample_rate
-    end
-
-    def tags
-      tags = audio_stream["tags"]
-      Hash(tags) if tags
     end
   end
 end
