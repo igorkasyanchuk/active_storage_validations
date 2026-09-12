@@ -33,6 +33,7 @@
     - Matchers build their probe attachments on in-memory `StringIO`s instead of `Tempfile`s that were never closed, and `validate_total_size_of` no longer creates and uploads a real blob per probe
     - Document that `Matchers.mock_metadata` stubs `Analyzer.new` process-wide while a probe runs
     - Raise SimpleCov `minimum_coverage` to 90 when `CI=true`; keep 50 for local single-file runs
+    - Ship `CHANGES.md` and `docs/upgrade_to_*.md` in the gem package
 
 - 4.1.1
   - **FIXED**

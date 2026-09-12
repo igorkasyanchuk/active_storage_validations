@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.description = 'Validations for Active Storage (presence, size, content type, ...)'
   s.license     = 'MIT'
 
-  s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md']
+  s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md', 'CHANGES.md', 'docs/upgrade_to_*.md']
 
   s.metadata['rubygems_mfa_required'] = 'true'
   s.metadata['changelog_uri'] = 'https://github.com/igorkasyanchuk/active_storage_validations/blob/master/CHANGES.md'
