@@ -196,4 +196,22 @@ RSpec.describe ActiveStorageValidations::Matchers::TotalSizeValidatorMatcher do
       end
     end
   end
+
+  describe "probe attachments" do
+    subject(:configured_matcher) { matcher.less_than(2.kilobytes) }
+
+    let(:model_attribute) { :less_than }
+
+    it "does not create or upload blobs" do
+      expect { configured_matcher.matches?(klass) }.not_to change(ActiveStorage::Blob, :count)
+    end
+
+    it "does not open tempfiles" do
+      allow(Tempfile).to receive(:new).and_call_original
+
+      configured_matcher.matches?(klass)
+
+      expect(Tempfile).not_to have_received(:new)
+    end
+  end
 end
