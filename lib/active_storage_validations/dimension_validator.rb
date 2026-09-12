@@ -54,18 +54,42 @@ module ActiveStorageValidations
 
     def ensure_dimension_in_option_validity
       %i[width height].each do |dimension|
-        if options[dimension]&.is_a?(Hash) && options[dimension][:in].present?
-          raise ArgumentError, "{ #{dimension}: { in: value } } value must be a Range (min..max)" if !options[dimension][:in].is_a?(Range) && !options[dimension][:in].is_a?(Proc)
+        next unless options[dimension].is_a?(Hash) && options[dimension].key?(:in)
+
+        in_option = options[dimension][:in]
+        unless in_option.is_a?(Range) || in_option.is_a?(Proc)
+          raise ArgumentError, "{ #{dimension}: { in: value } } value must be a Range (min..max)"
         end
+
+        ensure_range_has_both_bounds!(
+          in_option,
+          "{ #{dimension}: { in: } } value must be a Range with both bounds (use #{dimension}: { min: } or #{dimension}: { max: } for a single bound)"
+        )
       end
     end
 
     def ensure_min_max_option_validity
       %i[min max].each do |bound|
-        if options[bound].present?
-          raise ArgumentError, "{ #{bound}: value } value must be a Range (#{bound}_width..#{bound}_height)" if !options[bound]&.is_a?(Range) && !options[bound]&.is_a?(Proc)
+        next unless options[bound].present?
+
+        unless options[bound].is_a?(Range) || options[bound].is_a?(Proc)
+          raise ArgumentError, "{ #{bound}: value } value must be a Range (#{bound}_width..#{bound}_height)"
         end
+
+        ensure_range_has_both_bounds!(
+          options[bound],
+          "{ #{bound}: } value must be a Range with both bounds (#{bound}_width..#{bound}_height)"
+        )
       end
+    end
+
+    # Endless / beginless ranges (`100..`, `..800`) raise RangeError from
+    # Range#min / #max. Procs are evaluated per record and cannot be checked here.
+    def ensure_range_has_both_bounds!(value, message)
+      return if value.is_a?(Proc)
+      return if value.is_a?(Range) && !value.begin.nil? && !value.end.nil?
+
+      raise ArgumentError, message
     end
 
     def is_valid?(record, attribute, file, metadata)
@@ -170,7 +194,8 @@ module ActiveStorageValidations
     end
 
     def outside_range?(value, options)
-      value < options[:min] || value > options[:max]
+      min, max = options[:min], options[:max]
+      (min && value < min) || (max && value > max)
     end
 
     def add_range_error(record, attribute, dimension, flat_options, errors_options)
@@ -195,7 +220,9 @@ module ActiveStorageValidations
       %i[width height].each do |dimension|
         if flat_options[dimension] and flat_options[dimension].is_a?(Hash)
           if (range = flat_options[dimension][:in])
-            flat_options[dimension][:min], flat_options[dimension][:max] = range.min, range.max
+            # Range#begin / #end never raise; a Proc may still return an unbounded range.
+            flat_options[dimension][:min] = range.begin
+            flat_options[dimension][:max] = range.end
           end
         end
       end
@@ -204,8 +231,8 @@ module ActiveStorageValidations
         if (range = flat_options[bound])
           flat_options[:width] ||= {}
           flat_options[:height] ||= {}
-          flat_options[:width][bound] = range.first
-          flat_options[:height][bound] = range.last
+          flat_options[:width][bound] = range.begin
+          flat_options[:height][bound] = range.end
         end
       end
 

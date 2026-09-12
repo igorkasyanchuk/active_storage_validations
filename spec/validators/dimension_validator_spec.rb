@@ -43,6 +43,45 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
           expect { model }.to raise_error(ArgumentError, error_message)
         end
       end
+
+      context "when the range is missing a bound" do
+        subject(:validator) { described_class.new(attributes: [ :file ], width: { in: range }) }
+
+        let(:bounded_range_error_message) do
+          "{ width: { in: } } value must be a Range with both bounds (use width: { min: } or width: { max: } for a single bound)"
+        end
+
+        context "when the range is endless (e.g. width: { in: 100.. })" do
+          let(:range) { 100.. }
+
+          it "raises an error at validator initialization" do
+            expect { validator }.to raise_error(ArgumentError, bounded_range_error_message)
+          end
+        end
+
+        context "when the range is beginless (e.g. width: { in: ..800 })" do
+          let(:range) { ..800 }
+
+          it "raises an error at validator initialization" do
+            expect { validator }.to raise_error(ArgumentError, bounded_range_error_message)
+          end
+        end
+
+        context "when the range is returned by a Proc" do
+          let(:range) { ->(_record) { 100.. } }
+
+          it "cannot be checked at validator initialization" do
+            expect { validator }.not_to raise_error
+          end
+
+          it "still resolves the error bounds without raising" do
+            flat_options = validator.send(:process_options, nil)
+
+            expect(flat_options[:width][:min]).to eq(100)
+            expect(flat_options[:width][:max]).to be_nil
+          end
+        end
+      end
     end
 
     describe "#ensure_min_max_option_validity" do
@@ -70,6 +109,30 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           it "raises an error at model initialization" do
             expect { model }.to raise_error(ArgumentError, error_message)
+          end
+        end
+
+        context "when the range is missing a bound" do
+          subject(:validator) { described_class.new(attributes: [ :file ], bound => range) }
+
+          let(:bounded_range_error_message) do
+            "{ #{bound}: } value must be a Range with both bounds (#{bound}_width..#{bound}_height)"
+          end
+
+          context "when the range is endless" do
+            let(:range) { 100.. }
+
+            it "raises an error at validator initialization" do
+              expect { validator }.to raise_error(ArgumentError, bounded_range_error_message)
+            end
+          end
+
+          context "when the range is returned by a Proc" do
+            let(:range) { ->(_record) { 100.. } }
+
+            it "cannot be checked at validator initialization" do
+              expect { validator }.not_to raise_error
+            end
           end
         end
       end
