@@ -69,9 +69,8 @@ module ValidatorHelpers
   def value_is_equal_or_both_are_procs?(value_1, value_2)
     # Comparing Procs is tricky, let's just ensure that both values are procs
     # for now to check equality, if necessary we will investigate a better
-    # solution
-    (value_1 == value_2) ||
-      (value_1.is_a?(Proc) && value_2.is_a?(Proc)) ||
-      (value_1.is_a?(Hash) && value_2.is_a?(Hash) && value_1.values.all?(Proc) && value_2.values.all?(Proc)) # e.g. { width: { min: -> (record) { 500 } } }
+    # solution (only Rails options such as :if / :unless still carry Procs;
+    # validator check options are no longer forwarded to the error)
+    (value_1 == value_2) || (value_1.is_a?(Proc) && value_2.is_a?(Proc))
   end
 end
