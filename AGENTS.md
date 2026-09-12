@@ -64,7 +64,7 @@ require "active_storage_validations/matchers"
 
 ### Behavior changes (v5)
 
-Same Ruby / Rails support as v4. `errors.add` receives only the documented values (`ASVErrorable`; custom messages interpolating raw options raise), unbounded static `between:` ranges and non-exact `aspect_ratio` values raise at boot, `with_audio` fails closed on empty analyzer metadata, and a failed spoofing analysis adds `content_type_analysis_failed`. Migration steps: `docs/upgrade_to_5.md`. Do not soften these back to the 4.x behavior without a project decision.
+Same Ruby / Rails support as v4. `errors.add` receives only the documented values (`ASVErrorable`; custom messages interpolating raw options raise), unbounded static `between:` / `dimension` `in:` ranges and non-exact `aspect_ratio` values raise at boot, `with_audio` fails closed on empty analyzer metadata, and a failed spoofing analysis adds `content_type_analysis_failed`. Migration steps: `docs/upgrade_to_5.md`. Do not soften these back to the 4.x behavior without a project decision.
 
 ### FormBuilder `accept` inference (v4)
 
@@ -269,7 +269,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Blob `asv_*` metadata is forwarded to the storage service as object metadata (S3: 2 KB, ASCII). Analyzers must only return small scalar values — never free-form hashes such as audio stream tags. Enforced over every dummy fixture by `spec/analyzers/storage_metadata_constraints_spec.rb`
 - `ffprobe` reports Matroska / WebM audio duration on the container only: `AudioAnalyzer#duration` (like `VideoAnalyzer`) must fall back to `container["duration"]` (shared `ASVFFProbable#container`)
 - ImageMagick `identify` must target the first frame (`path[0]`, see `ImageMagick#first_frame`); without it every frame of an animated GIF / multi-page TIFF is decoded
-- `BaseComparisonValidator#min` / `#max` must use `Range#begin` / `#end`, not `#min` / `#max` (`RangeError` on endless / beginless ranges); `check_validity!` rejects unbounded static `between:` ranges
+- `BaseComparisonValidator#min` / `#max` and `DimensionValidator` `in:` / `min:` / `max:` bounds must use `Range#begin` / `#end`, not `#min` / `#max` (`RangeError` on endless / beginless ranges); `check_validity!` rejects unbounded static `between:` and dimension ranges
 - `ASVAttachableAdapter::HashIo#with_media_path` may only `File.open` IOs that respond to `to_path`; anything else (StringIO, streaming wrappers) is copied to the tempfile
 - Empty analyzer metadata (`{}`) means "no analysis happened" and must fail closed in every metadata validator, `with_audio` included (`media_metadata_missing`), for both `with: true` and `with: false`. Only a memoized blank `audio` key (image / PDF analyzed) means "no audio track"
 - `ContentTypeValidator`: Proc options bypass `check_validity!`, so `authorized_content_types_from_options` re-runs `ensure_content_types_validity` on the Proc result

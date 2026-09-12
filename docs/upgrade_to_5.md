@@ -8,6 +8,7 @@ Most applications need no code change. Go through the checklist below before bum
 
 - Validator options are no longer forwarded to `errors.add`: custom messages interpolating an undocumented raw option (e.g. `%{less_than}`) now raise, and `errors.details` only contains the documented values
 - `between:` requires a Range with both bounds; endless / beginless ranges raise `ArgumentError` at boot
+- `dimension` `width` / `height` `{ in: }` and `{ min: }` / `{ max: }` ranges also require both bounds
 - `aspect_ratio` values must be exact: `:is_16_9_extra`-style options raise `ArgumentError` at boot
 - `with_audio: { with: false }` fails closed with `media_metadata_missing` when the file could not be analyzed
 - `content_type` reports `content_type_analysis_failed` instead of `content_type_spoofed` when the spoofing analysis produced nothing
@@ -84,6 +85,8 @@ validates :video, duration: { less_than_or_equal_to: 5.minutes }
 ```
 
 Ranges returned by Procs are not checked at boot (Procs bypass `check_validity!`). They no longer raise either, but prefer a single-bound option there too so the error message gets a real bound.
+
+The same boot check applies to `dimension` `width` / `height` `{ in: }` and to `{ min: min_width..min_height }` / `{ max: }`. Those used to load and raise `RangeError` from `Range#min` / `#max` on the first `valid?`. Use `{ width: { min: 100 } }` or `{ width: { max: 800 } }` for a single bound.
 
 ### `aspect_ratio` options are validated strictly
 
