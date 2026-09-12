@@ -381,7 +381,7 @@ Spoofing protection compares the declared Active Storage content type to a type 
 - `:file` (default) — UNIX `file` / libmagic, mostly magic bytes / headers. Zero extra install on most UNIX systems.
 - `:magika` — [Google Magika](https://github.com/google/magika) CLI (ML sniffer; samples begin/middle/end of the file). Generally more accurate than `file`, especially on textual / ambiguous formats (Google reports ~99% F1 vs ~88% for `file --mime` on overlapping types). Prefer `:magika` when you can install the CLI.
 
-Neither backend fully parses the file. They do **not** load the whole file into RAM. For already-persisted blobs (e.g. remote storage), the analyzer still downloads the blob to a local tempfile before sniffing. That download is streamed in chunks to disk, but it can still be costly for very large files. Local path uploads are analyzed in place.
+Neither backend fully parses the file. They do **not** load the whole file into RAM. For already-persisted blobs (e.g. remote storage), the analyzer downloads the blob to a local tempfile before sniffing: `:file` only fetches the first MiB (libmagic never inspects more than that), while `:magika` streams the whole blob in chunks to disk since it also samples the end of the file — this can still be costly for very large files. Local path uploads are analyzed in place.
 
 Detected types are cached on the blob as `asv_content_type` + `asv_content_type_backend`. Switching backend re-analyzes. Legacy blobs that only have `asv_content_type` (no backend key) are treated as `:file` and keep using the cache — they are not re-analyzed. New (unsaved) blobs keep `asv_*` in memory until the record is saved; already-persisted blobs write the cache immediately so it survives `reload`.
 

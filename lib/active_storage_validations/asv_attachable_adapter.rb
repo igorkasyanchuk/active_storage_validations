@@ -12,6 +12,8 @@ module ActiveStorageValidations
   #
   # Every handler exposes the same three methods: +content_type+, +filename+
   # and +with_media_path+ (a filesystem path the analyzer commands can read).
+  # +with_media_path(tempfile, max_bytes:)+ lets an analyzer that only inspects
+  # the beginning of a file (libmagic) avoid downloading / copying all of it.
   class ASVAttachableAdapter
     def self.wrap(attachable, file_supported:)
       handler_class_for(attachable).new(attachable, file_supported: file_supported)
@@ -63,7 +65,7 @@ module ActiveStorageValidations
         raise NotImplementedError
       end
 
-      def with_media_path(_tempfile)
+      def with_media_path(_tempfile, max_bytes: nil)
         raise NotImplementedError
       end
 
@@ -75,17 +77,25 @@ module ActiveStorageValidations
             "got #{@attachable.inspect}"
       end
 
-      def copy_to_tempfile(tempfile, source)
+      def copy_to_tempfile(tempfile, source, max_bytes: nil)
         if source.is_a?(ActiveStorage::Blob)
-          source.download { |chunk| tempfile.write(chunk) }
+          download_blob(tempfile, source, max_bytes)
         else
-          IO.copy_stream(source, tempfile)
+          IO.copy_stream(source, tempfile, max_bytes)
           source.rewind
         end
 
         tempfile.flush
         tempfile.rewind
         yield tempfile.path
+      end
+
+      def download_blob(tempfile, blob, max_bytes)
+        if max_bytes && blob.byte_size.to_i > max_bytes
+          tempfile.write(blob.download_chunk(0...max_bytes))
+        else
+          blob.download { |chunk| tempfile.write(chunk) }
+        end
       end
 
       def marcel_content_type
@@ -102,8 +112,8 @@ module ActiveStorageValidations
         @attachable.filename
       end
 
-      def with_media_path(tempfile, &block)
-        copy_to_tempfile(tempfile, @attachable, &block)
+      def with_media_path(tempfile, max_bytes: nil, &block)
+        copy_to_tempfile(tempfile, @attachable, max_bytes: max_bytes, &block)
       end
     end
 
@@ -122,7 +132,7 @@ module ActiveStorageValidations
         @attachable.original_filename
       end
 
-      def with_media_path(_tempfile)
+      def with_media_path(_tempfile, max_bytes: nil)
         yield @attachable.path
       end
     end
@@ -140,12 +150,12 @@ module ActiveStorageValidations
       # may be a StringIO or any IO-like wrapper (streaming download, Zip entry,
       # …) with no file behind it. Only path-backed IOs (File, Tempfile,
       # uploaded files) can be handed to the analyzers' commands as they are.
-      def with_media_path(tempfile, &block)
+      def with_media_path(tempfile, max_bytes: nil, &block)
         io = @attachable[:io]
         if io.respond_to?(:to_path)
           File.open(io) { |file| yield file.path }
         else
-          copy_to_tempfile(tempfile, io, &block)
+          copy_to_tempfile(tempfile, io, max_bytes: max_bytes, &block)
         end
       end
     end
@@ -164,13 +174,13 @@ module ActiveStorageValidations
         File.basename(@attachable)
       end
 
-      def with_media_path(_tempfile)
+      def with_media_path(_tempfile, max_bytes: nil)
         yield @attachable.path
       end
     end
 
     class Path < FileLike
-      def with_media_path(_tempfile)
+      def with_media_path(_tempfile, max_bytes: nil)
         yield @attachable.to_s
       end
     end
