@@ -1,6 +1,6 @@
 # Upgrading to 5.x
 
-Version 5 keeps the supported Rails (`>= 7.0.1`) and Ruby (`>= 3.3`) versions and does not rename or remove any validator, option, matcher method or I18n key. It is a major release because a few behaviors an existing 4.x application could depend on changed: validator options are no longer forwarded to `errors.add`, some options that used to load are now rejected at boot, `with_audio` fails closed when a file could not be analyzed, and a failed content-type analysis gets its own error.
+Version 5 keeps the supported Rails (`>= 7.0.1`) and Ruby (`>= 3.3`) versions and does not rename or remove any validator, option, matcher method or I18n key. It is a major release because a few behaviors an existing 4.x application could depend on changed: validator options are no longer forwarded to `errors.add`, some options that used to load are now rejected at boot, empty `content_type` / `aspect_ratio` lists fail closed, `with_audio` fails closed when a file could not be analyzed, and a failed content-type analysis gets its own error.
 
 Most applications need no code change. Go through the checklist below before bumping the gem.
 
@@ -10,6 +10,7 @@ Most applications need no code change. Go through the checklist below before bum
 - `between:` requires a Range with both bounds; endless / beginless ranges raise `ArgumentError` at boot
 - `dimension` `width` / `height` `{ in: }` and `{ min: }` / `{ max: }` ranges also require both bounds
 - `aspect_ratio` values must be exact: `:is_16_9_extra`-style options raise `ArgumentError` at boot
+- `content_type` / `aspect_ratio` reject an empty authorized list instead of accepting every file
 - `with_audio: { with: false }` fails closed with `media_metadata_missing` when the file could not be analyzed
 - `content_type` reports `content_type_analysis_failed` instead of `content_type_spoofed` when the spoofing analysis produced nothing
 
@@ -87,6 +88,10 @@ validates :video, duration: { less_than_or_equal_to: 5.minutes }
 Ranges returned by Procs are not checked at boot (Procs bypass `check_validity!`). They no longer raise either, but prefer a single-bound option there too so the error message gets a real bound.
 
 The same boot check applies to `dimension` `width` / `height` `{ in: }` and to `{ min: min_width..min_height }` / `{ max: }`. Those used to load and raise `RangeError` from `Range#min` / `#max` on the first `valid?`. Use `{ width: { min: 100 } }` or `{ width: { max: 800 } }` for a single bound.
+
+### Empty `content_type` / `aspect_ratio` lists fail closed
+
+A static empty list (`content_type: { with: [] }`, `aspect_ratio: { in: [] }`) now raises `ArgumentError` at boot. A Proc that returns `[]` (or `nil`) used to skip the validator and accept every file; it now rejects the attachment (`content_type_invalid` / `aspect_ratio_invalid`). Treat an empty Proc result as "nothing is authorized", like Rails `inclusion: { in: [] }`.
 
 ### `aspect_ratio` options are validated strictly
 

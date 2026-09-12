@@ -51,6 +51,14 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
           expect { model }.not_to raise_error
         end
       end
+
+      context "when the authorized list is empty" do
+        subject(:validator) { described_class.new(attributes: [ :file ], with: []) }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, "You must pass at least one aspect ratio to the validator")
+        end
+      end
     end
   end
 
@@ -229,6 +237,24 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
           end
         end
       end
+    end
+
+    context "when the Proc returns an empty list" do
+      subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+      let(:attribute) { :with_empty_proc }
+      let(:error_options) do
+        {
+          authorized_aspect_ratios: "",
+          width: 150,
+          height: 150,
+          filename: square_image_file[:filename]
+        }
+      end
+
+      it { is_expected_not_to_be_valid }
+      it { is_expected_to_include_error_message("aspect_ratio_invalid", error_options: error_options) }
+      it { is_expected_to_have_error_options(error_options) }
     end
 
     describe "Edge cases" do
