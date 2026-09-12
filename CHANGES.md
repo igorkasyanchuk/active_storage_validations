@@ -34,6 +34,7 @@
     - Document that `Matchers.mock_metadata` stubs `Analyzer.new` process-wide while a probe runs
     - Raise SimpleCov `minimum_coverage` to 90 when `CI=true`; keep 50 for local single-file runs
     - Ship `CHANGES.md` and `docs/upgrade_to_*.md` in the gem package
+    - Install Magika CLI in CI from the checksummed `cli/v1.1.0` tarball instead of piping the installer script
 
 - 4.1.1
   - **FIXED**

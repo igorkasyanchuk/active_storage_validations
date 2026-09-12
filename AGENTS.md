@@ -80,7 +80,7 @@ External analyzer commands (`ffprobe`, `pdfinfo`, `file`, `magika`, ImageMagick 
 
 ### Content-type spoofing backends (v4)
 
-`content_type` `spoofing_protection` accepts `true` / `:file` (UNIX `file` CLI) or `:magika` (Google Magika CLI). Detected types are cached as `asv_content_type` plus `asv_content_type_backend`; switching backend re-analyzes. Legacy blobs with only `asv_content_type` are treated as the `:file` backend. Matcher: `#spoofing_protection` / `#spoofing_protection(:magika)`. Install Magika in any environment that uses `:magika` (CI pins the CLI to `cli/v1.1.0` in `.github/workflows/main.yml`).
+`content_type` `spoofing_protection` accepts `true` / `:file` (UNIX `file` CLI) or `:magika` (Google Magika CLI). Detected types are cached as `asv_content_type` plus `asv_content_type_backend`; switching backend re-analyzes. Legacy blobs with only `asv_content_type` are treated as the `:file` backend. Matcher: `#spoofing_protection` / `#spoofing_protection(:magika)`. Install Magika in any environment that uses `:magika` (CI installs the checksummed `cli/v1.1.0` linux tarball in `.github/workflows/main.yml`).
 
 A missing `file` or `magika` binary raises `ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::CommandLineToolNotInstalledError` (shared ancestor; both backends resolve that constant).
 
