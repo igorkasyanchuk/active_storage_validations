@@ -1,4 +1,6 @@
 # Unreleased
+- **ADDED**
+  - Localize the `duration` error message values (`%{duration}`, `%{min}`, `%{max}`, `%{exact}`). Units and sentence connectors now come from the new `active_storage_validations.duration` I18n keys shipped in every bundled locale (e.g. `1 minute et 30 secondes` in French) instead of the English-only `ActiveSupport::Duration#inspect`. Locales the gem does not ship fall back to the English wording
 - **CHANGED**
   - Validator options are no longer forwarded to `errors.add`, aligning with Rails' built-in validators (`LengthValidator::RESERVED_OPTIONS`): `errors.details` and I18n interpolation arguments no longer contain the check options (`less_than:`, `width:`, `with:`, …) nor the gem configuration (`timeout:`, `spoofing_protection:`), so they stay JSON-serializable even with Proc / Range options. The documented, resolved values (`min`, `max`, `count`, `filename`, …) are unchanged; only a custom message interpolating an undocumented raw option (e.g. `%{less_than}`) has to switch to its documented counterpart (`%{max}`)
 - **FIXED**

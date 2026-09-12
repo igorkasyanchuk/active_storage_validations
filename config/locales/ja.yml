@@ -66,3 +66,30 @@ ja:
       pages_not_greater_than_or_equal_to: "のページ数は%{min}以上にしてください (添付されたファイルは%{pages}ページ)"
       pages_not_between: "のページ数は%{min}以上%{max}以下にしてください (添付されたファイルは%{pages}ページ)"
       pages_not_equal_to: "のページ数は%{exact}にしてください (添付されたファイルは%{pages}ページ)"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count}年"
+        other: "%{count}年"
+      months:
+        one: "%{count}か月"
+        other: "%{count}か月"
+      weeks:
+        one: "%{count}週間"
+        other: "%{count}週間"
+      days:
+        one: "%{count}日"
+        other: "%{count}日"
+      hours:
+        one: "%{count}時間"
+        other: "%{count}時間"
+      minutes:
+        one: "%{count}分"
+        other: "%{count}分"
+      seconds:
+        one: "%{count}秒"
+        other: "%{count}秒"
+      connectors:
+        words_connector: ""
+        two_words_connector: ""
+        last_word_connector: ""
