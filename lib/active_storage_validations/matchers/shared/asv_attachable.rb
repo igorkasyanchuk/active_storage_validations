@@ -31,10 +31,9 @@ module ActiveStorageValidations
         @subject.public_send(@attribute_name).attached?
       end
 
-      def dummy_blob
-        ActiveStorage::Blob.create_and_upload!(**dummy_file)
-      end
-
+      # Probe attachments are built on in-memory IOs: nothing to close or
+      # unlink, and analyzers that need a path copy the IO to their own
+      # tempfile (ASVAttachableAdapter::HashIo#with_media_path).
       def dummy_file
         {
           io: io,
@@ -53,14 +52,14 @@ module ActiveStorageValidations
 
       def not_processable_image
         {
-          io: Tempfile.new("."),
+          io: StringIO.new,
           filename: "not_processable_image.txt",
           content_type: "text/plain"
         }
       end
 
       def io
-        @io ||= Tempfile.new("Hello world!")
+        @io ||= StringIO.new
       end
 
       def image_data

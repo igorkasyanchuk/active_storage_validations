@@ -148,7 +148,7 @@ module ActiveStorageValidations
         suffix = Marcel::TYPE_EXTS[type]&.first || "fake"
 
         {
-          io: Tempfile.new("."),
+          io: StringIO.new,
           filename: "test.#{suffix}",
           content_type: content_type
         }
