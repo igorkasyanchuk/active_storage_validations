@@ -121,6 +121,14 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
           expect { model.valid? }.to raise_error(ArgumentError, /'invalid' is not found in Marcel::EXTENSIONS/)
         end
       end
+
+      context "when the authorized list is empty" do
+        subject(:validator) { described_class.new(attributes: [ :file ], with: []) }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, "You must pass at least one content type to the validator")
+        end
+      end
     end
 
     describe "spoofing_protection validity" do
@@ -257,6 +265,24 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
         let(:file_having_content_type_with_parameter) { rar_file } # 'application/x-rar-compressed;version=5'
 
         it { is_expected_to_be_valid }
+      end
+
+      context "when the Proc returns an empty list" do
+        subject(:record) { model.public_send(attribute).attach(png_file) and model }
+
+        let(:attribute) { :with_empty_proc }
+        let(:error_options) do
+          {
+            authorized_human_content_types: "",
+            content_type: png_file[:content_type],
+            count: 0,
+            filename: png_file[:filename]
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("content_type_invalid", error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
       end
     end
 
