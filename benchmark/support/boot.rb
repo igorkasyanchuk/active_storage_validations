@@ -105,7 +105,7 @@ module ASVBenchmark
     puts "active_storage_validations benchmarks"
     puts "ruby:            #{RUBY_DESCRIPTION}"
     puts "rails:           #{Rails.version}"
-    puts "IMAGE_PROCESSOR: #{ActiveStorage.variant_processor || :mini_magick}"
+    puts "IMAGE_PROCESSOR: #{ActiveStorage.variant_processor || :vips}"
     puts "BUNDLE_GEMFILE:  #{ENV.fetch('BUNDLE_GEMFILE', '(default Gemfile)')}"
     puts "host:            #{`uname -nms`.strip}"
     puts "vips:            #{tool_version('vips', '-v')}"

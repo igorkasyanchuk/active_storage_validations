@@ -73,7 +73,7 @@ gem 'mini_magick', '>= 4.9.5'
 
 Plus, you have to be sure to have the corresponding command-line tool installed on your system (`libvips` for `ruby-vips`, or ImageMagick for `mini_magick` — both locally and in CI / production).
 
-We recommend **libvips** (`ruby-vips` + `config.active_storage.variant_processor = :vips`) for these validators. Rails already defaults Active Storage variants to libvips ([`ActiveStorage::Variant`](https://api.rubyonrails.org/classes/ActiveStorage/Variant.html)), and our [image processor benchmarks](benchmark/BASELINE.md#image-processors--vips-vs-mini_magick) show cold metadata analysis is about **8× faster** than MiniMagick/ImageMagick on the same machine and fixtures. Warm validations (cached `asv_*` metadata) are similar for both.
+We recommend **libvips** (`ruby-vips` + `config.active_storage.variant_processor = :vips`) for these validators. Rails already defaults Active Storage variants to libvips ([`ActiveStorage::Variant`](https://api.rubyonrails.org/classes/ActiveStorage/Variant.html)), and our [image processor benchmarks](benchmark/BASELINE.md#image-processors--vips-vs-mini_magick) show cold metadata analysis is about **8× faster** than MiniMagick/ImageMagick on the same machine and fixtures. Warm validations (cached `asv_*` metadata) are similar for both. When `ActiveStorage.variant_processor` is unset, the gem falls back to `:vips` as well (`config.active_storage.variant_processor = :mini_magick` to keep ImageMagick).
 
 ### Using video and audio metadata validators
 
@@ -1083,7 +1083,7 @@ BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake spec
 Tips:
 - To focus examples, tag them with `:focus` (or use `fit` / `fdescribe`); RSpec is configured with `filter_run_when_matching :focus`
 - To run a specific file: `bundle exec rspec spec/validators/size_validator_spec.rb`
-- Image processor: CI runs both via `IMAGE_PROCESSOR=vips` / `IMAGE_PROCESSOR=mini_magick`. Locally, unset means validators use MiniMagick (ASV default) and both analyzer unit specs run; setting the env selects that processor for validators and excludes the other processor’s tagged examples (so they do not show as pending)
+- Image processor: CI runs both via `IMAGE_PROCESSOR=vips` / `IMAGE_PROCESSOR=mini_magick`. Locally, unset means validators use libvips (ASV default) and both analyzer unit specs run; setting the env selects that processor for validators and excludes the other processor’s tagged examples (so they do not show as pending)
 
 ### Benchmarks
 

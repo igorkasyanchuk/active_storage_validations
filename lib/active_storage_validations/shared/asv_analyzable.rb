@@ -8,7 +8,7 @@ module ActiveStorageValidations
   module ASVAnalyzable
     extend ActiveSupport::Concern
 
-    DEFAULT_IMAGE_PROCESSOR = :mini_magick
+    DEFAULT_IMAGE_PROCESSOR = :vips
     # Keys written by the content-type sniffers. They record what the file
     # claims to be, not whether an analyzer could decode it, so they must never
     # count as evidence that a media analysis happened.
@@ -155,8 +155,10 @@ module ActiveStorageValidations
     end
 
     def image_processor
-      # Rails returns nil for default image processor, because it is set in an after initialize callback
-      # https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/engine.rb
+      # Rails may still return nil before its after-initialize callback sets the
+      # processor (https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/engine.rb).
+      # Fall back to libvips, which Rails 7.1+ uses for variants and which the
+      # README recommends.
       ActiveStorage.variant_processor || DEFAULT_IMAGE_PROCESSOR
     end
 
