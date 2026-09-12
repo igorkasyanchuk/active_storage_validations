@@ -87,32 +87,11 @@ module ActiveStorageValidations
       content_type && content_type.downcase.split(/[;,\s]/, 2).first
     end
 
-    # Retrieve the content_type from attachable using the same logic as Rails
-    # ActiveStorage::Blob::Identifiable#identify_content_type
-    def attachable_content_type_rails_like(attachable)
-      Marcel::MimeType.for(
-        attachable_io(attachable, max_byte_size: 4.kilobytes),
-        name: attachable_filename(attachable).to_s,
-        declared_type: full_attachable_content_type(attachable)
-      )
-    end
-
     # Retrieve the media type of the attachable, which is the first part of the
     # content type (or mime type).
     # Possible values are: application/audio/example/font/image/model/text/video
     def attachable_media_type(attachable)
       (full_attachable_content_type(attachable) || marcel_content_type_from_filename(attachable)).split("/").first
-    end
-
-    def attachable_io(attachable, max_byte_size: nil)
-      wrapped = wrap_attachable(attachable)
-      io = wrapped.read(max_byte_size: max_byte_size)
-      wrapped.rewind
-      io
-    end
-
-    def rewind_attachable_io(attachable)
-      wrap_attachable(attachable).rewind
     end
 
     def attachable_filename(attachable)
@@ -129,7 +108,6 @@ module ActiveStorageValidations
     def supports_file_attachment?
       Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
     end
-    alias :supports_pathname_attachment? :supports_file_attachment?
 
     # Retrieve the content_type from the file name only
     def marcel_content_type_from_filename(attachable)
