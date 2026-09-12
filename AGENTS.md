@@ -113,7 +113,7 @@ bundle exec rubocop --parallel
 
 Focus examples with `:focus` / `fit` / `fdescribe` (`filter_run_when_matching :focus` is enabled).
 
-SimpleCov runs unless `NO_COVERAGE=1`. `minimum_coverage` is 50 (`spec/spec_helper.rb`) so a targeted file still finishes; the full suite is ~97%. CI uploads the coverage artifact from the Ruby 3.4 / Rails 8.1 / vips job.
+SimpleCov runs unless `NO_COVERAGE=1`. `minimum_coverage` is 50 locally so a targeted file still finishes; CI (`CI=true`) requires 90. The full suite is ~97%. CI uploads the coverage artifact from the Ruby 3.4 / Rails 8.1 / vips job.
 
 ### Multi-Rails testing via `BUNDLE_GEMFILE`
 

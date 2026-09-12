@@ -32,6 +32,7 @@
     - `content_type` `spoofing_protection` with the `:file` backend now downloads only the first MiB of persisted blobs (`download_chunk`), since libmagic never inspects more than that (`file -P bytes=1048576`). The first validation of large remote files is much cheaper; `:magika` keeps downloading the whole blob as it also samples the end of the file
     - Matchers build their probe attachments on in-memory `StringIO`s instead of `Tempfile`s that were never closed, and `validate_total_size_of` no longer creates and uploads a real blob per probe
     - Document that `Matchers.mock_metadata` stubs `Analyzer.new` process-wide while a probe runs
+    - Raise SimpleCov `minimum_coverage` to 90 when `CI=true`; keep 50 for local single-file runs
 
 - 4.1.1
   - **FIXED**
