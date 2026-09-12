@@ -39,6 +39,14 @@ module ActiveStorageValidations
     end
     private_class_method :restore_stubbed_method
 
+    # Stubs Analyzer.new for the duration of the block so metadata matchers can
+    # probe bounds without real media files.
+    #
+    # The stub is process-global: every validation running in this process
+    # while the block executes (other threads, concurrent test workers sharing
+    # the process) sees the mocked metadata. This is fine for RSpec / Minitest,
+    # which run examples sequentially within a process, but do not call
+    # matchers from threads that also validate real attachments.
     def self.mock_metadata(attachment, metadata = {})
       asv_metadata_available_keys = { width: nil, height: nil, duration: nil, content_type: nil }
       merged = asv_metadata_available_keys.merge(metadata)
