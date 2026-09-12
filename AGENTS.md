@@ -43,8 +43,8 @@ docs/upgrade_to_*.md                       # Upgrade guides
 | `ASVAttachable` | Loop attachables/blobs; metadata validation path |
 | `ASVAnalyzable` | Pick analyzer; cache results on blob custom metadata (`asv_*`) |
 | `ASVCommandable` | Timed external commands with process-group kill (`command_timeout`) |
-| `ASVErrorable` | `add_error` with `validator_type`, `filename`, bounds |
-| `ASVOptionable` | Flatten options; evaluate Proc options |
+| `ASVErrorable` | `add_error` with `validator_type`, `filename`, resolved bounds; check / configuration options are not forwarded |
+| `ASVOptionable` | Keep the validator check options (`AVAILABLE_CHECKS`) and evaluate their Procs |
 | `ASVSymbolizable` | Map validator class → error symbol (`:content_type`, …) |
 | `ASVLoggable` | `Rails.logger` helper used by analyzers |
 
@@ -273,6 +273,11 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - `ASVCommandable` must keep the `windows?` branch: `Process.spawn(pgroup: true)` and `Process.kill(sig, -pid)` raise on Windows (use `new_pgroup: true` and a direct `KILL`). The spec simulates it by stubbing `windows?`
 - `VideoAnalyzer#angle` parses rotation as a rounded float and rescues unparsable values (`"90.0"` is a real-world tag)
 - `AspectRatioValidator::ASPECT_RATIO_REGEX` is anchored (`\A…\z`); the unanchored version accepted `:is_16_9square` at boot
+- `ASVAttachableAdapter` handlers expose only `content_type`, `filename` and `with_media_path(tempfile, max_bytes: nil)`. Do not reintroduce `read` / `rewind` (nor `attachable_io` / `rewind_attachable_io` on `ASVAttachable`): the io is rewound by `copy_to_tempfile`, nothing else reads it
+- `ASVErrorable#initialize_error_options` mirrors Rails' `RESERVED_OPTIONS`: `AVAILABLE_CHECKS` and `CONFIGURATION_OPTIONS` (`with in timeout spoofing_protection`) never reach `errors.add`. Validators set the documented values (`min`, `max`, `length`, …) explicitly; specs must not expect raw options such as `width: { in: 400..600 }` in `error.options`
+- `DurationValidator` humanizes values through `active_storage_validations.duration.<unit>` (`one` / `other`) and `.connectors` keys in every locale (`spec/global/locales_spec.rb` enforces parity; no `few` / `many` forms), with English defaults for other locales. Duration specs use `seconds_in_words(n)` / the `localized { … }` helper because messages are asserted in every locale
+- `ContentTypeAnalyzer::File#media_path_options` caps blob downloads at `LIBMAGIC_BYTES_LIMIT` (1 MiB, libmagic's `bytes` parameter). `Magika` must keep the full download (it samples the end of the file). Other analyzers use `Analyzer#media_path_options` (`{}`)
+- Matcher probe attachments are in-memory `StringIO`s (`Matchers::ASVAttachable#io`, `#not_processable_image`, `ContentTypeValidatorMatcher#attachment_for`) and `validate_total_size_of` attaches a Hash, not a persisted blob. Do not reintroduce `Tempfile.new` / `create_and_upload!` there
 - Keep `json` `< 3` on the Rails 8.1 Gemfile. json 3.0 made `JSON.parse` keyword-only; Rails 8.1.3.1 `ActiveSupport::JSON.decode` still passes a positional options hash (fixed on Rails 8.2 / main as rails/rails#58601)
 
 ## Read First When Contributing
