@@ -35,6 +35,7 @@
     - Raise SimpleCov `minimum_coverage` to 90 when `CI=true`; keep 50 for local single-file runs
     - Ship `CHANGES.md` and `docs/upgrade_to_*.md` in the gem package
     - Install Magika CLI in CI from the checksummed `cli/v1.1.0` tarball instead of piping the installer script
+    - When `ActiveStorage.variant_processor` is unset, image analyzers now fall back to `:vips` instead of `:mini_magick` (matching the README recommendation and Rails 7.1+). Set `config.active_storage.variant_processor = :mini_magick` to keep ImageMagick
 
 - 4.1.1
   - **FIXED**

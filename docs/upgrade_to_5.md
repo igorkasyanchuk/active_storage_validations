@@ -180,5 +180,6 @@ Only relevant if you monkey-patch the gem:
 
 - `spoofing_protection` with the `:file` backend downloads only the first MiB of persisted blobs, since libmagic never inspects more than that; `:magika` still downloads the whole blob
 - Matchers no longer leave probe `Tempfile`s open, and `validate_total_size_of` no longer creates and uploads a real blob per probe
+- When `ActiveStorage.variant_processor` is unset, image analyzers fall back to `:vips` instead of `:mini_magick`. A fully booted Rails app still uses whatever Rails set (`:mini_magick` on 7.0, `:vips` on 7.1+). Set `config.active_storage.variant_processor = :mini_magick` to keep ImageMagick
 
 See [CHANGES.md](../CHANGES.md) for the full list.
