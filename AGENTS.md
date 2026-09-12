@@ -60,7 +60,11 @@ require "active_storage_validations/matchers"
 
 - Ruby `>= 3.3` (CI also covers 3.4 and 4.0)
 - Rails `>= 7.0.1` (6.1 and 7.0.0 dropped)
-- See `docs/upgrade_to_4.md` and the Unreleased section of `CHANGES.md`
+- See `docs/upgrade_to_4.md`, `docs/upgrade_to_5.md` and the Unreleased section of `CHANGES.md`
+
+### Behavior changes (v5)
+
+Same Ruby / Rails support as v4. `errors.add` receives only the documented values (`ASVErrorable`; custom messages interpolating raw options raise), unbounded static `between:` ranges and non-exact `aspect_ratio` values raise at boot, `with_audio` fails closed on empty analyzer metadata, and a failed spoofing analysis adds `content_type_analysis_failed`. Migration steps: `docs/upgrade_to_5.md`. Do not soften these back to the 4.x behavior without a project decision.
 
 ### FormBuilder `accept` inference (v4)
 
@@ -235,7 +239,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 |-----|------|
 | User guide | `README.md` |
 | Changelog | `CHANGES.md` |
-| Upgrade to 2.x / 3.x / 4.x | `docs/upgrade_to_2.md`, `docs/upgrade_to_3.md`, `docs/upgrade_to_4.md` |
+| Upgrade to 2.x / 3.x / 4.x / 5.x | `docs/upgrade_to_2.md`, `docs/upgrade_to_3.md`, `docs/upgrade_to_4.md`, `docs/upgrade_to_5.md` |
 | Commit messages | [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) (Conventional Commits; always apply for agents) |
 | `/commit` skill | [`.cursor/skills/commit/SKILL.md`](.cursor/skills/commit/SKILL.md) |
 | Spec conventions | [`.cursor/rules/spec.mdc`](.cursor/rules/spec.mdc) (shared; named `subject`), plus [`spec-validators.mdc`](.cursor/rules/spec-validators.mdc), [`spec-matchers.mdc`](.cursor/rules/spec-matchers.mdc), [`spec-analyzers.mdc`](.cursor/rules/spec-analyzers.mdc), [`spec-integration.mdc`](.cursor/rules/spec-integration.mdc) |
@@ -282,7 +286,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 
 ## Read First When Contributing
 
-1. `README.md` (Contributing section) and `docs/upgrade_to_4.md`
+1. `README.md` (Contributing section), `docs/upgrade_to_4.md` and `docs/upgrade_to_5.md`
 2. `.cursor/rules/git.mdc` (commit / PR title format)
 3. `lib/active_storage_validations.rb` + `railtie.rb`
 4. A simple validator: `attached_validator.rb`

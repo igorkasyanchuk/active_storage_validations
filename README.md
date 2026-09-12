@@ -886,6 +886,7 @@ The `pages` validator error messages expose 5 values that you can use:
 - [Upgrading to 2.x](docs/upgrade_to_2.md)
 - [Upgrading to 3.x](docs/upgrade_to_3.md)
 - [Upgrading to 4.x](docs/upgrade_to_4.md)
+- [Upgrading to 5.x](docs/upgrade_to_5.md)
 
 ## Internationalization (I18n)
 
@@ -895,7 +896,7 @@ Translation files are available [here](https://github.com/igorkasyanchuk/active_
 
 If you wish to customize the error messages, just copy, paste and update the translation files into your application locales.
 
-Each validator section above lists the values its messages expose (`%{min}`, `%{max}`, `%{filename}`, …). Those resolved values, plus `validator_type` and `filename`, are what you will find in `record.errors.details`; the validator options themselves (`less_than: ->(record) { … }`, `timeout:`, `spoofing_protection:`, …) are not forwarded, so `errors.details` stays JSON-serializable, as with Rails' built-in validators.
+Each validator section above lists the values its messages expose (`%{min}`, `%{max}`, `%{filename}`, …). Those resolved values, plus `validator_type` and `filename`, are what you will find in `record.errors.details`; the validator options themselves (`less_than: ->(record) { … }`, `timeout:`, `spoofing_protection:`, …) are not forwarded, so `errors.details` stays JSON-serializable, as with Rails' built-in validators. Custom messages must interpolate the documented values only (see [upgrade to 5.x](docs/upgrade_to_5.md#validator-options-are-no-longer-forwarded-to-errorsadd)).
 
 ## Test matchers
 
