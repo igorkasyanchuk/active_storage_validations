@@ -69,7 +69,7 @@ RSpec.describe "command timeout integration" do
         flat = validator.send(:flatten_options, Object.new, validator.options)
 
         expect(flat[:less_than]).to eq(5.minutes)
-        expect(flat[:timeout]).not_to eq(2.seconds)
+        expect(flat).not_to have_key(:timeout)
         expect(flat.key?(:equal_to)).to be(false)
       end
     end
@@ -91,7 +91,7 @@ RSpec.describe "command timeout integration" do
         flat = validator.send(:flatten_options, Object.new, validator.options)
 
         expect(flat[:less_than]).to eq(1.megabyte)
-        expect(flat[:timeout]).not_to eq(3.seconds)
+        expect(flat).not_to have_key(:timeout)
       end
     end
   end
