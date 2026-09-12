@@ -32,7 +32,11 @@ module ActiveStorageValidations
 
     def check_validity!
       ensure_exactly_one_validator_option
-      ensure_content_types_validity(static_content_types) unless proc_content_types?
+      unless proc_content_types?
+        types = static_content_types
+        ensure_content_types_present!(types)
+        ensure_content_types_validity(types)
+      end
       ensure_spoofing_protection_validity
     end
 
@@ -40,8 +44,6 @@ module ActiveStorageValidations
       return if no_attachments?(record, attribute)
 
       authorized_content_types = authorized_content_types_from_options(record)
-      return if authorized_content_types.empty?
-
       attachables_and_blobs(record, attribute).each do |attachable, blob|
         context = Context.new(authorized_content_types, blob.content_type, blob.filename.to_s)
         is_valid?(record, attribute, attachable, blob, context)
@@ -58,7 +60,7 @@ module ActiveStorageValidations
       # "image/jpg") would otherwise reject every file with a blank message.
       ensure_content_types_validity(content_types) if proc_content_types?
 
-      content_types.map do |type|
+      content_types.filter_map do |type|
         case type
         when String, Symbol then Marcel::MimeType.for(declared_type: type.to_s, extension: type.to_s)
         when Regexp then type
@@ -242,7 +244,13 @@ module ActiveStorageValidations
     end
 
     def static_content_types
-      Array(options[:with]) + Array(options[:in])
+      (Array(options[:with]) + Array(options[:in])).compact
+    end
+
+    def ensure_content_types_present!(content_types)
+      return unless content_types.empty?
+
+      raise ArgumentError, "You must pass at least one content type to the validator"
     end
 
     def ensure_content_types_validity(content_types)
