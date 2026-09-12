@@ -22,6 +22,7 @@
   - Upgrade dev dependencies (simplecov from 1.1.0 to 1.2)
   - Remove dead attachable helpers (`attachable_content_type_rails_like`, `attachable_io`, `rewind_attachable_io`, `supports_pathname_attachment?`) and the adapter `read` / `rewind` methods: `ASVAttachableAdapter` handlers now only expose `content_type`, `filename` and `with_media_path`
   - `ASVOptionable#flatten_options` keeps only the validator check options instead of replacing every other option with `{}`
+  - Replace the `define_method` block generating the `DimensionValidator` min / max helpers with plain methods
 
 # Released
 - 4.1.1
