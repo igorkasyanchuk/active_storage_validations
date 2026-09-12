@@ -668,6 +668,21 @@ The `duration` validator error messages expose 4 values that you can use:
 - `max` containing the maximum allowed duration size (e.g. `2 minutes`)
 - `filename` containing the current file name
 
+Duration values are humanized in the current locale (e.g. `1 minute et 30 secondes` in French) through the `active_storage_validations.duration` keys shipped with every bundled locale: one `one` / `other` pair per unit (`years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`) plus the sentence `connectors`. Locales the gem does not ship fall back to the English wording. Override them in your application locales like any other key:
+
+```yml
+en:
+  active_storage_validations:
+    duration:
+      seconds:
+        one: "%{count} second"
+        other: "%{count} seconds"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " and "
+        last_word_connector: " and "
+```
+
 ---
 
 ### With audio

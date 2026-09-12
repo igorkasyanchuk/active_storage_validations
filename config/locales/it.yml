@@ -63,3 +63,30 @@ it:
       pages_not_greater_than_or_equal_to: "il numero di pagine deve essere maggiore o uguale a %{min} (il numero di pagine corrente è %{pages})"
       pages_not_between: "il numero di pagine deve essere compreso tra %{min} e %{max} (il numero di pagine corrente è %{pages})"
       pages_not_equal_to: "il numero di pagine deve essere uguale a %{exact} (il numero di pagine corrente è %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} anno"
+        other: "%{count} anni"
+      months:
+        one: "%{count} mese"
+        other: "%{count} mesi"
+      weeks:
+        one: "%{count} settimana"
+        other: "%{count} settimane"
+      days:
+        one: "%{count} giorno"
+        other: "%{count} giorni"
+      hours:
+        one: "%{count} ora"
+        other: "%{count} ore"
+      minutes:
+        one: "%{count} minuto"
+        other: "%{count} minuti"
+      seconds:
+        one: "%{count} secondo"
+        other: "%{count} secondi"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " e "
+        last_word_connector: " e "

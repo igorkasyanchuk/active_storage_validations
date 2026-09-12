@@ -63,3 +63,30 @@ da:
       pages_not_greater_than_or_equal_to: "sideantal skal være større end eller lig med %{min} (aktuelt sideantal er %{pages})"
       pages_not_between: "sideantal skal være mellem %{min} og %{max} (aktuelt sideantal er %{pages})"
       pages_not_equal_to: "sideantal skal være lig med %{exact} (aktuelt sideantal er %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} år"
+        other: "%{count} år"
+      months:
+        one: "%{count} måned"
+        other: "%{count} måneder"
+      weeks:
+        one: "%{count} uge"
+        other: "%{count} uger"
+      days:
+        one: "%{count} dag"
+        other: "%{count} dage"
+      hours:
+        one: "%{count} time"
+        other: "%{count} timer"
+      minutes:
+        one: "%{count} minut"
+        other: "%{count} minutter"
+      seconds:
+        one: "%{count} sekund"
+        other: "%{count} sekunder"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " og "
+        last_word_connector: " og "

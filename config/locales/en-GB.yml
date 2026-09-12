@@ -63,3 +63,30 @@ en-GB:
       pages_not_greater_than_or_equal_to: "page count must be greater than or equal to %{min} (current page count is %{pages})"
       pages_not_between: "page count must be between %{min} and %{max} (current page count is %{pages})"
       pages_not_equal_to: "page count must be equal to %{exact} (current page count is %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} year"
+        other: "%{count} years"
+      months:
+        one: "%{count} month"
+        other: "%{count} months"
+      weeks:
+        one: "%{count} week"
+        other: "%{count} weeks"
+      days:
+        one: "%{count} day"
+        other: "%{count} days"
+      hours:
+        one: "%{count} hour"
+        other: "%{count} hours"
+      minutes:
+        one: "%{count} minute"
+        other: "%{count} minutes"
+      seconds:
+        one: "%{count} second"
+        other: "%{count} seconds"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " and "
+        last_word_connector: ", and "

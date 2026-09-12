@@ -17,6 +17,17 @@ module ActiveStorageValidations
     ].freeze
     METADATA_KEYS = %i[duration].freeze
 
+    # Durations are rendered like ActiveSupport::Duration#inspect
+    # ("1 minute and 30 seconds") but through the active_storage_validations.duration
+    # I18n keys (units + sentence connectors) shipped in every bundled locale.
+    # The English wording is the fallback for locales the gem does not ship.
+    DURATION_UNITS = ActiveSupport::Duration::PARTS
+    DEFAULT_DURATION_CONNECTORS = {
+      words_connector: ", ",
+      two_words_connector: " and ",
+      last_word_connector: ", and "
+    }.freeze
+
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
@@ -56,7 +67,25 @@ module ActiveStorageValidations
       return nil unless value
 
       custom_value = value == value.to_i ? value.to_i : value
-      ActiveSupport::Duration.build(custom_value).inspect
+      duration_in_words(ActiveSupport::Duration.build(custom_value))
+    end
+
+    def duration_in_words(duration)
+      parts = duration.parts.presence || { seconds: duration.value.to_i }
+
+      words = parts.sort_by { |unit, _count| DURATION_UNITS.index(unit) }.map do |unit, count|
+        I18n.t("active_storage_validations.duration.#{unit}", count: count, default: default_unit_translation(unit))
+      end
+
+      words.to_sentence(locale: false, **duration_connectors)
+    end
+
+    def default_unit_translation(unit)
+      { one: "%{count} #{unit.to_s.singularize}", other: "%{count} #{unit}" }
+    end
+
+    def duration_connectors
+      I18n.t("active_storage_validations.duration.connectors", default: DEFAULT_DURATION_CONNECTORS)
     end
 
     def populate_error_options(errors_options, flat_options, duration)

@@ -63,3 +63,30 @@ zh-CN:
       pages_not_greater_than_or_equal_to: "页数必须大于或等于 %{min}（当前页数为 %{pages})"
       pages_not_between: "页数必须介于 %{min} 和 %{max} 之间（当前页数为 %{pages})"
       pages_not_equal_to: "页数必须等于 %{exact}（当前页数为%{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count}年"
+        other: "%{count}年"
+      months:
+        one: "%{count}个月"
+        other: "%{count}个月"
+      weeks:
+        one: "%{count}周"
+        other: "%{count}周"
+      days:
+        one: "%{count}天"
+        other: "%{count}天"
+      hours:
+        one: "%{count}小时"
+        other: "%{count}小时"
+      minutes:
+        one: "%{count}分钟"
+        other: "%{count}分钟"
+      seconds:
+        one: "%{count}秒"
+        other: "%{count}秒"
+      connectors:
+        words_connector: ""
+        two_words_connector: ""
+        last_word_connector: ""
