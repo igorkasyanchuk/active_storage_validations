@@ -64,7 +64,7 @@ require "active_storage_validations/matchers"
 
 ### Behavior changes (v5)
 
-Same Ruby / Rails support as v4. `errors.add` receives only the documented values (`ASVErrorable`; custom messages interpolating raw options raise), unbounded static `between:` / `dimension` `in:` ranges and non-exact `aspect_ratio` values raise at boot, `with_audio` fails closed on empty analyzer metadata, and a failed spoofing analysis adds `content_type_analysis_failed`. Migration steps: `docs/upgrade_to_5.md`. Do not soften these back to the 4.x behavior without a project decision.
+Same Ruby / Rails support as v4. `errors.add` receives only the documented values (`ASVErrorable`; custom messages interpolating raw options raise), unbounded static `between:` / `dimension` `in:` ranges and non-exact `aspect_ratio` values raise at boot, empty `content_type` / `aspect_ratio` lists fail closed, `with_audio` fails closed on empty analyzer metadata, and a failed spoofing analysis adds `content_type_analysis_failed`. Migration steps: `docs/upgrade_to_5.md`. Do not soften these back to the 4.x behavior without a project decision.
 
 ### FormBuilder `accept` inference (v4)
 
@@ -273,6 +273,8 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - `ASVAttachableAdapter::HashIo#with_media_path` may only `File.open` IOs that respond to `to_path`; anything else (StringIO, streaming wrappers) is copied to the tempfile
 - Empty analyzer metadata (`{}`) means "no analysis happened" and must fail closed in every metadata validator, `with_audio` included (`media_metadata_missing`), for both `with: true` and `with: false`. Only a memoized blank `audio` key (image / PDF analyzed) means "no audio track"
 - `ContentTypeValidator`: Proc options bypass `check_validity!`, so `authorized_content_types_from_options` re-runs `ensure_content_types_validity` on the Proc result
+- `ContentTypeValidator` / `AspectRatioValidator` must fail closed on an empty authorized list: static `[]` raises at boot; a Proc that returns `[]` rejects the file. Do not `return if authorized_*.empty?`
+- `ContentTypeValidator`: a blank detected type from the sniffer is `content_type_analysis_failed`, never `content_type_spoofed`; the matcher ignores both (`ContentTypeValidatorMatcher::SPOOFING_ERRORS`) because its probe files are empty tempfiles
 - `ContentTypeValidator`: a blank detected type from the sniffer is `content_type_analysis_failed`, never `content_type_spoofed`; the matcher ignores both (`ContentTypeValidatorMatcher::SPOOFING_ERRORS`) because its probe files are empty tempfiles
 - `ASVCommandable` must keep the `windows?` branch: `Process.spawn(pgroup: true)` and `Process.kill(sig, -pid)` raise on Windows (use `new_pgroup: true` and a direct `KILL`). The spec simulates it by stubbing `windows?`
 - `VideoAnalyzer#angle` parses rotation as a rounded float and rescues unparsable values (`"90.0"` is a real-world tag)

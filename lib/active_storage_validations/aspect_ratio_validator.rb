@@ -38,8 +38,6 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      return if authorized_aspect_ratios(record).empty?
-
       validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
     end
 
@@ -79,7 +77,7 @@ module ActiveStorageValidations
     end
 
     def aspect_ratio_error_mapping(aspect_ratios)
-      return :aspect_ratio_invalid if aspect_ratios.many?
+      return :aspect_ratio_invalid if aspect_ratios.empty? || aspect_ratios.many?
 
       aspect_ratio = aspect_ratios.first
       NAMED_ASPECT_RATIOS.include?(aspect_ratio) ? :"aspect_ratio_not_#{aspect_ratio}" : :aspect_ratio_not_x_y
@@ -127,7 +125,10 @@ module ActiveStorageValidations
     def ensure_aspect_ratio_validity
       return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
 
-      authorized_aspect_ratios_from_options(options).each do |aspect_ratio|
+      ratios = authorized_aspect_ratios_from_options(options).compact
+      raise ArgumentError, "You must pass at least one aspect ratio to the validator" if ratios.empty?
+
+      ratios.each do |aspect_ratio|
         unless NAMED_ASPECT_RATIOS.include?(aspect_ratio) || aspect_ratio =~ ASPECT_RATIO_REGEX
           raise ArgumentError, invalid_aspect_ratio_message
         end
