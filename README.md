@@ -880,6 +880,8 @@ Translation files are available [here](https://github.com/igorkasyanchuk/active_
 
 If you wish to customize the error messages, just copy, paste and update the translation files into your application locales.
 
+Each validator section above lists the values its messages expose (`%{min}`, `%{max}`, `%{filename}`, …). Those resolved values, plus `validator_type` and `filename`, are what you will find in `record.errors.details`; the validator options themselves (`less_than: ->(record) { … }`, `timeout:`, `spoofing_protection:`, …) are not forwarded, so `errors.details` stays JSON-serializable, as with Rails' built-in validators.
+
 ## Test matchers
 
 The gem also provides RSpec-compatible and Minitest-compatible matchers for testing the validators.

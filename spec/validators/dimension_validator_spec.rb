@@ -99,7 +99,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": value_type == "value" ? 500 : ->(record) { 500 },
                     filename: "image_150x150_file.png"
                   }
                 end
@@ -121,7 +120,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": value_type == "value" ? 500 : ->(record) { 500 },
                     filename: "image_600x800_file.png"
                   }
                 end
@@ -145,7 +143,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": { min: value_type == "value" ? 500 : ->(record) { 500 } },
                     filename: "image_150x150_file.png"
                   }
                 end
@@ -193,7 +190,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": { max: value_type == "value" ? 500 : ->(record) { 500 } },
                     filename: "image_600x800_file.png"
                   }
                 end
@@ -217,7 +213,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 400,
-                    "#{dimension}": { min: value_type == "value" ? 400 : ->(record) { 400 }, max: value_type == "value" ? 600 : ->(record) { 600 } },
                     filename: "image_150x150_file.png"
                   }
                 end
@@ -239,7 +234,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 600,
-                    "#{dimension}": { min: value_type == "value" ? 400 : ->(record) { 400 }, max: value_type == "value" ? 600 : ->(record) { 600 } },
                     filename: "image_1200x900_file.png"
                   }
                 end
@@ -262,7 +256,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
                 let(:error_options) do
                   {
-                    "#{dimension}": { in: value_type == "value" ? 400..600 : ->(record) { 400..600 } },
                     min: 400,
                     max: 600,
                     filename: "image_150x150_file.png"
@@ -285,7 +278,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
                 let(:error_options) do
                   {
-                    "#{dimension}": { in: value_type == "value" ? 400..600 : ->(record) { 400..600 } },
                     min: 400,
                     max: 600,
                     filename: "image_1200x900_file.png"
@@ -446,8 +438,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: 600,
-              height: 600,
               length: 600,
               filename: "image_800x600_file.png"
             }
@@ -463,8 +453,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: 600,
-              height: 600,
               length: 600,
               filename: "image_600x800_file.png"
             }
@@ -480,8 +468,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: 600,
-              height: 600,
               length: 600,
               filename: "image_1200x900_file.png"
             }
@@ -508,8 +494,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: { in: 550..750 },
-              height: { in: 550..750 },
               min: 550,
               max: 750,
               filename: "image_500x700_file.png"
@@ -526,8 +510,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: { in: 550..750 },
-              height: { in: 550..750 },
               min: 550,
               max: 750,
               filename: "image_700x500_file.png"
@@ -544,8 +526,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: { in: 550..750 },
-              height: { in: 550..750 },
               min: 550,
               max: 750,
               filename: "image_500x500_file.png"
@@ -604,8 +584,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
           let(:error_options) do
             {
               length: 150,
-              width: 150,
-              height: 150,
               filename: "pdf_200x300_file.pdf"
             }
           end
