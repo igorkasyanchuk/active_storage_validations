@@ -66,3 +66,30 @@ pl:
       pages_not_greater_than_or_equal_to: "liczba stron musi być większa lub równa %{min} (bieżąca liczba stron to %{pages})"
       pages_not_between: "liczba stron musi być między %{min} a %{max} (bieżąca liczba stron to %{pages})"
       pages_not_equal_to: "liczba stron musi być równa %{exact} (bieżąca liczba stron to %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} rok"
+        other: "%{count} lat"
+      months:
+        one: "%{count} miesiąc"
+        other: "%{count} miesięcy"
+      weeks:
+        one: "%{count} tydzień"
+        other: "%{count} tygodni"
+      days:
+        one: "%{count} dzień"
+        other: "%{count} dni"
+      hours:
+        one: "%{count} godzina"
+        other: "%{count} godzin"
+      minutes:
+        one: "%{count} minuta"
+        other: "%{count} minut"
+      seconds:
+        one: "%{count} sekunda"
+        other: "%{count} sekund"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " i "
+        last_word_connector: " i "

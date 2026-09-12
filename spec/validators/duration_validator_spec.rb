@@ -6,6 +6,17 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
   let(:validator_test_class) { Duration::Validator }
   let(:params) { {} }
 
+  # Expected duration value for the I18n.locale active when the expectation runs
+  # (error messages are checked in every bundled locale).
+  def seconds_in_words(seconds)
+    localized do
+      connectors = I18n.t("active_storage_validations.duration.connectors")
+      ActiveSupport::Duration.build(seconds).parts
+        .map { |unit, count| I18n.t("active_storage_validations.duration.#{unit}", count: count) }
+        .to_sentence(locale: false, **connectors)
+    end
+  end
+
   describe "ASVAttachable shared behavior" do
     it_behaves_like "ASVAttachable"
   end
@@ -31,18 +42,18 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
       let(:error_name) { "duration_not_less_than" }
       let(:error_options_for_file_having_exact_less_than_option) do
         {
-          duration: "2 seconds",
+          duration: seconds_in_words(2),
           filename: file_having_exact_less_than_option[:filename],
           min: nil,
-          max: "2 seconds"
+          max: seconds_in_words(2)
         }
       end
       let(:error_options_for_file_having_higher_than_less_than_option) do
         {
-          duration: "5 seconds",
+          duration: seconds_in_words(5),
           filename: file_having_higher_than_less_than_option[:filename],
           min: nil,
-          max: "2 seconds"
+          max: seconds_in_words(2)
         }
       end
 
@@ -56,18 +67,18 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
       let(:error_name) { "duration_not_less_than_or_equal_to" }
       let(:error_options_for_file_having_exact_less_than_or_equal_to_option) do
         {
-          duration: "2 seconds",
+          duration: seconds_in_words(2),
           filename: file_having_exact_less_than_or_equal_to_option[:filename],
           min: nil,
-          max: "2 seconds"
+          max: seconds_in_words(2)
         }
       end
       let(:error_options_for_file_having_higher_than_less_than_or_equal_to_option) do
         {
-          duration: "5 seconds",
+          duration: seconds_in_words(5),
           filename: file_having_higher_than_less_than_or_equal_to_option[:filename],
           min: nil,
-          max: "2 seconds"
+          max: seconds_in_words(2)
         }
       end
 
@@ -81,17 +92,17 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
       let(:error_name) { "duration_not_greater_than" }
       let(:error_options_for_file_having_lower_than_greater_than_option) do
         {
-          duration: "1 second",
+          duration: seconds_in_words(1),
           filename: file_having_lower_than_greater_than_option[:filename],
-          min: "7 seconds",
+          min: seconds_in_words(7),
           max: nil
         }
       end
       let(:error_options_for_file_having_exact_greater_than_option) do
         {
-          duration: "7 seconds",
+          duration: seconds_in_words(7),
           filename: file_having_exact_greater_than_option[:filename],
-          min: "7 seconds",
+          min: seconds_in_words(7),
           max: nil
         }
       end
@@ -106,9 +117,9 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
       let(:error_name) { "duration_not_greater_than_or_equal_to" }
       let(:error_options_for_file_having_lower_than_greater_than_or_equal_to_option) do
         {
-          duration: "1 second",
+          duration: seconds_in_words(1),
           filename: file_having_lower_than_greater_than_or_equal_to_option[:filename],
-          min: "7 seconds",
+          min: seconds_in_words(7),
           max: nil
         }
       end
@@ -125,18 +136,18 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
       let(:error_name) { "duration_not_between" }
       let(:error_options_for_file_having_lower_than_lower_bound_between_option) do
         {
-          duration: "1 second",
+          duration: seconds_in_words(1),
           filename: file_having_lower_than_lower_bound_between_option[:filename],
-          min: "2 seconds",
-          max: "7 seconds"
+          min: seconds_in_words(2),
+          max: seconds_in_words(7)
         }
       end
       let(:error_options_for_file_having_higher_than_higher_bound_between_option) do
         {
-          duration: "10 seconds",
+          duration: seconds_in_words(10),
           filename: file_having_higher_than_higher_bound_between_option[:filename],
-          min: "2 seconds",
-          max: "7 seconds"
+          min: seconds_in_words(2),
+          max: seconds_in_words(7)
         }
       end
 
@@ -150,16 +161,16 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
       let(:error_name) { "duration_not_equal_to" }
       let(:error_options_for_file_having_lower_than_equal_to_option) do
         {
-          duration: "2 seconds",
+          duration: seconds_in_words(2),
           filename: file_having_lower_than_equal_to_option[:filename],
-          exact: "5 seconds"
+          exact: seconds_in_words(5)
         }
       end
       let(:error_options_for_file_having_higher_than_equal_to_option) do
         {
-          duration: "7 seconds",
+          duration: seconds_in_words(7),
           filename: file_having_higher_than_equal_to_option[:filename],
-          exact: "5 seconds"
+          exact: seconds_in_words(5)
         }
       end
 
@@ -208,10 +219,10 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
 
         let(:error_options) do
           {
-            duration: "3 seconds",
+            duration: seconds_in_words(3),
             filename: audio_3s_webm[:filename],
             min: nil,
-            max: "2 seconds"
+            max: seconds_in_words(2)
           }
         end
 
@@ -265,5 +276,55 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
 
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
+  end
+
+  describe "duration values in error messages" do
+    subject(:duration_in_words) { validator.send(:format_bound_value, seconds) }
+
+    let(:validator) { described_class.new(attributes: :file, less_than: 1.minute) }
+
+    {
+      en: { 1 => "1 second", 2.5 => "2.5 seconds", 90 => "1 minute and 30 seconds", 3661 => "1 hour, 1 minute, and 1 second" },
+      fr: { 1 => "1 seconde", 90 => "1 minute et 30 secondes", 3661 => "1 heure, 1 minute et 1 seconde" },
+      de: { 90 => "1 Minute und 30 Sekunden" },
+      ja: { 90 => "1分30秒", 3661 => "1時間1分1秒" },
+      pl: { 1 => "1 sekunda", 5 => "5 sekund" }
+    }.each do |locale, expectations|
+      context "with the #{locale} locale" do
+        around { |example| I18n.with_locale(locale) { example.run } }
+
+        expectations.each do |value, expected|
+          context "with #{value} seconds" do
+            let(:seconds) { value }
+
+            it { is_expected.to eq(expected) }
+          end
+        end
+      end
+    end
+
+    context "with a locale the gem does not ship" do
+      around do |example|
+        enforce_available_locales = I18n.enforce_available_locales
+        I18n.enforce_available_locales = false
+        I18n.with_locale(:pt) { example.run }
+      ensure
+        I18n.enforce_available_locales = enforce_available_locales
+      end
+
+      let(:seconds) { 90 }
+
+      it "falls back to the English wording" do
+        expect(duration_in_words).to eq("1 minute and 30 seconds")
+      end
+    end
+
+    context "with a zero duration" do
+      let(:seconds) { 0 }
+
+      it "renders seconds like ActiveSupport::Duration#inspect" do
+        expect(duration_in_words).to eq("0 seconds")
+      end
+    end
   end
 end

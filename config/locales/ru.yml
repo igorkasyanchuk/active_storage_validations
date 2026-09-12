@@ -66,3 +66,30 @@ ru:
       pages_not_greater_than_or_equal_to: "количество страниц должно быть больше или равно %{min} (текущее количество страниц %{pages})"
       pages_not_between: "количество страниц должно быть между %{min} и %{max} (текущее количество страниц %{pages})"
       pages_not_equal_to: "количество страниц должно быть равно %{exact} (текущее количество страниц %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} год"
+        other: "%{count} лет"
+      months:
+        one: "%{count} месяц"
+        other: "%{count} месяцев"
+      weeks:
+        one: "%{count} неделя"
+        other: "%{count} недель"
+      days:
+        one: "%{count} день"
+        other: "%{count} дней"
+      hours:
+        one: "%{count} час"
+        other: "%{count} часов"
+      minutes:
+        one: "%{count} минута"
+        other: "%{count} минут"
+      seconds:
+        one: "%{count} секунда"
+        other: "%{count} секунд"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " и "
+        last_word_connector: " и "

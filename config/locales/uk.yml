@@ -66,3 +66,30 @@ uk:
       pages_not_greater_than_or_equal_to: "кількість сторінок має бути більшою або дорівнювати %{min} (поточна кількість сторінок становить %{pages})"
       pages_not_between: "кількість сторінок має бути від %{min} до %{max} (поточна кількість сторінок становить %{pages})"
       pages_not_equal_to: "кількість сторінок має дорівнювати %{exact} (поточна кількість сторінок - %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} рік"
+        other: "%{count} років"
+      months:
+        one: "%{count} місяць"
+        other: "%{count} місяців"
+      weeks:
+        one: "%{count} тиждень"
+        other: "%{count} тижнів"
+      days:
+        one: "%{count} день"
+        other: "%{count} днів"
+      hours:
+        one: "%{count} година"
+        other: "%{count} годин"
+      minutes:
+        one: "%{count} хвилина"
+        other: "%{count} хвилин"
+      seconds:
+        one: "%{count} секунда"
+        other: "%{count} секунд"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " і "
+        last_word_connector: " і "
