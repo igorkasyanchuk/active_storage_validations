@@ -9,6 +9,9 @@ module ActiveStorageValidations
   #
   # Supported representations: ActiveStorage::Blob, ActionDispatch::Http::UploadedFile,
   # Rack::Test::UploadedFile, Hash, File, Pathname, and a signed blob id (String).
+  #
+  # Every handler exposes the same three methods: +content_type+, +filename+
+  # and +with_media_path+ (a filesystem path the analyzer commands can read).
   class ASVAttachableAdapter
     def self.wrap(attachable, file_supported:)
       handler_class_for(attachable).new(attachable, file_supported: file_supported)
@@ -60,13 +63,6 @@ module ActiveStorageValidations
         raise NotImplementedError
       end
 
-      def read(max_byte_size: nil)
-        raise NotImplementedError
-      end
-
-      def rewind
-      end
-
       def with_media_path(_tempfile)
         raise NotImplementedError
       end
@@ -77,10 +73,6 @@ module ActiveStorageValidations
         raise ArgumentError,
           "Could not find or build blob: expected attachable, " \
             "got #{@attachable.inspect}"
-      end
-
-      def read_from(io, max_byte_size)
-        max_byte_size ? io.read(max_byte_size) : io.read
       end
 
       def copy_to_tempfile(tempfile, source)
@@ -110,10 +102,6 @@ module ActiveStorageValidations
         @attachable.filename
       end
 
-      def read(max_byte_size: nil)
-        max_byte_size ? @attachable.download_chunk(0...max_byte_size) : @attachable.download
-      end
-
       def with_media_path(tempfile, &block)
         copy_to_tempfile(tempfile, @attachable, &block)
       end
@@ -134,14 +122,6 @@ module ActiveStorageValidations
         @attachable.original_filename
       end
 
-      def read(max_byte_size: nil)
-        read_from(@attachable, max_byte_size)
-      end
-
-      def rewind
-        @attachable.rewind
-      end
-
       def with_media_path(_tempfile)
         yield @attachable.path
       end
@@ -154,14 +134,6 @@ module ActiveStorageValidations
 
       def filename
         @attachable[:filename]
-      end
-
-      def read(max_byte_size: nil)
-        read_from(@attachable[:io], max_byte_size)
-      end
-
-      def rewind
-        @attachable[:io].rewind
       end
 
       # Rails only requires the io to respond to #read / #rewind / #size, so it
@@ -192,24 +164,12 @@ module ActiveStorageValidations
         File.basename(@attachable)
       end
 
-      def read(max_byte_size: nil)
-        read_from(@attachable, max_byte_size)
-      end
-
-      def rewind
-        @attachable.rewind
-      end
-
       def with_media_path(_tempfile)
         yield @attachable.path
       end
     end
 
     class Path < FileLike
-      def rewind
-        File.open(@attachable) { |file| file.rewind }
-      end
-
       def with_media_path(_tempfile)
         yield @attachable.to_s
       end

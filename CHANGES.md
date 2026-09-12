@@ -16,6 +16,7 @@
 - **MISC**
   - Add a storage-metadata contract spec: every analyzer is run over every dummy fixture and must return scalar values that, once cached as `asv_*` custom metadata, are ASCII-only and within S3's 2 KB user-defined metadata limit (`spec/analyzers/storage_metadata_constraints_spec.rb`)
   - Upgrade dev dependencies (simplecov from 1.1.0 to 1.2)
+  - Remove dead attachable helpers (`attachable_content_type_rails_like`, `attachable_io`, `rewind_attachable_io`, `supports_pathname_attachment?`) and the adapter `read` / `rewind` methods: `ASVAttachableAdapter` handlers now only expose `content_type`, `filename` and `with_media_path`
 
 # Released
 - 4.1.1
