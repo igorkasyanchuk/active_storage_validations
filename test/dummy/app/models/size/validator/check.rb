@@ -24,6 +24,10 @@ class Size::Validator::Check < ApplicationRecord
   has_one_attached :between_exclusive
   validates :between_exclusive, size: { between: 2.kilobytes...7.kilobytes }
   validates :equal_to, size: { equal_to: 5.kilobytes }
+  has_one_attached :equal_to_zero
+  validates :equal_to_zero, size: { equal_to: 0 }
+  has_one_attached :greater_than_or_equal_to_zero
+  validates :greater_than_or_equal_to_zero, size: { greater_than_or_equal_to: 0 }
 
   has_one_attached :less_than_proc
   has_one_attached :less_than_or_equal_to_proc
