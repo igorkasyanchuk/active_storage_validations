@@ -65,10 +65,18 @@ module ActiveStorageValidations
       add_error(record, attribute, error_type, **errors_options)
     end
 
+    # Analyzer precision is milliseconds. `end - 1` on a Duration is 1 second.
+    def exclusive_range_step
+      0.001.seconds
+    end
+
     def format_bound_value(value)
       return nil unless value
 
-      custom_value = value == value.to_i ? value.to_i : value
+      # Encoder padding makes fixture files 2.024s, 5.029s, … Error copy still
+      # talks in tenths of a second; comparison uses the analyzer's millisecond value.
+      rounded = value.to_f.round(1)
+      custom_value = rounded == rounded.to_i ? rounded.to_i : rounded
       duration_in_words(ActiveSupport::Duration.build(custom_value))
     end
 

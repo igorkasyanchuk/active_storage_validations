@@ -17,11 +17,13 @@ class Duration::Validator::Check < ApplicationRecord
   has_one_attached :between
   has_one_attached :equal_to
   validates :less_than, duration: { less_than: 2.seconds }
-  validates :less_than_or_equal_to, duration: { less_than_or_equal_to: 2.seconds }
-  validates :greater_than, duration: { greater_than: 7.seconds }
+  validates :less_than_or_equal_to, duration: { less_than_or_equal_to: 3.seconds }
+  validates :greater_than, duration: { greater_than: 8.seconds }
   validates :greater_than_or_equal_to, duration: { greater_than_or_equal_to: 7.seconds }
-  validates :between, duration: { between: 2.seconds..7.seconds }
-  validates :equal_to, duration: { equal_to: 5.seconds }
+  validates :between, duration: { between: 2.seconds..8.seconds }
+  has_one_attached :between_exclusive
+  validates :between_exclusive, duration: { between: 2.seconds...7.seconds }
+  validates :equal_to, duration: { equal_to: 5.029.seconds }
 
   has_one_attached :less_than_proc
   has_one_attached :less_than_or_equal_to_proc
@@ -30,13 +32,15 @@ class Duration::Validator::Check < ApplicationRecord
   has_one_attached :between_proc
   has_one_attached :equal_to_proc
   validates :less_than_proc, duration: { less_than: ->(record) { 2.seconds } }
-  validates :less_than_or_equal_to_proc, duration: { less_than_or_equal_to: ->(record) { 2.seconds } }
-  validates :greater_than_proc, duration: { greater_than: ->(record) { 7.seconds } }
+  validates :less_than_or_equal_to_proc, duration: { less_than_or_equal_to: ->(record) { 3.seconds } }
+  validates :greater_than_proc, duration: { greater_than: ->(record) { 8.seconds } }
   validates :greater_than_or_equal_to_proc, duration: { greater_than_or_equal_to: ->(record) { 7.seconds } }
-  validates :between_proc, duration: { between: ->(record) { 2.seconds..7.seconds } }
-  validates :equal_to_proc, duration: { equal_to: ->(record) { 5.seconds } }
+  validates :between_proc, duration: { between: ->(record) { 2.seconds..8.seconds } }
+  validates :equal_to_proc, duration: { equal_to: ->(record) { 5.029.seconds } }
 
   # Edge cases
   has_one_attached :with_invalid_media_file
   validates :with_invalid_media_file, duration: { less_than: 2.seconds }
+  has_one_attached :less_than_or_equal_to_two
+  validates :less_than_or_equal_to_two, duration: { less_than_or_equal_to: 2.seconds }
 end
