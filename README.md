@@ -957,6 +957,7 @@ describe User do
   it { is_expected.to validate_dimensions_of(:avatar).width_max(500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_max(300) }
   it { is_expected.to validate_dimensions_of(:avatar).width_between(200..500) }
+  it { is_expected.to validate_dimensions_of(:avatar).width_between(200...500) } # exclusive end (200–499)
   it { is_expected.to validate_dimensions_of(:avatar).height_between(100..300) }
 
   # size:

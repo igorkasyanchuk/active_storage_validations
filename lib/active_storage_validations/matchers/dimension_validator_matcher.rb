@@ -64,7 +64,7 @@ module ActiveStorageValidations
       end
 
       def width_between(range)
-        @width_min, @width_max = range.first, range.last
+        @width_min, @width_max = range_bounds(range)
         self
       end
 
@@ -84,7 +84,7 @@ module ActiveStorageValidations
       end
 
       def height_between(range)
-        @height_min, @height_max = range.first, range.last
+        @height_min, @height_max = range_bounds(range)
         self
       end
 
@@ -119,6 +119,17 @@ module ActiveStorageValidations
           message << "  validation failed when provided with a #{error_case[:width]}x#{error_case[:height]}px test image"
         end
         message << "  whereas it should have passed"
+      end
+
+      # Exclusive ranges (`80...100`) reject the end bound. Probe the last
+      # included value so `#width_between(80...100)` does not match an inclusive
+      # `80..100`.
+      def range_bounds(range)
+        [ range.begin, last_included_dimension(range) ]
+      end
+
+      def last_included_dimension(range)
+        range.exclude_end? ? range.end - 1 : range.end
       end
 
       def valid_width

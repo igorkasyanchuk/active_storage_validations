@@ -213,6 +213,24 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
         end
       end
 
+      context "when used on an exclusive #{dimension} in validator (e.g. dimension: { #{dimension}: { in: 800...1200 } })" do
+        let(:model_attribute) { :"#{dimension}_in_exclusive" }
+
+        context "when provided with the exclusive range specified in the model validations" do
+          subject(:configured_matcher) { matcher.public_send(:"#{dimension}_between", 800...1200) }
+
+          it { is_expected_to_match_for(klass) }
+        end
+      end
+
+      context "when the matcher uses an exclusive range against an inclusive #{dimension} in validator" do
+        subject(:configured_matcher) { matcher.public_send(:"#{dimension}_between", 800...1200) }
+
+        let(:model_attribute) { :"#{dimension}_in" }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
       context "when used on a #{dimension} min validator (e.g. dimension: { #{dimension}: { min: 1200 } })" do
         let(:model_attribute) { :"#{dimension}_min" }
 

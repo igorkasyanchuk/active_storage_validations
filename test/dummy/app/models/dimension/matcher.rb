@@ -23,6 +23,8 @@ class Dimension::Matcher < ApplicationRecord
     has_one_attached :"#{dimension}_max"
     validates :"#{dimension}_exact", dimension: { "#{dimension}": 150 }
     validates :"#{dimension}_in", dimension: { "#{dimension}": { in: 800..1200 } }
+    has_one_attached :"#{dimension}_in_exclusive"
+    validates :"#{dimension}_in_exclusive", dimension: { "#{dimension}": { in: 800...1200 } }
     validates :"#{dimension}_min", dimension: { "#{dimension}": { min: 800 } }
     validates :"#{dimension}_max", dimension: { "#{dimension}": { max: 1200 } }
 
