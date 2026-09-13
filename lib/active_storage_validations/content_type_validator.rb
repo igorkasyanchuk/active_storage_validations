@@ -22,6 +22,7 @@ module ActiveStorageValidations
       content_type_invalid
       content_type_spoofed
       content_type_analysis_failed
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[content_type].freeze
 
