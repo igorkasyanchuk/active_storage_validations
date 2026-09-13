@@ -1,6 +1,7 @@
 # Unreleased
 - **FIXED**
   - Honor exclusive `dimension` `in:` ranges (`400...600` no longer accepts 600). Inclusive `min..max` is unchanged
+  - `validate_dimensions_of(...).width_min(n)` / `#height_min` / `#width_max` / `#height_max` now probe the inclusive bound itself, so an exclusive min/max no longer satisfies the matcher (same class of false positive already fixed for comparison matchers)
 
 # Released
 - 5.0.0
