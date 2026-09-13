@@ -716,6 +716,7 @@ class User < ApplicationRecord
 
   validates :video, with_audio: true
   validates :silent_video, with_audio: { with: false }
+  validates :video, with_audio: { with: ->(record) { record.needs_audio? } }
   validates :video, with_audio: { timeout: 5.seconds }
 end
 ```
