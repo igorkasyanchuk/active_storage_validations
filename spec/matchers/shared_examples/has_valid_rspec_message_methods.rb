@@ -157,7 +157,7 @@ RSpec.shared_examples "has valid rspec message methods" do
         <<~FAILURE_MESSAGE
           is expected not to validate file duration of :#{model_attribute}
             but there seem to have issues with the matcher methods you used, since:
-            validation failed when provided with a 301 seconds test file
+            validation failed when provided with a 300.001 seconds test file
             whereas it should have passed
         FAILURE_MESSAGE
       when :with_audio

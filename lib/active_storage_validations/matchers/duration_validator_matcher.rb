@@ -33,8 +33,10 @@ module ActiveStorageValidations
         "seconds"
       end
 
+      # Analyzers round to milliseconds. A 1-second step made `less_than(1.second)`
+      # probe duration 0, which DurationValidator treats as missing metadata.
       def smallest_measurement
-        1.second
+        0.001.seconds
       end
 
       def mock_value_for(io, duration)
