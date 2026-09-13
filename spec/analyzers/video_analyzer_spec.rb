@@ -90,4 +90,38 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
       end
     end
   end
+
+  describe "malformed ffprobe output" do
+    let(:attachable) { video_file }
+
+    context "when ffprobe returns invalid JSON" do
+      subject(:metadata) { analyzer.metadata }
+
+      before { allow(analyzer).to receive(:run_command).and_return(successful_command_result("{")) }
+
+      it "returns empty metadata instead of raising" do
+        expect { metadata }.not_to raise_error
+        expect(metadata).to eq({})
+      end
+    end
+
+    context "when duration is N/A" do
+      subject(:metadata) { analyzer.metadata }
+
+      before do
+        allow(analyzer).to receive(:media_from_path).and_return(
+          {
+            "streams" => [ { "codec_type" => "video", "width" => 150, "height" => 150, "duration" => "N/A" } ],
+            "format" => { "duration" => "N/A" }
+          }
+        )
+      end
+
+      it "omits duration instead of raising" do
+        expect { metadata }.not_to raise_error
+        expect(metadata).to include(width: 150, height: 150)
+        expect(metadata).not_to have_key(:duration)
+      end
+    end
+  end
 end
