@@ -170,7 +170,7 @@ module ActiveStorageValidations
         return true if @width_max.nil? || @width_min == @width_max
 
         passes_validation_with_dimensions(@width_max, valid_height) &&
-          passes_validation_with_dimensions(@width_max - 1, valid_height)
+          passes_interior_max?(@width_max, valid_height, :width)
       end
 
       def width_not_larger_than_max?
@@ -196,7 +196,7 @@ module ActiveStorageValidations
         return true if @height_max.nil? || @height_min == @height_max
 
         passes_validation_with_dimensions(valid_width, @height_max) &&
-          passes_validation_with_dimensions(valid_width, @height_max - 1)
+          passes_interior_max?(@height_max, valid_width, :height)
       end
 
       def height_not_larger_than_max?
@@ -205,6 +205,19 @@ module ActiveStorageValidations
 
       def height_equals?
         @height_min.nil? || @height_min != @height_max || passes_validation_with_dimensions(valid_width, @height_min)
+      end
+
+      # 0px probes are media_metadata_missing, not a bound miss. Skip max-1
+      # when it would be below 1px so #width_max(1) can match a correct validator.
+      def passes_interior_max?(max, other, axis)
+        interior = max - 1
+        return true unless interior.positive?
+
+        if axis == :width
+          passes_validation_with_dimensions(interior, other)
+        else
+          passes_validation_with_dimensions(other, interior)
+        end
       end
 
       def passes_validation_with_dimensions(width, height)

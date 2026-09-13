@@ -110,4 +110,10 @@ class Dimension::Matcher < ApplicationRecord
   has_one_attached :large_height_min_and_width_min
   validates :large_width_min_and_height_min, dimension: { width: { min: 2048 }, height: { min: 100 } }
   validates :large_height_min_and_width_min, dimension: { width: { min: 100 }, height: { min: 2048 } }
+
+  # 1px max: matcher max-1 probe would be 0px (media_metadata_missing)
+  has_one_attached :width_max_one
+  has_one_attached :height_max_one
+  validates :width_max_one, dimension: { width: { max: 1 } }
+  validates :height_max_one, dimension: { height: { max: 1 } }
 end

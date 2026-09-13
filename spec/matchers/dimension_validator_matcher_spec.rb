@@ -320,6 +320,14 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
 
         it_behaves_like "dimension matcher only match when exact value"
       end
+
+      context "when used on a #{dimension} max validator of 1px" do
+        subject(:configured_matcher) { matcher.public_send(matcher_method, 1) }
+
+        let(:model_attribute) { :"#{dimension}_max_one" }
+
+        it { is_expected_to_match_for(klass) }
+      end
     end
   end
 
