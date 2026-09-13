@@ -29,6 +29,7 @@
     - `content_type` `spoofing_protection` now compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the mismatch check
     - Honor exclusive `dimension` `in:` ranges (`400...600` no longer accepts 600). Inclusive `min..max` is unchanged
     - `validate_dimensions_of(...).width_min(n)` / `#height_min` / `#width_max` / `#height_max` now probe the inclusive bound itself, so an exclusive min/max no longer satisfies the matcher (same class of false positive already fixed for comparison matchers)
+    - `validate_dimensions_of(...).width_max(1)` / `#height_max(1)` now matches a correct validator. The matcher probed `max - 1` = 0px, which is `media_metadata_missing` rather than an out-of-range dimension
     - `VideoAnalyzer` / `AudioAnalyzer` no longer raise from `valid?` when ffprobe returns invalid JSON or `N/A` numeric fields; analysis fails closed with empty / partial metadata
     - Image metadata validators fail closed (`media_metadata_missing`) when `ActiveStorage.variant_processor` is `:disabled` (or any unknown processor) instead of raising `NoMethodError`
     - Fix `content_type` on Marcel 2 / Rails main (8.2+) : `spoofing_protection` no longer rejects `audio/aac`, `application/xml`, or `audio/mp4` (`file` detections such as `audio/x-hx-aac-adts`, `text/xml`, `audio/x-m4a` are aliases), and options that were canonical in Marcel 1 (e.g. `audio/x-aac`) are still accepted
