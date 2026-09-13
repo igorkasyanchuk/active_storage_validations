@@ -181,6 +181,8 @@ As stated in the Rails documentation: "Blobs are intended to be immutable in so 
 
 This also covers metadata the analyzer cannot extract from a given file (e.g. a `duration` validation on an image): the gem remembers that the value is unavailable, so the validation keeps failing with `media_metadata_missing` but the file is only analyzed once. Files that yield no metadata at all — missing command-line tool, [timed out](#configuration) command, unreadable file — are not remembered and get analyzed again on the next validation.
 
+To force re-analysis of a persisted blob, call `blob.remove_active_storage_validations_metadata!`. That clears `asv_*` keys and, when the blob is already saved, writes the change so `reload` does not restore them. Non-`asv_*` custom metadata is kept.
+
 ---
 
 ### Attached
