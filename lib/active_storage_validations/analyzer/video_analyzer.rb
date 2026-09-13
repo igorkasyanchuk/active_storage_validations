@@ -26,19 +26,27 @@ module ActiveStorageValidations
     include ASVFFProbable
 
     def metadata
-      read_media do |media|
-        {
-          width: (Integer(width) if width),
-          height: (Integer(height) if height),
-          duration: duration,
-          angle: angle,
-          audio: audio?,
-          video: video?
-        }.compact
-      end
+      read_media { |_media| metadata_from_streams }
     end
 
     private
+
+    # ffprobe can exit 0 on a well-formed container with zero streams (empty
+    # MP4/M4A). Hash#compact keeps false, so { audio: false, video: false }
+    # would be memoized and processable_file would treat it as a successful
+    # decode. {} is the documented "no analysis" miss.
+    def metadata_from_streams
+      return {} unless audio? || video?
+
+      {
+        width: (Integer(width) if width),
+        height: (Integer(height) if height),
+        duration: duration,
+        angle: angle,
+        audio: audio?,
+        video: video?
+      }.compact
+    end
 
     def width
       if rotated?
@@ -56,8 +64,10 @@ module ActiveStorageValidations
       end
     end
 
+    # Round to milliseconds so 1.96s is not stored as 2.0 (which made
+    # `less_than: 2.seconds` fail).
     def duration
-      parse_float(video_stream["duration"] || container["duration"])&.round(1)
+      parse_float(video_stream["duration"] || container["duration"])&.round(3)
     end
 
     # ffprobe reports the rotation either as a stream tag (older encoders) or as

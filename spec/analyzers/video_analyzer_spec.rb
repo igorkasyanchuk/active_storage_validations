@@ -19,9 +19,9 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
   let(:media_io) { open_fixture(media_path) }
   let(:media_content_type) { "video/mp4" }
   let(:media_content_type_rotated) { media_content_type }
-  let(:expected_metadata) { { width: 150, height: 150, duration: 1.7, audio: false, video: true } }
-  let(:expected_metadata_over_10ko) { { width: 150, height: 150, duration: 9.6, audio: false, video: true } }
-  let(:expected_metadata_rotated) { { width: 700, height: 500, duration: 1.7, audio: false, video: true } }
+  let(:expected_metadata) { { width: 150, height: 150, duration: 1.733, audio: false, video: true } }
+  let(:expected_metadata_over_10ko) { { width: 150, height: 150, duration: 9.643, audio: false, video: true } }
+  let(:expected_metadata_rotated) { { width: 700, height: 500, duration: 1.733, audio: false, video: true } }
 
   it_behaves_like "returns the right metadata for any attachable"
 
@@ -91,6 +91,25 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
     end
   end
 
+  describe "duration precision" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) { video_file }
+
+    before do
+      allow(analyzer).to receive(:media_from_path).and_return(
+        {
+          "streams" => [ { "codec_type" => "video", "width" => 150, "height" => 150, "duration" => "1.96" } ],
+          "format" => {}
+        }
+      )
+    end
+
+    it "keeps sub-second precision instead of rounding to 0.1s" do
+      expect(metadata[:duration]).to eq(1.96)
+    end
+  end
+
   describe "malformed ffprobe output" do
     let(:attachable) { video_file }
 
@@ -121,6 +140,57 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
         expect { metadata }.not_to raise_error
         expect(metadata).to include(width: 150, height: 150)
         expect(metadata).not_to have_key(:duration)
+      end
+    end
+  end
+
+  describe "empty container" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) { video_file }
+
+    context "when ffprobe succeeds with no audio or video streams" do
+      before do
+        allow(analyzer).to receive(:media_from_path).and_return(
+          {
+            "streams" => [],
+            "format" => { "nb_streams" => 0, "format_name" => "mov,mp4,m4a,3gp,3g2,mj2", "duration" => "0.000000" }
+          }
+        )
+      end
+
+      it "returns empty metadata so processable_file fails closed" do
+        expect(metadata).to eq({})
+      end
+    end
+
+    context "when ffprobe reports only a data stream" do
+      before do
+        allow(analyzer).to receive(:media_from_path).and_return(
+          {
+            "streams" => [ { "codec_type" => "data" } ],
+            "format" => { "duration" => "1.0" }
+          }
+        )
+      end
+
+      it "returns empty metadata" do
+        expect(metadata).to eq({})
+      end
+    end
+
+    context "when the container has an audio stream but no video stream" do
+      before do
+        allow(analyzer).to receive(:media_from_path).and_return(
+          {
+            "streams" => [ { "codec_type" => "audio", "duration" => "1.5", "sample_rate" => "44100" } ],
+            "format" => { "duration" => "1.5" }
+          }
+        )
+      end
+
+      it "keeps the audio analysis" do
+        expect(metadata).to eq({ duration: 1.5, audio: true, video: false })
       end
     end
   end
