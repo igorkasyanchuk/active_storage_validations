@@ -225,8 +225,9 @@ module ActiveStorageValidations
         if flat_options[dimension] and flat_options[dimension].is_a?(Hash)
           if (range = flat_options[dimension][:in])
             # Range#begin / #end never raise; a Proc may still return an unbounded range.
+            # Exclusive ranges reject the end bound — error :max is the last included value.
             flat_options[dimension][:min] = range.begin
-            flat_options[dimension][:max] = range.end
+            flat_options[dimension][:max] = last_included_range_end(range)
           end
         end
       end
@@ -241,6 +242,14 @@ module ActiveStorageValidations
       end
 
       flat_options
+    end
+
+    # Exclusive ranges (`400...600`) reject the end bound. Error messages must
+    # advertise the last included value, not the excluded endpoint.
+    def last_included_range_end(range)
+      return range.end unless range.respond_to?(:exclude_end?) && range.exclude_end?
+
+      range.end - 1
     end
   end
 end

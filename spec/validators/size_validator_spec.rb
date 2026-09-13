@@ -140,6 +140,32 @@ RSpec.describe ActiveStorageValidations::SizeValidator do
       it_behaves_like "comparison between option"
     end
 
+    describe "exclusive :between (e.g. between: 2.kilobytes...7.kilobytes)" do
+      let(:attribute) { :between_exclusive }
+      let(:error_options) do
+        {
+          file_size: "7 KB",
+          filename: file_7ko[:filename],
+          min: "2 KB",
+          max: ActiveSupport::NumberHelper.number_to_human_size(7.kilobytes - 1)
+        }
+      end
+
+      context "when provided with a file inside the exclusive range" do
+        subject(:record) { model.public_send(attribute).attach(file_5ko) and model }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when provided with a file at the exclusive end bound" do
+        subject(:record) { model.public_send(attribute).attach(file_7ko) and model }
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("file_size_not_between", with_locales: [ "en" ], error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+    end
+
     describe ":equal_to" do
       let(:file_having_lower_than_equal_to_option) { file_1ko }
       let(:file_having_exact_equal_to_option) { file_5ko }

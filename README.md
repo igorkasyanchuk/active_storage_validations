@@ -490,7 +490,7 @@ The `size` validator error messages expose 4 values that you can use:
 - `file_size` containing the current file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed file size (e.g. `1KB`)
 - `exact` containing the allowed file size (e.g. `1MB`)
-- `max` containing the maximum allowed file size (e.g. `2MB`)
+- `max` containing the maximum allowed file size (e.g. `2MB`; for exclusive `between:` ranges, the last included value)
 - `filename` containing the current file name
 
 ---
@@ -543,7 +543,7 @@ The `total_size` validator error messages expose 4 values that you can use:
 - `total_file_size` containing the current total file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed total file size (e.g. `1KB`)
 - `exact` containing the allowed total file size (e.g. `1MB`)
-- `max` containing the maximum allowed total file size (e.g. `2MB`)
+- `max` containing the maximum allowed total file size (e.g. `2MB`; for exclusive `between:` ranges, the last included value)
 
 ---
 
@@ -607,7 +607,7 @@ en:
 
 The `dimension` validator error messages expose 6 values that you can use:
 - `min` containing the minimum width or height allowed
-- `max` containing the maximum width or height allowed
+- `max` containing the maximum width or height allowed (for exclusive `in:` ranges, the last included value: `400...600` reports `599`)
 - `width` containing the minimum or maximum width allowed
 - `height` containing the minimum or maximum width allowed
 - `length` containing the exact width or height allowed
@@ -666,7 +666,7 @@ The `duration` validator error messages expose 4 values that you can use:
 - `duration` containing the current duration size (e.g. `2 minutes`)
 - `min` containing the minimum allowed duration size (e.g. `1 second`)
 - `exact` containing the allowed duration (e.g. `3 seconds`)
-- `max` containing the maximum allowed duration size (e.g. `2 minutes`)
+- `max` containing the maximum allowed duration (e.g. `2 minutes`; for exclusive `between:` ranges, the last included value)
 - `filename` containing the current file name
 
 Duration values are humanized in the current locale (e.g. `1 minute et 30 secondes` in French) through the `active_storage_validations.duration` keys shipped with every bundled locale: one `one` / `other` pair per unit (`years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`) plus the sentence `connectors`. Locales the gem does not ship fall back to the English wording. Override them in your application locales like any other key:
@@ -877,7 +877,7 @@ The `pages` validator error messages expose 5 values that you can use:
 - `pages` containing the current file number of pages (e.g. `7`)
 - `min` containing the minimum allowed number of pages (e.g. `1`)
 - `exact` containing the allowed number of pages (e.g. `3`)
-- `max` containing the maximum allowed number of pages (e.g. `5`)
+- `max` containing the maximum allowed number of pages (e.g. `5`; for exclusive `between:` ranges, the last included value)
 - `filename` containing the current file name
 
 ---
