@@ -262,6 +262,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - `AttachedValidator#check_validity!` rejects `:allow_blank` / `:allow_nil`; the attached matcher has no `#allow_blank`
 - Comparison matcher inclusive chains (`#less_than_or_equal_to`, `#greater_than_or_equal_to`, `#between`) must fail when the validator is exclusive (`less_than` / `greater_than`)
 - `DimensionValidatorMatcher` `#width_min` / `#height_min` / `#width_max` / `#height_max` must probe the inclusive bound itself (`min` / `max`) *and* `min + 1` / `max - 1`. Bound-only probes let exact `width: n` satisfy `#width_min(n)`; interior-only probes let exclusive min satisfy `#width_min`
+- `ASVBlobMetadatable#remove_active_storage_validations_metadata!` must assign via `custom_metadata=` and `save!` if the blob is persisted (in-place `delete_if` does not persist; `reload` restored `asv_*`)
 - `DimensionValidator` `in:` must use `Range#include?` so exclusive ranges (`400...600`) reject the end bound; flattening to `min`/`max` via `#begin`/`#end` treats them as inclusive
 - `ValidatorHelpers` filter errors with `error.options[:validator_type] == (kwargs[:validator] || validator_sym)` — keep the parentheses; `==` binds tighter than `||`
 - Do not reintroduce a Minitest suite for the gem; keep consumer matcher docs for both RSpec and Minitest/shoulda

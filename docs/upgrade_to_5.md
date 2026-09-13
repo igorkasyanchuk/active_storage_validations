@@ -177,7 +177,7 @@ Two duration analyzer fixes change what is stored as `asv_duration`. They do not
 - WebM / Matroska audio (e.g. browser `MediaRecorder` Opus recordings) used to get an empty `asv_duration`
 - Duration was rounded to 0.1s before comparing, so a 1.96s file could fail `less_than: 2.seconds`
 
-Call `blob.remove_active_storage_validations_metadata!` to re-analyze those blobs.
+Call `blob.remove_active_storage_validations_metadata!` to re-analyze those blobs. On a persisted blob the method now `save!`s the cleared cache (it used to only mutate memory, so `reload` restored the old `asv_*` keys). Non-`asv_*` custom metadata is kept.
 
 ### `content_type` Proc results are checked
 
