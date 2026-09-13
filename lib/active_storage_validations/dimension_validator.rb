@@ -194,8 +194,12 @@ module ActiveStorageValidations
     end
 
     def outside_range?(value, options)
-      min, max = options[:min], options[:max]
-      (min && value < min) || (max && value > max)
+      if (range = options[:in])
+        !range.include?(value)
+      else
+        min, max = options[:min], options[:max]
+        (min && value < min) || (max && value > max)
+      end
     end
 
     def add_range_error(record, attribute, dimension, flat_options, errors_options)

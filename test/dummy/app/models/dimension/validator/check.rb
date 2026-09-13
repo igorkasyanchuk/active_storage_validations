@@ -21,6 +21,8 @@ class Dimension::Validator::Check < ApplicationRecord
     validates :"#{dimension}_max", dimension: { "#{dimension}": { max: 500 } }
     validates :"#{dimension}_min_max", dimension: { "#{dimension}": { min: 400, max: 600 } }
     validates :"#{dimension}_in", dimension: { "#{dimension}": { in: 400..600 } }
+    has_one_attached :"#{dimension}_in_exclusive"
+    validates :"#{dimension}_in_exclusive", dimension: { "#{dimension}": { in: 400...600 } }
 
     has_one_attached :"#{dimension}_proc"
     has_one_attached :"#{dimension}_min_proc"
