@@ -16,6 +16,7 @@
   - **FIXED**
     - `aspect_ratio` `:is_16_9` (and other `is_x_y` ratios) now allow a 1-pixel difference on either axis. 3-decimal rounding rejected common widescreen sizes such as 1366×768 and 854×480
     - `duration` no longer rounds analyzer output to 0.1s before comparing. A 1.96s file no longer fails `less_than: 2.seconds`, and a 2.04s file no longer satisfies `less_than_or_equal_to: 2.seconds`. Blobs analyzed before this fix have a rounded `asv_duration`; call `blob.remove_active_storage_validations_metadata!` to re-analyze them
+    - `size` / `limit` / `total_size` ignore attachments marked for destruction, matching `attached:` and what will remain after save. Nested-attributes replace flows no longer count a doomed file against `:max` / total size
     - Honor exclusive ranges in comparison and dimension matchers (`#between`, `#width_between`, `#height_between`). `Range#last` treated `80...100` as inclusive, so the matcher could match an inclusive validator and fail against the exclusive one documented in the README
     - Exclusive `dimension` `in:` / comparison `between:` error `:max` now uses the last included value (`400...600` reports `599`, not `600`)
     - `content_type` `spoofing_protection` now compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the mismatch check
