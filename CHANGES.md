@@ -1,9 +1,4 @@
 # Unreleased
-- **FIXED**
-  - Honor exclusive `dimension` `in:` ranges (`400...600` no longer accepts 600). Inclusive `min..max` is unchanged
-  - `validate_dimensions_of(...).width_min(n)` / `#height_min` / `#width_max` / `#height_max` now probe the inclusive bound itself, so an exclusive min/max no longer satisfies the matcher (same class of false positive already fixed for comparison matchers)
-  - `VideoAnalyzer` / `AudioAnalyzer` no longer raise from `valid?` when ffprobe returns invalid JSON or `N/A` numeric fields; analysis fails closed with empty / partial metadata
-  - Image metadata validators fail closed (`media_metadata_missing`) when `ActiveStorage.variant_processor` is `:disabled` (or any unknown processor) instead of raising `NoMethodError`
 
 # Released
 - 5.0.0
@@ -19,6 +14,10 @@
   - **ADDED**
     - Localize the `duration` error message values (`%{duration}`, `%{min}`, `%{max}`, `%{exact}`). Units and sentence connectors now come from the new `active_storage_validations.duration` I18n keys shipped in every bundled locale (e.g. `1 minute et 30 secondes` in French) instead of the English-only `ActiveSupport::Duration#inspect`. Locales the gem does not ship fall back to the English wording
   - **FIXED**
+    - Honor exclusive `dimension` `in:` ranges (`400...600` no longer accepts 600). Inclusive `min..max` is unchanged
+    - `validate_dimensions_of(...).width_min(n)` / `#height_min` / `#width_max` / `#height_max` now probe the inclusive bound itself, so an exclusive min/max no longer satisfies the matcher (same class of false positive already fixed for comparison matchers)
+    - `VideoAnalyzer` / `AudioAnalyzer` no longer raise from `valid?` when ffprobe returns invalid JSON or `N/A` numeric fields; analysis fails closed with empty / partial metadata
+    - Image metadata validators fail closed (`media_metadata_missing`) when `ActiveStorage.variant_processor` is `:disabled` (or any unknown processor) instead of raising `NoMethodError`
     - Fix `content_type` on Marcel 2 / Rails main (8.2+) : `spoofing_protection` no longer rejects `audio/aac`, `application/xml`, or `audio/mp4` (`file` detections such as `audio/x-hx-aac-adts`, `text/xml`, `audio/x-m4a` are aliases), and options that were canonical in Marcel 1 (e.g. `audio/x-aac`) are still accepted
     - Fix `duration` rejecting valid WebM / Matroska audio (e.g. browser `MediaRecorder` Opus recordings) with `media_metadata_missing`. `ffprobe` reports their duration on the container only, so the audio analyzer now falls back to it like the video analyzer does. Blobs analyzed before this fix have an empty `asv_duration` memoized; call `blob.remove_active_storage_validations_metadata!` to re-analyze them
     - Stop caching audio stream tags (ID3 / Vorbis comments) on the blob as `asv_tags`. No validator reads them, and Active Storage forwards blob custom metadata to the storage service as object metadata, where a free-form, possibly non-ASCII tag hash could exceed S3's 2 KB limit and fail the upload
