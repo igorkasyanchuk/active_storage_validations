@@ -188,6 +188,59 @@ RSpec.describe ActiveStorageValidations::SizeValidator do
 
       it_behaves_like "comparison equal_to option"
     end
+
+    describe "zero bounds" do
+      context "when equal_to is 0" do
+        let(:attribute) { :equal_to_zero }
+
+        context "when provided with a 0-byte file" do
+          subject(:record) { model.public_send(attribute).attach(image_file_0ko) and model }
+
+          it { is_expected_to_be_valid }
+        end
+
+        context "when provided with a non-empty file" do
+          subject(:record) { model.public_send(attribute).attach(file_1ko) and model }
+
+          let(:error_options) do
+            {
+              file_size: "1 KB",
+              filename: file_1ko[:filename],
+              exact: "0 Bytes"
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("file_size_not_equal_to", with_locales: [ "en" ], error_options: error_options) }
+        end
+      end
+
+      context "when greater_than_or_equal_to is 0" do
+        let(:attribute) { :greater_than_or_equal_to_zero }
+
+        context "when provided with a 0-byte file" do
+          subject(:record) { model.public_send(attribute).attach(image_file_0ko) and model }
+
+          it { is_expected_to_be_valid }
+        end
+
+        context "when provided with a non-empty file" do
+          subject(:record) { model.public_send(attribute).attach(file_1ko) and model }
+
+          it { is_expected_to_be_valid }
+        end
+      end
+    end
+  end
+
+  describe "attachments marked for destruction" do
+    let(:model) { validator_test_class::Check.new(params) }
+
+    context "when an oversized file is marked for destruction" do
+      subject(:record) { model.less_than.attach(file_5ko) and model.less_than.mark_for_destruction and model }
+
+      it { is_expected_to_be_valid }
+    end
   end
 
   describe "Rails options" do

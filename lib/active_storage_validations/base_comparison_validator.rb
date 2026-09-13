@@ -59,17 +59,19 @@ module ActiveStorageValidations
     def is_valid?(value, flat_options)
       return false if value < 0
 
-      if flat_options[:between].present?
+      # Integer 0 is a real bound (`equal_to: 0`). `.present?` treats it as
+      # absent, so the comparison would be skipped and every file would fail.
+      if bound_present?(flat_options, :between)
         flat_options[:between].include?(value)
-      elsif flat_options[:less_than].present?
+      elsif bound_present?(flat_options, :less_than)
         value < flat_options[:less_than]
-      elsif flat_options[:less_than_or_equal_to].present?
+      elsif bound_present?(flat_options, :less_than_or_equal_to)
         value <= flat_options[:less_than_or_equal_to]
-      elsif flat_options[:greater_than].present?
+      elsif bound_present?(flat_options, :greater_than)
         value > flat_options[:greater_than]
-      elsif flat_options[:greater_than_or_equal_to].present?
+      elsif bound_present?(flat_options, :greater_than_or_equal_to)
         value >= flat_options[:greater_than_or_equal_to]
-      elsif flat_options[:equal_to].present?
+      elsif bound_present?(flat_options, :equal_to)
         value == flat_options[:equal_to]
       end
     end

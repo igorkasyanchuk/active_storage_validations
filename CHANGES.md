@@ -14,6 +14,7 @@
   - **ADDED**
     - Localize the `duration` error message values (`%{duration}`, `%{min}`, `%{max}`, `%{exact}`). Units and sentence connectors now come from the new `active_storage_validations.duration` I18n keys shipped in every bundled locale (e.g. `1 minute et 30 secondes` in French) instead of the English-only `ActiveSupport::Duration#inspect`. Locales the gem does not ship fall back to the English wording
   - **FIXED**
+    - `size` / `total_size` / `duration` / `pages` honor comparison bounds of `0` (`equal_to: 0`, `greater_than_or_equal_to: 0`, …). The same `.present?` trap skipped those checks and rejected every file
     - `limit: { max: 0 }` (and `min: 0`) now treats `0` as a real bound. Empty attachments pass `max: 0`; attaching a file is still rejected. `.present?` used to skip the check, so freeze-upload configs without `allow_blank` rejected records with no files
     - `aspect_ratio` `:is_16_9` (and other `is_x_y` ratios) now allow a 1-pixel difference on either axis. 3-decimal rounding rejected common widescreen sizes such as 1366×768 and 854×480
     - `duration` no longer rounds analyzer output to 0.1s before comparing. A 1.96s file no longer fails `less_than: 2.seconds`, and a 2.04s file no longer satisfies `less_than_or_equal_to: 2.seconds`. Blobs analyzed before this fix have a rounded `asv_duration`; call `blob.remove_active_storage_validations_metadata!` to re-analyze them
