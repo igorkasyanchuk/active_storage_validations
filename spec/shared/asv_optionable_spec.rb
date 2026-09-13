@@ -51,6 +51,17 @@ RSpec.describe ActiveStorageValidations::ASVOptionable do
       end
     end
 
+    context "when a check option is 0" do
+      let(:validator) do
+        ActiveStorageValidations::SizeValidator.new(attributes: :file, equal_to: 0)
+      end
+
+      it "keeps the bound instead of treating it as absent" do
+        expect(validator.send(:bound_present?, flat_options, :equal_to)).to be(true)
+        expect(flat_options).to eq(equal_to: 0)
+      end
+    end
+
     context "with nested check options" do
       let(:validator) do
         ActiveStorageValidations::DimensionValidator.new(
