@@ -55,5 +55,28 @@ RSpec.describe ActiveStorageValidations::ASVBlobMetadatable do
         expect(blob.active_storage_validations_metadata).to be_empty
       end
     end
+
+    context "when the blob is persisted" do
+      let(:blob) do
+        ActiveStorage::Blob.create_and_upload!(
+          io: open_fixture(Rails.root.join("public", "image_150x150.png")),
+          filename: "image_150x150.png",
+          content_type: "image/png"
+        )
+      end
+
+      before do
+        blob.custom_metadata = { "asv_duration" => "1.0", "asv_width" => "100", "other" => "keep" }
+        blob.save!
+      end
+
+      it "persists the cleared cache so reload does not restore asv_* keys" do
+        blob.remove_active_storage_validations_metadata!
+
+        expect(blob.active_storage_validations_metadata).to be_empty
+        expect(blob.reload.active_storage_validations_metadata).to be_empty
+        expect(blob.custom_metadata).to eq({ "other" => "keep" })
+      end
+    end
   end
 end

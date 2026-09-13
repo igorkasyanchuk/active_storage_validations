@@ -46,9 +46,13 @@ module ActiveStorageValidations
             .transform_values(&:to_s)
       end
 
+      # Clears +asv_*+ keys. Non-gem custom metadata is kept. On a persisted blob
+      # the change is saved so +reload+ does not restore a stale cache (in-place
+      # Hash#delete_if is not enough: Active Record may not mark JSON metadata dirty).
       def remove_active_storage_validations_metadata!
-        metadata["custom"] ||= {}
-        metadata["custom"].delete_if { |key, _| key.to_s.start_with?("asv_") }
+        remaining = (metadata["custom"] || {}).reject { |key, _| key.to_s.start_with?("asv_") }
+        self.custom_metadata = remaining
+        save! if persisted?
       end
     end
     # rubocop:enable Metrics/BlockLength
