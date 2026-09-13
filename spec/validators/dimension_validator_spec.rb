@@ -371,7 +371,7 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                   let(:error_options) do
                     {
                       min: 400,
-                      max: 600,
+                      max: 599,
                       filename: "image_600x600_file.png"
                     }
                   end
