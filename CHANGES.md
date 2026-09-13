@@ -16,6 +16,7 @@
   - **FIXED**
     - Honor exclusive ranges in comparison and dimension matchers (`#between`, `#width_between`, `#height_between`). `Range#last` treated `80...100` as inclusive, so the matcher could match an inclusive validator and fail against the exclusive one documented in the README
     - Exclusive `dimension` `in:` / comparison `between:` error `:max` now uses the last included value (`400...600` reports `599`, not `600`)
+    - `content_type` `spoofing_protection` now compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the mismatch check
     - Honor exclusive `dimension` `in:` ranges (`400...600` no longer accepts 600). Inclusive `min..max` is unchanged
     - `validate_dimensions_of(...).width_min(n)` / `#height_min` / `#width_max` / `#height_max` now probe the inclusive bound itself, so an exclusive min/max no longer satisfies the matcher (same class of false positive already fixed for comparison matchers)
     - `VideoAnalyzer` / `AudioAnalyzer` no longer raise from `valid?` when ffprobe returns invalid JSON or `N/A` numeric fields; analysis fails closed with empty / partial metadata
