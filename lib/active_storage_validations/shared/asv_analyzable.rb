@@ -151,12 +151,17 @@ module ActiveStorageValidations
         ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick.new(attachable, **analyzer_timeout_options)
       when :vips
         ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips.new(attachable, **analyzer_timeout_options)
+      else
+        # Rails 7.2+ allows :disabled (no variants). Unknown processors must not
+        # return nil — `.metadata` would raise from valid? instead of failing closed.
+        fallback_analyzer_for(attachable)
       end
     end
 
     def image_processor
       # Rails returns nil for default image processor, because it is set in an after initialize callback
       # https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/engine.rb
+      # `:disabled` (Rails 7.2+) is handled in #image_analyzer_for via NullAnalyzer.
       ActiveStorage.variant_processor || DEFAULT_IMAGE_PROCESSOR
     end
 
