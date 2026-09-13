@@ -14,6 +14,7 @@
   - **ADDED**
     - Localize the `duration` error message values (`%{duration}`, `%{min}`, `%{max}`, `%{exact}`). Units and sentence connectors now come from the new `active_storage_validations.duration` I18n keys shipped in every bundled locale (e.g. `1 minute et 30 secondes` in French) instead of the English-only `ActiveSupport::Duration#inspect`. Locales the gem does not ship fall back to the English wording
   - **FIXED**
+    - `aspect_ratio` `:is_16_9` (and other `is_x_y` ratios) now allow a 1-pixel difference on either axis. 3-decimal rounding rejected common widescreen sizes such as 1366×768 and 854×480
     - Honor exclusive ranges in comparison and dimension matchers (`#between`, `#width_between`, `#height_between`). `Range#last` treated `80...100` as inclusive, so the matcher could match an inclusive validator and fail against the exclusive one documented in the README
     - Exclusive `dimension` `in:` / comparison `between:` error `:max` now uses the last included value (`400...600` reports `599`, not `600`)
     - `content_type` `spoofing_protection` now compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the mismatch check
