@@ -50,6 +50,32 @@ RSpec.describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
     end
   end
 
+  describe "#min" do
+    context "when the bound is 0" do
+      subject(:configured_matcher) { matcher.min(0) }
+
+      let(:model_attribute) { :min_zero }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    context "when matching min(0) against a min: 3 validator" do
+      subject(:configured_matcher) { matcher.min(0) }
+
+      let(:model_attribute) { :min }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+
+    context "when matching min(0) against a max-only validator" do
+      subject(:configured_matcher) { matcher.min(0) }
+
+      let(:model_attribute) { :max }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+  end
+
   describe "#allow_blank" do
     it_behaves_like "works with allow_blank"
   end

@@ -27,6 +27,7 @@
     - Honor exclusive ranges in comparison and dimension matchers (`#between`, `#width_between`, `#height_between`). `Range#last` treated `80...100` as inclusive, so the matcher could match an inclusive validator and fail against the exclusive one documented in the README
     - Exclusive `dimension` `in:` / comparison `between:` error `:max` now uses the last included value (`400...600` reports `599`, not `600`)
     - Exclusive `duration` `between:` error `:max` now uses a 1ms step (`7.seconds - 0.001.seconds`) instead of `end - 1` (1 second). `2.seconds...7.seconds` no longer advertises "6 seconds" while a 6.5s file still passes. Display still rounds to 0.1s, so that exclusive end is shown as `7 seconds`
+    - `validate_limits_of(...).min(0)` now matches only a validator with `min: 0`. The matcher used to skip every min probe, so it passed against `min: 1` or a max-only limit
     - `content_type` `spoofing_protection` now compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the mismatch check
     - Honor exclusive `dimension` `in:` ranges (`400...600` no longer accepts 600). Inclusive `min..max` is unchanged
     - `validate_dimensions_of(...).width_min(n)` / `#height_min` / `#width_max` / `#height_max` now probe the inclusive bound itself, so an exclusive min/max no longer satisfies the matcher (same class of false positive already fixed for comparison matchers)

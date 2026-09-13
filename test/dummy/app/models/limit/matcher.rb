@@ -13,6 +13,8 @@
 class Limit::Matcher < ApplicationRecord
   include Validatable
 
+  has_many_attached :without_validator
+
   has_many_attached :custom_matcher
   validates :custom_matcher, limit: { min: 1, max: 5 }
 
@@ -40,6 +42,8 @@ class Limit::Matcher < ApplicationRecord
   if Rails.gem_version >= Gem::Version.new("8.0.0")
     has_many_attached :with_except_on_symbol
     validates :with_except_on_symbol, limit: { min: 1, max: 5 }, except_on: :update
+    has_many_attached :with_except_on_create
+    validates :with_except_on_create, limit: { min: 1, max: 5 }, except_on: :create
     has_many_attached :with_except_on_array
     validates :with_except_on_array, limit: { min: 1, max: 5 }, except_on: %i[update custom]
     has_many_attached :with_several_validators_and_except_on
@@ -66,4 +70,7 @@ class Limit::Matcher < ApplicationRecord
   validates :min_with_message, limit: { min: 1, message: "Invalid limits." }
   has_many_attached :max_with_message
   validates :max_with_message, limit: { max: 5, message: "Invalid limits." }
+
+  has_many_attached :min_zero
+  validates :min_zero, limit: { min: 0 }
 end
