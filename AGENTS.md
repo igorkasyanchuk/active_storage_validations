@@ -262,6 +262,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - `AttachedValidator#check_validity!` rejects `:allow_blank` / `:allow_nil`; the attached matcher has no `#allow_blank`
 - Comparison matcher inclusive chains (`#less_than_or_equal_to`, `#greater_than_or_equal_to`, `#between`) must fail when the validator is exclusive (`less_than` / `greater_than`)
 - `DimensionValidatorMatcher` `#width_min` / `#height_min` / `#width_max` / `#height_max` must probe the inclusive bound itself (`min` / `max`) *and* `min + 1` / `max - 1`. Bound-only probes let exact `width: n` satisfy `#width_min(n)`; interior-only probes let exclusive min satisfy `#width_min`. Skip the `max - 1` probe when it would be `< 1` (`#width_max(1)`): a 0px probe is `media_metadata_missing`, not a bound miss
+- `DurationValidator` exclusive `between:` error `:max` must use `#exclusive_range_step` (1ms), not `end - 1` (1 second on a Duration)
 - `ASVBlobMetadatable#remove_active_storage_validations_metadata!` must assign via `custom_metadata=` and `save!` if the blob is persisted (in-place `delete_if` does not persist; `reload` restored `asv_*`)
 - `DimensionValidator` `width` / `height` `{ min:, max: }` (and `{ min: 0.. }` after flattening) must use `bound_present?`, not truthiness: `width: { max: 0 }` is a real bound
 - `PdfAnalyzer` must omit non-positive `pages` / width / height (`@media["pages"].to_i` of a missing key is `0`; `Hash#compact` keeps `0` and memoizes a fake analysis)

@@ -70,7 +70,7 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
           duration: seconds_in_words(2),
           filename: file_having_exact_less_than_or_equal_to_option[:filename],
           min: nil,
-          max: seconds_in_words(2)
+          max: seconds_in_words(3)
         }
       end
       let(:error_options_for_file_having_higher_than_less_than_or_equal_to_option) do
@@ -78,7 +78,7 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
           duration: seconds_in_words(5),
           filename: file_having_higher_than_less_than_or_equal_to_option[:filename],
           min: nil,
-          max: seconds_in_words(2)
+          max: seconds_in_words(3)
         }
       end
 
@@ -94,7 +94,7 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
         {
           duration: seconds_in_words(1),
           filename: file_having_lower_than_greater_than_option[:filename],
-          min: seconds_in_words(7),
+          min: seconds_in_words(8),
           max: nil
         }
       end
@@ -102,7 +102,7 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
         {
           duration: seconds_in_words(7),
           filename: file_having_exact_greater_than_option[:filename],
-          min: seconds_in_words(7),
+          min: seconds_in_words(8),
           max: nil
         }
       end
@@ -139,7 +139,7 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
           duration: seconds_in_words(1),
           filename: file_having_lower_than_lower_bound_between_option[:filename],
           min: seconds_in_words(2),
-          max: seconds_in_words(7)
+          max: seconds_in_words(8)
         }
       end
       let(:error_options_for_file_having_higher_than_higher_bound_between_option) do
@@ -147,7 +147,7 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
           duration: seconds_in_words(10),
           filename: file_having_higher_than_higher_bound_between_option[:filename],
           min: seconds_in_words(2),
-          max: seconds_in_words(7)
+          max: seconds_in_words(8)
         }
       end
 
@@ -161,7 +161,7 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
           duration: seconds_in_words(7),
           filename: audio_7s[:filename],
           min: seconds_in_words(2),
-          max: seconds_in_words(6)
+          max: seconds_in_words(7)
         }
       end
 
@@ -227,7 +227,7 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
       end
 
       context "when a file lasting less than a second breaks the constraint" do
-        # validates :greater_than, duration: { greater_than: 7.seconds }
+        # validates :greater_than, duration: { greater_than: 8.seconds }
         subject(:record) { model.greater_than.attach(audio_0_5s) and model }
 
         it { is_expected_not_to_be_valid }
@@ -262,6 +262,30 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
         let(:file_for_attachment_missing) { audio_1s }
 
         it_behaves_like "reports attachment_missing"
+      end
+
+      describe "sub-second duration against an exclusive bound" do
+        # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
+        def stub_duration(seconds)
+          allow_any_instance_of(described_class).to receive(:metadata_for).and_return({ duration: seconds })
+        end
+        # rubocop:enable RSpec/AnyInstance
+
+        context "when the file is 1.96s and the bound is less_than: 2.seconds" do
+          subject(:record) { model.less_than.attach(audio_5s) and model }
+
+          before { stub_duration(1.96) }
+
+          it { is_expected_to_be_valid }
+        end
+
+        context "when the file is 2.04s and the bound is less_than_or_equal_to: 2.seconds" do
+          subject(:record) { model.less_than_or_equal_to_two.attach(audio_5s) and model }
+
+          before { stub_duration(2.04) }
+
+          it { is_expected_not_to_be_valid }
+        end
       end
     end
   end
