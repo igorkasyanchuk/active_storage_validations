@@ -27,26 +27,35 @@ module ActiveStorageValidations
     include ASVFFProbable
 
     def metadata
-      read_media do |media|
-        {
-          duration: duration,
-          bit_rate: bit_rate,
-          sample_rate: sample_rate,
-          audio: audio?
-        }.compact
-      end
+      read_media { |_media| metadata_from_streams }
     end
 
     private
+
+    # Same empty-container contract as VideoAnalyzer: a successful ffprobe
+    # with no audio stream is not an analysis. Do not emit { audio: false }
+    # (or a container duration) that processable_file / with_audio: false
+    # would read as a decoded file with no track.
+    def metadata_from_streams
+      return {} unless audio?
+
+      {
+        duration: duration,
+        bit_rate: bit_rate,
+        sample_rate: sample_rate,
+        audio: audio?
+      }.compact
+    end
 
     def audio?
       audio_stream.present?
     end
 
     # Matroska / WebM (e.g. browser MediaRecorder output) report the duration
-    # on the container only, not on the audio stream.
+    # on the container only, not on the audio stream. Round to milliseconds so
+    # 1.96s is not stored as 2.0 (which made `less_than: 2.seconds` fail).
     def duration
-      parse_float(audio_stream["duration"] || container["duration"])&.round(1)
+      parse_float(audio_stream["duration"] || container["duration"])&.round(3)
     end
 
     def bit_rate

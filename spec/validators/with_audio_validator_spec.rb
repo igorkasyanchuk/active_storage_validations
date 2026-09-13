@@ -123,6 +123,30 @@ RSpec.describe ActiveStorageValidations::WithAudioValidator do
       it { is_expected_to_be_valid }
     end
 
+    context "when ffprobe succeeds with no audio or video streams" do
+      before do
+        allow_any_instance_of(ActiveStorageValidations::Analyzer::VideoAnalyzer).to receive(:media_from_path).and_return( # rubocop:disable RSpec/AnyInstance
+          { "streams" => [], "format" => { "nb_streams" => 0, "format_name" => "mov,mp4,m4a,3gp,3g2,mj2" } }
+        )
+      end
+
+      context "when an audio track is required" do
+        subject(:record) { model.video.attach(video_file) and model }
+
+        let(:error_options) { { filename: "video" } }
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
+      end
+
+      context "when audio is forbidden" do
+        subject(:record) { model.silent_video.attach(video_file) and model }
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: { filename: "video" }) }
+      end
+    end
+
     context "when the file could not be analyzed (ffprobe missing or timed out, unreadable file)" do
       let(:error_options) { { filename: "audio_5s" } }
 
