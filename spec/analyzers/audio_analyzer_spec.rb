@@ -66,4 +66,28 @@ RSpec.describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
       expect(analyzer.metadata).to eq({})
     end
   end
+
+  describe "malformed ffprobe output" do
+    let(:attachable) { audio_1s_tagged }
+
+    context "when duration and bit_rate are N/A" do
+      subject(:metadata) { analyzer.metadata }
+
+      before do
+        allow(analyzer).to receive(:media_from_path).and_return(
+          {
+            "streams" => [ { "codec_type" => "audio", "duration" => "N/A", "bit_rate" => "N/A", "sample_rate" => "44100" } ],
+            "format" => { "duration" => "N/A" }
+          }
+        )
+      end
+
+      it "omits unparsable fields instead of raising" do
+        expect { metadata }.not_to raise_error
+        expect(metadata).to include(sample_rate: 44100, audio: true)
+        expect(metadata).not_to have_key(:duration)
+        expect(metadata).not_to have_key(:bit_rate)
+      end
+    end
+  end
 end
