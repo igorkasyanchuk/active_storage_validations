@@ -57,8 +57,7 @@ module ActiveStorageValidations
     end
 
     def duration
-      duration = video_stream["duration"] || container["duration"]
-      Float(duration).round(1) if duration
+      parse_float(video_stream["duration"] || container["duration"])&.round(1)
     end
 
     # ffprobe reports the rotation either as a stream tag (older encoders) or as
@@ -66,10 +65,7 @@ module ActiveStorageValidations
     # indifferently, so parse it as a float and round; an unparsable value
     # means no known rotation rather than an exception escaping `valid?`.
     def angle
-      rotation = tags["rotate"] || display_matrix&.dig("rotation")
-      Float(rotation).round if rotation
-    rescue ArgumentError, TypeError
-      nil
+      parse_float(tags["rotate"] || display_matrix&.dig("rotation"))&.round
     end
 
     def display_matrix
@@ -77,14 +73,15 @@ module ActiveStorageValidations
     end
 
     def display_aspect_ratio
-      if descriptor = video_stream["display_aspect_ratio"]
-        if terms = descriptor.split(":", 2)
-          numerator   = Integer(terms[0])
-          denominator = Integer(terms[1])
+      descriptor = video_stream["display_aspect_ratio"]
+      return unless descriptor
 
-          [ numerator, denominator ] unless numerator == 0
-        end
-      end
+      terms = descriptor.to_s.split(":", 2)
+      numerator = parse_integer(terms[0])
+      denominator = parse_integer(terms[1])
+      return if numerator.nil? || denominator.nil? || numerator.zero?
+
+      [ numerator, denominator ]
     end
 
     def rotated?
@@ -106,15 +103,18 @@ module ActiveStorageValidations
     end
 
     def encoded_width
-      @encoded_width ||= Float(video_stream["width"]) if video_stream["width"]
+      @encoded_width ||= parse_float(video_stream["width"])
     end
 
     def encoded_height
-      @encoded_height ||= Float(video_stream["height"]) if video_stream["height"]
+      @encoded_height ||= parse_float(video_stream["height"])
     end
 
     def display_height_scale
-      @display_height_scale ||= Float(display_aspect_ratio.last) / display_aspect_ratio.first if display_aspect_ratio
+      return unless display_aspect_ratio
+
+      last = parse_float(display_aspect_ratio.last)
+      @display_height_scale ||= last / display_aspect_ratio.first if last
     end
 
     def tags

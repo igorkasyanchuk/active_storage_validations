@@ -46,18 +46,15 @@ module ActiveStorageValidations
     # Matroska / WebM (e.g. browser MediaRecorder output) report the duration
     # on the container only, not on the audio stream.
     def duration
-      duration = audio_stream["duration"] || container["duration"]
-      Float(duration).round(1) if duration
+      parse_float(audio_stream["duration"] || container["duration"])&.round(1)
     end
 
     def bit_rate
-      bit_rate = audio_stream["bit_rate"]
-      Integer(bit_rate) if bit_rate
+      parse_integer(audio_stream["bit_rate"])
     end
 
     def sample_rate
-      sample_rate = audio_stream["sample_rate"]
-      Integer(sample_rate) if sample_rate
+      parse_integer(audio_stream["sample_rate"])
     end
   end
 end

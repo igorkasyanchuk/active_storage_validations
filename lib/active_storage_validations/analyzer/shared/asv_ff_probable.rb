@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "json"
+
 module ActiveStorageValidations
   # ActiveStorageValidations:::ASVFFProbable
   #
@@ -39,8 +41,28 @@ module ActiveStorageValidations
           payload: payload
         )
 
-        result.success? ? JSON.parse(result.stdout) : nil
+        parse_ffprobe_json(result)
       end
+    end
+
+    def parse_ffprobe_json(result)
+      return nil unless result.success?
+
+      JSON.parse(result.stdout)
+    rescue JSON::ParserError
+      nil
+    end
+
+    def parse_float(value)
+      Float(value) if value
+    rescue ArgumentError, TypeError
+      nil
+    end
+
+    def parse_integer(value)
+      Integer(value) if value
+    rescue ArgumentError, TypeError
+      nil
     end
 
     def ffprobe_path
