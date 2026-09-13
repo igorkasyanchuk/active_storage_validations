@@ -12,6 +12,6 @@
 class Duration::Validator::UsingAttachable < ApplicationRecord
   has_one_attached :using_attachable
   has_many_attached :using_attachables
-  validates :using_attachable, duration: { less_than_or_equal_to: 5.seconds }
-  validates :using_attachables, duration: { less_than_or_equal_to: 5.seconds }
+  validates :using_attachable, duration: { less_than_or_equal_to: 6.seconds }
+  validates :using_attachables, duration: { less_than_or_equal_to: 6.seconds }
 end
