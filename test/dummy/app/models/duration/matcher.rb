@@ -13,6 +13,8 @@
 class Duration::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :without_validator
+
   has_one_attached :custom_matcher
   validates :custom_matcher, duration: { less_than_or_equal_to: 5.minutes }
 
@@ -34,6 +36,10 @@ class Duration::Matcher < ApplicationRecord
   validates :many_greater_than, duration: { greater_than: 7.seconds }
   has_one_attached :less_than_one_second
   validates :less_than_one_second, duration: { less_than: 1.second }
+  has_one_attached :greater_than_or_equal_to_zero
+  validates :greater_than_or_equal_to_zero, duration: { greater_than_or_equal_to: 0.seconds }
+  has_one_attached :equal_to_zero
+  validates :equal_to_zero, duration: { equal_to: 0.seconds }
 
   has_one_attached :proc_less_than
   has_one_attached :proc_less_than_or_equal_to
@@ -70,6 +76,8 @@ class Duration::Matcher < ApplicationRecord
   if Rails.gem_version >= Gem::Version.new("8.0.0")
     has_one_attached :with_except_on_symbol
     validates :with_except_on_symbol, duration: { less_than_or_equal_to: 5.minutes }, except_on: :update
+    has_one_attached :with_except_on_create
+    validates :with_except_on_create, duration: { less_than_or_equal_to: 5.minutes }, except_on: :create
     has_one_attached :with_except_on_array
     validates :with_except_on_array, duration: { less_than_or_equal_to: 5.minutes }, except_on: %i[update custom]
     has_one_attached :with_several_validators_and_except_on

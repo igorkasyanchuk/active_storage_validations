@@ -153,17 +153,17 @@ module ActiveStorageValidations
       end
 
       def width_not_smaller_than_min?
-        @width_min.nil? || !passes_validation_with_dimensions(@width_min - 1, valid_height)
+        @width_min.nil? || @width_min < 1 || !passes_validation_with_dimensions(@width_min - 1, valid_height)
       end
 
       # Probe the inclusive bound itself *and* min+1. Checking only min+1 lets
       # an exclusive min (`>` instead of `>=`) satisfy #width_min; checking only
-      # the bound lets an exact `width: n` satisfy #width_min(n).
+      # the bound lets an exact `width: n` satisfy #width_min(n). Skip a 0px
+      # bound probe (media_metadata_missing) and require the validator option.
       def width_larger_than_min?
         return true if @width_min.nil? || @width_min == @width_max
 
-        passes_validation_with_dimensions(@width_min, valid_height) &&
-          passes_validation_with_dimensions(@width_min + 1, valid_height)
+        passes_min_probes?(:width, @width_min, valid_height)
       end
 
       def width_smaller_than_max?
@@ -182,14 +182,13 @@ module ActiveStorageValidations
       end
 
       def height_not_smaller_than_min?
-        @height_min.nil? || !passes_validation_with_dimensions(valid_width, @height_min - 1)
+        @height_min.nil? || @height_min < 1 || !passes_validation_with_dimensions(valid_width, @height_min - 1)
       end
 
       def height_larger_than_min?
         return true if @height_min.nil? || @height_min == @height_max
 
-        passes_validation_with_dimensions(valid_width, @height_min) &&
-          passes_validation_with_dimensions(valid_width, @height_min + 1)
+        passes_min_probes?(:height, @height_min, valid_width)
       end
 
       def height_smaller_than_max?
@@ -205,6 +204,27 @@ module ActiveStorageValidations
 
       def height_equals?
         @height_min.nil? || @height_min != @height_max || passes_validation_with_dimensions(valid_width, @height_min)
+      end
+
+      def passes_min_probes?(axis, min, other)
+        if min < 1
+          passes_axis?(axis, 1, other) && dimension_min_zero?(axis)
+        else
+          passes_axis?(axis, min, other) && passes_axis?(axis, min + 1, other)
+        end
+      end
+
+      def passes_axis?(axis, value, other)
+        if axis == :width
+          passes_validation_with_dimensions(value, other)
+        else
+          passes_validation_with_dimensions(other, value)
+        end
+      end
+
+      def dimension_min_zero?(axis)
+        opt = attribute_validator&.options&.[](axis)
+        opt.is_a?(Hash) && opt[:min] == 0
       end
 
       # 0px probes are media_metadata_missing, not a bound miss. Skip max-1

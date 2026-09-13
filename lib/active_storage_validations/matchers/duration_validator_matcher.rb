@@ -39,6 +39,10 @@ module ActiveStorageValidations
         0.001.seconds
       end
 
+      def lowest_comparable_value
+        smallest_measurement
+      end
+
       def mock_value_for(io, duration)
         Matchers.mock_metadata(io, { duration: duration }) do
           yield

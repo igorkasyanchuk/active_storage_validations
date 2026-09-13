@@ -276,6 +276,22 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
         it_behaves_like "dimension matcher only match when exact value"
       end
 
+      context "when used on a #{dimension} min validator of 0px" do
+        subject(:configured_matcher) { matcher.public_send(matcher_method, 0) }
+
+        let(:model_attribute) { :"#{dimension}_min_zero" }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      context "when matching #{dimension}_min(0) against a #{dimension} min: 800 validator" do
+        subject(:configured_matcher) { matcher.public_send(matcher_method, 0) }
+
+        let(:model_attribute) { :"#{dimension}_min" }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
       context "when used on a #{dimension} max validator (e.g. dimension: { #{dimension}: { max: 1200 } })" do
         let(:model_attribute) { :"#{dimension}_max" }
 

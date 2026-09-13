@@ -110,9 +110,13 @@ module ActiveStorageValidations
 
       # Probe the inclusive bound itself. Checking only min+1 / max-1 lets
       # less_than(n) satisfy less_than_or_equal_to(n) (and greater_than
-      # satisfy greater_than_or_equal_to).
+      # satisfy greater_than_or_equal_to). Duration / pages treat 0 as
+      # media_metadata_missing, so probe the first comparable value instead.
       def higher_than_min?
-        @min.nil? || passes_validation_with_value(@min)
+        return true if @min.nil?
+        return false unless passes_validation_with_value(probeable_value(@min))
+
+        !unprobeable_zero_min? || validator_declares_zero_lower_bound?
       end
 
       def lower_than_max?
@@ -126,13 +130,42 @@ module ActiveStorageValidations
       def equal_to_exact?
         return true if @exact.nil?
 
-        passes_validation_with_value(@exact) &&
-          !passes_validation_with_value(@exact - smallest_measurement) &&
-          !passes_validation_with_value(@exact + smallest_measurement)
+        if zero_like?(@exact) && @exact < lowest_comparable_value
+          zero_like?(attribute_validator&.options&.[](:equal_to))
+        else
+          passes_validation_with_value(@exact) &&
+            !passes_validation_with_value(@exact - smallest_measurement) &&
+            !passes_validation_with_value(@exact + smallest_measurement)
+        end
       end
 
       def smallest_measurement
         raise NotImplementedError
+      end
+
+      # Size / total_size can probe 0 bytes. Duration / pages override: 0 is
+      # media_metadata_missing rather than an in-range comparison.
+      def lowest_comparable_value
+        0
+      end
+
+      def probeable_value(value)
+        lowest = lowest_comparable_value
+        value < lowest ? lowest : value
+      end
+
+      def zero_like?(value)
+        value.respond_to?(:zero?) && value.zero?
+      end
+
+      def unprobeable_zero_min?
+        zero_like?(@min) && @min < lowest_comparable_value
+      end
+
+      def validator_declares_zero_lower_bound?
+        options = attribute_validator&.options || {}
+        zero_like?(options[:greater_than_or_equal_to]) ||
+          (options[:between].is_a?(Range) && zero_like?(options[:between].begin))
       end
 
       # Exclusive ranges (`1...5`) reject the end bound. Probe the last included
