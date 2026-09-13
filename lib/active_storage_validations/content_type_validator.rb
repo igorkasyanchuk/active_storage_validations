@@ -108,7 +108,7 @@ module ActiveStorageValidations
       # evidence of spoofing, so fail closed with a dedicated error instead.
       if detected_content_type.blank?
         add_content_type_analysis_failed_error(record, attribute, attachable, context)
-      elsif content_type_mismatch?(context.content_type, detected_content_type)
+      elsif content_type_mismatch?(marcel_attachable_content_type(context), detected_content_type)
         add_content_type_spoofed_error(record, attribute, attachable, context, detected_content_type)
       else
         true
@@ -137,6 +137,10 @@ module ActiveStorageValidations
       ERROR_MESSAGE
     end
 
+    # Compare the Marcel-resolved type (declared type + filename fallback), not
+    # the raw blob content_type. A blank declared type still authorizes via
+    # filename; spoofing must use the same resolved type or it would skip the
+    # sniffer comparison.
     def content_type_mismatch?(attachable_content_type, detected_content_type)
       attachable_content_type.present? &&
         !content_types_intersect?(attachable_content_type, detected_content_type)

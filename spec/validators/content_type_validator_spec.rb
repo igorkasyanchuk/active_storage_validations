@@ -369,6 +369,37 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
           it { is_expected_to_have_error_options(error_options, validator: :content_type) }
         end
 
+        context "when the declared content_type is blank (identify: false)" do
+          context "and the filename extension is authorized but the file is spoofed" do
+            subject(:record) { model.public_send(attribute).attach(blank_type_spoofed) and model }
+
+            let(:blank_type_spoofed) { spoofed_jpeg.merge(content_type: "", identify: false) }
+            let(:error_options) do
+              {
+                authorized_human_content_types: "JPG",
+                content_type: "",
+                human_content_type: "",
+                count: 1,
+                detected_content_type: "text/plain",
+                detected_human_content_type: "TXT",
+                filename: spoofed_jpeg[:filename]
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_include_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
+            it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+          end
+
+          context "and the file matches the filename-inferred type" do
+            subject(:record) { model.public_send(attribute).attach(blank_type_genuine) and model }
+
+            let(:blank_type_genuine) { jpeg_file.merge(content_type: "", identify: false) }
+
+            it { is_expected_to_be_valid }
+          end
+        end
+
         describe "working with most common mime types" do
           most_common_mime_types.each do |common_mime_type|
             describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
