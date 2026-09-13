@@ -241,6 +241,17 @@ RSpec.describe ActiveStorageValidations::SizeValidator do
 
       it { is_expected_to_be_valid }
     end
+
+    context "when a persisted oversized file is marked for destruction" do
+      subject(:record) do
+        model.less_than.attach(file_5ko)
+        model.save!(validate: false)
+        model.less_than.mark_for_destruction
+        model
+      end
+
+      it { is_expected_to_be_valid }
+    end
   end
 
   describe "Rails options" do
