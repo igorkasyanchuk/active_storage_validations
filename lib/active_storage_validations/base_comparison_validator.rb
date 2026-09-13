@@ -109,7 +109,13 @@ module ActiveStorageValidations
     def last_included_range_end(range)
       return range.end unless range.respond_to?(:exclude_end?) && range.exclude_end?
 
-      range.end - 1
+      range.end - exclusive_range_step
+    end
+
+    # Integer comparisons (bytes, pages) step by 1. Duration overrides this
+    # so `7.seconds - 1` is not advertised as "6 seconds".
+    def exclusive_range_step
+      1
     end
   end
 end
