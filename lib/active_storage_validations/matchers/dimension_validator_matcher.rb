@@ -145,12 +145,21 @@ module ActiveStorageValidations
         @width_min.nil? || !passes_validation_with_dimensions(@width_min - 1, valid_height)
       end
 
+      # Probe the inclusive bound itself *and* min+1. Checking only min+1 lets
+      # an exclusive min (`>` instead of `>=`) satisfy #width_min; checking only
+      # the bound lets an exact `width: n` satisfy #width_min(n).
       def width_larger_than_min?
-        @width_min.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_min + 1, valid_height)
+        return true if @width_min.nil? || @width_min == @width_max
+
+        passes_validation_with_dimensions(@width_min, valid_height) &&
+          passes_validation_with_dimensions(@width_min + 1, valid_height)
       end
 
       def width_smaller_than_max?
-        @width_max.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_max - 1, valid_height)
+        return true if @width_max.nil? || @width_min == @width_max
+
+        passes_validation_with_dimensions(@width_max, valid_height) &&
+          passes_validation_with_dimensions(@width_max - 1, valid_height)
       end
 
       def width_not_larger_than_max?
@@ -166,11 +175,17 @@ module ActiveStorageValidations
       end
 
       def height_larger_than_min?
-        @height_min.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_min + 1)
+        return true if @height_min.nil? || @height_min == @height_max
+
+        passes_validation_with_dimensions(valid_width, @height_min) &&
+          passes_validation_with_dimensions(valid_width, @height_min + 1)
       end
 
       def height_smaller_than_max?
-        @height_max.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_max - 1)
+        return true if @height_max.nil? || @height_min == @height_max
+
+        passes_validation_with_dimensions(valid_width, @height_max) &&
+          passes_validation_with_dimensions(valid_width, @height_max - 1)
       end
 
       def height_not_larger_than_max?

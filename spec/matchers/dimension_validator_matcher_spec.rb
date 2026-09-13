@@ -56,10 +56,22 @@ RSpec.shared_examples "dimension matcher only match when exact value" do
     it { is_expected_not_to_match_for(klass) }
   end
 
+  context "when provided with a value one below the value specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, validator_value - 1) }
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+
   context "when provided with the exact width specified in the model validations" do
     subject(:configured_matcher) { matcher.public_send(matcher_method, validator_value) }
 
     it { is_expected_to_match_for(klass) }
+  end
+
+  context "when provided with a value one above the value specified in the model validations" do
+    subject(:configured_matcher) { matcher.public_send(matcher_method, validator_value + 1) }
+
+    it { is_expected_not_to_match_for(klass) }
   end
 
   context "when provided with a higher width than the width specified in the model validations" do
