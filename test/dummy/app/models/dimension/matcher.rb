@@ -13,6 +13,8 @@
 class Dimension::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :without_validator
+
   has_one_attached :custom_matcher
   validates :custom_matcher, dimension: { width: 150, height: 150 }
 
@@ -70,6 +72,8 @@ class Dimension::Matcher < ApplicationRecord
   if Rails.gem_version >= Gem::Version.new("8.0.0")
     has_one_attached :with_except_on_symbol
     validates :with_except_on_symbol, dimension: { width: 150, height: 150 }, except_on: :update
+    has_one_attached :with_except_on_create
+    validates :with_except_on_create, dimension: { width: 150, height: 150 }, except_on: :create
     has_one_attached :with_except_on_array
     validates :with_except_on_array, dimension: { width: 150, height: 150 }, except_on: %i[update custom]
     has_one_attached :with_several_validators_and_except_on
@@ -116,4 +120,10 @@ class Dimension::Matcher < ApplicationRecord
   has_one_attached :height_max_one
   validates :width_max_one, dimension: { width: { max: 1 } }
   validates :height_max_one, dimension: { height: { max: 1 } }
+
+  # 0px min: matcher min probe would be 0px (media_metadata_missing)
+  has_one_attached :width_min_zero
+  has_one_attached :height_min_zero
+  validates :width_min_zero, dimension: { width: { min: 0 } }
+  validates :height_min_zero, dimension: { height: { min: 0 } }
 end

@@ -13,6 +13,8 @@
 class Pages::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :without_validator
+
   has_one_attached :custom_matcher
   validates :custom_matcher, pages: { equal_to: 5 }
 
@@ -32,6 +34,10 @@ class Pages::Matcher < ApplicationRecord
   validates :between_exclusive, pages: { between: 2...7 }
   validates :equal_to, pages: { equal_to: 5 }
   validates :many_greater_than, pages: { greater_than: 7 }
+  has_one_attached :greater_than_or_equal_to_zero
+  validates :greater_than_or_equal_to_zero, pages: { greater_than_or_equal_to: 0 }
+  has_one_attached :equal_to_zero
+  validates :equal_to_zero, pages: { equal_to: 0 }
 
   has_one_attached :proc_less_than
   has_one_attached :proc_less_than_or_equal_to
@@ -68,6 +74,8 @@ class Pages::Matcher < ApplicationRecord
   if Rails.gem_version >= Gem::Version.new("8.0.0")
     has_one_attached :with_except_on_symbol
     validates :with_except_on_symbol, pages: { less_than_or_equal_to: 5 }, except_on: :update
+    has_one_attached :with_except_on_create
+    validates :with_except_on_create, pages: { less_than_or_equal_to: 5 }, except_on: :create
     has_one_attached :with_except_on_array
     validates :with_except_on_array, pages: { less_than_or_equal_to: 5 }, except_on: %i[update custom]
     has_one_attached :with_several_validators_and_except_on
