@@ -218,6 +218,18 @@ RSpec.describe ActiveStorageValidations::LimitValidator do
 
       it { is_expected_to_be_valid }
     end
+
+    context "when replacing a persisted file via mark_for_destruction" do
+      subject(:record) do
+        model.max.attach(png_file)
+        model.save!
+        model.max.attachments.first.mark_for_destruction
+        model.max.attach(gif_file)
+        model
+      end
+
+      it { is_expected_to_be_valid }
+    end
   end
 
   describe "Rails options" do

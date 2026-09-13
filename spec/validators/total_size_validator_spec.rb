@@ -225,6 +225,32 @@ RSpec.describe ActiveStorageValidations::TotalSizeValidator do
     end
   end
 
+  describe "attachments marked for destruction" do
+    let(:model) { validator_test_class::Check.new(params) }
+
+    context "when a file that would exceed the total is marked for destruction" do
+      subject(:record) do
+        model.less_than.attach([ file_1ko, file_5ko ])
+        model.less_than.attachments.max_by { |attachment| attachment.blob.byte_size }.mark_for_destruction
+        model
+      end
+
+      it { is_expected_to_be_valid }
+    end
+
+    context "when replacing a persisted file via mark_for_destruction" do
+      subject(:record) do
+        model.less_than.attach(file_1ko)
+        model.save!
+        model.less_than.attachments.first.mark_for_destruction
+        model.less_than.attach(file_1ko)
+        model
+      end
+
+      it { is_expected_to_be_valid }
+    end
+  end
+
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
   end
