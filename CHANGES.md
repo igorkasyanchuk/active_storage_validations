@@ -14,6 +14,7 @@
   - **ADDED**
     - Localize the `duration` error message values (`%{duration}`, `%{min}`, `%{max}`, `%{exact}`). Units and sentence connectors now come from the new `active_storage_validations.duration` I18n keys shipped in every bundled locale (e.g. `1 minute et 30 secondes` in French) instead of the English-only `ActiveSupport::Duration#inspect`. Locales the gem does not ship fall back to the English wording
   - **FIXED**
+    - `validate_with_audio_of(...).without_audio.with_message(...)` now probes a file *with* an audio track. The custom-message check always used `audio: false`, which passes `with: false` and made the matcher fail
     - `validate_duration_of(...).less_than(1.second)` now matches a correct validator. The matcher stepped by 1 second, so it probed duration `0`, which is `media_metadata_missing` rather than an out-of-range duration. It now steps by 1 millisecond, matching analyzer precision
     - `size` / `total_size` / `duration` / `pages` honor comparison bounds of `0` (`equal_to: 0`, `greater_than_or_equal_to: 0`, …). The same `.present?` trap skipped those checks and rejected every file
     - `limit: { max: 0 }` (and `min: 0`) now treats `0` as a real bound. Empty attachments pass `max: 0`; attaching a file is still rejected. `.present?` used to skip the check, so freeze-upload configs without `allow_blank` rejected records with no files

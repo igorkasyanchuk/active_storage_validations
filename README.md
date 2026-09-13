@@ -999,6 +999,7 @@ describe User do
   # with_audio
   it { is_expected.to validate_with_audio_of(:video) }
   it { is_expected.to validate_with_audio_of(:silent_video).without_audio }
+  it { is_expected.to validate_with_audio_of(:silent_video).without_audio.with_message("must not have an audio track") }
 
   # pages:
   # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
