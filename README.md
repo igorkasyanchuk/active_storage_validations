@@ -897,7 +897,7 @@ The `pages` validator error messages expose 5 values that you can use:
 - [Upgrading to 2.x](docs/upgrade_to_2.md)
 - [Upgrading to 3.x](docs/upgrade_to_3.md)
 - [Upgrading to 4.x](docs/upgrade_to_4.md)
-- [Upgrading to 5.x](docs/upgrade_to_5.md)
+- [Upgrading to 5.x](docs/upgrade_to_5.md) — same Ruby / Rails as 4.x; most apps bump the gem and keep the same code
 
 ## Internationalization (I18n)
 
