@@ -16,6 +16,8 @@ module ActiveStorageValidations
       pages_not_greater_than_or_equal_to
       pages_not_between
       pages_not_equal_to
+      media_metadata_missing
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[pages].freeze
 

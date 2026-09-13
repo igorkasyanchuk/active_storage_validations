@@ -14,6 +14,8 @@ module ActiveStorageValidations
       duration_not_greater_than_or_equal_to
       duration_not_between
       duration_not_equal_to
+      media_metadata_missing
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[duration].freeze
 
