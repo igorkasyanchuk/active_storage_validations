@@ -56,6 +56,46 @@ RSpec.describe ActiveStorageValidations::Analyzer::PdfAnalyzer do
     end
   end
 
+  describe "pages parsing" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) do
+      {
+        io: open_fixture(Rails.root.join("public", "pdf_150x150.pdf")),
+        filename: "pdf_150x150.pdf",
+        content_type: "application/pdf"
+      }
+    end
+
+    before do
+      allow(analyzer).to receive(:media_from_path).and_return(pdfinfo)
+    end
+
+    context "when pdfinfo omits Pages" do
+      let(:pdfinfo) { { "page_size" => "150 x 150 pts" } }
+
+      it "omits pages rather than caching 0" do
+        expect(metadata).to eq({ width: 150, height: 150 })
+      end
+    end
+
+    context "when pdfinfo reports Pages: 0" do
+      let(:pdfinfo) { { "page_size" => "150 x 150 pts", "pages" => "0" } }
+
+      it "omits pages rather than caching 0" do
+        expect(metadata).to eq({ width: 150, height: 150 })
+      end
+    end
+
+    context "when pdfinfo reports only Pages: 0" do
+      let(:pdfinfo) { { "pages" => "0" } }
+
+      it "returns empty metadata so analysis can retry" do
+        expect(metadata).to eq({})
+      end
+    end
+  end
+
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "pdf_150x150.pdf").to_s }
     let(:attachable) do
