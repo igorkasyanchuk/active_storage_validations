@@ -4,6 +4,7 @@ require_relative "shared/asv_active_storageable"
 require_relative "shared/asv_analyzable"
 require_relative "shared/asv_attachable"
 require_relative "shared/asv_errorable"
+require_relative "shared/asv_optionable"
 require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
@@ -12,8 +13,10 @@ module ActiveStorageValidations
     include ASVAnalyzable
     include ASVAttachable
     include ASVErrorable
+    include ASVOptionable
     include ASVSymbolizable
 
+    AVAILABLE_CHECKS = %i[with].freeze
     ERROR_TYPES = %i[audio_missing audio_present media_metadata_missing].freeze
     METADATA_KEYS = %i[audio].freeze
 
@@ -28,7 +31,7 @@ module ActiveStorageValidations
     def is_valid?(record, attribute, attachable, metadata)
       return add_media_metadata_missing_error(record, attribute, attachable) unless media_analyzed?(metadata)
 
-      expected_audio = options.fetch(:with, true)
+      expected_audio = set_flat_options(record).fetch(:with, true)
       return if audio_track?(metadata) == expected_audio
 
       errors_options = initialize_error_options(options, attachable)
