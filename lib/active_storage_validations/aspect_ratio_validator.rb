@@ -27,7 +27,8 @@ module ActiveStorageValidations
       aspect_ratio_invalid
       media_metadata_missing
     ].freeze
-    PRECISION = 3
+    # One pixel on either axis so sizes such as 1366×768 still match 16:9.
+    PIXEL_TOLERANCE = 1
     METADATA_KEYS = %i[width height].freeze
 
     def check_validity!
@@ -109,11 +110,22 @@ module ActiveStorageValidations
     end
 
     def valid_regex_aspect_ratio?(aspect_ratio, metadata)
-      aspect_ratio =~ ASPECT_RATIO_REGEX
-      x = ::Regexp.last_match(1).to_i
-      y = ::Regexp.last_match(2).to_i
+      x, y = ratio_components(aspect_ratio)
+      width = metadata[:width].to_i
+      height = metadata[:height].to_i
+      return false unless x.positive? && y.positive? && width.positive? && height.positive?
 
-      x > 0 && y > 0 && (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
+      within_pixel_tolerance?(width, height, x, y)
+    end
+
+    def ratio_components(aspect_ratio)
+      aspect_ratio =~ ASPECT_RATIO_REGEX
+      [ ::Regexp.last_match(1).to_i, ::Regexp.last_match(2).to_i ]
+    end
+
+    def within_pixel_tolerance?(width, height, x, y)
+      (width - height * x / y.to_f).abs <= PIXEL_TOLERANCE ||
+        (height - width * y / x.to_f).abs <= PIXEL_TOLERANCE
     end
 
     def ensure_at_least_one_validator_option
@@ -152,10 +164,7 @@ module ActiveStorageValidations
         if NAMED_ASPECT_RATIOS.include?(aspect_ratio)
           aspect_ratio
         else
-          aspect_ratio =~ ASPECT_RATIO_REGEX
-          x = ::Regexp.last_match(1).to_i
-          y = ::Regexp.last_match(2).to_i
-
+          x, y = ratio_components(aspect_ratio)
           "#{x}:#{y}"
         end
       end.join(", ")

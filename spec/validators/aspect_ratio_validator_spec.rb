@@ -239,6 +239,50 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
       end
     end
 
+    describe "custom ratio pixel tolerance" do
+      let(:attribute) { :with_regex }
+
+      # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
+      def stub_dimensions(width, height)
+        allow_any_instance_of(described_class).to receive(:metadata_for).and_return({ width: width, height: height })
+      end
+      # rubocop:enable RSpec/AnyInstance
+
+      context "when the image is 1 pixel off 16:9 (1366x768)" do
+        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+        before { stub_dimensions(1366, 768) }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when the image is 1 pixel off 16:9 (854x480)" do
+        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+        before { stub_dimensions(854, 480) }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when the image is 2 pixels off 16:9 (1920x1082)" do
+        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+        before { stub_dimensions(1920, 1082) }
+
+        let(:error_options) do
+          {
+            authorized_aspect_ratios: "16:9",
+            width: 1920,
+            height: 1082,
+            filename: square_image_file[:filename]
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("aspect_ratio_not_x_y", error_options: error_options) }
+      end
+    end
+
     context "when the Proc returns an empty list" do
       subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
 

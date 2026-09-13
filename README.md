@@ -741,14 +741,14 @@ It can also be used for pdf files, but it will only analyze the pdf first page.
 #### Options
 
 The `aspect_ratio` validator has several options:
-- `with`: defines the allowed aspect ratio (e.g. `:is_16/9`)
+- `with`: defines the allowed aspect ratio (e.g. `:is_16_9`)
 - `in`: defines the allowed aspect ratios (e.g. `%i[square landscape]`)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 This validator can define aspect ratios in several ways:
 - Symbols:
   - prebuilt aspect ratios: `:square`, `:portrait`, `:landscape`
-  - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc.
+  - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc. Custom ratios allow a 1-pixel difference on either axis, so sizes such as 1366×768 match `:is_16_9`.
 
 #### Examples
 
