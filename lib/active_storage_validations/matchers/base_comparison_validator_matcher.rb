@@ -57,7 +57,8 @@ module ActiveStorageValidations
       end
 
       def between(range)
-        @min, @max = range.first, range.last
+        @min = range.begin
+        @max = last_included_bound(range)
         self
       end
 
@@ -132,6 +133,14 @@ module ActiveStorageValidations
 
       def smallest_measurement
         raise NotImplementedError
+      end
+
+      # Exclusive ranges (`1...5`) reject the end bound. Probe the last included
+      # value so `#between(80...100)` does not match an inclusive `80..100`.
+      def last_included_bound(range)
+        return range.end unless range.exclude_end?
+
+        range.end - smallest_measurement
       end
 
       def passes_validation_with_value(value)

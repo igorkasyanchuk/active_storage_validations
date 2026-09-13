@@ -28,6 +28,8 @@ class Duration::Matcher < ApplicationRecord
   validates :greater_than, duration: { greater_than: 7.seconds }
   validates :greater_than_or_equal_to, duration: { greater_than_or_equal_to: 7.seconds }
   validates :between, duration: { between: 2.seconds..7.seconds }
+  has_one_attached :between_exclusive
+  validates :between_exclusive, duration: { between: 2.seconds...7.seconds }
   validates :equal_to, duration: { equal_to: 5.seconds }
   validates :many_greater_than, duration: { greater_than: 7.seconds }
 

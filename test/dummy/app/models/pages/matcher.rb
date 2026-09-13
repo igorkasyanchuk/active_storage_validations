@@ -28,6 +28,8 @@ class Pages::Matcher < ApplicationRecord
   validates :greater_than, pages: { greater_than: 7 }
   validates :greater_than_or_equal_to, pages: { greater_than_or_equal_to: 7 }
   validates :between, pages: { between: 2..7 }
+  has_one_attached :between_exclusive
+  validates :between_exclusive, pages: { between: 2...7 }
   validates :equal_to, pages: { equal_to: 5 }
   validates :many_greater_than, pages: { greater_than: 7 }
 

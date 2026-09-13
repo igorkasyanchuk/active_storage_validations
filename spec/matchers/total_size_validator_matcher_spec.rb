@@ -93,6 +93,8 @@ RSpec.describe ActiveStorageValidations::Matchers::TotalSizeValidatorMatcher do
 
       it { is_expected_not_to_match_for(klass) }
     end
+
+    it_behaves_like "base comparison validator matcher between honors exclusive range"
   end
 
   describe "#equal_to" do
