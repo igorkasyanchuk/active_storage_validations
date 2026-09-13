@@ -31,5 +31,11 @@ module ActiveStorageValidations
         end
       end
     end
+
+    # Integer 0 is a real bound (`max: 0`, `equal_to: 0`). `.present?` / truthiness
+    # treat it as absent, so the check would be skipped.
+    def bound_present?(flat_options, key)
+      !flat_options[key].nil?
+    end
   end
 end
