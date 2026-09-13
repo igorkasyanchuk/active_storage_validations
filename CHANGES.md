@@ -1,4 +1,6 @@
 # Unreleased
+- **FIXED**
+  - Honor exclusive `dimension` `in:` ranges (`400...600` no longer accepts 600). Inclusive `min..max` is unchanged
 
 # Released
 - 5.0.0

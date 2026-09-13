@@ -578,6 +578,7 @@ class User < ApplicationRecord
   validates :avatar, dimension: { width: 100 } # restricts the width to 100 pixels
   validates :avatar, dimension: { width: { min: 80, max: 100 } } # restricts the width to between 80 and 100 pixels
   validates :avatar, dimension: { width: { in: 80..100 } } # restricts the width to between 80 and 100 pixels
+  validates :avatar, dimension: { width: { in: 80...100 } } # same, but exclusive end (80–99), matching Ruby `Range`
   validates :avatar, dimension: { height: 100 } # restricts the height to 100 pixels
   validates :avatar, dimension: { height: { min: 600, max: 1800 } } # restricts the height to between 600 and 1800 pixels
   validates :avatar, dimension: { height: { in: 600..1800 } } # restricts the height to between 600 and 1800 pixels

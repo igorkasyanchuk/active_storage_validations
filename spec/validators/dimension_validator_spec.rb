@@ -352,6 +352,36 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 it { is_expected_to_have_error_options(error_options) }
               end
             end
+
+            if value_type == "value"
+              describe "#{dimension}: exclusive :in (e.g { #{dimension}: { in: 400...600 } })" do
+                # validates :width_in_exclusive, dimension: { width: { in: 400...600 } }
+                # validates :height_in_exclusive, dimension: { height: { in: 400...600 } }
+                let(:attribute) { :"#{dimension}_in_exclusive" }
+
+                context "when provided with a #{dimension} value inside the exclusive range" do
+                  subject(:record) { model.public_send(attribute).attach(image_500x500_file) and model }
+
+                  it { is_expected_to_be_valid }
+                end
+
+                context "when provided with the exclusive end bound (#{dimension} = 600)" do
+                  subject(:record) { model.public_send(attribute).attach(image_600x600_file) and model }
+
+                  let(:error_options) do
+                    {
+                      min: 400,
+                      max: 600,
+                      filename: "image_600x600_file.png"
+                    }
+                  end
+
+                  it { is_expected_not_to_be_valid }
+                  it { is_expected_to_include_error_message("dimension_#{dimension}_not_included_in", error_options: error_options) }
+                  it { is_expected_to_have_error_options(error_options) }
+                end
+              end
+            end
           end
         end
       end
