@@ -60,4 +60,9 @@ class Dimension::Validator::Check < ApplicationRecord
   validates :with_invalid_media_file, dimension: { width: 150, height: 150 }
   has_one_attached :with_pdf_file
   validates :with_pdf_file, dimension: { width: 150, height: 150 }
+
+  has_one_attached :width_max_zero
+  validates :width_max_zero, dimension: { width: { max: 0 } }
+  has_one_attached :width_max_zero_proc
+  validates :width_max_zero_proc, dimension: { width: { max: ->(_record) { 0 } } }
 end

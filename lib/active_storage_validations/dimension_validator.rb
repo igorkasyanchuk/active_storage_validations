@@ -110,7 +110,7 @@ module ActiveStorageValidations
     end
 
     def min_max_validation?(flat_options)
-      flat_options[:min] || flat_options[:max]
+      bound_present?(flat_options, :min) || bound_present?(flat_options, :max)
     end
 
     # { min: 100..200, max: 800..600 } options: one error per violated bound,
@@ -129,7 +129,7 @@ module ActiveStorageValidations
     end
 
     def invalid_bound?(bound, flat_options, metadata)
-      return false unless flat_options[bound]
+      return false unless bound_present?(flat_options, bound)
 
       %i[width height].any? { |dimension| invalid_dimension_bound?(bound, dimension, flat_options, metadata) }
     end
@@ -152,15 +152,23 @@ module ActiveStorageValidations
     end
 
     def invalid_dimension_bound?(bound, dimension, flat_options, metadata)
-      limit = flat_options[dimension][bound]
-      return false unless limit
+      limit = dimension_limit(flat_options, dimension, bound)
+      return false if limit.nil?
 
       bound == :min ? metadata[dimension] < limit : metadata[dimension] > limit
     end
 
+    # Integer 0 is a real bound (`width: { max: 0 }`). Truthiness would skip it.
+    def dimension_limit(flat_options, dimension, bound)
+      limits = flat_options[dimension]
+      return unless limits.is_a?(Hash) && bound_present?(limits, bound)
+
+      limits[bound]
+    end
+
     def validate_width_height(record, attribute, metadata, flat_options, errors_options)
       %i[width height].each do |dimension|
-        next unless flat_options[dimension]
+        next unless bound_present?(flat_options, dimension)
 
         if flat_options[dimension].is_a?(Hash)
           validate_range(record, attribute, dimension, metadata, flat_options, errors_options)
@@ -190,16 +198,23 @@ module ActiveStorageValidations
     end
 
     def in_option_used?(flat_options, dimension)
-      flat_options[dimension][:in]
+      bound_present?(flat_options[dimension], :in)
     end
 
     def outside_range?(value, options)
-      if (range = options[:in])
-        !range.include?(value)
+      if bound_present?(options, :in)
+        !options[:in].include?(value)
       else
-        min, max = options[:min], options[:max]
-        (min && value < min) || (max && value > max)
+        min_exceeded?(value, options) || max_exceeded?(value, options)
       end
+    end
+
+    def min_exceeded?(value, options)
+      bound_present?(options, :min) && value < options[:min]
+    end
+
+    def max_exceeded?(value, options)
+      bound_present?(options, :max) && value > options[:max]
     end
 
     def add_range_error(record, attribute, dimension, flat_options, errors_options)
@@ -222,8 +237,9 @@ module ActiveStorageValidations
       flat_options = set_flat_options(record)
 
       %i[width height].each do |dimension|
-        if flat_options[dimension] and flat_options[dimension].is_a?(Hash)
-          if (range = flat_options[dimension][:in])
+        if flat_options[dimension].is_a?(Hash)
+          if bound_present?(flat_options[dimension], :in)
+            range = flat_options[dimension][:in]
             # Range#begin / #end never raise; a Proc may still return an unbounded range.
             # Exclusive ranges reject the end bound — error :max is the last included value.
             flat_options[dimension][:min] = range.begin
@@ -233,7 +249,8 @@ module ActiveStorageValidations
       end
 
       %i[min max].each do |bound|
-        if (range = flat_options[bound])
+        if bound_present?(flat_options, bound)
+          range = flat_options[bound]
           flat_options[:width] ||= {}
           flat_options[:height] ||= {}
           flat_options[:width][bound] = range.begin

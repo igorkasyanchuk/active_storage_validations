@@ -634,6 +634,26 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
     end
 
     describe "Edge cases" do
+      describe "width: { max: 0 }" do
+        %w[value proc].each do |value_type|
+          describe value_type do
+            subject(:record) { model.public_send(attribute).attach(image_150x150_file) and model }
+
+            let(:attribute) { :"width_max_zero#{'_proc' if value_type == 'proc'}" }
+            let(:error_options) do
+              {
+                length: 0,
+                filename: "image_150x150_file.png"
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_include_error_message("dimension_width_not_less_than_or_equal_to", error_options: error_options) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+        end
+      end
+
       context "when ActiveStorage.variant_processor is :disabled" do
         subject(:record) { model.public_send(attribute).attach(image_500x500_file) and model }
 
