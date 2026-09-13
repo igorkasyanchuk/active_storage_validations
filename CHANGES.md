@@ -14,6 +14,7 @@
   - **ADDED**
     - Localize the `duration` error message values (`%{duration}`, `%{min}`, `%{max}`, `%{exact}`). Units and sentence connectors now come from the new `active_storage_validations.duration` I18n keys shipped in every bundled locale (e.g. `1 minute et 30 secondes` in French) instead of the English-only `ActiveSupport::Duration#inspect`. Locales the gem does not ship fall back to the English wording
   - **FIXED**
+    - Honor exclusive ranges in comparison and dimension matchers (`#between`, `#width_between`, `#height_between`). `Range#last` treated `80...100` as inclusive, so the matcher could match an inclusive validator and fail against the exclusive one documented in the README
     - Honor exclusive `dimension` `in:` ranges (`400...600` no longer accepts 600). Inclusive `min..max` is unchanged
     - `validate_dimensions_of(...).width_min(n)` / `#height_min` / `#width_max` / `#height_max` now probe the inclusive bound itself, so an exclusive min/max no longer satisfies the matcher (same class of false positive already fixed for comparison matchers)
     - `VideoAnalyzer` / `AudioAnalyzer` no longer raise from `valid?` when ffprobe returns invalid JSON or `N/A` numeric fields; analysis fails closed with empty / partial metadata
