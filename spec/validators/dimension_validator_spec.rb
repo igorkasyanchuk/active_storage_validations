@@ -634,6 +634,33 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
     end
 
     describe "Edge cases" do
+      context "when ActiveStorage.variant_processor is :disabled" do
+        subject(:record) { model.public_send(attribute).attach(image_500x500_file) and model }
+
+        let(:attribute) { :width }
+        let(:error_options) do
+          {
+            filename: "image_500x500_file.png"
+          }
+        end
+
+        around do |example|
+          previous = ActiveStorage.variant_processor
+          ActiveStorage.variant_processor = :disabled
+          example.run
+        ensure
+          ActiveStorage.variant_processor = previous
+        end
+
+        it "fails closed with media_metadata_missing instead of raising" do
+          expect { record.valid? }.not_to raise_error
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+
       context "when the passed file is not a valid media" do
         subject(:record) { model.public_send(attribute).attach(empty_io_file) and model }
 
