@@ -169,6 +169,7 @@ Only relevant if you monkey-patch the gem:
 
 - `content_type` `spoofing_protection` on Marcel 2 / Rails main (8.2+): `audio/aac`, `application/xml` and `audio/mp4` are no longer rejected (their `file` detections are aliases)
 - `duration` rejecting WebM / Matroska audio such as browser `MediaRecorder` recordings. Blobs analyzed before this fix have an empty `asv_duration` memoized; call `blob.remove_active_storage_validations_metadata!` to re-analyze them
+- `duration` no longer rounds analyzer output to 0.1s before comparing. Blobs analyzed before this fix have a rounded `asv_duration`; call `blob.remove_active_storage_validations_metadata!` to re-analyze them
 - Audio stream tags are no longer cached on the blob as `asv_tags` (they could exceed S3's 2 KB object-metadata limit)
 - ImageMagick `identify` targets the first frame of animated GIFs / multi-page TIFFs
 - `validate_dimensions_of(...).width_min(n)` / `.height_min(n)` matching when `n` is above 2000px
