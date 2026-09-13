@@ -24,8 +24,8 @@ module ActiveStorageValidations
     def metadata
       read_media do |media|
         {
-          width: width,
-          height: height,
+          width: positive_measurement(width),
+          height: positive_measurement(height),
           pages: pages
         }.compact
       end
@@ -86,7 +86,15 @@ module ActiveStorageValidations
     end
 
     def pages
-      @media["pages"].to_i
+      return unless @media.key?("pages")
+
+      positive_measurement(@media["pages"].to_i)
+    end
+
+    # 0 is not a usable measurement (PagesValidator / processable_file treat
+    # it as a miss). Omit it so Hash#compact does not cache a fake success.
+    def positive_measurement(value)
+      value if value.to_i.positive?
     end
   end
 end
