@@ -52,6 +52,35 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
       it { is_expected_to_have_error_options(error_options) }
     end
 
+    context "when provided with an empty media container" do
+      # ffprobe exits 0 with zero streams; that must not count as a decode.
+      %w[video audio].each do |media_type|
+        context "when the declared type is #{media_type}" do
+          subject(:record) { model.has_to_be_processable.attach(empty_container) and model }
+
+          let(:empty_container) do
+            case media_type
+            when "video" then video_file
+            when "audio" then audio_file
+            end
+          end
+          let(:analyzer_class) do
+            media_type == "video" ? ActiveStorageValidations::Analyzer::VideoAnalyzer : ActiveStorageValidations::Analyzer::AudioAnalyzer
+          end
+          let(:error_options) { { filename: empty_container[:filename] } }
+
+          before do
+            allow_any_instance_of(analyzer_class).to receive(:media_from_path).and_return( # rubocop:disable RSpec/AnyInstance
+              { "streams" => [], "format" => { "nb_streams" => 0, "format_name" => "mov,mp4,m4a,3gp,3g2,mj2" } }
+            )
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("file_not_processable", error_options: error_options) }
+        end
+      end
+    end
+
     context "when provided with a StringIO that is an image" do
       # validates :has_to_be_processable, processable_file: true
       subject(:record) { model.has_to_be_processable.attach(image_string_io) and model }
