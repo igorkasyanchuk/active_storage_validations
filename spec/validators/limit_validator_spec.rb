@@ -113,6 +113,38 @@ RSpec.describe ActiveStorageValidations::LimitValidator do
           end
         end
       end
+
+      describe "0" do
+        %w[value proc].each do |value_type|
+          describe value_type do
+            let(:model) { "#{validator_test_class}::CheckMax#{'Proc' if value_type == 'proc'}".constantize.new(params) }
+            let(:attribute) { :"max_zero#{'_proc' if value_type == 'proc'}" }
+
+            context "when provided with no files" do
+              subject(:record) { model }
+
+              it { is_expected_to_be_valid }
+            end
+
+            context "when provided with a file" do
+              subject(:record) { model.public_send(attribute).attach(file_1) and model }
+
+              let(:file_1) { png_file }
+              let(:error_options) do
+                {
+                  min: nil,
+                  max: 0,
+                  count: 1
+                }
+              end
+
+              it { is_expected_not_to_be_valid }
+              it { is_expected_to_include_error_message("limit_max_exceeded", error_options: error_options) }
+              it { is_expected_to_have_error_options(error_options) }
+            end
+          end
+        end
+      end
     end
 
     describe "Combinations" do
@@ -171,6 +203,20 @@ RSpec.describe ActiveStorageValidations::LimitValidator do
           end
         end
       end
+    end
+  end
+
+  describe "attachments marked for destruction" do
+    let(:model) { validator_test_class::CheckMax.new(params) }
+
+    context "when a has_many file that would exceed :max is marked for destruction" do
+      subject(:record) do
+        model.max.attach([ png_file, gif_file ])
+        model.max.attachments.first.mark_for_destruction
+        model
+      end
+
+      it { is_expected_to_be_valid }
     end
   end
 

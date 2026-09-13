@@ -12,4 +12,7 @@
 class Limit::Validator::CheckMaxProc < ApplicationRecord
   has_many_attached :max_proc
   validates :max_proc, limit: { max: ->(record) { 1 } }
+
+  has_many_attached :max_zero_proc
+  validates :max_zero_proc, limit: { max: ->(_record) { 0 } }
 end

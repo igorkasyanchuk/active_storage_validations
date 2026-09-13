@@ -12,4 +12,7 @@
 class Limit::Validator::CheckMax < ApplicationRecord
   has_many_attached :max
   validates :max, limit: { max: 1 }
+
+  has_many_attached :max_zero
+  validates :max_zero, limit: { max: 0 }
 end
