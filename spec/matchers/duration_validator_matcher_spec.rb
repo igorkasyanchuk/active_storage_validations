@@ -23,6 +23,14 @@ RSpec.describe ActiveStorageValidations::Matchers::DurationValidatorMatcher do
     let(:validator_value) { 2.seconds }
 
     it_behaves_like "base comparison validator matcher only match when exact value"
+
+    context "when the bound is 1 second" do
+      subject(:configured_matcher) { matcher.less_than(1.second) }
+
+      let(:model_attribute) { :less_than_one_second }
+
+      it { is_expected_to_match_for(klass) }
+    end
   end
 
   describe "#less_than_or_equal_to" do
