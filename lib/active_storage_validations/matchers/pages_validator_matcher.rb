@@ -37,6 +37,10 @@ module ActiveStorageValidations
         1
       end
 
+      def lowest_comparable_value
+        1
+      end
+
       def mock_value_for(io, pages)
         Matchers.mock_metadata(io, { pages: pages }) do
           yield
