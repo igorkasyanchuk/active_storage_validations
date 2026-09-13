@@ -225,6 +225,8 @@ The `limit` validator has 2 possible options:
 - `min`: defines the minimum allowed number of files
 - `max`: defines the maximum allowed number of files
 
+Attachments marked for destruction are ignored, so they do not count against `:min` / `:max`.
+
 #### Examples
 
 Use it like this:
@@ -451,6 +453,8 @@ The `size` validator has 6 possible options:
 - `between`: defines the allowed file size range (a `Range` with both bounds)
 - `equal_to`: defines the allowed file size
 
+Attachments marked for destruction are ignored, so they do not count against the bound.
+
 #### Examples
 
 Use it like this:
@@ -508,6 +512,8 @@ The `total_size` validator has 6 possible options:
 - `greater_than_or_equal_to`: defines the minimum allowed total file size
 - `between`: defines the allowed total file size range (a `Range` with both bounds)
 - `equal_to`: defines the allowed total file size
+
+Attachments marked for destruction are ignored, so they do not count against the total.
 
 #### Examples
 
