@@ -40,6 +40,7 @@
     - Ship `CHANGES.md` and `docs/upgrade_to_*.md` in the gem package
     - Install Magika CLI in CI from the checksummed `cli/v1.1.0` tarball instead of piping the installer script
     - When `ActiveStorage.variant_processor` is unset, image analyzers now fall back to `:vips` instead of `:mini_magick` (matching the README recommendation and Rails 7.1+). Set `config.active_storage.variant_processor = :mini_magick` to keep ImageMagick
+    - Include `:media_metadata_missing` / `:attachment_missing` in Duration and Pages `ERROR_TYPES`, and `:attachment_missing` in ContentType `ERROR_TYPES`, so matchers that filter on that list recognize those errors
     - Remove the unused dummy `Document` model and its `documents` table (`Project` still has a `:documents` attachment)
 
 - 4.1.1
