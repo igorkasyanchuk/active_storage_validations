@@ -235,6 +235,7 @@ class User < ApplicationRecord
   has_many_attached :certificates
 
   validates :certificates, limit: { min: 1, max: 10 } # restricts the number of files to between 1 and 10
+  validates :certificates, limit: { max: 0 } # freeze uploads (empty is valid, any file is not)
 end
 ```
 

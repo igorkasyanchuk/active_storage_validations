@@ -39,13 +39,12 @@ module ActiveStorageValidations
     private
 
     def files_count_valid?(count, flat_options)
-      if flat_options[:max].present? && flat_options[:min].present?
-        count >= flat_options[:min] && count <= flat_options[:max]
-      elsif flat_options[:max].present?
-        count <= flat_options[:max]
-      elsif flat_options[:min].present?
-        count >= flat_options[:min]
-      end
+      has_min = bound_present?(flat_options, :min)
+      has_max = bound_present?(flat_options, :max)
+      return true unless has_min || has_max
+
+      (!has_min || count >= flat_options[:min]) &&
+        (!has_max || count <= flat_options[:max])
     end
 
     def ensure_at_least_one_validator_option
@@ -88,9 +87,12 @@ module ActiveStorageValidations
     end
 
     def set_error_type(flat_options, count)
-      if flat_options[:min] && flat_options[:max]
+      has_min = bound_present?(flat_options, :min)
+      has_max = bound_present?(flat_options, :max)
+
+      if has_min && has_max
         :limit_out_of_range
-      elsif flat_options[:min] && count < flat_options[:min]
+      elsif has_min && count < flat_options[:min]
         :limit_min_not_reached
       else
         :limit_max_exceeded
