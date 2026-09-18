@@ -26,7 +26,7 @@ group :development, :test do
   # gem "aws-sdk-s3", require: false
 
   # Linters
-  gem "rubocop", "~> 1.90", require: false
+  gem "rubocop", "~> 1.91", require: false
   gem "rubocop-performance", "~> 1.27", require: false
   gem "rubocop-rails-omakase", "~> 1.1", require: false
   gem "rubocop-rspec", "~> 3.0", require: false
