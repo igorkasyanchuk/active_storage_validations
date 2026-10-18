@@ -18,6 +18,10 @@ module ActiveStorageValidations
 
       private
 
+      def context_description
+        "on #{@context.inspect}" if @context
+      end
+
       def is_context_valid?
         return true if !@context && attribute_validators.none? { |validator| validator.options[:on] }
 

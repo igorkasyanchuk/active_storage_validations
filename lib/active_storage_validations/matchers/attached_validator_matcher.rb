@@ -31,18 +31,21 @@ module ActiveStorageValidations
         @attribute_name = attribute_name
       end
 
-      def description
+      def base_description
         "validate that :#{@attribute_name} must be attached"
       end
 
       def failure_message
-        "is expected to validate attachment of :#{@attribute_name}"
+        message = [ "is expected to validate attachment of :#{@attribute_name}" ]
+        build_failure_message(message)
+        message.join("\n")
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject.new : subject
+        initialize_subject(subject)
 
         is_a_valid_active_storage_attribute? &&
+          has_validator? &&
           is_context_valid? &&
           is_except_on_valid? &&
           is_custom_message_valid? &&
@@ -55,13 +58,13 @@ module ActiveStorageValidations
       def is_valid_when_file_attached?
         attach_file unless file_attached?
         validate
-        is_valid?
+        is_valid? || add_failure_message_artefact("a file attached", passed: false)
       end
 
       def is_invalid_when_file_not_attached?
         detach_file if file_attached?
         validate
-        !is_valid?
+        !is_valid? || add_failure_message_artefact("no file attached", passed: true)
       end
 
       def is_custom_message_valid?

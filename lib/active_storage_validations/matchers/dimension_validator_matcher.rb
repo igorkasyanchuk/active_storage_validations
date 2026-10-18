@@ -38,7 +38,7 @@ module ActiveStorageValidations
         @width_min = @width_max = @height_min = @height_max = nil
       end
 
-      def description
+      def base_description
         "validate the image dimensions of :#{@attribute_name}"
       end
 
@@ -89,9 +89,10 @@ module ActiveStorageValidations
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject.new : subject
+        initialize_subject(subject)
 
         is_a_valid_active_storage_attribute? &&
+          has_validator? &&
           is_context_valid? &&
           is_except_on_valid? &&
           is_allowing_blank? &&
@@ -111,14 +112,19 @@ module ActiveStorageValidations
 
       protected
 
-      def build_failure_message(message)
-        return unless @failure_message_artefacts.present?
+      def chain_descriptions
+        [
+          describe_axis("width", @width_min, @width_max),
+          describe_axis("height", @height_min, @height_max)
+        ].compact
+      end
 
-        message << "  but there seem to have issues with the matcher methods you used, since:"
-        @failure_message_artefacts.each do |error_case|
-          message << "  validation failed when provided with a #{error_case[:width]}x#{error_case[:height]}px test image"
+      def describe_axis(axis, min, max)
+        if min && min == max then "#{axis} #{min}px"
+        elsif min && max then "#{axis} between #{min}px and #{max}px"
+        elsif min then "#{axis} at least #{min}px"
+        elsif max then "#{axis} at most #{max}px"
         end
-        message << "  whereas it should have passed"
       end
 
       # Exclusive ranges (`80...100`) reject the end bound. Probe the last
@@ -153,7 +159,7 @@ module ActiveStorageValidations
       end
 
       def width_not_smaller_than_min?
-        @width_min.nil? || @width_min < 1 || !passes_validation_with_dimensions(@width_min - 1, valid_height)
+        @width_min.nil? || @width_min < 1 || rejects_dimensions?(@width_min - 1, valid_height)
       end
 
       # Probe the inclusive bound itself *and* min+1. Checking only min+1 lets
@@ -169,20 +175,20 @@ module ActiveStorageValidations
       def width_smaller_than_max?
         return true if @width_max.nil? || @width_min == @width_max
 
-        passes_validation_with_dimensions(@width_max, valid_height) &&
+        accepts_dimensions?(@width_max, valid_height) &&
           passes_interior_max?(@width_max, valid_height, :width)
       end
 
       def width_not_larger_than_max?
-        @width_max.nil? || !passes_validation_with_dimensions(@width_max + 1, valid_height)
+        @width_max.nil? || rejects_dimensions?(@width_max + 1, valid_height)
       end
 
       def width_equals?
-        @width_min.nil? || @width_min != @width_max || passes_validation_with_dimensions(@width_min, valid_height)
+        @width_min.nil? || @width_min != @width_max || accepts_dimensions?(@width_min, valid_height)
       end
 
       def height_not_smaller_than_min?
-        @height_min.nil? || @height_min < 1 || !passes_validation_with_dimensions(valid_width, @height_min - 1)
+        @height_min.nil? || @height_min < 1 || rejects_dimensions?(valid_width, @height_min - 1)
       end
 
       def height_larger_than_min?
@@ -194,16 +200,16 @@ module ActiveStorageValidations
       def height_smaller_than_max?
         return true if @height_max.nil? || @height_min == @height_max
 
-        passes_validation_with_dimensions(valid_width, @height_max) &&
+        accepts_dimensions?(valid_width, @height_max) &&
           passes_interior_max?(@height_max, valid_width, :height)
       end
 
       def height_not_larger_than_max?
-        @height_max.nil? || !passes_validation_with_dimensions(valid_width, @height_max + 1)
+        @height_max.nil? || rejects_dimensions?(valid_width, @height_max + 1)
       end
 
       def height_equals?
-        @height_min.nil? || @height_min != @height_max || passes_validation_with_dimensions(valid_width, @height_min)
+        @height_min.nil? || @height_min != @height_max || accepts_dimensions?(valid_width, @height_min)
       end
 
       def passes_min_probes?(axis, min, other)
@@ -216,9 +222,9 @@ module ActiveStorageValidations
 
       def passes_axis?(axis, value, other)
         if axis == :width
-          passes_validation_with_dimensions(value, other)
+          accepts_dimensions?(value, other)
         else
-          passes_validation_with_dimensions(other, value)
+          accepts_dimensions?(other, value)
         end
       end
 
@@ -234,23 +240,28 @@ module ActiveStorageValidations
         return true unless interior.positive?
 
         if axis == :width
-          passes_validation_with_dimensions(interior, other)
+          accepts_dimensions?(interior, other)
         else
-          passes_validation_with_dimensions(other, interior)
+          accepts_dimensions?(other, interior)
         end
+      end
+
+      def accepts_dimensions?(width, height)
+        passes_validation_with_dimensions(width, height) ||
+          add_failure_message_artefact("a #{width}x#{height}px test image", passed: false)
+      end
+
+      def rejects_dimensions?(width, height)
+        !passes_validation_with_dimensions(width, height) ||
+          add_failure_message_artefact("a #{width}x#{height}px test image", passed: true)
       end
 
       def passes_validation_with_dimensions(width, height)
         mock_dimensions_for(attach_file, width, height) do
           validate
           detach_file
-          is_valid? || add_failure_message_artefact(width, height)
+          is_valid?
         end
-      end
-
-      def add_failure_message_artefact(width, height)
-        @failure_message_artefacts << { width: width, height: height }
-        false
       end
 
       def is_custom_message_valid?

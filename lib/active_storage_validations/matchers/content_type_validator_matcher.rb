@@ -47,7 +47,7 @@ module ActiveStorageValidations
         @allowed_content_types = @rejected_content_types = []
       end
 
-      def description
+      def base_description
         "validate the content types allowed on :#{@attribute_name}"
       end
 
@@ -86,6 +86,13 @@ module ActiveStorageValidations
       end
 
       protected
+
+      def chain_descriptions
+        [
+          ("allowing #{@allowed_content_types.to_sentence(locale: :en)}" if @allowed_content_types.any?),
+          ("rejecting #{@rejected_content_types.to_sentence(locale: :en)}" if @rejected_content_types.any?)
+        ].compact
+      end
 
       def build_failure_message(message)
         if @allowed_content_types_not_allowed.present?

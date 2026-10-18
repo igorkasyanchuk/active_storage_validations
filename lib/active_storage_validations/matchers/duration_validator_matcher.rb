@@ -17,7 +17,7 @@ module ActiveStorageValidations
         initialize_timeoutable
       end
 
-      def description
+      def base_description
         "validate file duration of :#{@attribute_name}"
       end
 
@@ -28,6 +28,10 @@ module ActiveStorageValidations
       end
 
       private
+
+      def describe_value(value)
+        value.is_a?(ActiveSupport::Duration) ? value.inspect : "#{value} seconds"
+      end
 
       def failure_message_unit
         "seconds"

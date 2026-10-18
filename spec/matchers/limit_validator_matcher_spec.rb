@@ -82,6 +82,14 @@ RSpec.describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
 
   describe "#with_message" do
     it_behaves_like "works with custom message"
+
+    context "without #min nor #max" do
+      subject(:configured_matcher) { matcher.with_message("Custom message") }
+
+      let(:model_attribute) { :with_message }
+
+      it { is_expected_to_raise_error(ArgumentError, "#with_message needs #min or #max") }
+    end
   end
 
   describe "#on" do
