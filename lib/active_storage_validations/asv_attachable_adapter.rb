@@ -95,19 +95,26 @@ module ActiveStorageValidations
       # #to_path is the tmp directory) or an IO with no file behind it (a
       # Rack::Test::UploadedFile built on a StringIO) is copied instead.
       #
-      # The path is expanded so a relative one (`-image.png`, `clip:1.mp4`)
+      # The path is made absolute so a relative one (`-image.png`, `clip:1.mp4`)
       # is never read as a command-line option or an ffmpeg protocol.
+      # File.absolute_path, unlike File.expand_path, leaves a leading `~` alone
+      # (`~$lock.png`, an Office lock file, is not a home directory).
       def with_path_or_copy(tempfile, path, io, max_bytes:, &block)
         if regular_file_of?(path, io)
-          yield File.expand_path(path)
+          yield File.absolute_path(path)
         else
           copy_to_tempfile(tempfile, io, max_bytes: max_bytes, &block)
         end
       end
 
+      # A closed IO (`File.open(path) { |f| record.avatar.attach(io: f, …) }`)
+      # can neither be compared nor copied: its path is all there is left.
       def regular_file_of?(path, io)
-        path.present? && File.file?(path) && File.identical?(io, path)
-      rescue SystemCallError, TypeError
+        return false unless path.present? && File.file?(path)
+        return true if io.respond_to?(:closed?) && io.closed?
+
+        File.identical?(io, path)
+      rescue SystemCallError, TypeError, IOError
         false
       end
 
@@ -203,7 +210,7 @@ module ActiveStorageValidations
     # which fail closed.
     class Path < FileLike
       def with_media_path(_tempfile, max_bytes: nil)
-        yield File.expand_path(@attachable.to_s)
+        yield File.absolute_path(@attachable.to_s)
       end
     end
 
