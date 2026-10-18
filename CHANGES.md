@@ -34,6 +34,9 @@
     - **`content_type`**
       - Marcel 2 / Rails main (8.2+): `spoofing_protection` no longer rejects `audio/aac`, `application/xml` or `audio/mp4` (`file` reports aliases such as `text/xml`, `audio/x-m4a`), and Marcel 1 canonical options such as `audio/x-aac` are still accepted
       - `spoofing_protection` compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the check
+      - A Proc nested in the list (`[:pdf, -> { … }]`) is checked at validation time like a top-level Proc, and an Array it returns is flattened. Unsupported types it returned were silently ignored, and a returned Array was dropped, so every file was rejected
+    - **`dimension`**
+      - A `width:` / `height:` Proc returning a frozen Hash no longer raises `FrozenError` from `valid?`, and a non-frozen one is no longer modified (the flattened `:min` / `:max` were written into it)
     - **`with_audio`**
       - `with: -> { … }` evaluates the Proc. It used to be treated as truthy, so every file failed
     - **`processable_file`**
@@ -41,9 +44,13 @@
     - **All metadata validators** (`dimension`, `aspect_ratio`, `duration`, `pages`, `processable_file`, `with_audio`)
       - Files marked for destruction are skipped, like `size` / `limit` / `total_size` (and `content_type`). A persisted `has_one_attached` file, or an existing `has_many_attached` file when new ones are attached, used to be validated even with `_destroy`, so a form could not remove an out-of-policy file
       - No more `TypeError` when a Hash attachable's `io:` has no filesystem path (streaming wrapper, Zip entry, …): it is copied to a tempfile
+      - The same copy is used, here and for `content_type` `spoofing_protection`, when an attachable's path does not hold its content: a `Rack::Test::UploadedFile` built on a `StringIO` no longer raises `NoMethodError`, a Hash `io:` Tempfile that was unlinked no longer raises `Errno::ENOENT` (or reports `file` as not installed), and an anonymous Tempfile (Ruby 3.4) is no longer analyzed as its tmp directory (`inode/directory`)
+      - Relative `File` / `Pathname` attachables are expanded before reaching the analyzer commands, which read `-image.png` as an option and `clip:1.mp4` as an ffmpeg protocol and rejected valid files
       - Image validators fail closed (`media_metadata_missing`) instead of raising `NoMethodError` when `ActiveStorage.variant_processor` is `:disabled` or unknown
     - **Analyzers**
       - Windows: analyzer commands (`ffprobe`, `pdfinfo`, `file`, `magika`, `identify`) no longer raise since 4.0 (`Process.spawn(pgroup: true)` is Unix-only). On timeout the child is killed directly
+      - An exception raised into the validating thread while an analyzer command runs (`Rack::Timeout`, job shutdown, …) kills the command. It used to keep running, and became a zombie process with `command_timeout = nil`
+      - Blobs and other copied attachables are analyzed from a tempfile named with their extension, like `ActiveStorage::Blob#open`, so ImageMagick identifies formats without a magic number (ICO, TGA) from a blob as it does from an upload
       - `VideoAnalyzer` / `AudioAnalyzer` no longer raise from `valid?` on invalid ffprobe JSON, `N/A` numeric fields, a non-integer rotation (`"90.0"`) or a missing `side_data_list`; analysis fails closed
       - ImageMagick `identify` targets the first frame only (`path[0]`), so large animated GIFs / multi-page TIFFs no longer hit `command_timeout`
       - `PdfAnalyzer` no longer caches `pages: 0` (or 0-pt width / height) when `pdfinfo` omits them, so the analysis can retry and `processable_file` no longer treats `{ pages: 0 }` as a decoded file

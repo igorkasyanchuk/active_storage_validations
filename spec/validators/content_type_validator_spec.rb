@@ -120,6 +120,20 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
 
           expect { model.valid? }.to raise_error(ArgumentError, /'invalid' is not found in Marcel::EXTENSIONS/)
         end
+
+        # validates :nested_invalid, content_type: [ :pdf, ->(record) { :invalid } ]
+        it "checks the content types returned by a Proc nested in the list at validation time" do
+          model.nested_invalid.attach(image_150x150_file)
+
+          expect { model.valid? }.to raise_error(ArgumentError, /'invalid' is not found in Marcel::EXTENSIONS/)
+        end
+
+        # validates :nested_list, content_type: [ :pdf, ->(record) { [ :png, :gif ] } ]
+        it "authorizes the content types of a list returned by a nested Proc" do
+          model.nested_list.attach(image_150x150_file)
+
+          expect(model).to be_valid
+        end
       end
 
       context "when the authorized list is empty" do
