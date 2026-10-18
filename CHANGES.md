@@ -59,6 +59,7 @@
       - Relative `File` / `Pathname` attachables are expanded before reaching the analyzer commands, which read `-image.png` as an option and `clip:1.mp4` as an ffmpeg protocol and rejected valid files
       - The analyzer is picked from the declared type (case and parameters ignored), then, when it is blank or `application/octet-stream`, from the type Rails identified for the blob (magic bytes), then from the filename. A valid file declared as `application/octet-stream`, `IMAGE/PNG` or `""` (common with some clients and direct uploads) used to get no analyzer and was rejected (`file_not_processable`, `media_metadata_missing`)
       - Image validators fail closed (`media_metadata_missing`) instead of raising `NoMethodError` when `ActiveStorage.variant_processor` is `:disabled` or unknown
+      - Rails 8.2+ `config.active_storage.variant_processor = MyTransformer` (a transformer class) no longer fails every image with `media_metadata_missing` / `file_not_processable`: a subclass of Rails' ImageMagick transformer is analyzed with ImageMagick, any other class with libvips
     - **Analyzers**
       - Windows: analyzer commands (`ffprobe`, `pdfinfo`, `file`, `magika`, `identify`) no longer raise since 4.0 (`Process.spawn(pgroup: true)` is Unix-only). On timeout the child is killed directly
       - An exception raised into the validating thread while an analyzer command runs (`Rack::Timeout`, job shutdown, …) kills the command. It used to keep running, and became a zombie process with `command_timeout = nil`
@@ -70,6 +71,11 @@
       - `PdfAnalyzer` no longer caches `pages: 0` (or 0-pt width / height) when `pdfinfo` omits them, so the analysis can retry and `processable_file` no longer treats `{ pages: 0 }` as a decoded file
       - Audio stream tags (ID3 / Vorbis) are no longer cached as `asv_tags`. No validator read them, and a large or non-ASCII tag hash could exceed S3's 2 KB object-metadata limit and fail the upload
       - `blob.remove_active_storage_validations_metadata!` persists the cleared cache on saved blobs (it only changed memory, so `reload` restored stale `asv_*`) and keeps non-`asv_*` custom metadata
+    - **Locales**
+      - `media_metadata_missing` no longer says "is not an image" for every unreadable video, audio or PDF in Ukrainian and Vietnamese
+      - Japanese `aspect_ratio_invalid` said the aspect ratio "cannot be detected" when it is merely not one of the allowed ones; Japanese `limit_out_of_range` and `total_file_size_not_greater_than_or_equal_to` wording fixed
+      - Russian, Ukrainian and Polish ship CLDR `few` / `many` plural forms for every pluralized key (duration units, `limit_*`, `content_type_*`), so apps using rails-i18n pluralization rules get "2 секунды" / "5 секунд" instead of always the `other` form. Russian and Ukrainian `limit_*` `one` messages interpolate `%{count}`, since that form also covers 21, 31, …
+      - Decimal `duration` values follow the locale's decimal separator (`1,5 secondes` with a French `number.format.separator`), like `size` values already did
     - **Matchers**
       - Exclusive ranges are honored by `#between`, `#width_between`, `#height_between` (`80...100` used to be read as inclusive)
       - `validate_dimensions_of` `#width_min` / `#height_min` / `#width_max` / `#height_max` probe the inclusive bound itself, so an exclusive validator no longer satisfies them
@@ -97,6 +103,7 @@
       - Remove the unused dummy `Document` model and its `documents` table
     - Docs & packaging
       - Ship `CHANGES.md` and `docs/upgrade_to_*.md` in the gem package
+      - Declare the `railties` runtime dependency the gem already needed (Railtie / Engine, `Rails.logger`, `Rails.gem_version`)
       - Requiring the gem before Rails (a script, or a `Bundler.require` order that loads it first) no longer raises `NameError: uninitialized constant Rails`: the engine and railtie require `rails/engine` / `rails/railtie` themselves
       - Document that `Matchers.mock_metadata` mocks `Analyzer.new` in the current thread only while a probe runs
 

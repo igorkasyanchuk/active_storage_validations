@@ -14,15 +14,28 @@ RSpec.describe "I18n locale files" do
     end
   end
 
+  # CLDR plural forms beyond English one / other. Every pluralized key carries
+  # them in these locales, so apps using rails-i18n pluralization rules get
+  # "2 секунды" / "5 секунд" instead of falling back to other.
+  let(:extra_plural_forms) do
+    {
+      "pl" => %w[few many],
+      "ru" => %w[few many],
+      "uk" => %w[few many]
+    }
+  end
+
   describe "keys" do
     it "keeps every locale in sync with en.yml" do
       locale_catalog.each do |locale, catalog|
         next if locale == "en"
 
-        expect(catalog.keys).to match_array(english_catalog.keys), <<~MESSAGE
-          #{locale}.yml keys do not match en.yml
-          missing: #{(english_catalog.keys - catalog.keys).join(", ")}
-          extra: #{(catalog.keys - english_catalog.keys).join(", ")}
+        expected_keys = english_catalog.keys + extra_plural_keys(locale)
+
+        expect(catalog.keys).to match_array(expected_keys), <<~MESSAGE
+          #{locale}.yml keys do not match en.yml (plus #{extra_plural_forms.fetch(locale, []).join(" / ").presence || "no"} plural forms)
+          missing: #{(expected_keys - catalog.keys).join(", ")}
+          extra: #{(catalog.keys - expected_keys).join(", ")}
         MESSAGE
       end
     end
@@ -49,7 +62,32 @@ RSpec.describe "I18n locale files" do
     end
   end
 
+  describe "extra plural forms" do
+    it "keep the English placeholders of the other form" do
+      english_placeholders = english_catalog.transform_values { |value| placeholders_in(value) }
+
+      extra_plural_forms.each do |locale, forms|
+        catalog = locale_catalog.fetch(locale)
+
+        extra_plural_keys(locale).each do |key|
+          expected = english_placeholders.fetch(key.sub(/\.(#{forms.join("|")})\z/, ".other"))
+          missing = expected - placeholders_in(catalog[key])
+
+          expect(missing).to be_empty, "#{locale}.yml #{key} is missing interpolation placeholders: #{missing.join(", ")}"
+        end
+      end
+    end
+  end
+
   private
+
+  def extra_plural_keys(locale)
+    forms = extra_plural_forms.fetch(locale, [])
+
+    english_catalog.keys.grep(/\.other\z/).flat_map do |key|
+      forms.map { |form| key.sub(/\.other\z/, ".#{form}") }
+    end
+  end
 
   def flatten_locale(value, prefix = nil)
     case value
