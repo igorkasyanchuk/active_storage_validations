@@ -57,9 +57,10 @@ module ActiveStorageValidations
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject.new : subject
+        initialize_subject(subject)
 
         is_a_valid_active_storage_attribute? &&
+          has_validator? &&
           is_context_valid? &&
           is_except_on_valid? &&
           is_allowing_blank? &&
