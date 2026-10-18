@@ -186,7 +186,7 @@ As stated in the Rails documentation: "Blobs are intended to be immutable in so 
 
 This also covers metadata the analyzer cannot extract from a given file (e.g. a `duration` validation on an image): the gem remembers that the value is unavailable, so the validation keeps failing with `media_metadata_missing` but the file is only analyzed once. Files that yield no metadata at all — missing command-line tool, [timed out](#configuration) command, unreadable file — are not remembered and get analyzed again on the next validation.
 
-The cache is signed: the gem stores an `asv_signature` (an HMAC of the blob checksum and the `asv_*` values, keyed from your app's `secret_key_base`) and ignores `asv_*` values it did not sign for that file's content. A client cannot pre-fill them (e.g. through Rails' direct upload endpoint, which accepts `metadata: { custom: … }`) to skip the analysis. Blobs analyzed by 4.x, or before a `secret_key_base` rotation, are analyzed again once.
+Clients cannot pre-fill this cache to skip the analysis (e.g. through Rails' direct upload endpoint, which accepts `metadata: { custom: … }`): a new blob drops `asv_*` keys when it is initialized, so only the gem writes them.
 
 To force re-analysis of a persisted blob, call `blob.remove_active_storage_validations_metadata!`. That clears `asv_*` keys and, when the blob is already saved, writes the change so `reload` does not restore them. Non-`asv_*` custom metadata is kept.
 
@@ -396,7 +396,7 @@ Spoofing protection compares the declared Active Storage content type to a type 
 
 Neither backend fully parses the file. They do **not** load the whole file into RAM. For already-persisted blobs (e.g. remote storage), the analyzer downloads the blob to a local tempfile before sniffing: `:file` only fetches the first MiB (libmagic is pinned to inspect that much, for uploads too), while `:magika` streams the whole blob in chunks to disk since it also samples the end of the file — this can still be costly for very large files. Local path uploads are analyzed in place.
 
-Detected types are cached on the blob as `asv_content_type` + `asv_content_type_backend`. Switching backend re-analyzes. Blobs analyzed by 4.x carry an unsigned cache and are analyzed again once. New (unsaved) blobs keep `asv_*` in memory until the record is saved; already-persisted blobs write the cache immediately so it survives `reload`.
+Detected types are cached on the blob as `asv_content_type` + `asv_content_type_backend`. Switching backend re-analyzes. Legacy blobs that only have `asv_content_type` (no backend key) are treated as `:file` and keep using the cache — they are not re-analyzed. New (unsaved) blobs keep `asv_*` in memory until the record is saved; already-persisted blobs write the cache immediately so it survives `reload`.
 
 Sniffers will not always return the exact same MIME as Active Storage (AS uses first ~4kb + filename + extension). A detected type is accepted when it is the declared type, or an ancestor or descendant of it in the `Marcel::TYPE_PARENTS` chain (e.g. `text/plain` for a CSV, `application/zip` for a DOCX, `video/x-ms-wmv` vs `video/x-ms-asf`). Two siblings are rejected: a PHP script (`text/x-php`) uploaded as a CSV (`text/csv`) is spoofed, even though both are `text/plain` children. The audio and video flavors of the Ogg and WebM containers count as one type, since sniffers read the container, not the codecs. A more specific detected type is accepted: a PHP script uploaded as `.txt` really is plain text.
 
