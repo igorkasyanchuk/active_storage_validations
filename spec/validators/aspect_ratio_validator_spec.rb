@@ -21,7 +21,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
       context "when the passed option is an invalid" do
         let(:error_message) do
           <<~ERROR_MESSAGE
-            You must pass a valid aspect ratio to the validator
+            You must pass a valid aspect ratio to the validator (got #{invalid_value.inspect})
             It should either be a named aspect ratio (#{ActiveStorageValidations::AspectRatioValidator::NAMED_ASPECT_RATIOS.join(', ')})
             Or an aspect ratio like 'is_16_9' (matching /#{ActiveStorageValidations::AspectRatioValidator::ASPECT_RATIO_REGEX.source}/)
           ERROR_MESSAGE
@@ -30,6 +30,8 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
         describe "named aspect ratio" do
           subject(:model) { validator_test_class::CheckValidityInvalidNamedArgument.new(params) }
 
+          let(:invalid_value) { :television }
+
           it "raises an error at model initialization" do
             expect { model }.to raise_error(ArgumentError, error_message)
           end
@@ -37,6 +39,8 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
 
         describe "is_x_y aspect ratio" do
           subject(:model) { validator_test_class::CheckValidityInvalidIsXyArgument.new(params) }
+
+          let(:invalid_value) { :is_0_1 }
 
           it "raises an error at model initialization" do
             expect { model }.to raise_error(ArgumentError, error_message)
@@ -49,6 +53,27 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
 
         it "does not perform a check, and therefore is valid" do
           expect { model }.not_to raise_error
+        end
+
+        # validates :invalid, aspect_ratio: ->(record) { :invalid }
+        it "checks the aspect ratios returned by the Proc at validation time" do
+          model.invalid.attach(image_150x150_file)
+
+          expect { model.valid? }.to raise_error(ArgumentError, /You must pass a valid aspect ratio to the validator \(got :invalid\)/)
+        end
+
+        # validates :nested_invalid, aspect_ratio: { in: [ :square, ->(record) { "16:9" } ] }
+        it "checks the aspect ratios returned by a Proc nested in the list at validation time" do
+          model.nested_invalid.attach(image_150x150_file)
+
+          expect { model.valid? }.to raise_error(ArgumentError, /You must pass a valid aspect ratio to the validator \(got "16:9"\)/)
+        end
+
+        # validates :nested_list, aspect_ratio: { in: [ :portrait, ->(record) { [ :square, :landscape ] } ] }
+        it "authorizes the aspect ratios of a list returned by a nested Proc" do
+          model.nested_list.attach(image_150x150_file)
+
+          expect(model).to be_valid
         end
       end
 

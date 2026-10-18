@@ -1,12 +1,13 @@
-![](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true)
+[<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
+/>](https://www.railsjazz.com/?utm_source=github&utm_medium=top&utm_campaign=active_storage_validations)
 
 # Active Storage Validations
 
-![CI](https://github.com/igorkasyanchuk/active_storage_validations/actions/workflows/main.yml/badge.svg)
-![RailsJazz](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/my_other.svg?raw=true)
-![https://www.patreon.com/igorkasyanchuk](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/patron.svg?raw=true)
+[![CI](https://github.com/igorkasyanchuk/active_storage_validations/actions/workflows/main.yml/badge.svg)](https://github.com/igorkasyanchuk/active_storage_validations/actions/workflows/main.yml)
+[![RailsJazz](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/my_other.svg?raw=true)](https://www.railsjazz.com)
+[![https://www.patreon.com/igorkasyanchuk](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/patron.svg?raw=true)](https://www.patreon.com/igorkasyanchuk)
 
-!["Buy Me A Coffee"](https://github.com/igorkasyanchuk/get-smart/blob/main/docs/snapshot-bmc-button-small.png?raw=true)
+[!["Buy Me A Coffee"](https://github.com/igorkasyanchuk/get-smart/blob/main/docs/snapshot-bmc-button-small.png?raw=true)](https://buymeacoffee.com/igorkasyanchuk)
 
 Active Storage Validations is a gem that allows you to add validations for Active Storage attributes.
 
@@ -72,7 +73,7 @@ gem 'mini_magick', '>= 4.9.5'
 
 Plus, you have to be sure to have the corresponding command-line tool installed on your system (`libvips` for `ruby-vips`, or ImageMagick for `mini_magick` — both locally and in CI / production).
 
-We recommend **libvips** (`ruby-vips` + `config.active_storage.variant_processor = :vips`) for these validators. Rails already defaults Active Storage variants to libvips ([`ActiveStorage::Variant`](https://api.rubyonrails.org/classes/ActiveStorage/Variant.html)), and our [image processor benchmarks](benchmark/BASELINE.md#image-processors--vips-vs-mini_magick) show cold metadata analysis is about **8× faster** than MiniMagick/ImageMagick on the same machine and fixtures. Warm validations (cached `asv_`* metadata) are similar for both. When `ActiveStorage.variant_processor` is unset, the gem falls back to `:vips` as well (`config.active_storage.variant_processor = :mini_magick` to keep ImageMagick). `config.active_storage.variant_processor = :disabled` (Rails 7.2+) leaves no image analyzer: `dimension` / `aspect_ratio` / `processable_file` fail closed with `media_metadata_missing` / `file_not_processable` rather than raising.
+We recommend **libvips** (`ruby-vips` + `config.active_storage.variant_processor = :vips`) for these validators. Rails already defaults Active Storage variants to libvips ([`ActiveStorage::Variant`](https://api.rubyonrails.org/classes/ActiveStorage/Variant.html)), and our [image processor benchmarks](benchmark/BASELINE.md#image-processors--vips-vs-mini_magick) show cold metadata analysis is about **8× faster** than MiniMagick/ImageMagick on the same machine and fixtures. Warm validations (cached `asv_*` metadata) are similar for both. When `ActiveStorage.variant_processor` is unset, the gem falls back to `:vips` as well (`config.active_storage.variant_processor = :mini_magick` to keep ImageMagick). `config.active_storage.variant_processor = :disabled` (Rails 7.2+) leaves no image analyzer: `dimension` / `aspect_ratio` / `processable_file` fail closed with `media_metadata_missing` / `file_not_processable` rather than raising.
 
 ### Using video and audio metadata validators
 
@@ -139,8 +140,7 @@ validates :video, duration: { less_than: 5.minutes, timeout: 30.seconds }
 ```
 
 Notes:
-
-- Setting `command_timeout` (or per-validator `timeout:`) to `nil` disables the deadline
+- Setting `command_timeout` (or per-validator `timeout:`) to `nil` disables the deadline. Any other value must be a positive number of seconds (`0`, a negative number or a proc raises `ArgumentError`)
 - ImageMagick analysis runs `identify` through the same killable command runner (MiniMagick is only used to build the argv)
 - For libvips, a timeout may not immediately free the Ruby thread stuck in FFI/C; the validation still fails closed and emits `timeout.active_storage_validations`
 - On Windows there are no POSIX process groups: a timed out command is killed directly (its own child processes, if any, are not), without the TERM grace period
@@ -148,7 +148,6 @@ Notes:
 ## Validators
 
 **List of validators:**
-
 - [Attached](#attached): validates if file(s) attached
 - [Limit](#limit): validates number of uploaded files
 - [Content type](#content-type): validates file content type
@@ -160,23 +159,16 @@ Notes:
 - [Aspect ratio](#aspect-ratio): validates image / video aspect ratio
 - [Processable file](#processable-file): validates if a file can be processed
 - [Pages](#pages): validates pdf number of pages
+<br>
+<br>
 
-  
-  
-
-
-**Attachments marked for destruction**  
-
+**Attachments marked for destruction**<br>
 Files whose attachment is marked for destruction (e.g. nested attributes with `_destroy`) are not validated: they will be gone once the record is saved. `attached` still fails when every attachment is marked for destruction.
-  
+<br>
+<br>
 
-  
-
-
-**Proc usage**  
-
+**Proc usage**<br>
 Every validator can use procs instead of values in all the validator examples:
-
 ```ruby
 class User < ApplicationRecord
   has_many_attached :files
@@ -185,10 +177,9 @@ class User < ApplicationRecord
 end
 ```
 
-Static options are checked when the model class loads; a proc's result is only known at validation time, so an unsupported value returned by a `content_type` proc (e.g. `"image/jpg"`) raises the same `ArgumentError` from `valid?` instead of silently rejecting every file.
+Static options are checked when the model class loads; a proc's result is only known at validation time, so an unsupported value returned by a proc (`"image/jpg"` for `content_type`, `:sqaure` for `aspect_ratio`, `"2MB"` or `-1` for a comparison bound, `nil` for `with_audio`) raises the same `ArgumentError` from `valid?` instead of silently rejecting every file. A comparison (`size`, `total_size`, `duration`, `pages`) or `limit` proc returning `nil` sets no bound. `timeout:` does not accept procs.
 
-**Performance optimization**  
-
+**Performance optimization**<br>
 Some validators rely on an expensive operation (metadata analysis and content type analysis). To mitigate the performance cost, the gem leverages the `ActiveStorage::Blob.metadata` method to store retrieved metadata. Therefore, once the file has been analyzed by our gem, the expensive analysis operation will not be triggered again for new validations.
 
 As stated in the Rails documentation: "Blobs are intended to be immutable in so far as their reference to a specific file goes". We based our performance optimization on the same assumption, so if you do not follow it, the gem will not work as expected.
@@ -210,7 +201,6 @@ The `attached` validator has no options.
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
@@ -239,7 +229,6 @@ Validates the number of uploaded files.
 #### Options
 
 The `limit` validator has 2 possible options:
-
 - `min`: defines the minimum allowed number of files
 - `max`: defines the maximum allowed number of files
 
@@ -248,7 +237,6 @@ Attachments marked for destruction are ignored, so they do not count against `:m
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
   has_many_attached :certificates
@@ -280,7 +268,6 @@ en:
 ```
 
 The `limit` validator error messages expose 3 values that you can use:
-
 - `min` containing the minimum allowed number of files (e.g. `1`)
 - `max` containing the maximum allowed number of files (e.g. `10`)
 - `count` containing the current number of files (e.g. `5`)
@@ -294,14 +281,12 @@ Validates if the attachment has an allowed content type.
 #### Options
 
 The `content_type` validator has several possible options:
-
 - `with`: defines the allowed content type (string, symbol or regex)
-- `in`: defines the allowed content types (array of strings or symbols)
+- `in`: defines the allowed content types (array of strings, symbols or regexes)
 - `spoofing_protection`: enables content type spoofing protection (`false` by default). Allowed values: `true` / `:file` (UNIX `file` CLI), `:magika` (Google Magika CLI)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) when spoofing protection runs `file` or `magika`
 
 As mentioned above, this validator can define content types in several ways:
-
 - String: `image/png` or `png`
 - Symbol: `:png`
 - Regex: `/\Avideo\/.*\z/`
@@ -309,7 +294,6 @@ As mentioned above, this validator can define content types in several ways:
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
@@ -363,7 +347,6 @@ ActiveStorageValidations.configure { |config| config.infer_file_field_accept = f
 ```
 
 Notes:
-
 - Only broad MIME-type regexes of the form `/\Aimage\/.*\z/` (or `video` / `audio` / etc.) are inferred, as `image/*`
 - Other regexes (e.g. `/\Aimage\/(png|gif)\z/`) are skipped, since they cannot be reliably represented in `accept`
 - Proc / dynamic `content_type` options are skipped: they are not called while the form renders, because their result can depend on record state that is only set on submit, and a raising proc would break the whole view for what is merely a frontend hint. Backend validation is unchanged; pass a custom `accept:` on those fields if you want the picker filtered
@@ -391,13 +374,18 @@ validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: :magi
 
 Override binary paths with `ActiveStorage.paths[:file]` / `ActiveStorage.paths[:magika]` if needed.
 
+<details>
+<summary>
 What is content type spoofing?
+</summary>
 
 File content type spoofing happens when an ill-intentioned user uploads a file which hides its true content type by faking its extension and its declared content type value. For example, a user may try to upload a `.exe` file (application/x-msdownload content type) dissimulated as a `.jpg` file (image/jpeg content type).
+</details>
 
-
-
+<details>
+<summary>
 How do we prevent it?
+</summary>
 
 Spoofing protection compares the declared Active Storage content type to a type detected by a sniffer CLI, then uses `Marcel` parent types so near-matches still pass:
 
@@ -415,17 +403,20 @@ For stronger protection on images / video / audio / PDF, combine sniffing with p
 ```ruby
 validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true }, processable_file: true
 ```
+</details>
 
-
-
+<details>
+<summary>
 Edge cases
+</summary>
 
 The difficulty to accurately predict a mime type may generate false positives, if so there are several solutions available:
-
 - Try the other sniffer backend (`:file` vs `:magika`)
 - For media/PDF that sniffers misidentify but that open correctly, add `processable_file: true`
 - If the ActiveStorage blob content type is closely related to the detected content type, enhance `Marcel::TYPE_PARENTS` mapping using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `config/initializers/mime_types.rb` file. (Please drop an issue so we can add it to the gem for everyone!)
 - If needed, disable spoofing protection in the validator, and please drop us an issue so we can fix it for everyone!
+</details>
+
 
 #### Error messages (I18n)
 
@@ -447,7 +438,6 @@ en:
 `content_type_analysis_failed` is added when `spoofing_protection` is enabled but the sniffer produced no content type at all (`file` / `magika` command [timed out](#configuration), file the backend cannot read, invalid CLI output): the validation fails closed without claiming the file is spoofed. `detected_content_type` / `detected_human_content_type` are not available for this error.
 
 The `content_type` validator error messages expose 7 values that you can use:
-
 - `content_type` containing the content type of the sent file (e.g. `image/png`)
 - `human_content_type` containing a more user-friendly version of the sent file content type (e.g. 'TXT' for 'text/plain')
 - `detected_content_type` containing the detected content type of the sent file using `spoofing_protection` option (e.g. `image/png`)
@@ -465,12 +455,11 @@ Validates each attached file size.
 #### Options
 
 The `size` validator has 6 possible options:
-
 - `less_than`: defines the strict maximum allowed file size
 - `less_than_or_equal_to`: defines the maximum allowed file size
 - `greater_than`: defines the strict minimum allowed file size
 - `greater_than_or_equal_to`: defines the minimum allowed file size
-- `between`: defines the allowed file size range (a `Range` with both bounds)
+- `between`: defines the allowed file size range (a `Range` with both bounds, its begin not greater than its end)
 - `equal_to`: defines the allowed file size
 
 Attachments marked for destruction are ignored, so they do not count against the bound.
@@ -478,7 +467,6 @@ Attachments marked for destruction are ignored, so they do not count against the
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
@@ -511,8 +499,7 @@ en:
       file_size_not_equal_to: "file size must be equal to %{exact} (current size is %{file_size})"
 ```
 
-The `size` validator error messages expose 4 values that you can use:
-
+The `size` validator error messages expose 5 values that you can use:
 - `file_size` containing the current file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed file size (e.g. `1KB`)
 - `exact` containing the allowed file size (e.g. `1MB`)
@@ -528,12 +515,11 @@ Validates the total file size for several files.
 #### Options
 
 The `total_size` validator has 6 possible options:
-
 - `less_than`: defines the strict maximum allowed total file size
 - `less_than_or_equal_to`: defines the maximum allowed total file size
 - `greater_than`: defines the strict minimum allowed total file size
 - `greater_than_or_equal_to`: defines the minimum allowed total file size
-- `between`: defines the allowed total file size range (a `Range` with both bounds)
+- `between`: defines the allowed total file size range (a `Range` with both bounds, its begin not greater than its end)
 - `equal_to`: defines the allowed total file size
 
 Attachments marked for destruction are ignored, so they do not count against the total.
@@ -541,7 +527,6 @@ Attachments marked for destruction are ignored, so they do not count against the
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
   has_many_attached :certificates
@@ -570,7 +555,6 @@ en:
 ```
 
 The `total_size` validator error messages expose 4 values that you can use:
-
 - `total_file_size` containing the current total file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed total file size (e.g. `1KB`)
 - `exact` containing the allowed total file size (e.g. `1MB`)
@@ -587,7 +571,6 @@ It can also be used for pdf files, but it will only analyze the pdf first page, 
 #### Options
 
 The `dimension` validator has several possible options:
-
 - `width`: defines the allowed width (integer)
   - `min`: defines the minimum allowed width (integer)
   - `max`: defines the maximum allowed width (integer)
@@ -600,14 +583,13 @@ The `dimension` validator has several possible options:
 - `max`: defines the maximum allowed width and height (range)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
-Static options are checked at boot and raise `ArgumentError` when malformed: a `width` / `height` Hash needs `:min`, `:max` or `:in` (and no other key, nor `:in` together with `:min` / `:max`), `:min` / `:max` values are Integers or Procs, a bare Range must be wrapped in `{ in: }`, and the top-level `min` / `max` cannot be combined with `width` / `height`.
-
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
+Static options are checked at boot and raise `ArgumentError` when malformed: a `width` / `height` Hash needs `:min`, `:max` or `:in` (and no other key, nor `:in` together with `:min` / `:max`), `:min` / `:max` values are Integers or Procs, a bare Range must be wrapped in `{ in: }`, and the top-level `min` / `max` cannot be combined with `width` / `height`.
+
   has_one_attached :avatar
 
   validates :avatar, dimension: { width: 100 } # restricts the width to 100 pixels
@@ -641,11 +623,10 @@ en:
 ```
 
 The `dimension` validator error messages expose 6 values that you can use:
-
 - `min` containing the minimum width or height allowed
 - `max` containing the maximum width or height allowed (for exclusive `in:` ranges, the last included value: `400...600` reports `599`)
 - `width` containing the minimum or maximum width allowed
-- `height` containing the minimum or maximum width allowed
+- `height` containing the minimum or maximum height allowed
 - `length` containing the exact width or height allowed
 - `filename` containing the current filename in error
 
@@ -659,12 +640,11 @@ Validates the duration of the attached audio / video files.
 #### Options
 
 The `duration` validator has several possible options:
-
 - `less_than`: defines the strict maximum allowed file duration
 - `less_than_or_equal_to`: defines the maximum allowed file duration
 - `greater_than`: defines the strict minimum allowed file duration
 - `greater_than_or_equal_to`: defines the minimum allowed file duration
-- `between`: defines the allowed file duration range (a `Range` with both bounds)
+- `between`: defines the allowed file duration range (a `Range` with both bounds, its begin not greater than its end)
 - `equal_to`: defines the allowed duration
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
@@ -673,7 +653,6 @@ Duration is compared at sub-second precision (the analyzer no longer rounds to 0
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
   has_one_attached :intro_song
@@ -702,8 +681,7 @@ en:
       duration_not_equal_to: "duration must be equal to %{exact} (current duration is %{duration})"
 ```
 
-The `duration` validator error messages expose 4 values that you can use:
-
+The `duration` validator error messages expose 5 values that you can use:
 - `duration` containing the current duration size (e.g. `2 minutes`)
 - `min` containing the minimum allowed duration size (e.g. `1 second`)
 - `exact` containing the allowed duration (e.g. `3 seconds`)
@@ -735,14 +713,12 @@ Validates whether attached video / audio files contain an audio track.
 #### Options
 
 The `with_audio` validator supports:
-
-- `with`: `true` requires an audio track and `false` rejects one
+- `with`: `true` requires an audio track and `false` rejects one (a proc must return `true` or `false`)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
   has_one_attached :video
@@ -785,13 +761,11 @@ It can also be used for pdf files, but it will only analyze the pdf first page.
 #### Options
 
 The `aspect_ratio` validator has several options:
-
 - `with`: defines the allowed aspect ratio (e.g. `:is_16_9`)
 - `in`: defines the allowed aspect ratios (e.g. `%i[square landscape]`)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 This validator can define aspect ratios in several ways:
-
 - Symbols:
   - prebuilt aspect ratios: `:square`, `:portrait`, `:landscape`
   - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc. Custom ratios allow a 1-pixel difference on either axis, so sizes such as 1366×768 match `:is_16_9`.
@@ -799,7 +773,6 @@ This validator can define aspect ratios in several ways:
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
@@ -827,7 +800,6 @@ en:
 ```
 
 The `aspect_ratio` validator error messages expose 4 values that you can use:
-
 - `authorized_aspect_ratios` containing the authorized aspect ratios
 - `width` containing the current width of the image/video
 - `height` containing the current height of the image/video
@@ -843,13 +815,11 @@ Validates if the attached files can be processed by MiniMagick or Vips (image), 
 #### Options
 
 The `processable_file` validator supports:
-
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
@@ -875,7 +845,6 @@ en:
 ```
 
 The `processable_file` validator error messages expose 1 value that you can use:
-
 - `filename` containing the current filename in error
 
 ---
@@ -888,19 +857,17 @@ Validates each attached pdf file number of pages.
 #### Options
 
 The `pages` validator has several possible options:
-
 - `less_than`: defines the strict maximum allowed number of pages
 - `less_than_or_equal_to`: defines the maximum allowed number of pages
 - `greater_than`: defines the strict minimum allowed number of pages
 - `greater_than_or_equal_to`: defines the minimum allowed number of pages
-- `between`: defines the allowed number of pages range (a `Range` with both bounds)
+- `between`: defines the allowed number of pages range (a `Range` with both bounds, its begin not greater than its end)
 - `equal_to`: defines the allowed number of pages
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 #### Examples
 
 Use it like this:
-
 ```ruby
 class User < ApplicationRecord
   has_one_attached :contract
@@ -929,7 +896,6 @@ en:
 ```
 
 The `pages` validator error messages expose 5 values that you can use:
-
 - `pages` containing the current file number of pages (e.g. `7`)
 - `min` containing the minimum allowed number of pages (e.g. `1`)
 - `exact` containing the allowed number of pages (e.g. `3`)
@@ -962,7 +928,6 @@ The gem also provides RSpec-compatible and Minitest-compatible matchers for test
 ### RSpec
 
 #### Setup
-
 In `spec_helper.rb`, you'll need to require the matchers:
 
 ```ruby
@@ -978,7 +943,6 @@ end
 ```
 
 #### Matchers
-
 Matcher methods available:
 
 ```ruby
@@ -1060,7 +1024,6 @@ describe User do
   it { is_expected.to validate_pages_of(:contract).equal_to(5) }
 end
 ```
-
 (Note that matcher methods are chainable)
 
 A matcher fails when the attribute has no validator of its type, so `is_expected.not_to validate_size_of(:avatar)` checks that `:avatar` has no `size` validator. Matchers probe a copy of the subject: they never attach files to, save, or detach files from the record you pass.
@@ -1095,7 +1058,6 @@ end
 ### Minitest
 
 #### Setup
-
 To use the matchers, make sure you have the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem up and running. No extra mock library is required (`minitest-mock` is not needed on Minitest 6).
 
 You need to require the matchers:
@@ -1113,8 +1075,8 @@ end
 ```
 
 #### Matchers
-
 Then you can use the matchers with the syntax specified in the RSpec section, just use `should validate_method` instead of `it { is_expected_to validate_method }` as specified in the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem.
+
 
 ## Contributing
 
@@ -1151,7 +1113,6 @@ BUNDLE_GEMFILE=gemfiles/rails_next.gemfile bundle exec rake spec
 ```
 
 Tips:
-
 - To focus examples, tag them with `:focus` (or use `fit` / `fdescribe`); RSpec is configured with `filter_run_when_matching :focus`
 - To run a specific file: `bundle exec rspec spec/validators/size_validator_spec.rb`
 - Image processor: CI runs both via `IMAGE_PROCESSOR=vips` / `IMAGE_PROCESSOR=mini_magick`. Locally, unset means validators use libvips (ASV default) and both analyzer unit specs run; setting the env selects that processor for validators and excludes the other processor’s tagged examples (so they do not show as pending)
@@ -1159,6 +1120,7 @@ Tips:
 ### Benchmarks
 
 Optional wall-clock / ips suite for metadata validators (cold analysis vs cached `asv_*` hits) lives under [`benchmark/`](benchmark/). See [`benchmark/README.md`](benchmark/README.md) for setup, how to run, and how to refresh [`benchmark/BASELINE.md`](benchmark/BASELINE.md). CI runs the suite informationally (no fail-on-regression).
+
 
 ## Additional information
 
@@ -1172,9 +1134,9 @@ https://github.com/igorkasyanchuk/active_storage_validations/graphs/contributors
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
 
-  
+<br>
 
+[<img src="https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true"
+/>](https://www.railsjazz.com/?utm_source=github&utm_medium=bottom&utm_campaign=active_storage_validations)
 
-![](https://github.com/igorkasyanchuk/rails_time_travel/blob/main/docs/more_gems.png?raw=true)
-
-!["Buy Me A Coffee"](https://github.com/igorkasyanchuk/get-smart/blob/main/docs/snapshot-bmc-button.png?raw=true)
+[!["Buy Me A Coffee"](https://github.com/igorkasyanchuk/get-smart/blob/main/docs/snapshot-bmc-button.png?raw=true)](https://buymeacoffee.com/igorkasyanchuk)

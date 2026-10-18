@@ -48,7 +48,13 @@ module ActiveStorageValidations
     # Active Model reuses one validator instance across records and threads, so
     # per-validation state cannot live in an instance variable.
     def authorized_aspect_ratios(record)
-      authorized_aspect_ratios_from_options(set_flat_options(record)).compact
+      # A Proc nested in the list may return an Array of its own.
+      aspect_ratios = authorized_aspect_ratios_from_options(set_flat_options(record)).flatten.compact
+
+      # Procs escape check_validity!; an unknown value they return (`:sqaure`,
+      # "16:9") would otherwise reject every file with "must be 0:0".
+      ensure_aspect_ratios_validity(aspect_ratios) if proc_aspect_ratios?
+      aspect_ratios
     end
 
     def is_valid?(record, attribute, attachable, metadata)
@@ -134,22 +140,33 @@ module ActiveStorageValidations
       raise ArgumentError, "You must pass either :with or :in to the validator"
     end
 
+    # Procs (top-level or nested in the list) are checked when they are
+    # evaluated, see #authorized_aspect_ratios.
     def ensure_aspect_ratio_validity
-      return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
-
       ratios = authorized_aspect_ratios_from_options(options).compact
       raise ArgumentError, "You must pass at least one aspect ratio to the validator" if ratios.empty?
 
-      ratios.each do |aspect_ratio|
-        unless NAMED_ASPECT_RATIOS.include?(aspect_ratio) || aspect_ratio =~ ASPECT_RATIO_REGEX
-          raise ArgumentError, invalid_aspect_ratio_message
-        end
+      ensure_aspect_ratios_validity(ratios.grep_v(Proc))
+    end
+
+    def ensure_aspect_ratios_validity(aspect_ratios)
+      aspect_ratios.each do |aspect_ratio|
+        raise ArgumentError, invalid_aspect_ratio_message(aspect_ratio) unless valid_aspect_ratio?(aspect_ratio)
       end
     end
 
-    def invalid_aspect_ratio_message
+    def valid_aspect_ratio?(aspect_ratio)
+      NAMED_ASPECT_RATIOS.include?(aspect_ratio) ||
+        ((aspect_ratio.is_a?(Symbol) || aspect_ratio.is_a?(String)) && aspect_ratio.match?(ASPECT_RATIO_REGEX))
+    end
+
+    def proc_aspect_ratios?
+      authorized_aspect_ratios_from_options(options).any?(Proc)
+    end
+
+    def invalid_aspect_ratio_message(aspect_ratio)
       <<~ERROR_MESSAGE
-        You must pass a valid aspect ratio to the validator
+        You must pass a valid aspect ratio to the validator (got #{aspect_ratio.inspect})
         It should either be a named aspect ratio (#{NAMED_ASPECT_RATIOS.join(', ')})
         Or an aspect ratio like 'is_16_9' (matching /#{ASPECT_RATIO_REGEX.source}/)
       ERROR_MESSAGE
