@@ -37,6 +37,31 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
       end
     end
 
+    # The analyzer follows the type Rails identified for the blob, not the
+    # declared one.
+    [ "application/octet-stream", "IMAGE/PNG", "" ].each do |declared_type|
+      context "when a processable image is declared as #{declared_type.inspect}" do
+        subject(:record) { model.has_to_be_processable.attach(image) and model }
+
+        let(:image) { fixture_file("image_150x150.png", filename: "image_150x150.png", content_type: declared_type) }
+
+        it { is_expected_to_be_valid }
+      end
+    end
+
+    context "when a processable image is attached as application/octet-stream without identification" do
+      subject(:record) { model.has_to_be_processable.attach(image) and model }
+
+      let(:image) do
+        fixture_file("image_150x150.png", filename: "image_150x150.png", content_type: "application/octet-stream").merge(identify: false)
+      end
+
+      it "falls back to the filename" do
+        expect(record.has_to_be_processable.blob.content_type).to eq("application/octet-stream")
+        is_expected_to_be_valid
+      end
+    end
+
     context "when provided with a file that is not processable" do
       # validates :has_to_be_processable, processable_file: true
       subject(:record) { model.has_to_be_processable.attach(tar_file_with_image_content_type) and model }
