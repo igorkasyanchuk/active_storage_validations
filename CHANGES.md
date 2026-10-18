@@ -10,10 +10,12 @@
     - **Malformed `dimension` options raise at boot**: a `width` / `height` Hash with no known key (`{ minimum: 1000 }`, `{}`) used to validate nothing and accept every file; a bare Range (`width: 100..200`) rejected every file as an exact width; `{ min: 100..200 }` inside `width` / `height`, `nil` values, `:in` combined with `:min` / `:max`, and top-level `min:` / `max:` combined with `width` / `height` (which silently dropped a bound, or raised `NoMethodError`) now raise `ArgumentError`. Proc results are not checked at boot. [Details](docs/upgrade_to_5.md#malformed-dimension-options-raise-at-boot)
     - **Inexact `aspect_ratio` values raise at boot** (`:is_16_9_extra`, `:is_16_9square`). `ASPECT_RATIO_REGEX` is now anchored; those values used to load and be validated as `16:9`. [Details](docs/upgrade_to_5.md#aspect_ratio-options-are-validated-strictly)
     - **`with_audio` fails closed on unanalyzable files**: when `ffprobe` is missing, times out, or cannot read the file, both `with: true` and `with: false` now add `media_metadata_missing`. `with: false` used to accept those files, `with: true` reported `audio_missing`. Images and PDFs still count as having no audio track. [Details](docs/upgrade_to_5.md#with_audio--with-false--fails-closed)
+    - **Matchers fail on an attribute without a validator of their type**: `validate_size_of(:avatar)` (and the `content_type`, `dimension`, `limit`, `aspect_ratio`, … matchers) used to pass when `:avatar` had no such validator and the chain probed nothing, so `is_expected.not_to validate_size_of(:avatar)` always failed. Matchers also probe a copy of the subject: they no longer save probe attachments on a persisted record, nor drop the record's own pending attachments. Only specs relying on those side effects are affected. [Details](docs/upgrade_to_5.md#matchers-require-a-validator-and-probe-a-copy)
     - **New `content_type_analysis_failed` error** (all bundled locales, same values as `content_type_invalid`) when the spoofing analysis itself produced nothing (`file` / `magika` timed out, unsupported file, invalid CLI output). It used to be reported as `content_type_spoofed`. The file is still rejected; only code matching `:content_type_spoofed` or overriding that locale key is affected. [Details](docs/upgrade_to_5.md#content_type_analysis_failed-error)
   - **ADDED**
     - Localize `duration` error values (`%{duration}`, `%{min}`, `%{max}`, `%{exact}`) through new `active_storage_validations.duration` I18n keys in every bundled locale (`1 minute et 30 secondes` in French) instead of the English-only `ActiveSupport::Duration#inspect`. Locales the gem does not ship fall back to English. [Details](docs/upgrade_to_5.md#localized-duration-values)
   - **CHANGED**
+    - Matcher `#description` lists the chained qualifiers (`validate file size of :avatar, less than 2 MB, on :update`), so RSpec one-liners and shoulda-context test names tell two chains on one attribute apart. Failure messages list only the probes with an unexpected outcome, including probes the validator accepted whereas it should have rejected them; `validate_aspect_ratio_of`, `validate_attached_of`, `validate_processable_file_of` and `validate_with_audio_of` failure messages now say which probe failed
     - When `ActiveStorage.variant_processor` is unset, image analyzers fall back to `:vips` instead of `:mini_magick` (README recommendation, Rails 7.1+ default). A booted Rails app still uses the processor Rails set. Set `config.active_storage.variant_processor = :mini_magick` to keep ImageMagick
     - `content_type` Proc results are checked at validation time with the same `ArgumentError` static options get at boot. A Proc returning an unsupported type (e.g. `"image/jpg"`) used to reject every file with a blank message ("authorized content type is )"). Types Marcel knows no extension for are now rendered as-is in `*_human_content_type(s)`
     - `content_type` `spoofing_protection` with the `:file` backend downloads only the first MiB of persisted blobs (libmagic never reads more). `:magika` still downloads the whole blob
@@ -55,6 +57,12 @@
       - `validate_with_audio_of(...).without_audio.with_message(...)` probes a file with an audio track
       - `duration`, `pages` and `content_type` `ERROR_TYPES` include `:media_metadata_missing` / `:attachment_missing`, so matchers recognize those errors
       - `validate_processable_file_of` messages say "processable file" instead of "processable image"
+      - `#except_on(:create)` matches: probes run in a context the validator does not skip (they used to validate in `:create`, so the validator never ran and every probe passed)
+      - `validate_content_type_of(...).with_message(...)` detaches its probe file, which used to stay attached and corrupt the next `#allowing` / `#rejecting` probes on a `has_many_attached`
+      - `#with_message` matches when several validators on the attribute share the message
+      - `validate_limits_of(...).with_message(...)` without `#min` / `#max` raises an explicit `ArgumentError` instead of `NoMethodError`
+      - A matcher instance reused on another subject no longer returns the previous subject's `content_type` / `aspect_ratio` result nor repeats failure message lines
+      - `Matchers.mock_metadata` keeps its `Analyzer.new` mock per thread: concurrent probes (`parallelize(with: :threads)`) could restore each other's stub out of order and leave every analyzer mocked for good
   - **MISC**
     - Internals (only relevant if you monkey-patch the gem, see [upgrade guide](docs/upgrade_to_5.md#internal-api-removals))
       - Remove dead attachable helpers (`attachable_content_type_rails_like`, `attachable_io`, `rewind_attachable_io`, `supports_pathname_attachment?`) and the adapter `read` / `rewind`: `ASVAttachableAdapter` handlers only expose `content_type`, `filename` and `with_media_path`
@@ -68,7 +76,7 @@
       - Remove the unused dummy `Document` model and its `documents` table
     - Docs & packaging
       - Ship `CHANGES.md` and `docs/upgrade_to_*.md` in the gem package
-      - Document that `Matchers.mock_metadata` stubs `Analyzer.new` process-wide while a probe runs
+      - Document that `Matchers.mock_metadata` mocks `Analyzer.new` in the current thread only while a probe runs
 
 - 4.1.1
   - **FIXED**

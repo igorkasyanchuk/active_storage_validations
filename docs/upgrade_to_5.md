@@ -22,6 +22,7 @@ Go through this table. If no row matches, you are done.
 | Uses `with_audio: { with: false }` where `ffprobe` may be missing | Install `ffmpeg` wherever validations run | [`with_audio` fails closed](#with_audio--with-false--fails-closed) |
 | Matches on `:content_type_spoofed`, or overrides that locale key | Also handle `:content_type_analysis_failed` | [`content_type_analysis_failed`](#content_type_analysis_failed-error) |
 | Has specs asserting the English wording of `duration` errors in a non-English locale | Update the expected strings | [Localized duration values](#localized-duration-values) |
+| Has matcher specs on an attribute without that validator, relying on a matcher's side effects on the subject, or asserting a matcher description / failure message | Fix the spec | [Matchers](#matchers-require-a-validator-and-probe-a-copy) |
 
 Optional, ops only: three analyzer fixes change cached metadata, so blobs analyzed under 4.x can be re-analyzed. See [Already-analyzed blobs](#already-analyzed-blobs-optional).
 
@@ -189,6 +190,22 @@ en:
         one: "could not be verified (authorized content type is %{authorized_human_content_types})"
         other: "could not be verified (authorized content types are %{authorized_human_content_types})"
 ```
+
+### Matchers require a validator and probe a copy
+
+**Who is affected?** Only test suites using the gem matchers in one of the ways below. Validation results in your app do not change.
+
+**What changed.**
+
+- A matcher fails when the attribute has no validator of its type. `validate_size_of(:avatar)`, `validate_content_type_of(:avatar).allowing(...)`, `validate_dimensions_of(:avatar)`, `validate_limits_of(:avatar)`, `validate_aspect_ratio_of(:avatar).allowing(...)` (and other chains whose probes all pass without a validator) used to pass on an attribute with no such validator, so the negated form always failed.
+- Matchers probe a copy of the subject (`subject.dup`, a class still gets `.new`). On a persisted record, a passing probe used to save its attachment for real, and the probes dropped the record's own pending attachments (`validate_attached_of` deleted a persisted attachment). The copy keeps the original validation context: `:update` for a persisted record, as before.
+- `#description` lists the chained qualifiers, and failure messages list only the probes with an unexpected outcome (the negated message of a matching matcher no longer lists the probes that were expected to fail).
+
+**How to fix.**
+
+- `is_expected.to validate_size_of(:avatar)` that now fails: the attribute has no `size` validator, add it or remove the expectation
+- Specs reading the subject after a matcher ran (an attachment saved by a probe, a pending attachment removed): attach or detach explicitly
+- Specs asserting a matcher `description`, `failure_message` or `failure_message_when_negated` string: update the expected text
 
 ## Fixes that can change validation results
 
