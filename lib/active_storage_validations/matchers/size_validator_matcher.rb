@@ -9,7 +9,7 @@ module ActiveStorageValidations
     end
 
     class SizeValidatorMatcher < BaseComparisonValidatorMatcher
-      def description
+      def base_description
         "validate file size of :#{@attribute_name}"
       end
 
@@ -20,6 +20,10 @@ module ActiveStorageValidations
       end
 
       private
+
+      def describe_value(value)
+        ActiveSupport::NumberHelper.number_to_human_size(value)
+      end
 
       def failure_message_unit
         "bytes"

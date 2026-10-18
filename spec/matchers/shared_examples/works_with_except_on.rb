@@ -20,6 +20,29 @@ RSpec.shared_examples "works with except_on" do
 
           it { is_expected_to_match_for(klass) }
         end
+
+        # A new record validates in :create, which the validator skips. Each
+        # requirement below needs a probe to be rejected, so the matcher only
+        # matches when the probes run in a context the validator runs in.
+        context "which is :create" do
+          subject(:configured_matcher) { matcher.except_on(:create) }
+
+          let(:model_attribute) { :with_except_on_create }
+
+          before do
+            case validator_sym
+            when :aspect_ratio then matcher.allowing(:square).rejecting(:portrait)
+            when :limit then matcher.min(1).max(5)
+            when :content_type then matcher.allowing("image/png").rejecting("application/pdf")
+            when :dimension then matcher.width(150).height(150)
+            when :duration then matcher.less_than_or_equal_to(5.minutes)
+            when :size, :total_size then matcher.less_than_or_equal_to(5.megabytes)
+            when :pages then matcher.less_than_or_equal_to(5)
+            end
+          end
+
+          it { is_expected_to_match_for(klass) }
+        end
       end
 
       context "and the matcher is provided with a different context than the model attribute validator except_on context" do

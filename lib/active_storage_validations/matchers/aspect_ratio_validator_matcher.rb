@@ -38,12 +38,14 @@ module ActiveStorageValidations
         @allowed_aspect_ratios = @rejected_aspect_ratios = []
       end
 
-      def description
-        "validate the aspect ratios allowed on :#{@attribute_name}."
+      def base_description
+        "validate the aspect ratios allowed on :#{@attribute_name}"
       end
 
       def failure_message
-        "is expected to validate aspect ratio of :#{@attribute_name}"
+        message = [ "is expected to validate aspect ratio of :#{@attribute_name}" ]
+        build_failure_message(message)
+        message.join("\n")
       end
 
       def allowing(*aspect_ratios)
@@ -72,6 +74,37 @@ module ActiveStorageValidations
       end
 
       protected
+
+      def chain_descriptions
+        [
+          ("allowing #{describe_aspect_ratios(@allowed_aspect_ratios)}" if @allowed_aspect_ratios.any?),
+          ("rejecting #{describe_aspect_ratios(@rejected_aspect_ratios)}" if @rejected_aspect_ratios.any?)
+        ].compact
+      end
+
+      def describe_aspect_ratios(aspect_ratios)
+        aspect_ratios.map(&:inspect).to_sentence(locale: :en)
+      end
+
+      def build_failure_message(message)
+        if @allowed_aspect_ratios_not_allowed.present?
+          message << "  the following aspect ratio#{'s' if @allowed_aspect_ratios.count > 1} should be allowed: :#{@allowed_aspect_ratios.join(", :")}"
+          message << "  but #{pluralize(@allowed_aspect_ratios_not_allowed)} rejected"
+        end
+
+        if @rejected_aspect_ratios_not_rejected.present?
+          message << "  the following aspect ratio#{'s' if @rejected_aspect_ratios.count > 1} should be rejected: :#{@rejected_aspect_ratios.join(", :")}"
+          message << "  but #{pluralize(@rejected_aspect_ratios_not_rejected)} accepted"
+        end
+      end
+
+      def pluralize(aspect_ratios)
+        if aspect_ratios.count == 1
+          ":#{aspect_ratios[0]} was"
+        else
+          ":#{aspect_ratios.join(", :")} were"
+        end
+      end
 
       def all_allowed_aspect_ratios_allowed?
         @allowed_aspect_ratios_not_allowed = @allowed_aspect_ratios.reject { |aspect_ratio| aspect_ratio_allowed?(aspect_ratio) }

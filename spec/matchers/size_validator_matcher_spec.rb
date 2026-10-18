@@ -17,6 +17,21 @@ RSpec.describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     it_behaves_like "has custom matcher"
   end
 
+  describe "#failure_message" do
+    subject(:configured_matcher) { matcher.less_than_or_equal_to(1.megabyte) }
+
+    let(:model_attribute) { :failure_message }
+
+    it "lists the probes the validator accepted whereas the matcher expected a rejection" do
+      is_expected_to_have_failure_message(<<~FAILURE_MESSAGE.chomp)
+        is expected to validate file size of :failure_message
+          but there seem to have issues with the matcher methods you used, since:
+          validation passed when provided with a 1048577 bytes test file
+          whereas it should have failed
+      FAILURE_MESSAGE
+    end
+  end
+
   describe "#less_than" do
     let(:matcher_method) { :less_than }
     let(:model_attribute) { matcher_method }

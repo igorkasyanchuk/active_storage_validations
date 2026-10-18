@@ -248,6 +248,17 @@ RSpec.describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher d
     end
   end
 
+  describe "reusing the matcher on another record" do
+    subject(:configured_matcher) { matcher.allowing("image/png") }
+
+    let(:model_attribute) { :validatable_different_error_messages }
+
+    it "does not keep the result of the previous record" do
+      expect(configured_matcher.matches?(klass.new(title: "American Psycho"))).to be(true)
+      expect(configured_matcher.matches?(klass.new(title: "Quo vadis"))).to be(false)
+    end
+  end
+
   describe "Combinations" do
     describe "#allowing + #with_message" do
       let(:model_attribute) { :allowing_one_with_message }
@@ -263,6 +274,25 @@ RSpec.describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher d
           it { is_expected_to_match_for(klass) }
         end
       end
+    end
+
+    describe "#allowing + #rejecting + #with_message on a has_many_attached" do
+      # The #with_message probe file must not stay attached to the next probes.
+      subject(:configured_matcher) do
+        matcher.with_message("Not authorized file type.").allowing("application/pdf").rejecting("image/png")
+      end
+
+      let(:model_attribute) { :many_allowing_one_with_message }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    describe "#with_message shared by several validators" do
+      subject(:configured_matcher) { matcher.allowing("application/pdf").with_message("Not authorized file type.") }
+
+      let(:model_attribute) { :several_validators_with_same_message }
+
+      it { is_expected_to_match_for(klass) }
     end
 
     describe "#rejecting + #with_message" do
