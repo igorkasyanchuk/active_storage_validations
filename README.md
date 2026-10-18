@@ -162,6 +162,11 @@ Notes:
 <br>
 <br>
 
+**Attachments marked for destruction**<br>
+Files whose attachment is marked for destruction (e.g. nested attributes with `_destroy`) are not validated: they will be gone once the record is saved. `attached` still fails when every attachment is marked for destruction.
+<br>
+<br>
+
 **Proc usage**<br>
 Every validator can use procs instead of values in all the validator examples:
 ```ruby
@@ -577,6 +582,8 @@ The `dimension` validator has several possible options:
 - `min`: defines the minimum allowed width and height (range)
 - `max`: defines the maximum allowed width and height (range)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
+
+Static options are checked at boot and raise `ArgumentError` when malformed: a `width` / `height` Hash needs `:min`, `:max` or `:in` (and no other key, nor `:in` together with `:min` / `:max`), `:min` / `:max` values are Integers or Procs, a bare Range must be wrapped in `{ in: }`, and the top-level `min` / `max` cannot be combined with `width` / `height`.
 
 #### Examples
 

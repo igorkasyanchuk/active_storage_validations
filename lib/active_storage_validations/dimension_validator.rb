@@ -31,11 +31,14 @@ module ActiveStorageValidations
       media_metadata_missing
     ].freeze
     METADATA_KEYS = %i[width height].freeze
+    DIMENSION_HASH_KEYS = %i[min max in].freeze
 
     def check_validity!
       ensure_at_least_one_validator_option
+      ensure_dimension_option_validity
       ensure_dimension_in_option_validity
       ensure_min_max_option_validity
+      ensure_min_max_not_combined_with_dimension
     end
 
     def validate_each(record, attribute, _value)
@@ -50,6 +53,51 @@ module ActiveStorageValidations
       unless AVAILABLE_CHECKS.any? { |argument| options.key?(argument) }
         raise ArgumentError, "You must pass either :width, :height, :min or :max to the validator"
       end
+    end
+
+    # A misspelled or empty width / height Hash (`{ minimum: 1000 }`, `{}`) used
+    # to load and validate nothing, and a bare Range (`width: 100..200`) was
+    # compared as an exact width. Procs are evaluated per record and cannot be
+    # checked here.
+    def ensure_dimension_option_validity
+      %i[width height].each do |dimension|
+        next unless options.key?(dimension)
+
+        value = options[dimension]
+        next if value.is_a?(Numeric) || value.is_a?(Proc)
+
+        unless value.is_a?(Hash)
+          raise ArgumentError, "{ #{dimension}: value } value must be an Integer, a Proc or a Hash with :min, :max or :in (e.g. #{dimension}: { in: 100..200 })"
+        end
+
+        ensure_dimension_hash_validity(dimension, value)
+      end
+    end
+
+    def ensure_dimension_hash_validity(dimension, value)
+      if value.empty? || (value.keys - DIMENSION_HASH_KEYS).any?
+        raise ArgumentError, "{ #{dimension}: { … } } only accepts :min, :max and :in (got #{value.keys.inspect})"
+      end
+
+      if value.key?(:in) && (value.key?(:min) || value.key?(:max))
+        raise ArgumentError, "{ #{dimension}: { in: } } cannot be combined with :min / :max"
+      end
+
+      %i[min max].each do |bound|
+        next unless value.key?(bound)
+        next if value[bound].is_a?(Numeric) || value[bound].is_a?(Proc)
+
+        raise ArgumentError, "{ #{dimension}: { #{bound}: value } } value must be an Integer or a Proc"
+      end
+    end
+
+    # Top-level min / max overwrite the width / height bounds and skip their
+    # own checks, so combining both silently dropped a bound.
+    def ensure_min_max_not_combined_with_dimension
+      return unless %i[min max].any? { |bound| options.key?(bound) }
+      return unless %i[width height].any? { |dimension| options.key?(dimension) }
+
+      raise ArgumentError, "{ min: } / { max: } cannot be combined with :width / :height (use width: { min:, max: } and height: { min:, max: } instead)"
     end
 
     def ensure_dimension_in_option_validity
