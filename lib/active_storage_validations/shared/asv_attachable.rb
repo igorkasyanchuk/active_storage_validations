@@ -102,13 +102,6 @@ module ActiveStorageValidations
       content_type && content_type.downcase.split(/[;,\s]/, 2).first
     end
 
-    # Retrieve the media type of the attachable, which is the first part of the
-    # content type (or mime type).
-    # Possible values are: application/audio/example/font/image/model/text/video
-    def attachable_media_type(attachable)
-      (full_attachable_content_type(attachable) || marcel_content_type_from_filename(attachable)).split("/").first
-    end
-
     def attachable_filename(attachable)
       wrap_attachable(attachable).filename
     end
