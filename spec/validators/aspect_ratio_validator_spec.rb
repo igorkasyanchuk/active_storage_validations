@@ -307,22 +307,25 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
         it { is_expected_to_include_error_message("aspect_ratio_not_x_y", error_options: error_options) }
       end
 
-      # A 1-pixel margin is a large share of a small side: these used to match.
-      context "when the image is 1 pixel off 16:9 (1921x1080)" do
-        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
-
-        before { stub_dimensions(1921, 1080) }
-
-        it { is_expected_not_to_be_valid }
-      end
-
-      { [ 2, 2 ] => :is_1_2, [ 100, 2 ] => :is_100_1, [ 1001, 1000 ] => :is_1_1 }.each do |(width, height), aspect_ratio|
+      {
+        # 4.x rule (ratios equal to 3 decimals): a few pixels of slack on large images
+        [ 2200, 1237, :is_16_9 ] => true,
+        [ 6000, 3374, :is_16_9 ] => true,
+        [ 4032, 3025, :is_4_3 ] => true,
+        # one side is the floor or ceil of the other one scaled to x:y
+        [ 1921, 1080, :is_16_9 ] => true,
+        [ 2, 1, :is_16_9 ] => true,
+        # a whole pixel off is a large share of a small side
+        [ 2, 2, :is_1_2 ] => false,
+        [ 100, 2, :is_100_1 ] => false,
+        [ 1001, 1000, :is_1_1 ] => false
+      }.each do |(width, height, aspect_ratio), expected|
         context "when a #{width}x#{height} image is validated as #{aspect_ratio}" do
           subject(:valid) { validator.send(:valid_regex_aspect_ratio?, aspect_ratio, { width: width, height: height }) }
 
           let(:validator) { described_class.new(attributes: [ :file ], with: aspect_ratio) }
 
-          it { is_expected.to be(false) }
+          it { is_expected.to be(expected) }
         end
       end
     end

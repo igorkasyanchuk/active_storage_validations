@@ -28,6 +28,7 @@ module ActiveStorageValidations
       media_metadata_missing
     ].freeze
     METADATA_KEYS = %i[width height].freeze
+    RATIO_PRECISION = 3
 
     def check_validity!
       ensure_at_least_one_validator_option
@@ -119,7 +120,7 @@ module ActiveStorageValidations
       height = metadata[:height].to_i
       return false unless x.positive? && y.positive? && width.positive? && height.positive?
 
-      nearest_pixel_ratio?(width, height, x, y)
+      matching_ratio?(width, height, x, y)
     end
 
     def ratio_components(aspect_ratio)
@@ -127,14 +128,19 @@ module ActiveStorageValidations
       [ ::Regexp.last_match(1).to_i, ::Regexp.last_match(2).to_i ]
     end
 
-    # The file matches x:y when one of its sides is the other one scaled to
-    # x:y and rounded to the nearest pixel, so sizes such as 1366×768
-    # (1366 × 9 / 16 = 768.375) still match 16:9. An absolute 1-pixel margin
-    # was far too loose on small images (2×2 matched 1:2, 100×2 matched 100:1)
-    # and made :is_1_1 looser than :square.
-    def nearest_pixel_ratio?(width, height, x, y)
-      (width * y / x.to_f).round == height ||
-        (height * x / y.to_f).round == width
+    # The file matches x:y when either:
+    # - both ratios are equal once rounded to RATIO_PRECISION decimals, the
+    #   4.x rule, which leaves a few pixels of slack on large images
+    #   (2200×1237, 4032×3025), or
+    # - one side is within a pixel of the other one scaled to x:y, i.e. its
+    #   floor or ceil, so common sizes such as 1366×768 (1366 × 9 / 16 =
+    #   768.375) and 854×480 match 16:9.
+    # Strictly under a pixel: a `<= 1` margin was far too loose on small
+    # images (2×2 matched 1:2, 100×2 matched 100:1).
+    def matching_ratio?(width, height, x, y)
+      (width.to_f / height).round(RATIO_PRECISION) == (x.to_f / y).round(RATIO_PRECISION) ||
+        (height - width * y / x.to_f).abs < 1 ||
+        (width - height * x / y.to_f).abs < 1
     end
 
     def ensure_at_least_one_validator_option
