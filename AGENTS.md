@@ -60,7 +60,7 @@ require "active_storage_validations/matchers"
 
 - Ruby `>= 3.3` (CI also covers 3.4 and 4.0)
 - Rails `>= 7.0.1` (6.1 and 7.0.0 dropped)
-- See `docs/upgrade_to_4.md`, `docs/upgrade_to_5.md` and the Unreleased section of `CHANGES.md`
+- See `docs/upgrade_to_4.md`, `docs/upgrade_to_5.md` and the 5.0.0 section of `CHANGES.md`
 
 ### Behavior changes (v5)
 
