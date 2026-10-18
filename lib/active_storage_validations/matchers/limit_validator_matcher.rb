@@ -56,9 +56,10 @@ module ActiveStorageValidations
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject.new : subject
+        initialize_subject(subject)
 
         is_a_valid_active_storage_attribute? &&
+          has_validator? &&
           is_context_valid? &&
           is_except_on_valid? &&
           is_allowing_blank? &&
@@ -123,6 +124,7 @@ module ActiveStorageValidations
 
       def is_custom_message_valid?
         return true if !@custom_message || (@min&.zero? && @max.nil?)
+        raise ArgumentError, "#with_message needs #min or #max to build a file count the validator rejects" if @min.nil? && @max.nil?
 
         attach_files(@min.nil? || @min.zero? ? @max + 1 : @min - 1)
         validate

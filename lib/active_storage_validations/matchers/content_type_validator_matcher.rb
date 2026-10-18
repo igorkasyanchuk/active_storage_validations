@@ -71,10 +71,11 @@ module ActiveStorageValidations
 
       def matches?(subject)
         initialize_subject(subject)
+        @allowed_content_types_not_allowed = @rejected_content_types_not_rejected = nil
 
         is_a_valid_active_storage_attribute? &&
-          is_context_valid? &&
           has_validator? &&
+          is_context_valid? &&
           is_except_on_valid? &&
           is_allowing_blank? &&
           is_timeout_valid? &&
@@ -111,12 +112,12 @@ module ActiveStorageValidations
       end
 
       def all_allowed_content_types_allowed?
-        @allowed_content_types_not_allowed ||= @allowed_content_types.reject { |type| type_allowed?(type) }
+        @allowed_content_types_not_allowed = @allowed_content_types.reject { |type| type_allowed?(type) }
         @allowed_content_types_not_allowed.empty?
       end
 
       def all_rejected_content_types_rejected?
-        @rejected_content_types_not_rejected ||= @rejected_content_types.select { |type| type_allowed?(type) }
+        @rejected_content_types_not_rejected = @rejected_content_types.select { |type| type_allowed?(type) }
         @rejected_content_types_not_rejected.empty?
       end
 
@@ -136,6 +137,7 @@ module ActiveStorageValidations
 
         attach_invalid_content_type_file
         validate
+        detach_file
         has_an_error_message_which_is_custom_message?
       end
 
