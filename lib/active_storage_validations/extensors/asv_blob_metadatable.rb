@@ -6,6 +6,17 @@ module ActiveStorageValidations
 
     # rubocop:disable Metrics/BlockLength
     included do
+      # Clients can write a new blob's custom metadata: Rails' direct upload
+      # endpoint permits +metadata: {}+ (only +analyzed+ / +identified+ /
+      # +composed+ are stripped) and the signed id it returns can be attached
+      # to any attachment param; +attach(io:, metadata:)+ and
+      # +create_and_upload!(metadata:)+ pass app-provided metadata the same
+      # way. All of them go through Blob.new, so dropping +asv_*+ keys there
+      # leaves only keys the gem wrote itself: a forged +asv_width+ or
+      # +asv_content_type+ can no longer skip the analysis, and the cache of a
+      # persisted blob (4.x included) stays trusted.
+      after_initialize :drop_client_active_storage_validations_metadata, if: :new_record?
+
       # This method returns the metadata that has been set by our gem.
       # The metadata is stored in the blob's custom metadata. All keys are prefixed with 'asv_'
       # to avoid conflicts with other metadata.
@@ -53,6 +64,15 @@ module ActiveStorageValidations
         remaining = (metadata["custom"] || {}).reject { |key, _| key.to_s.start_with?("asv_") }
         self.custom_metadata = remaining
         save! if persisted?
+      end
+
+      private
+
+      def drop_client_active_storage_validations_metadata
+        custom = metadata["custom"]
+        return unless custom.is_a?(Hash) && custom.keys.any? { |key| key.to_s.start_with?("asv_") }
+
+        self.custom_metadata = custom.reject { |key, _| key.to_s.start_with?("asv_") }
       end
     end
     # rubocop:enable Metrics/BlockLength
