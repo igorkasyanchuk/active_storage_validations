@@ -28,9 +28,23 @@ Go through this table. If no row matches, you are done.
 | Has specs asserting the English wording of `duration` errors in a non-English locale | Update the expected strings | [Localized duration values](#localized-duration-values) |
 | Has matcher specs on an attribute without that validator, relying on a matcher's side effects on the subject, or asserting a matcher description / failure message | Fix the spec | [Matchers](#matchers-require-a-validator-and-probe-a-copy) |
 
-Optional, ops only: three analyzer fixes change cached metadata, so blobs analyzed under 4.x can be re-analyzed. See [Already-analyzed blobs](#already-analyzed-blobs-optional).
+Ops only, nothing to do: the `asv_*` cache is now signed, so every blob analyzed under 4.x is analyzed again once, the first time a validator reads it. See [The `asv_*` metadata cache is signed](#the-asv_-metadata-cache-is-signed).
 
 ## Breaking changes (edge cases)
+
+### The `asv_*` metadata cache is signed
+
+**Who is affected?** Every app, for security, without a code change. The visible effect is a one-time re-analysis of existing blobs.
+
+**What changed.** The gem caches its analysis on the blob as `asv_*` custom metadata and skipped the analysis when those keys were present. Clients can write that metadata: Rails' direct upload endpoint (`POST /rails/active_storage/direct_uploads`, mounted by default) permits `metadata: {}` and only strips `analyzed`, `identified` and `composed`, and the signed id it returns can be submitted to any attachment param, even in apps that never use direct uploads. A forged `asv_width` / `asv_height`, `asv_duration` or `asv_content_type` therefore let an oversized image pass `dimension` / `aspect_ratio`, an undecodable file pass `processable_file`, or a spoofed file pass `spoofing_protection`.
+
+The gem now writes `asv_signature`, an HMAC-SHA256 of the blob checksum and its `asv_*` values, with a key derived from your app's `secret_key_base`, and ignores any `asv_*` value it did not sign for that file's content (unsigned, tampered, or copied from another blob).
+
+**How to fix.** Nothing to change. Expect:
+
+- Blobs analyzed under 4.x carry an unsigned cache: each one is analyzed again the next time a validator reads it (a `has_one_attached` file on `valid?`, a `has_many_attached` file when it is attached again), then signed. If that first pass is a concern on large media libraries, there is no need to clear anything beforehand
+- Rotating `secret_key_base` invalidates every signature the same way
+- `blob.custom_metadata` now includes an `asv_signature` key (64 hex characters, forwarded to the storage service like the other `asv_*` keys)
 
 ### Validator options are no longer forwarded to `errors.add`
 
@@ -273,7 +287,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | `dimension` exclusive `in:` (`400...600`) | 600 accepted | 600 rejected |
 | `size`, `limit`, `total_size` with attachments marked for destruction | Doomed files counted | Ignored, like `attached:` |
 | Metadata validators and `content_type` with a persisted file marked for destruction (`has_one_attached`, or `has_many_attached` while attaching new files) | Doomed file still validated | Ignored |
-| `aspect_ratio` `is_x_y` | Exact to 3 decimals: 1366×768, 854×480 rejected as `:is_16_9` | Accepted when one side is the other one scaled to `x:y`, rounded to the nearest pixel |
+| `aspect_ratio` `is_x_y` | Exact to 3 decimals: 1366×768, 854×480 rejected as `:is_16_9` | Still exact to 3 decimals, and also accepted when one side is within a pixel of the other one scaled to `x:y` |
 | `duration` | Rounded to 0.1s before comparing: 1.96s failed `less_than: 2.seconds` | Exact value compared ♻️ |
 | `duration` on WebM / Matroska audio (browser `MediaRecorder` Opus) | `media_metadata_missing` | Container duration used ♻️ |
 | `processable_file` on an empty media container (zero streams) | Accepted (also by `with_audio: { with: false }`) | Rejected ♻️ |
@@ -288,13 +302,13 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 
 ### Already-analyzed blobs (optional)
 
-Three analyzer fixes change what is cached in `asv_*` blob metadata. They do not require a code change, but blobs already validated under 4.x keep the old metadata until you clear it:
+Three analyzer fixes change what is cached in `asv_*` blob metadata. Blobs validated under 4.x carry an unsigned cache, so v5 [ignores it](#the-asv_-metadata-cache-is-signed) and analyzes them again: there is nothing to clear. The old cache held:
 
 - `asv_duration` was rounded to 0.1s
 - `asv_duration` was empty for WebM / Matroska audio
 - Empty media containers were cached as `{ audio: false, video: false }`, which `processable_file` read as a successful analysis
 
-Call `blob.remove_active_storage_validations_metadata!` to re-analyze those blobs. On a persisted blob the method now `save!`s the cleared cache (it used to only mutate memory, so `reload` restored the old `asv_*` keys). Non-`asv_*` custom metadata is kept.
+`blob.remove_active_storage_validations_metadata!` still forces a re-analysis of any blob. On a persisted blob the method now `save!`s the cleared cache (it used to only mutate memory, so `reload` restored the old `asv_*` keys). Non-`asv_*` custom metadata is kept.
 
 ## Other changes that can show up without a code change
 
