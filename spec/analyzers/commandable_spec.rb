@@ -201,6 +201,38 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
       end
     end
 
+    # Thread#raise from Rack::Timeout, a job shutdown, … while the command runs.
+    context "when the waiting thread is interrupted" do
+      let(:argv) { [ "sh", "-c", "exec sleep 30" ] }
+      let(:spawned_pids) { Queue.new }
+
+      before do
+        allow(Process).to receive(:spawn).and_wrap_original do |original, *args, **options|
+          original.call(*args, **options).tap { |pid| spawned_pids << pid }
+        end
+      end
+
+      [ 60, nil ].each do |command_timeout|
+        context "with a #{command_timeout.inspect} timeout" do
+          let(:timeout) { command_timeout }
+
+          it "kills and reaps the command" do
+            interrupted = Class.new(StandardError)
+            runner = Thread.new { analyzer.send(:run_command, *argv, payload: payload) }
+            runner.report_on_exception = false
+            pid = spawned_pids.pop(timeout: 5)
+            sleep 0.1 # let the runner reach the wait
+            runner.raise(interrupted)
+
+            expect { runner.join }.to raise_error(interrupted)
+            expect(reaped?(pid)).to be(true), "expected pid=#{pid} to be killed and reaped"
+          ensure
+            Process.kill(:KILL, pid) if pid && process_alive?(pid)
+          end
+        end
+      end
+    end
+
     context "when the binary is missing" do
       let(:argv) { [ "asv_definitely_missing_binary_#{Process.pid}" ] }
 
@@ -247,7 +279,8 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
 
     it "reaps the process group after a timeout without leaving zombies" do
       pid = Process.spawn("ruby", "-e", "sleep 5", pgroup: true)
-      status, timed_out = analyzer.send(:wait_for_command, pid, 0.2)
+      waiter = analyzer.send(:reap_in_background, pid)
+      status, timed_out = analyzer.send(:wait_for_command, pid, waiter, 0.2)
 
       expect(timed_out).to be(true)
       expect(status).to be_truthy
@@ -272,6 +305,16 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
     result = yield
     elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started_at
     [ result, elapsed ]
+  end
+
+  # Killed and reaped by the waiter thread: the pid is gone, not a zombie.
+  def reaped?(pid)
+    20.times do
+      return true unless process_alive?(pid)
+
+      sleep 0.05
+    end
+    false
   end
 
   def process_alive?(pid)
