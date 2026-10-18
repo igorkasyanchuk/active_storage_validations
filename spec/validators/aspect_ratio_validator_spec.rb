@@ -264,7 +264,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
       end
     end
 
-    describe "custom ratio pixel tolerance" do
+    describe "custom ratio pixel rounding" do
       let(:attribute) { :with_regex }
 
       # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
@@ -273,7 +273,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
       end
       # rubocop:enable RSpec/AnyInstance
 
-      context "when the image is 1 pixel off 16:9 (1366x768)" do
+      context "when the image is 16:9 rounded to the nearest pixel (1366x768)" do
         subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
 
         before { stub_dimensions(1366, 768) }
@@ -281,7 +281,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
         it { is_expected_to_be_valid }
       end
 
-      context "when the image is 1 pixel off 16:9 (854x480)" do
+      context "when the image is 16:9 rounded to the nearest pixel (854x480)" do
         subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
 
         before { stub_dimensions(854, 480) }
@@ -305,6 +305,25 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
 
         it { is_expected_not_to_be_valid }
         it { is_expected_to_include_error_message("aspect_ratio_not_x_y", error_options: error_options) }
+      end
+
+      # A 1-pixel margin is a large share of a small side: these used to match.
+      context "when the image is 1 pixel off 16:9 (1921x1080)" do
+        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+        before { stub_dimensions(1921, 1080) }
+
+        it { is_expected_not_to_be_valid }
+      end
+
+      { [ 2, 2 ] => :is_1_2, [ 100, 2 ] => :is_100_1, [ 1001, 1000 ] => :is_1_1 }.each do |(width, height), aspect_ratio|
+        context "when a #{width}x#{height} image is validated as #{aspect_ratio}" do
+          subject(:valid) { validator.send(:valid_regex_aspect_ratio?, aspect_ratio, { width: width, height: height }) }
+
+          let(:validator) { described_class.new(attributes: [ :file ], with: aspect_ratio) }
+
+          it { is_expected.to be(false) }
+        end
       end
     end
 

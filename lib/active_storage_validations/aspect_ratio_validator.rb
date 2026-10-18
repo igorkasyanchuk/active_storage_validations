@@ -27,8 +27,6 @@ module ActiveStorageValidations
       aspect_ratio_invalid
       media_metadata_missing
     ].freeze
-    # One pixel on either axis so sizes such as 1366×768 still match 16:9.
-    PIXEL_TOLERANCE = 1
     METADATA_KEYS = %i[width height].freeze
 
     def check_validity!
@@ -121,7 +119,7 @@ module ActiveStorageValidations
       height = metadata[:height].to_i
       return false unless x.positive? && y.positive? && width.positive? && height.positive?
 
-      within_pixel_tolerance?(width, height, x, y)
+      nearest_pixel_ratio?(width, height, x, y)
     end
 
     def ratio_components(aspect_ratio)
@@ -129,9 +127,14 @@ module ActiveStorageValidations
       [ ::Regexp.last_match(1).to_i, ::Regexp.last_match(2).to_i ]
     end
 
-    def within_pixel_tolerance?(width, height, x, y)
-      (width - height * x / y.to_f).abs <= PIXEL_TOLERANCE ||
-        (height - width * y / x.to_f).abs <= PIXEL_TOLERANCE
+    # The file matches x:y when one of its sides is the other one scaled to
+    # x:y and rounded to the nearest pixel, so sizes such as 1366×768
+    # (1366 × 9 / 16 = 768.375) still match 16:9. An absolute 1-pixel margin
+    # was far too loose on small images (2×2 matched 1:2, 100×2 matched 100:1)
+    # and made :is_1_1 looser than :square.
+    def nearest_pixel_ratio?(width, height, x, y)
+      (width * y / x.to_f).round == height ||
+        (height * x / y.to_f).round == width
     end
 
     def ensure_at_least_one_validator_option

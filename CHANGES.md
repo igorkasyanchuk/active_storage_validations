@@ -38,7 +38,7 @@
       - ♻️ No longer rounds the analyzed duration to 0.1s before comparing: a 1.96s file passes `less_than: 2.seconds`, a 2.04s file fails `less_than_or_equal_to: 2.seconds`
       - ♻️ WebM / Matroska audio (e.g. browser `MediaRecorder` Opus) is no longer rejected with `media_metadata_missing`: the audio analyzer falls back to the container duration, like the video analyzer
     - **`aspect_ratio`**
-      - `is_x_y` ratios allow a 1-pixel difference on either axis, so common sizes such as 1366×768 and 854×480 pass `:is_16_9`
+      - `is_x_y` ratios accept a side rounded to the nearest pixel, so common sizes such as 1366×768 and 854×480 pass `:is_16_9` (1366 × 9 / 16 = 768.375)
     - **`content_type`**
       - Marcel 2 / Rails main (8.2+): `spoofing_protection` no longer rejects `audio/aac`, `application/xml` or `audio/mp4` (`file` reports aliases such as `text/xml`, `audio/x-m4a`), and Marcel 1 canonical options such as `audio/x-aac` are still accepted
       - `spoofing_protection` compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the check
