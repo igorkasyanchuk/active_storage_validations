@@ -25,6 +25,15 @@ module ActiveStorageValidations
       attachment_missing
     ].freeze
     METADATA_KEYS = %i[content_type].freeze
+    # Audio / video flavors of one container that the sniffers cannot tell
+    # apart, since they read the container and not the codecs: Magika reports
+    # audio/ogg for an Ogg Theora video, and browsers declare MediaRecorder
+    # recordings as audio/webm while both sniffers report video/webm. Spoofing
+    # compares each group as one type (Marcel itself is left untouched).
+    SAME_CONTAINER_CONTENT_TYPES = [
+      %w[audio/ogg video/ogg],
+      %w[audio/webm video/webm]
+    ].freeze
 
     # State for a single attachable check. Active Model builds one validator per
     # class and reuses it for every record and every thread, so this must travel
@@ -145,23 +154,48 @@ module ActiveStorageValidations
     # sniffer comparison.
     def content_type_mismatch?(attachable_content_type, detected_content_type)
       attachable_content_type.present? &&
-        !content_types_intersect?(attachable_content_type, detected_content_type)
+        !content_types_related?(attachable_content_type, detected_content_type)
     end
 
-    def content_types_intersect?(attachable_content_type, detected_content_type)
-      enlarged_content_type(content_type_without_parameters(attachable_content_type)).intersect?(
-        enlarged_content_type(content_type_without_parameters(detected_content_type))
-      )
+    # The declared and detected types match when they are the same type (or
+    # Marcel aliases of it), or when one is an ancestor of the other: the
+    # sniffer may be less specific than the claim (`text/plain` for a CSV,
+    # `application/zip` for a DOCX) or more specific (`text/csv` for a declared
+    # `text/plain`). Two siblings never match: comparing both types' parents
+    # let a PHP script (`text/x-php`) pass as `text/csv`, since both are
+    # `text/plain` children, or a JAR pass as a DOCX (both under zip).
+    def content_types_related?(attachable_content_type, detected_content_type)
+      declared = content_type_family(content_type_without_parameters(attachable_content_type))
+      detected = content_type_family(content_type_without_parameters(detected_content_type))
+
+      declared.intersect?(detected) ||
+        ancestor_content_types(declared).intersect?(detected) ||
+        ancestor_content_types(detected).intersect?(declared)
     end
 
-    def enlarged_content_type(content_type)
-      related = related_marcel_content_types(content_type)
-      [
-        content_type,
-        *related,
-        *parent_content_types(content_type),
-        *related.flat_map { |type| parent_content_types(type) }
-      ].compact.uniq
+    # The type with its Marcel canonical type and aliases, and the other
+    # flavors of its container (SAME_CONTAINER_CONTENT_TYPES).
+    def content_type_family(content_type)
+      family = [ content_type, *related_marcel_content_types(content_type) ].compact
+      same_container = SAME_CONTAINER_CONTENT_TYPES.select { |group| family.intersect?(group) }
+
+      (family + same_container.flatten).uniq
+    end
+
+    # Every type up the Marcel parent chain of the given types (and the aliases
+    # of each ancestor), e.g. xlsm → x-tika-ooxml → zip.
+    def ancestor_content_types(content_types)
+      ancestors = []
+      pending = content_types.flat_map { |type| parent_content_types(type) }
+
+      while (type = pending.shift)
+        next if ancestors.include?(type)
+
+        ancestors << type
+        pending.concat(content_type_family(type), parent_content_types(type))
+      end
+
+      ancestors
     end
 
     # Marcel 2 (Rails 8.2+) stores `text/xml`, `audio/x-m4a`, `audio/x-aac`, …

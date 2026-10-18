@@ -87,7 +87,7 @@ To use the pdf metadata validators (`dimension`, `aspect_ratio`, `processable_fi
 
 To use the `spoofing_protection` option with the `content_type` validator:
 
-- Default backend (`true` / `:file`): the UNIX [`file`](https://en.wikipedia.org/wiki/File_(command)) command (usually preinstalled on UNIX systems)
+- Default backend (`true` / `:file`): the UNIX [`file`](https://en.wikipedia.org/wiki/File_(command)) command, 5.26 or later (usually preinstalled on UNIX systems; check with `file --version`, older systems such as CentOS 7 or Amazon Linux 2 ship an earlier one)
 - Magika backend (`:magika`): the [Google Magika](https://github.com/google/magika) CLI — install via `brew install magika`, their [install script](https://securityresearch.google/magika/getting-started/installation/), `cargo install --locked magika-cli`, or `pipx install magika`
 
 Both backends are optional system tools (not Ruby gems). Prefer `:magika` when you can install the CLI — it is generally more accurate than `file`, especially on textual / ambiguous formats. Be sure to install Magika in CI / production if you enable `:magika`.
@@ -389,14 +389,16 @@ How do we prevent it?
 
 Spoofing protection compares the declared Active Storage content type to a type detected by a sniffer CLI, then uses `Marcel` parent types so near-matches still pass:
 
-- `:file` (default) — UNIX `file` / libmagic, mostly magic bytes / headers. Zero extra install on most UNIX systems.
+- `:file` (default) — UNIX `file` / libmagic (5.26 or later), mostly magic bytes / headers. Zero extra install on most UNIX systems.
 - `:magika` — [Google Magika](https://github.com/google/magika) CLI (ML sniffer; samples begin/middle/end of the file). Generally more accurate than `file`, especially on textual / ambiguous formats (Google reports ~99% F1 vs ~88% for `file --mime` on overlapping types). Prefer `:magika` when you can install the CLI.
 
-Neither backend fully parses the file. They do **not** load the whole file into RAM. For already-persisted blobs (e.g. remote storage), the analyzer downloads the blob to a local tempfile before sniffing: `:file` only fetches the first MiB (libmagic never inspects more than that), while `:magika` streams the whole blob in chunks to disk since it also samples the end of the file — this can still be costly for very large files. Local path uploads are analyzed in place.
+Neither backend fully parses the file. They do **not** load the whole file into RAM. For already-persisted blobs (e.g. remote storage), the analyzer downloads the blob to a local tempfile before sniffing: `:file` only fetches the first MiB (libmagic is pinned to inspect that much, for uploads too), while `:magika` streams the whole blob in chunks to disk since it also samples the end of the file — this can still be costly for very large files. Local path uploads are analyzed in place.
 
 Detected types are cached on the blob as `asv_content_type` + `asv_content_type_backend`. Switching backend re-analyzes. Legacy blobs that only have `asv_content_type` (no backend key) are treated as `:file` and keep using the cache — they are not re-analyzed. New (unsaved) blobs keep `asv_*` in memory until the record is saved; already-persisted blobs write the cache immediately so it survives `reload`.
 
-Sniffers will not always return the exact same MIME as Active Storage (AS uses first ~4kb + filename + extension). Close parent types are accepted via `Marcel::TYPE_PARENTS` (e.g. `video/x-ms-wmv` vs `video/x-ms-asf`). On Marcel 2 (Rails 8.2+), aliased types such as `text/xml` / `application/xml` and `audio/x-m4a` / `audio/mp4` are also treated as equivalent.
+Sniffers will not always return the exact same MIME as Active Storage (AS uses first ~4kb + filename + extension). A detected type is accepted when it is the declared type, or an ancestor or descendant of it in the `Marcel::TYPE_PARENTS` chain (e.g. `text/plain` for a CSV, `application/zip` for a DOCX, `video/x-ms-wmv` vs `video/x-ms-asf`). Two siblings are rejected: a PHP script (`text/x-php`) uploaded as a CSV (`text/csv`) is spoofed, even though both are `text/plain` children. The audio and video flavors of the Ogg and WebM containers count as one type, since sniffers read the container, not the codecs. A more specific detected type is accepted: a PHP script uploaded as `.txt` really is plain text.
+
+`:magika` misidentifies a few genuine formats (HEIC, HTML, AVI, WMV, AAC) and rejects them as spoofed; use `:file` for those. On Marcel 2 (Rails 8.2+), aliased types such as `text/xml` / `application/xml` and `audio/x-m4a` / `audio/mp4` are also treated as equivalent.
 
 For stronger protection on images / video / audio / PDF, combine sniffing with parse validation:
 
@@ -413,7 +415,7 @@ Edge cases
 The difficulty to accurately predict a mime type may generate false positives, if so there are several solutions available:
 - Try the other sniffer backend (`:file` vs `:magika`)
 - For media/PDF that sniffers misidentify but that open correctly, add `processable_file: true`
-- If the ActiveStorage blob content type is closely related to the detected content type, enhance `Marcel::TYPE_PARENTS` mapping using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `config/initializers/mime_types.rb` file. (Please drop an issue so we can add it to the gem for everyone!)
+- If the ActiveStorage blob content type is closely related to the detected content type (e.g. two siblings that are really the same format), enhance `Marcel::TYPE_PARENTS` mapping so one becomes a parent of the other using `Marcel::MimeType.extend "application/x-rar-compressed", parents: %(application/x-rar)` in the `config/initializers/mime_types.rb` file. (Please drop an issue so we can add it to the gem for everyone!)
 - If needed, disable spoofing protection in the validator, and please drop us an issue so we can fix it for everyone!
 </details>
 
