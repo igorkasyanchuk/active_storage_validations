@@ -250,6 +250,25 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File do
       end
     end
 
+    context "when the attachable is read from a local path" do
+      let(:attachable) do
+        {
+          io: open_fixture(Rails.root.join("public", "image_150x150.png")),
+          filename: "image_150x150.png",
+          content_type: "image/png"
+        }
+      end
+
+      before { allow(analyzer).to receive(:run_command).and_call_original }
+
+      it "pins libmagic to the same number of bytes as blob downloads" do
+        content_type
+
+        expect(analyzer).to have_received(:run_command)
+          .with(anything, "-E", "-P", "bytes=#{described_class::LIBMAGIC_BYTES_LIMIT}", "-b", "--mime-type", anything, payload: anything)
+      end
+    end
+
     context "when the blob fits within libmagic's read limit" do
       let(:attachable) do
         ActiveStorage::Blob.create_and_upload!(
@@ -289,6 +308,14 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File do
       before { allow(analyzer).to receive(:run_command).and_return(timed_out_command_result) }
 
       it "returns nil from media_from_path" do
+        expect(media).to be_nil
+      end
+    end
+
+    context "when file cannot open the path" do
+      subject(:media) { analyzer.send(:media_from_path, Rails.root.join("public", "missing.png").to_s) }
+
+      it "returns nil instead of the error message" do
         expect(media).to be_nil
       end
     end
