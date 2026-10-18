@@ -40,18 +40,33 @@ module ActiveStorageValidations
     #
     # Some file could be passed several times, we just need to perform the
     # analysis once on the file, therefore the use of #uniq.
+    #
+    # Files whose attachment is marked for destruction are skipped, like in
+    # ASVActiveStorageable#attached_files: they will not remain after save.
     def attachables_and_blobs(record, attribute)
       changes = changes_for(record, attribute)
 
       return to_enum(:attachables_and_blobs, record, attribute) if changes.blank? || !block_given?
 
-      if changes.is_a?(ActiveStorage::Attached::Changes::CreateMany)
-        changes.attachables.zip(changes.blobs).uniq { |attachable, blob| attachable_blob_key(attachable, blob) }.each do |attachable, blob|
-          yield attachable, blob
-        end
-      else
-        yield changes.is_a?(ActiveStorage::Attached::Changes::CreateOne) ? changes.attachable : changes.blob, changes.blob
+      doomed_blob_ids = blob_ids_marked_for_destruction(record, attribute)
+
+      changed_attachables_and_blobs(changes).each do |attachable, blob|
+        yield attachable, blob unless blob&.id && doomed_blob_ids.include?(blob.id)
       end
+    end
+
+    def changed_attachables_and_blobs(changes)
+      if changes.is_a?(ActiveStorage::Attached::Changes::CreateMany)
+        changes.attachables.zip(changes.blobs).uniq { |attachable, blob| attachable_blob_key(attachable, blob) }
+      else
+        [ [ changes.is_a?(ActiveStorage::Attached::Changes::CreateOne) ? changes.attachable : changes.blob, changes.blob ] ]
+      end
+    end
+
+    def blob_ids_marked_for_destruction(record, attribute)
+      Array.wrap(record.public_send(attribute))
+        .select { |file| file.try(:marked_for_destruction?) }
+        .map(&:blob_id)
     end
 
     def attachable_blob_key(attachable, blob)
