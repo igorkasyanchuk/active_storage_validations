@@ -184,7 +184,20 @@ module ActiveStorageValidations
       # Rails returns nil for default image processor, because it is set in an after initialize callback
       # https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/engine.rb
       # `:disabled` (Rails 7.2+) is handled in #image_analyzer_for via NullAnalyzer.
-      ActiveStorage.variant_processor || DEFAULT_IMAGE_PROCESSOR
+      processor = ActiveStorage.variant_processor || DEFAULT_IMAGE_PROCESSOR
+      processor.is_a?(Class) ? image_processor_for_transformer(processor) : processor
+    end
+
+    # Rails 8.2+ also accepts a transformer class
+    # (`config.active_storage.variant_processor = MyTransformer`). It names the
+    # image library only when it extends Rails' ImageMagick transformer; any
+    # other class is analyzed with libvips, Rails' default transformer, instead
+    # of failing every image. Ancestors are compared by name: referencing the
+    # constants would autoload them, and they require the image_processing gem.
+    def image_processor_for_transformer(transformer)
+      ancestor_names = transformer.ancestors.map(&:name)
+
+      ancestor_names.include?("ActiveStorage::Transformers::ImageMagick") ? :mini_magick : :vips
     end
 
     def video_analyzer_for(attachable)
