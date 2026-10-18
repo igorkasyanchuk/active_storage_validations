@@ -166,6 +166,19 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
           end
         end
       end
+
+      context "when a Proc returns a frozen Hash" do
+        subject(:validator) { described_class.new(attributes: [ :file ], width: ->(_record) { limits }) }
+
+        let(:limits) { { in: 100..140 }.freeze }
+
+        it "resolves the bounds without modifying the Hash" do
+          flat_options = validator.send(:process_options, nil)
+
+          expect(flat_options[:width]).to include(min: 100, max: 140)
+          expect(limits).to eq({ in: 100..140 })
+        end
+      end
     end
 
     describe "#ensure_min_max_option_validity" do

@@ -286,6 +286,9 @@ module ActiveStorageValidations
 
       %i[width height].each do |dimension|
         if flat_options[dimension].is_a?(Hash)
+          # A width / height Proc returns the caller's own Hash (maybe a frozen
+          # constant): copy it before adding the flattened :min / :max bounds.
+          flat_options[dimension] = flat_options[dimension].dup
           if bound_present?(flat_options[dimension], :in)
             range = flat_options[dimension][:in]
             # Range#begin / #end never raise; a Proc may still return an unbounded range.
