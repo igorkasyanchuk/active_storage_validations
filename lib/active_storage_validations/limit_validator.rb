@@ -74,16 +74,19 @@ module ActiveStorageValidations
       value.is_a?(Integer) && !value.negative?
     end
 
-    # Procs escape check_validity!: check what they return the same way. nil
-    # means no bound.
+    # Procs escape check_validity!, so a non-number they return raises like a
+    # static option. nil means no bound. Their result is data, not
+    # configuration: a Float / BigDecimal plan column is compared as is, and a
+    # negative value (a quota the record is already over) fails the record
+    # with the usual error, as in 4.x.
     def ensure_proc_bounds_validity(flat_options)
       AVAILABLE_CHECKS.each do |bound|
         next unless options[bound].is_a?(Proc)
 
         value = flat_options[bound]
-        next if value.nil? || valid_bound?(value)
+        next if value.nil? || value.is_a?(Numeric)
 
-        raise ArgumentError, "You must pass non-negative integers to :min and :max (got #{value.inspect} from a Proc for :#{bound})"
+        raise ArgumentError, "You must pass numbers to :min and :max (got #{value.inspect} from a Proc for :#{bound})"
       end
     end
 

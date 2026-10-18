@@ -130,7 +130,16 @@ RSpec.shared_examples "checks validator validity" do
 
             it "raises the same error when the Proc is evaluated" do
               expect { validator.send(:set_flat_options, nil) }
-                .to raise_error(ArgumentError, "You must pass a non-negative number to :#{check} (got \"2MB\" from a Proc)")
+                .to raise_error(ArgumentError, "You must pass a number to :#{check} (got \"2MB\" from a Proc)")
+            end
+          end
+
+          # A quota the record is already over: data, not configuration.
+          context "when a Proc returns a negative bound" do
+            let(:bound) { ->(_record) { -10 } }
+
+            it "does not raise, so the comparison fails the file" do
+              expect { validator.send(:set_flat_options, nil) }.not_to raise_error
             end
           end
 
@@ -169,11 +178,17 @@ RSpec.shared_examples "checks validator validity" do
         context "when a Proc returns a reversed range" do
           let(:bound) { ->(_record) { 5..1 } }
 
-          it "raises the same error when the Proc is evaluated" do
-            expect { validator.send(:set_flat_options, nil) }.to raise_error(
-              ArgumentError,
-              "You must pass a Range of non-negative numbers, whose begin is not greater than its end, to :between (got 5..1 from a Proc)"
-            )
+          it "does not raise, so the comparison fails the file" do
+            expect { validator.send(:set_flat_options, nil) }.not_to raise_error
+          end
+        end
+
+        context "when a Proc returns anything but a Range of numbers" do
+          let(:bound) { ->(_record) { "1".."5" } }
+
+          it "raises an error when the Proc is evaluated" do
+            expect { validator.send(:set_flat_options, nil) }
+              .to raise_error(ArgumentError, 'You must pass a Range of numbers to :between (got "1".."5" from a Proc)')
           end
         end
       end

@@ -177,7 +177,7 @@ class User < ApplicationRecord
 end
 ```
 
-Static options are checked when the model class loads; a proc's result is only known at validation time, so an unsupported value returned by a proc (`"image/jpg"` for `content_type`, `:sqaure` for `aspect_ratio`, `"2MB"` or `-1` for a comparison bound, `nil` for `with_audio`) raises the same `ArgumentError` from `valid?` instead of silently rejecting every file. A comparison (`size`, `total_size`, `duration`, `pages`) or `limit` proc returning `nil` sets no bound. `timeout:` does not accept procs.
+Static options are checked when the model class loads; a proc's result is only known at validation time, so an unsupported value returned by a proc (`"image/jpg"` for `content_type`, `:sqaure` for `aspect_ratio`, `"2MB"` for a comparison bound, `nil` for `with_audio`) raises the same `ArgumentError` from `valid?` instead of silently rejecting every file. A comparison (`size`, `total_size`, `duration`, `pages`) or `limit` proc returning `nil` sets no bound. `timeout:` does not accept procs.
 
 **Performance optimization**<br>
 Some validators rely on an expensive operation (metadata analysis and content type analysis). To mitigate the performance cost, the gem leverages the `ActiveStorage::Blob.metadata` method to store retrieved metadata. Therefore, once the file has been analyzed by our gem, the expensive analysis operation will not be triggered again for new validations.

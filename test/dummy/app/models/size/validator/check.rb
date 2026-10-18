@@ -30,6 +30,8 @@ class Size::Validator::Check < ApplicationRecord
   validates :greater_than_or_equal_to_zero, size: { greater_than_or_equal_to: 0 }
   has_one_attached :less_than_nil_proc
   validates :less_than_nil_proc, size: { less_than: ->(record) { nil } }
+  has_one_attached :less_than_negative_proc
+  validates :less_than_negative_proc, size: { less_than: ->(record) { -10 } }
 
   has_one_attached :less_than_proc
   has_one_attached :less_than_or_equal_to_proc

@@ -58,35 +58,41 @@ module ActiveStorageValidations
     end
 
     # A non-number used to boot then raise from valid? (`less_than: "2MB"`); a
-    # negative bound or a reversed / empty range rejected every file.
+    # static negative bound or reversed / empty range rejected every file.
+    #
+    # A Proc result is data, not configuration: only a non-number raises. A
+    # negative or reversed bound (a quota the record is already over) fails the
+    # file with the usual error, as in 4.x.
     def ensure_bound_validity(flat_options, from_proc: false)
       bound = flat_options[check_option]
       return if bound.nil? && from_proc
 
       if check_option == :between
-        return if valid_range_bound?(bound)
+        return if valid_range_bound?(bound, from_proc)
 
-        raise ArgumentError, "You must pass a Range of non-negative numbers, whose begin is not greater than its end, to :between (got #{bound.inspect}#{' from a Proc' if from_proc})"
+        requirement = from_proc ? "a Range of numbers" : "a Range of non-negative numbers, whose begin is not greater than its end,"
       else
-        return if valid_bound?(bound)
+        return if valid_bound?(bound, from_proc)
 
-        raise ArgumentError, "You must pass a non-negative number to :#{check_option} (got #{bound.inspect}#{' from a Proc' if from_proc})"
+        requirement = from_proc ? "a number" : "a non-negative number"
       end
+
+      raise ArgumentError, "You must pass #{requirement} to :#{check_option} (got #{bound.inspect}#{' from a Proc' if from_proc})"
     end
 
     # ActiveSupport::Duration is a Numeric too.
-    def valid_bound?(value)
-      value.is_a?(Numeric) && !value.negative?
+    def valid_bound?(value, from_proc = false)
+      value.is_a?(Numeric) && (from_proc || !value.negative?)
     end
 
     # A Proc may return a one-sided range (static ones are rejected at boot by
     # #ensure_between_range_is_bounded!).
-    def valid_range_bound?(range)
+    def valid_range_bound?(range, from_proc = false)
       return false unless range.is_a?(Range)
 
       bounds = [ range.begin, range.end ].compact
-      return false unless bounds.all? { |bound| valid_bound?(bound) }
-      return true if bounds.size < 2
+      return false unless bounds.all? { |bound| valid_bound?(bound, from_proc) }
+      return true if from_proc || bounds.size < 2
 
       range.exclude_end? ? range.begin < range.end : range.begin <= range.end
     end

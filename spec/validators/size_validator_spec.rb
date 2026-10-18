@@ -240,6 +240,16 @@ RSpec.describe ActiveStorageValidations::SizeValidator do
         is_expected_to_be_valid
       end
     end
+
+    # validates :less_than_negative_proc, size: { less_than: ->(record) { -10 } }
+    describe "Proc returning a negative bound" do
+      subject(:record) { model.less_than_negative_proc.attach(file_10ko) and model }
+
+      it "fails the file instead of raising" do
+        is_expected_not_to_be_valid
+        is_expected_to_include_error_message("file_size_not_less_than", with_locales: [ "en" ], error_options: { file_size: "10.2 KB", filename: file_10ko[:filename], max: "-10 Bytes" })
+      end
+    end
   end
 
   describe "attachments marked for destruction" do
