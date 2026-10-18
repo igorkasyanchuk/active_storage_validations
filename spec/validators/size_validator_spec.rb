@@ -231,6 +231,15 @@ RSpec.describe ActiveStorageValidations::SizeValidator do
         end
       end
     end
+
+    # validates :less_than_nil_proc, size: { less_than: ->(record) { nil } }
+    describe "Proc returning nil" do
+      subject(:record) { model.less_than_nil_proc.attach(file_10ko) and model }
+
+      it "sets no bound, like limit" do
+        is_expected_to_be_valid
+      end
+    end
   end
 
   describe "attachments marked for destruction" do

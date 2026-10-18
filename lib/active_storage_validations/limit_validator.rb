@@ -27,6 +27,7 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       files = attached_files(record, attribute).reject(&:blank?)
       flat_options = set_flat_options(record)
+      ensure_proc_bounds_validity(flat_options)
       count = files.count
 
       return if files_count_valid?(count, flat_options)
@@ -54,18 +55,36 @@ module ActiveStorageValidations
     end
 
     def ensure_arguments_validity
-      raise ArgumentError, "You must pass integers to :min and :max" unless bounds_are_integer_or_proc?
+      raise ArgumentError, "You must pass non-negative integers to :min and :max" unless bounds_are_integer_or_proc?
       raise ArgumentError, "You must pass a higher value to :max than to :min" if min_higher_than_max?
     end
 
     # A Proc is a deferred integer (`min: 1, max: -> { record.plan_limit }`).
-    # Only static integers can be compared at boot.
+    # Only static integers can be compared at boot. A negative :max used to
+    # reject every record, even one without files.
     def bounds_are_integer_or_proc?
       AVAILABLE_CHECKS.all? { |bound| bound_is_integer_or_proc?(bound) }
     end
 
     def bound_is_integer_or_proc?(bound)
-      !options.key?(bound) || options[bound].is_a?(Integer) || options[bound].is_a?(Proc)
+      !options.key?(bound) || valid_bound?(options[bound]) || options[bound].is_a?(Proc)
+    end
+
+    def valid_bound?(value)
+      value.is_a?(Integer) && !value.negative?
+    end
+
+    # Procs escape check_validity!: check what they return the same way. nil
+    # means no bound.
+    def ensure_proc_bounds_validity(flat_options)
+      AVAILABLE_CHECKS.each do |bound|
+        next unless options[bound].is_a?(Proc)
+
+        value = flat_options[bound]
+        next if value.nil? || valid_bound?(value)
+
+        raise ArgumentError, "You must pass non-negative integers to :min and :max (got #{value.inspect} from a Proc for :#{bound})"
+      end
     end
 
     def min_higher_than_max?
