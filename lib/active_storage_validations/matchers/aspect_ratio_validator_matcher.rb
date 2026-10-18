@@ -83,7 +83,7 @@ module ActiveStorageValidations
       end
 
       def describe_aspect_ratios(aspect_ratios)
-        aspect_ratios.map(&:inspect).to_sentence(locale: :en)
+        aspect_ratios.map(&:inspect).to_sentence(locale: false)
       end
 
       def build_failure_message(message)

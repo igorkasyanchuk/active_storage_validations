@@ -240,5 +240,23 @@ RSpec.shared_examples "has valid rspec message methods" do
     it "lists the chained qualifiers" do
       expect(configured_matcher.description).to eq(%(#{expected_description}, with message "Custom message", on :update))
     end
+
+    # enforce_available_locales (Rails default) raises for a locale that is not
+    # available, so the description must not ask I18n for :en.
+    context "when :en is not an available locale" do
+      around do |example|
+        previous_locales, previous_locale = I18n.available_locales, I18n.locale
+        I18n.available_locales = [ :fr ]
+        I18n.locale = :fr
+        example.run
+      ensure
+        I18n.available_locales = previous_locales
+        I18n.locale = previous_locale
+      end
+
+      it "still describes the chain" do
+        expect { configured_matcher.description }.not_to raise_error
+      end
+    end
   end
 end
