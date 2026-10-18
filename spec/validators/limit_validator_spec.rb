@@ -151,10 +151,17 @@ RSpec.describe ActiveStorageValidations::LimitValidator do
       describe ":min + :max" do
         # validates :range, limit: { min: 1, max: 3 }
         # validates :range_proc, limit: { min: -> (record) { 1 }, max: -> (record) { 3 } }
-        %w[value proc].each do |value_type|
-          describe value_type do
-            let(:model) { "#{validator_test_class}::CheckRange#{'Proc' if value_type == 'proc'}".constantize.new(params) }
-            let(:attribute) { :"range#{'_proc' if value_type == 'proc'}" }
+        # validates :range_min_proc, limit: { min: -> (record) { 1 }, max: 3 }
+        # validates :range_max_proc, limit: { min: 1, max: -> (record) { 3 } }
+        {
+          value: [ "CheckRange", :range ],
+          proc: [ "CheckRangeProc", :range_proc ],
+          min_proc_max_integer: [ "CheckRangeMinProc", :range_min_proc ],
+          min_integer_max_proc: [ "CheckRangeMaxProc", :range_max_proc ]
+        }.each do |value_type, (klass_name, attribute_name)|
+          describe value_type.to_s do
+            let(:model) { "#{validator_test_class}::#{klass_name}".constantize.new(params) }
+            let(:attribute) { attribute_name }
 
             context "when provided with a right number of files" do
               subject(:record) { model.public_send(attribute).attach([ file_1, file_2 ]) and model }
