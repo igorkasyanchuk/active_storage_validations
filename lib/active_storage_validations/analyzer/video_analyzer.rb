@@ -131,8 +131,12 @@ module ActiveStorageValidations
       @tags ||= video_stream["tags"] || {}
     end
 
+    # ffprobe reports an Array of hashes. Default to [] (Rails does the same)
+    # so Enumerable#detect yields those hashes. A Hash default made detect
+    # yield [key, value] pairs and could raise TypeError from valid?.
     def side_data
-      @side_data ||= video_stream["side_data_list"] || {}
+      list = video_stream["side_data_list"]
+      @side_data ||= list.is_a?(Array) ? list : []
     end
   end
 end
