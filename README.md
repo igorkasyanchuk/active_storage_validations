@@ -768,7 +768,7 @@ The `aspect_ratio` validator has several options:
 This validator can define aspect ratios in several ways:
 - Symbols:
   - prebuilt aspect ratios: `:square`, `:portrait`, `:landscape`
-  - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc. Custom ratios allow a 1-pixel difference on either axis, so sizes such as 1366×768 match `:is_16_9`.
+  - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc. A file matches a custom ratio when one of its sides is the other one scaled to that ratio and rounded to the nearest pixel, so sizes such as 1366×768 (1366 × 9 / 16 = 768.375) match `:is_16_9`, while 1921×1080 does not.
 
 #### Examples
 
