@@ -12,4 +12,7 @@ class WithAudio::Validator::Check < ApplicationRecord
 
   has_one_attached :silent_video_proc
   validates :silent_video_proc, with_audio: { with: ->(_record) { false } }
+
+  has_one_attached :nil_proc_video
+  validates :nil_proc_video, with_audio: { with: ->(_record) { nil } }
 end

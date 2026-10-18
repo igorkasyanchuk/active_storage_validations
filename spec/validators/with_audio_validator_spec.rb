@@ -14,6 +14,39 @@ RSpec.describe ActiveStorageValidations::WithAudioValidator do
     it_behaves_like "ASVErrorable"
   end
 
+  describe "#check_validity!" do
+    subject(:validator) { described_class.new(attributes: [ :video ], **validator_options) }
+
+    [ {}, { with: true }, { with: false }, { with: ->(_record) { true } } ].each do |valid_options|
+      context "with #{valid_options.inspect}" do
+        let(:validator_options) { valid_options }
+
+        it { expect { validator }.not_to raise_error }
+      end
+    end
+
+    [ "no", nil, 0 ].each do |invalid_value|
+      context "with :with set to #{invalid_value.inspect}" do
+        let(:validator_options) { { with: invalid_value } }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, "You must pass true, false or a Proc returning true or false to :with (got #{invalid_value.inspect})")
+        end
+      end
+    end
+
+    # validates :nil_proc_video, with_audio: { with: ->(_record) { nil } }
+    context "when a Proc returns anything but true or false" do
+      subject(:model) { validator_test_class::Check.new(params) }
+
+      it "raises the same error at validation time" do
+        model.nil_proc_video.attach(video_file)
+
+        expect { model.valid? }.to raise_error(ArgumentError, "You must pass true, false or a Proc returning true or false to :with (got nil)")
+      end
+    end
+  end
+
   describe "Validator checks" do
     let(:model) { validator_test_class::Check.new(params) }
 
