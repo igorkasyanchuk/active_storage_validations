@@ -1,12 +1,36 @@
 # frozen_string_literal: true
 
 require "rails_helper"
+require "open3"
 
 RSpec.describe ActiveStorageValidations do
   let(:instance) { ActiveStorageValidations::Check.new }
 
   it "is part of the app's modules" do
     expect(described_class).to be_a(Module)
+  end
+
+  # Engine / Railtie subclass Rails::Engine / Rails::Railtie: requiring the gem
+  # before Rails (a script, a Bundler.require order) used to raise NameError.
+  describe "requiring the gem without Rails loaded" do
+    subject(:result) do
+      Open3.capture2e(RbConfig.ruby, "-rbundler/setup", "-I", lib_path, "-e", script)
+    end
+
+    let(:lib_path) { File.expand_path("../../lib", __dir__) }
+    let(:script) do
+      <<~RUBY
+        require "active_storage_validations"
+        print ActiveStorageValidations::Engine.superclass, " ", ActiveStorageValidations::Railtie.superclass
+      RUBY
+    end
+
+    it "loads the Rails integration it needs" do
+      output, status = result
+
+      expect(status).to be_success, output
+      expect(output).to eq("Rails::Engine Rails::Railtie")
+    end
   end
 
   describe "concerns" do
