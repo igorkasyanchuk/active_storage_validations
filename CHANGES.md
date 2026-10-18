@@ -1,5 +1,10 @@
 # Unreleased
 
+- **FIXED**
+  - `limit: { min: 1, max: -> { … } }` (and the inverse) now loads. A Proc on only one side used to raise `ArgumentError` ("You must pass integers") even though both-Proc and Proc-only-one-bound already worked
+  - `validate_processable_file_of` matcher copy now says “processable file” rather than “processable image”
+  - `VideoAnalyzer#side_data` defaults to `[]` when ffprobe omits `side_data_list` (Rails does the same). A Hash default made `Enumerable#detect` yield pairs and could raise `TypeError` from `valid?`
+
 # Released
 - 5.0.0
   - Same Ruby / Rails as 4.x. No validator, option, matcher, or I18n key was renamed or removed. The major bump is a handful of edge-case behaviors; typical apps bump the gem and keep the same code. See [upgrade guide](docs/upgrade_to_5.md)
