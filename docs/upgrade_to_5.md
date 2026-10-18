@@ -282,7 +282,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | `with_audio: { with: -> { … } }` | Proc treated as truthy, every file failed | Proc evaluated |
 | `dimension` / `aspect_ratio` on a PDF whose first page is rotated (`/Rotate 90`) | Stored page size (200×300) | Displayed page size (300×200) ♻️ |
 | Video metadata validators on an audio-only MP4 with cover art | Cover read as the video track (its dimensions, `video: true`) | No video track: `dimension` / `aspect_ratio` add `media_metadata_missing` ♻️ |
-| Metadata validators on a file declared as `application/octet-stream`, `IMAGE/PNG` or `""` | No analyzer picked, file rejected | Analyzed from the type Rails identified (or the filename) |
+| Metadata validators on a file declared as `application/octet-stream`, `IMAGE/PNG` or `""` | No analyzer picked, file rejected | Analyzed from the normalized declared type, or from the type Rails identified (or the filename) when it is blank or generic |
 
 ♻️ = the old result is cached on blobs analyzed under 4.x, see below.
 

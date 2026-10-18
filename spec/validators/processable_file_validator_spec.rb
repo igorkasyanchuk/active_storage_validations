@@ -37,8 +37,9 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
       end
     end
 
-    # The analyzer follows the type Rails identified for the blob, not the
-    # declared one.
+    # The analyzer follows the declared type, normalized, and only falls back to
+    # the type Rails identified for the blob when the declared one is blank or
+    # generic.
     [ "application/octet-stream", "IMAGE/PNG", "" ].each do |declared_type|
       context "when a processable image is declared as #{declared_type.inspect}" do
         subject(:record) { model.has_to_be_processable.attach(image) and model }
@@ -59,6 +60,19 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
       it "falls back to the filename" do
         expect(record.has_to_be_processable.blob.content_type).to eq("application/octet-stream")
         is_expected_to_be_valid
+      end
+    end
+
+    # Rails identifies the blob as video/mp4: routing on that would hand the
+    # file to the video analyzer and let it pass image-only validators.
+    context "when a video is declared as an image" do
+      subject(:record) { model.has_to_be_processable.attach(video) and model }
+
+      let(:video) { fixture_file("video.mp4", filename: "video.png", content_type: "image/png") }
+
+      it "is analyzed as the declared image and rejected" do
+        expect(record.has_to_be_processable.blob.content_type).to eq("video/mp4")
+        is_expected_not_to_be_valid
       end
     end
 

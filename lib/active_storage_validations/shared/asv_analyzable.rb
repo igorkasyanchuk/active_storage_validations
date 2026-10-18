@@ -158,13 +158,18 @@ module ActiveStorageValidations
       end
     end
 
-    # Pick the analyzer from the type Rails identified for the blob (from the
-    # file's magic bytes, unless attached with `identify: false`), then the
-    # declared type, then the filename. Routing on the raw declared type sent
-    # a PNG uploaded as application/octet-stream, IMAGE/PNG or "" to the null
-    # analyzer (file_not_processable). A generic type is not an answer either.
+    # Pick the analyzer from the declared type (downcased, parameters removed),
+    # then from the type Rails identified for the blob (its magic bytes, unless
+    # attached with `identify: false`), then from the filename. Blank and
+    # generic types are skipped: a PNG uploaded as application/octet-stream,
+    # IMAGE/PNG or "" used to get the null analyzer (file_not_processable).
+    #
+    # The declared type stays first on purpose: routing on the identified type
+    # would analyze a video or PDF uploaded as image/png with the video / PDF
+    # analyzer, so image-only validators (dimension, aspect_ratio,
+    # processable_file) would accept it.
     def analyzable_content_type(attachable, blob)
-      [ blob&.content_type, full_attachable_content_type(attachable) ].each do |type|
+      [ full_attachable_content_type(attachable), blob&.content_type ].each do |type|
         type = content_type_without_parameters(type.to_s)
         return type if type.present? && type != GENERIC_CONTENT_TYPE
       end
