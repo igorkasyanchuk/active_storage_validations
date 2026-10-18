@@ -1030,7 +1030,7 @@ end
 ```
 (Note that matcher methods are chainable)
 
-A matcher fails when the attribute has no validator of its type, so `is_expected.not_to validate_size_of(:avatar)` checks that `:avatar` has no `size` validator. Matchers probe a copy of the subject: they never attach files to, save, or detach files from the record you pass.
+A matcher fails when the attribute has no validator of its type, so `is_expected.not_to validate_size_of(:avatar)` checks that `:avatar` has no `size` validator. Matchers leave the subject unchanged: probe files are assigned through the attribute writer, which never saves, and the record's own pending attachment and errors are restored once the matcher is done.
 
 All matchers can be customized with `:on`, `:except_on` and `:message`. All matchers except `validate_attached_of` support `#allow_blank`, and `#timeout` is available on the metadata matchers (`aspect_ratio`, `dimension`, `duration`, `pages`, `processable_file`, `with_audio`) and `content_type`:
 

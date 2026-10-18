@@ -56,13 +56,13 @@ module ActiveStorageValidations
       private
 
       def is_valid_when_file_attached?
-        attach_file unless file_attached?
+        attach_file
         validate
         is_valid? || add_failure_message_artefact("a file attached", passed: false)
       end
 
       def is_invalid_when_file_not_attached?
-        detach_file if file_attached?
+        detach_file
         validate
         !is_valid? || add_failure_message_artefact("no file attached", passed: true)
       end
@@ -70,19 +70,9 @@ module ActiveStorageValidations
       def is_custom_message_valid?
         return true unless @custom_message
 
-        detach_file if file_attached?
+        detach_file
         validate
         has_an_error_message_which_is_custom_message?
-      end
-
-      def file_attached?
-        @subject.public_send(@attribute_name).attached?
-      end
-
-      def detach_file
-        @subject.public_send(@attribute_name).detach
-        # Unset the direct relation since `detach` on an unpersisted record does not set `attached?` to false.
-        @subject.public_send("#{@attribute_name}=", nil)
       end
     end
   end

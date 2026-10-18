@@ -89,8 +89,8 @@ module ActiveStorageValidations
 
       def chain_descriptions
         [
-          ("allowing #{@allowed_content_types.to_sentence(locale: :en)}" if @allowed_content_types.any?),
-          ("rejecting #{@rejected_content_types.to_sentence(locale: :en)}" if @rejected_content_types.any?)
+          ("allowing #{@allowed_content_types.to_sentence(locale: false)}" if @allowed_content_types.any?),
+          ("rejecting #{@rejected_content_types.to_sentence(locale: false)}" if @rejected_content_types.any?)
         ].compact
       end
 
@@ -136,7 +136,7 @@ module ActiveStorageValidations
       end
 
       def attach_file_with_content_type(content_type)
-        @subject.public_send(@attribute_name).attach(attachment_for(content_type))
+        attach_file(attachment_for(content_type))
       end
 
       def is_custom_message_valid?
@@ -149,7 +149,7 @@ module ActiveStorageValidations
       end
 
       def attach_invalid_content_type_file
-        @subject.public_send(@attribute_name).attach(attachment_for("fake/fake"))
+        attach_file(attachment_for("fake/fake"))
       end
 
       def attachment_for(content_type)

@@ -26,7 +26,7 @@ Go through this table. If no row matches, you are done.
 | Uses `content_type` `spoofing_protection` | Nothing, unless real uploads start failing as `content_type_spoofed` | [Sibling types rejected](#spoofing_protection-rejects-sibling-types) |
 | Matches on `:content_type_spoofed`, or overrides that locale key | Also handle `:content_type_analysis_failed` | [`content_type_analysis_failed`](#content_type_analysis_failed-error) |
 | Has specs asserting the English wording of `duration` errors in a non-English locale | Update the expected strings | [Localized duration values](#localized-duration-values) |
-| Has matcher specs on an attribute without that validator, relying on a matcher's side effects on the subject, or asserting a matcher description / failure message | Fix the spec | [Matchers](#matchers-require-a-validator-and-probe-a-copy) |
+| Has matcher specs on an attribute without that validator, relying on a matcher's side effects on the subject, or asserting a matcher description / failure message | Fix the spec | [Matchers](#matchers-require-a-validator-and-leave-the-subject-unchanged) |
 
 Ops only, nothing to do: the `asv_*` cache is now signed, so every blob analyzed under 4.x is analyzed again once, the first time a validator reads it. See [The `asv_*` metadata cache is signed](#the-asv_-metadata-cache-is-signed).
 
@@ -259,14 +259,14 @@ The same rules apply to a value returned by a Proc (`less_than: ->(record) { …
 
 **How to fix.** Nothing if "no bound" is what `nil` meant. If you relied on `nil` rejecting every file, return `0` (or a real bound) from the Proc, or make the validator conditional (`if:` / `unless:`).
 
-### Matchers require a validator and probe a copy
+### Matchers require a validator and leave the subject unchanged
 
 **Who is affected?** Only test suites using the gem matchers in one of the ways below. Validation results in your app do not change.
 
 **What changed.**
 
 - A matcher fails when the attribute has no validator of its type. `validate_size_of(:avatar)`, `validate_content_type_of(:avatar).allowing(...)`, `validate_dimensions_of(:avatar)`, `validate_limits_of(:avatar)`, `validate_aspect_ratio_of(:avatar).allowing(...)` (and other chains whose probes all pass without a validator) used to pass on an attribute with no such validator, so the negated form always failed.
-- Matchers probe a copy of the subject (`subject.dup`, a class still gets `.new`). On a persisted record, a passing probe used to save its attachment for real, and the probes dropped the record's own pending attachments (`validate_attached_of` deleted a persisted attachment). The copy keeps the original validation context: `:update` for a persisted record, as before.
+- Matchers leave the subject as they found it. Probe files are assigned through the attribute writer (`record.avatar = file`), which never saves, and the record's own pending attachment and errors are restored afterwards. On a persisted record, a passing probe used to save its attachment for real, and the probes dropped the record's own pending attachments (`validate_attached_of` deleted a persisted attachment). The probes still run on the record you pass, so `if:` conditions and Procs see its persistence state and associations, and the validation context stays `:update` for a persisted record.
 - `#description` lists the chained qualifiers, and failure messages list only the probes with an unexpected outcome (the negated message of a matching matcher no longer lists the probes that were expected to fail).
 
 **How to fix.**
