@@ -19,6 +19,7 @@ Go through this table. If no row matches, you are done.
 | Passes an empty `content_type` / `aspect_ratio` list (`[]`, or a Proc that can return `[]`) | Remove the validator, or expect every file to be rejected | [Empty lists](#empty-content_type--aspect_ratio-lists-fail-closed) |
 | Declares a malformed `dimension` option (`width: { minimum: 1000 }`, `width: 100..200`, `{ min: 100..100, width: 150 }`) | Fix the option | [Malformed `dimension` options](#malformed-dimension-options-raise-at-boot) |
 | Uses an `aspect_ratio` value that is not an exact `is_x_y` (`:is_16_9square`) | Fix the typo | [Strict `aspect_ratio`](#aspect_ratio-options-are-validated-strictly) |
+| Passes `with_audio: { with: "no" }` (statically or from a Proc) | Fix the option | [Invalid options raise](#invalid-options-raise) |
 | Passes a non-numeric or negative comparison / `limit` bound, a reversed `between:` range, `with_audio: { with: "no" }`, or a `timeout:` of `0` or a Proc (statically or from a Proc) | Fix the option | [Invalid options raise](#invalid-options-raise) |
 | Has a `size` / `total_size` / `duration` / `pages` Proc that can return `nil` | Nothing if `nil` means "no bound"; otherwise return a real bound | [Comparison Procs returning `nil`](#comparison-procs-returning-nil-set-no-bound) |
 | Uses `with_audio: { with: false }` where `ffprobe` may be missing | Install `ffmpeg` wherever validations run | [`with_audio` fails closed](#with_audio--with-false--fails-closed) |
@@ -220,6 +221,20 @@ The same rules apply to a value returned by a Proc (`less_than: ->(record) { …
 **What changed.** A Proc returning `nil` (`less_than: ->(record) { record.plan.max_upload_size }` on a plan without a limit) used to reject every file with a blank bound in the message ("file size must be less than  (current size is 1 KB)"). It now sets no bound and accepts the file, like `limit: { max: ->(record) { nil } }` already did.
 
 **How to fix.** Nothing if "no bound" is what `nil` meant. If you relied on `nil` rejecting every file, return `0` (or a real bound) from the Proc, or make the validator conditional (`if:` / `unless:`).
+
+### Invalid options raise
+
+**Who is affected?** Only options that already crashed, or silently rejected (or accepted) files.
+
+**What changed.** These options now raise `ArgumentError` at boot:
+
+| Option | 4.x | 5.x |
+| --- | --- | --- |
+| `with_audio: { with: "no" }` (anything but `true` / `false`) | Behaved as `true` | Raises |
+
+The same rule applies to a value returned by a Proc (`with: ->(record) { … }`), which raises the same `ArgumentError` when it is evaluated. In particular, a `with_audio` Proc returning `nil` (e.g. a `nil` boolean column) used to reject silent files with `audio_present`.
+
+**How to fix.** Pass `true` / `false` to `with_audio`, and make Procs return the same.
 
 ### Matchers require a validator and probe a copy
 
