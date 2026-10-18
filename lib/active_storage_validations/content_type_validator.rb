@@ -32,7 +32,9 @@ module ActiveStorageValidations
 
     def check_validity!
       ensure_exactly_one_validator_option
-      ensure_content_types_validity(static_content_types) unless proc_content_types?
+      unless options[:with].is_a?(Proc) || options[:in].is_a?(Proc)
+        ensure_content_types_validity(static_content_types.grep_v(Proc))
+      end
       ensure_spoofing_protection_validity
     end
 
@@ -52,10 +54,12 @@ module ActiveStorageValidations
 
     def authorized_content_types_from_options(record)
       flat_options = set_flat_options(record)
-      content_types = (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).compact
+      # A Proc nested in the list may return an Array of its own.
+      content_types = (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).flatten.compact
 
-      # Procs escape check_validity!; an unknown type they return (e.g.
-      # "image/jpg") would otherwise reject every file with a blank message.
+      # Procs escape check_validity!, nested ones included; an unknown type they
+      # return (e.g. "image/jpg") would otherwise reject every file with a blank
+      # message.
       ensure_content_types_validity(content_types) if proc_content_types?
 
       content_types.map do |type|
@@ -231,7 +235,7 @@ module ActiveStorageValidations
     # Procs are resolved per record, so their result is checked at validation
     # time (see #authorized_content_types_from_options) instead of at boot.
     def proc_content_types?
-      options[:with].is_a?(Proc) || options[:in].is_a?(Proc)
+      static_content_types.any?(Proc)
     end
 
     def static_content_types
