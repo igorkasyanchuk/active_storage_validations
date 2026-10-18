@@ -51,6 +51,26 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
       end
     end
 
+    context "when the stream has no side_data_list" do
+      let(:rotation) { {} }
+
+      it "does not raise" do
+        expect { metadata }.not_to raise_error
+        expect(metadata).to include(width: 700, height: 500)
+        expect(metadata).not_to have_key(:angle)
+      end
+    end
+
+    context "when side_data_list is not an Array" do
+      let(:rotation) { { "side_data_list" => { "side_data_type" => "Display Matrix", "rotation" => -90.0 } } }
+
+      it "ignores it instead of raising" do
+        expect { metadata }.not_to raise_error
+        expect(metadata).to include(width: 700, height: 500)
+        expect(metadata).not_to have_key(:angle)
+      end
+    end
+
     context "when the rotation cannot be parsed" do
       let(:rotation) { { "tags" => { "rotate" => "unknown" } } }
 
