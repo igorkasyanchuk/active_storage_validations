@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 3.3.0' # We support Rails >= 7.0.1
 
-  %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 7.0.1' }
+  %w[activejob activemodel activestorage activesupport railties].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 7.0.1' }
   s.add_dependency 'marcel', ">= 1.0.3" # necessary for mime type spoofing features, required for Rails >= 7.0.1 anyway
 
   s.add_development_dependency 'combustion', "~> 1.3"

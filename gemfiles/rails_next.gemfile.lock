@@ -111,6 +111,7 @@ PATH
       activestorage (>= 7.0.1)
       activesupport (>= 7.0.1)
       marcel (>= 1.0.3)
+      railties (>= 7.0.1)
 
 GEM
   remote: https://rubygems.org/
