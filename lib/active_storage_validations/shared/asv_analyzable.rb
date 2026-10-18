@@ -14,7 +14,21 @@ module ActiveStorageValidations
     # count as evidence that a media analysis happened.
     CONTENT_TYPE_METADATA_KEYS = %i[content_type content_type_backend].freeze
 
+    # Every validator that runs analyzers accepts +timeout:+. Checked here, after
+    # the validator's own check_validity!, rather than in each of them.
+    def initialize(*)
+      super
+      ensure_timeout_validity
+    end
+
     private
+
+    def ensure_timeout_validity
+      return unless options.key?(:timeout)
+      return if ActiveStorageValidations.valid_command_timeout?(options[:timeout])
+
+      raise ArgumentError, "You must pass a positive number of seconds, or nil to disable it, to :timeout (got #{options[:timeout].inspect})"
+    end
 
     # Retrieve the ASV metadata from the blob.
     # If the blob has not been analyzed by our gem yet, the gem will analyze the
