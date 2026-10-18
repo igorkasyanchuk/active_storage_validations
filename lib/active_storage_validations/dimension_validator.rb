@@ -75,7 +75,10 @@ module ActiveStorageValidations
     end
 
     def ensure_dimension_hash_validity(dimension, value)
-      if value.empty? || (value.keys - DIMENSION_HASH_KEYS).any?
+      # A HashWithIndifferentAccess stores String keys but answers [:min]; a
+      # plain Hash with String keys does not, so it must keep raising.
+      keys = value.is_a?(ActiveSupport::HashWithIndifferentAccess) ? value.keys.map(&:to_sym) : value.keys
+      if value.empty? || (keys - DIMENSION_HASH_KEYS).any?
         raise ArgumentError, "{ #{dimension}: { … } } only accepts :min, :max and :in (got #{value.keys.inspect})"
       end
 
