@@ -2,7 +2,7 @@
 
 **TL;DR: most applications bump the gem and keep the same code.**
 
-- Same Ruby (`>= 3.3`) and Rails (`>= 7.0.1`) as 4.x
+- Same Ruby (`>= 3.3`) and Rails (`>= 7.0.1`) as 4.x. One new system requirement: `content_type` `spoofing_protection` with the default `:file` backend needs `file` 5.26 (2016) or later, see [below](#file-526-for-spoofing_protection)
 - No validator, option, matcher method, or I18n key was renamed or removed
 - The breaking changes are edge cases: custom messages interpolating undocumented options, options that already crashed at runtime or were silently ignored, empty authorized lists, and analysis failures that now fail closed
 - The changelog is long because of the **FIXED** list: hardening found in review, none of it requiring a code change. The few fixes that can change whether a real upload passes are listed in [Fixes that can change validation results](#fixes-that-can-change-validation-results)
@@ -22,6 +22,8 @@ Go through this table. If no row matches, you are done.
 | Passes a non-numeric or negative comparison / `limit` bound, a reversed `between:` range, `with_audio: { with: "no" }`, or a `timeout:` of `0` or a Proc (statically or from a Proc) | Fix the option | [Invalid options raise](#invalid-options-raise) |
 | Has a `size` / `total_size` / `duration` / `pages` Proc that can return `nil` | Nothing if `nil` means "no bound"; otherwise return a real bound | [Comparison Procs returning `nil`](#comparison-procs-returning-nil-set-no-bound) |
 | Uses `with_audio: { with: false }` where `ffprobe` may be missing | Install `ffmpeg` wherever validations run | [`with_audio` fails closed](#with_audio--with-false--fails-closed) |
+| Uses `spoofing_protection: true` (or `:file`) on a system whose `file` is older than 5.26 (CentOS 7, Amazon Linux 2; check `file --version`) | Upgrade `file`, point `ActiveStorage.paths[:file]` at a newer one, or use `:magika` | [`file` 5.26+](#file-526-for-spoofing_protection) |
+| Uses `content_type` `spoofing_protection` | Nothing, unless real uploads start failing as `content_type_spoofed` | [Sibling types rejected](#spoofing_protection-rejects-sibling-types) |
 | Matches on `:content_type_spoofed`, or overrides that locale key | Also handle `:content_type_analysis_failed` | [`content_type_analysis_failed`](#content_type_analysis_failed-error) |
 | Has specs asserting the English wording of `duration` errors in a non-English locale | Update the expected strings | [Localized duration values](#localized-duration-values) |
 | Has matcher specs on an attribute without that validator, relying on a matcher's side effects on the subject, or asserting a matcher description / failure message | Fix the spec | [Matchers](#matchers-require-a-validator-and-probe-a-copy) |
@@ -172,6 +174,28 @@ validates :avatar, aspect_ratio: :is_16_9
 **What changed.** Empty analyzer metadata means the file could not be analyzed at all: `ffprobe` is not installed or [timed out](../README.md#configuration), the file is unreadable, or its media type is unsupported. In 4.x that empty result was read as "no audio track", so `with_audio: { with: false }` accepted every such file (and `with: true` reported `audio_missing`). Both now add `media_metadata_missing`, like `dimension`, `duration`, `aspect_ratio`, `pages` and `processable_file` do. Images and PDFs are still treated as having no audio track.
 
 **How to fix.** Install `ffmpeg` (which ships `ffprobe`) wherever validations run, raise the per-validator `timeout:` if large videos time out, and update specs that expected `audio_missing` for unanalyzable files. The `validate_with_audio_of` matcher is unchanged.
+
+### `spoofing_protection` rejects sibling types
+
+**Who is affected?** Apps using `content_type` `spoofing_protection` whose users upload files that `file` / `magika` identify as a *sibling* of the declared type. This closes a hole: it is the one breaking change that turns an accepted upload into a rejection on purpose.
+
+**What changed.** The declared and detected types were compared after adding the Marcel parents of both, so any two types sharing a parent matched:
+
+| Declared | Detected | 4.x | 5.x |
+| --- | --- | --- | --- |
+| `text/csv` | `text/x-php` (a PHP script named `data.csv`) | Accepted (both `text/plain` children) | `content_type_spoofed` |
+| `application/vnd.openxmlformats-officedocument.wordprocessingml.document` (DOCX) | `application/java-archive` | Accepted (both `application/zip`) | `content_type_spoofed` |
+| `application/msword` | `application/vnd.ms-excel` | Accepted (both `application/x-tika-msoffice`) | `content_type_spoofed` |
+| `text/csv` | `text/plain` | Accepted | Accepted (ancestor) |
+| DOCX / XLSM | `application/zip` | Accepted | Accepted (ancestor, at any depth) |
+
+The types now match only when they are the same, Marcel aliases of each other (Marcel 2), the audio / video flavors of one container (`audio/ogg` / `video/ogg`, `audio/webm` / `video/webm`), or when one is an ancestor of the other in `Marcel::TYPE_PARENTS`.
+
+The gem's suite checks this against real uploads with both backends: genuine files of 50 common formats (also declared with the variants browsers send, such as `image/pjpeg`, `audio/wav` or `application/x-zip-compressed`), and PHP, HTML, shell, Python, SVG-with-script, Windows / Linux executable and JAR payloads uploaded as 15 common formats. A file whose real type is a more specific kind of the declared one is still accepted: a PHP or SVG file uploaded as `.txt` is plain text, a JAR uploaded as `.zip` is a ZIP. With `:file`, a JAR uploaded as `.docx` / `.xlsx` is still accepted (libmagic reports it as `application/zip`); `:magika` tells them apart.
+
+Magika misidentifies a few genuine formats (HEIC as `video/mp4`, HTML as `text/plain`, AVI / WMV / AAC as `application/octet-stream`), so `spoofing_protection: :magika` rejects them, as it did in 4.x. Use `:file` for those formats.
+
+**How to fix.** Nothing for genuine files sniffed as their own type or a less specific one. If a real format is sniffed as a sibling of what browsers declare for it, make one a parent of the other in an initializer (`Marcel::MimeType.extend "detected/type", parents: %w[declared/type]`) and please open an issue so the gem ships the link; or try the other backend (`spoofing_protection: :magika` / `:file`).
 
 ### `content_type_analysis_failed` error
 
