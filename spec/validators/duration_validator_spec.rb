@@ -376,5 +376,51 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
         expect(duration_in_words).to eq("0 seconds")
       end
     end
+
+    context "with a decimal duration in a locale using a decimal comma" do
+      around do |example|
+        I18n.backend.store_translations(:fr, number: { format: { separator: ",", delimiter: " " } })
+        I18n.with_locale(:fr) { example.run }
+      ensure
+        I18n.reload!
+      end
+
+      let(:seconds) { 1.5 }
+
+      it "localizes the number" do
+        expect(duration_in_words).to eq("1,5 secondes")
+      end
+    end
+
+    # rails-i18n style pluralization: CLDR "few" / "many" forms
+    context "with a locale whose plural rules have few and many forms" do
+      around do |example|
+        original_backend = I18n.backend
+        I18n.backend = Class.new(I18n::Backend::Simple) { include I18n::Backend::Pluralization }.new
+        I18n.backend.store_translations(:ru, i18n: { plural: { rule: east_slavic_plural_rule } })
+        I18n.with_locale(:ru) { example.run }
+      ensure
+        I18n.backend = original_backend
+      end
+
+      let(:east_slavic_plural_rule) do
+        lambda do |n|
+          next :other unless n.is_a?(Integer)
+
+          if n % 10 == 1 && n % 100 != 11 then :one
+          elsif (2..4).cover?(n % 10) && !(12..14).cover?(n % 100) then :few
+          else :many
+          end
+        end
+      end
+
+      { 1 => "1 секунда", 2 => "2 секунды", 5 => "5 секунд", 21 => "21 секунда", 1.5 => "1.5 секунд" }.each do |count, words|
+        context "when the duration is #{count} seconds" do
+          let(:seconds) { count }
+
+          it { is_expected.to eq(words) }
+        end
+      end
+    end
   end
 end
