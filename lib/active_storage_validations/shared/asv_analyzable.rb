@@ -200,7 +200,24 @@ module ActiveStorageValidations
       # Fall back to libvips, which Rails 7.1+ uses for variants and which the
       # README recommends. `:disabled` (Rails 7.2+) is handled in
       # #image_analyzer_for via NullAnalyzer.
-      ActiveStorage.variant_processor || DEFAULT_IMAGE_PROCESSOR
+      processor = ActiveStorage.variant_processor || DEFAULT_IMAGE_PROCESSOR
+      processor.is_a?(Class) ? image_processor_for_transformer(processor) : processor
+    end
+
+    # Rails 8.2+ also accepts a transformer class
+    # (`config.active_storage.variant_processor = MyTransformer`). It names the
+    # image library only when it extends Rails' ImageMagick / Vips transformer;
+    # any other class gets the default analyzer instead of failing every image.
+    # Ancestors are compared by name: referencing the constants would autoload
+    # them, and they require the image_processing gem.
+    def image_processor_for_transformer(transformer)
+      ancestor_names = transformer.ancestors.map(&:name)
+
+      if ancestor_names.include?("ActiveStorage::Transformers::ImageMagick")
+        :mini_magick
+      else
+        DEFAULT_IMAGE_PROCESSOR
+      end
     end
 
     def video_analyzer_for(attachable)

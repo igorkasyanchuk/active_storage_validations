@@ -778,6 +778,46 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
         it { is_expected_to_have_error_options(error_options) }
       end
 
+      # Rails 8.2+: config.active_storage.variant_processor = MyTransformer
+      context "when ActiveStorage.variant_processor is a transformer class" do
+        let(:validator) { described_class.new(attributes: [ :file ], width: 500) }
+
+        around do |example|
+          previous = ActiveStorage.variant_processor
+          ActiveStorage.variant_processor = transformer
+          example.run
+        ensure
+          ActiveStorage.variant_processor = previous
+        end
+
+        context "with a custom transformer" do
+          let(:transformer) { Class.new }
+
+          it "analyzes images with the default libvips analyzer" do
+            expect(validator.send(:image_processor)).to eq(:vips)
+          end
+
+          context "when validating an image", image_processor: :vips do
+            subject(:record) { model.width.attach(image_500x500_file) and model }
+
+            it { is_expected_to_be_valid }
+          end
+        end
+
+        context "with a subclass of Rails' ImageMagick transformer" do
+          # Stand-in named like the Rails class: the real one requires image_processing.
+          let(:transformer) do
+            image_magick_transformer = Class.new
+            image_magick_transformer.define_singleton_method(:name) { "ActiveStorage::Transformers::ImageMagick" }
+            Class.new(image_magick_transformer)
+          end
+
+          it "analyzes images with ImageMagick" do
+            expect(validator.send(:image_processor)).to eq(:mini_magick)
+          end
+        end
+      end
+
       context "when the passed file is not a valid media" do
         subject(:record) { model.public_send(attribute).attach(empty_io_file) and model }
 
