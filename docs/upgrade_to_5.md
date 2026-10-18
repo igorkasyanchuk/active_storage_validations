@@ -256,6 +256,9 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | `content_type` `spoofing_protection` on Marcel 2 / Rails main (8.2+) | `audio/aac`, `application/xml`, `audio/mp4` rejected | Accepted |
 | `content_type` `spoofing_protection` with a blank declared content type | Mismatch check skipped | Checked against the filename-resolved type |
 | `with_audio: { with: -> { … } }` | Proc treated as truthy, every file failed | Proc evaluated |
+| `dimension` / `aspect_ratio` on a PDF whose first page is rotated (`/Rotate 90`) | Stored page size (200×300) | Displayed page size (300×200) ♻️ |
+| Video metadata validators on an audio-only MP4 with cover art | Cover read as the video track (its dimensions, `video: true`) | No video track: `dimension` / `aspect_ratio` add `media_metadata_missing` ♻️ |
+| Metadata validators on a file declared as `application/octet-stream`, `IMAGE/PNG` or `""` | No analyzer picked, file rejected | Analyzed from the type Rails identified (or the filename) |
 
 ♻️ = the old result is cached on blobs analyzed under 4.x, see below.
 
@@ -296,6 +299,10 @@ pt:
 
 A `content_type` Proc returning an unsupported type (e.g. `"image/jpg"`) used to reject every file with a blank message, and an `aspect_ratio` Proc returning an unknown ratio (`:sqaure`, `"16:9"`) rejected every file with "must be 0:0". Both now raise, when the Proc is evaluated, the same `ArgumentError` static options get at boot. This also applies to a Proc nested in the list (`in: [:pdf, ->(record) { … }]`), whose returned Array is now flattened instead of dropped. Fix the Proc (`"image/jpeg"`, a Marcel shorthand such as `:jpeg`, `:square`, `:is_16_9`).
 
+### `file` 5.26+ for `spoofing_protection`
+
+The `:file` backend (`spoofing_protection: true` / `:file`) now runs `file -E -P bytes=1048576`: `-P bytes` sniffs uploads on the same first MiB as persisted blobs (recent libmagic reads up to 7 MiB by default), and `-E` makes filesystem errors exit non-zero instead of printing "cannot open …" as if it were the detected type. Both flags need `file` 5.26 (2016) or later, which every maintained Linux distribution and macOS ship. With an older `file` (e.g. CentOS 7, Amazon Linux 2) every spoofing check fails with `content_type_analysis_failed`: upgrade `file`, point `ActiveStorage.paths[:file]` at a newer binary, or use `spoofing_protection: :magika`. Check with `file --version`.
+
 ### Image analyzer default when Rails has not set a processor
 
 When `ActiveStorage.variant_processor` is unset, image analyzers now fall back to `:vips` instead of `:mini_magick` (matching the README recommendation and Rails 7.1+). A fully booted Rails app still uses whatever Rails set (`:mini_magick` on 7.0, `:vips` on 7.1+). Set `config.active_storage.variant_processor = :mini_magick` to keep ImageMagick.
@@ -305,7 +312,7 @@ When `ActiveStorage.variant_processor` is unset, image analyzers now fall back t
 Only relevant if you monkey-patch the gem:
 
 - `ASVAttachableAdapter` handlers expose only `content_type`, `filename` and `with_media_path(tempfile, max_bytes: nil)`; `read` / `rewind` are gone
-- `ASVAttachable#attachable_io`, `#rewind_attachable_io`, `#attachable_content_type_rails_like` and `#supports_pathname_attachment?` are removed
+- `ASVAttachable#attachable_io`, `#rewind_attachable_io`, `#attachable_content_type_rails_like`, `#supports_pathname_attachment?` and `#attachable_media_type` are removed. `ASVAnalyzable#metadata_analyzer_for` / `#generate_metadata_for` take the blob as an optional last argument
 - `ASVOptionable#flatten_options` returns only the validator check options
 - Matchers build their probe attachments on `StringIO`s; `Matchers::ASVAttachable#dummy_blob` is removed
 

@@ -13,6 +13,8 @@ module ActiveStorageValidations
     # claims to be, not whether an analyzer could decode it, so they must never
     # count as evidence that a media analysis happened.
     CONTENT_TYPE_METADATA_KEYS = %i[content_type content_type_backend].freeze
+    # What browsers and clients send when they do not know the type.
+    GENERIC_CONTENT_TYPE = "application/octet-stream"
 
     # Every validator that runs analyzers accepts +timeout:+. Checked here, after
     # the validator's own check_validity!, rather than in each of them.
@@ -41,7 +43,7 @@ module ActiveStorageValidations
 
       return media_metadata(blob) if blob_has_asv_metadata?(blob, metadata_keys)
 
-      new_metadata = generate_metadata_for(attachable, metadata_keys) || {}
+      new_metadata = generate_metadata_for(attachable, metadata_keys, blob) || {}
       blob.merge_into_active_storage_validations_metadata(memoize_unavailable_keys(new_metadata, metadata_keys))
       persist_asv_metadata(blob)
 
@@ -136,23 +138,38 @@ module ActiveStorageValidations
       metadata_keys.all? { |key| cached.key?(key) }
     end
 
-    def generate_metadata_for(attachable, metadata_keys)
+    def generate_metadata_for(attachable, metadata_keys, blob = nil)
       if content_type_metadata_keys?(metadata_keys)
         content_type_analyzer_for(attachable).content_type
       else
-        metadata_analyzer_for(attachable).metadata
+        metadata_analyzer_for(attachable, blob).metadata
       end
     end
 
-    def metadata_analyzer_for(attachable)
-      return pdf_analyzer_for(attachable) if attachable_content_type(attachable) == "application/pdf"
+    def metadata_analyzer_for(attachable, blob = nil)
+      content_type = analyzable_content_type(attachable, blob)
+      return pdf_analyzer_for(attachable) if content_type == "application/pdf"
 
-      case attachable_media_type(attachable)
+      case content_type.to_s.split("/").first
       when "image" then image_analyzer_for(attachable)
       when "video" then video_analyzer_for(attachable)
       when "audio" then audio_analyzer_for(attachable)
       else fallback_analyzer_for(attachable)
       end
+    end
+
+    # Pick the analyzer from the type Rails identified for the blob (from the
+    # file's magic bytes, unless attached with `identify: false`), then the
+    # declared type, then the filename. Routing on the raw declared type sent
+    # a PNG uploaded as application/octet-stream, IMAGE/PNG or "" to the null
+    # analyzer (file_not_processable). A generic type is not an answer either.
+    def analyzable_content_type(attachable, blob)
+      [ blob&.content_type, full_attachable_content_type(attachable) ].each do |type|
+        type = content_type_without_parameters(type.to_s)
+        return type if type.present? && type != GENERIC_CONTENT_TYPE
+      end
+
+      marcel_content_type_from_filename(attachable)
     end
 
     def pdf_analyzer_for(attachable)

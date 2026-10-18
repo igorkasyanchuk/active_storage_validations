@@ -26,7 +26,7 @@
     - When `ActiveStorage.variant_processor` is unset, image analyzers fall back to `:vips` instead of `:mini_magick` (README recommendation, Rails 7.1+ default). A booted Rails app still uses the processor Rails set. Set `config.active_storage.variant_processor = :mini_magick` to keep ImageMagick
     - `content_type` Proc results are checked at validation time with the same `ArgumentError` static options get at boot. A Proc returning an unsupported type (e.g. `"image/jpg"`) used to reject every file with a blank message ("authorized content type is )"). Types Marcel knows no extension for are now rendered as-is in `*_human_content_type(s)`
     - `aspect_ratio` Proc results (top-level or nested in an `in:` list) are checked the same way. A Proc returning an unknown ratio (`:sqaure`, `"16:9"`) used to reject every file with "must be 0:0"; an Array returned by a nested Proc is flattened
-    - `content_type` `spoofing_protection` with the `:file` backend downloads only the first MiB of persisted blobs (libmagic never reads more). `:magika` still downloads the whole blob
+    - `content_type` `spoofing_protection` with the `:file` backend downloads only the first MiB of persisted blobs, and runs `file -E -P bytes=1048576` so every attachable is sniffed on that same first MiB (recent libmagic reads up to 7 MiB by default, so an upload and the same file as a blob could get different verdicts) and a filesystem error ("cannot open …", exit status 0 without `-E`) is never taken for the detected type. Requires `file` >= 5.26 (2016). `:magika` still downloads the whole blob. [Details](docs/upgrade_to_5.md#file-526-for-spoofing_protection)
   - **FIXED** (found in review, none reported as GitHub issues; none require a code change. ♻️ = blobs analyzed under 4.x keep stale metadata until `blob.remove_active_storage_validations_metadata!`)
     - **Comparison bounds** (`size`, `total_size`, `duration`, `pages`, `limit`, `dimension`)
       - A bound of `0` is a real bound: `equal_to: 0`, `greater_than_or_equal_to: 0`, `limit: { max: 0 }` / `{ min: 0 }`, `dimension` `width` / `height` `{ max: 0 }` (or a Proc returning `0`). Those checks used to be skipped: comparison validators rejected every file, `limit` rejected records with no files, `dimension` accepted every file
@@ -54,6 +54,7 @@
       - No more `TypeError` when a Hash attachable's `io:` has no filesystem path (streaming wrapper, Zip entry, …): it is copied to a tempfile
       - The same copy is used, here and for `content_type` `spoofing_protection`, when an attachable's path does not hold its content: a `Rack::Test::UploadedFile` built on a `StringIO` no longer raises `NoMethodError`, a Hash `io:` Tempfile that was unlinked no longer raises `Errno::ENOENT` (or reports `file` as not installed), and an anonymous Tempfile (Ruby 3.4) is no longer analyzed as its tmp directory (`inode/directory`)
       - Relative `File` / `Pathname` attachables are expanded before reaching the analyzer commands, which read `-image.png` as an option and `clip:1.mp4` as an ffmpeg protocol and rejected valid files
+      - The analyzer is picked from the type Rails identified for the blob (magic bytes), then the declared type, then the filename. A valid file declared as `application/octet-stream`, `IMAGE/PNG` or `""` (common with some clients and direct uploads) used to get no analyzer and was rejected (`file_not_processable`, `media_metadata_missing`)
       - Image validators fail closed (`media_metadata_missing`) instead of raising `NoMethodError` when `ActiveStorage.variant_processor` is `:disabled` or unknown
     - **Analyzers**
       - Windows: analyzer commands (`ffprobe`, `pdfinfo`, `file`, `magika`, `identify`) no longer raise since 4.0 (`Process.spawn(pgroup: true)` is Unix-only). On timeout the child is killed directly
@@ -61,6 +62,8 @@
       - Blobs and other copied attachables are analyzed from a tempfile named with their extension, like `ActiveStorage::Blob#open`, so ImageMagick identifies formats without a magic number (ICO, TGA) from a blob as it does from an upload
       - `VideoAnalyzer` / `AudioAnalyzer` no longer raise from `valid?` on invalid ffprobe JSON, `N/A` numeric fields, a non-integer rotation (`"90.0"`) or a missing `side_data_list`; analysis fails closed
       - ImageMagick `identify` targets the first frame only (`path[0]`), so large animated GIFs / multi-page TIFFs no longer hit `command_timeout`
+      - ♻️ `PdfAnalyzer` applies the first page's `/Rotate`: a 200×300 pt page rotated by 90° is reported as 300×200, as displayed, like rotated images and videos
+      - ♻️ `VideoAnalyzer` ignores cover art (`attached_pic` streams): an audio-only MP4 with an embedded cover no longer reports the cover's dimensions and `video: true`
       - `PdfAnalyzer` no longer caches `pages: 0` (or 0-pt width / height) when `pdfinfo` omits them, so the analysis can retry and `processable_file` no longer treats `{ pages: 0 }` as a decoded file
       - Audio stream tags (ID3 / Vorbis) are no longer cached as `asv_tags`. No validator read them, and a large or non-ASCII tag hash could exceed S3's 2 KB object-metadata limit and fail the upload
       - `blob.remove_active_storage_validations_metadata!` persists the cleared cache on saved blobs (it only changed memory, so `reload` restored stale `asv_*`) and keeps non-`asv_*` custom metadata
@@ -80,7 +83,7 @@
       - `Matchers.mock_metadata` keeps its `Analyzer.new` mock per thread: concurrent probes (`parallelize(with: :threads)`) could restore each other's stub out of order and leave every analyzer mocked for good
   - **MISC**
     - Internals (only relevant if you monkey-patch the gem, see [upgrade guide](docs/upgrade_to_5.md#internal-api-removals))
-      - Remove dead attachable helpers (`attachable_content_type_rails_like`, `attachable_io`, `rewind_attachable_io`, `supports_pathname_attachment?`) and the adapter `read` / `rewind`: `ASVAttachableAdapter` handlers only expose `content_type`, `filename` and `with_media_path`
+      - Remove dead attachable helpers (`attachable_content_type_rails_like`, `attachable_io`, `rewind_attachable_io`, `supports_pathname_attachment?`, `attachable_media_type`) and the adapter `read` / `rewind`: `ASVAttachableAdapter` handlers only expose `content_type`, `filename` and `with_media_path`
       - `ASVOptionable#flatten_options` keeps only the validator check options instead of replacing every other option with `{}`
       - Replace the `define_method` block generating the `DimensionValidator` min / max helpers with plain methods
       - Matchers build probe attachments on in-memory `StringIO`s instead of never-closed `Tempfile`s, and `validate_total_size_of` no longer uploads a real blob per probe
