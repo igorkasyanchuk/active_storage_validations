@@ -13,6 +13,8 @@
 class ContentType::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :without_validator
+
   has_one_attached :custom_matcher
   validates :custom_matcher, content_type: [ "image/png" ]
 
@@ -53,6 +55,8 @@ class ContentType::Matcher < ApplicationRecord
   if Rails.gem_version >= Gem::Version.new("8.0.0")
     has_one_attached :with_except_on_symbol
     validates :with_except_on_symbol, content_type: :png, except_on: :update
+    has_one_attached :with_except_on_create
+    validates :with_except_on_create, content_type: :png, except_on: :create
     has_one_attached :with_except_on_array
     validates :with_except_on_array, content_type: :png, except_on: %i[update custom]
     has_one_attached :with_several_validators_and_except_on
@@ -75,6 +79,11 @@ class ContentType::Matcher < ApplicationRecord
   # Combinations
   has_one_attached :allowing_one_with_message
   validates :allowing_one_with_message, content_type: { in: [ "application/pdf" ], message: "Not authorized file type." }
+  has_many_attached :many_allowing_one_with_message
+  validates :many_allowing_one_with_message, content_type: { in: [ "application/pdf" ], message: "Not authorized file type." }
+  has_one_attached :several_validators_with_same_message
+  validates :several_validators_with_same_message, content_type: { with: :pdf, message: "Not authorized file type." }
+  validates :several_validators_with_same_message, content_type: { in: %i[pdf png], message: "Not authorized file type." }
 
   most_common_mime_types.reject { |common_mime_type| common_mime_type[:type] == :ogv } # issue with ogv
                         .each do |content_type|
