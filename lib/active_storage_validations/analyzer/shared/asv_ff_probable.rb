@@ -69,8 +69,15 @@ module ActiveStorageValidations
       ActiveStorage.paths[:ffprobe] || "ffprobe"
     end
 
+    # Cover art (ID3 / MP4 artwork) is reported as a video stream flagged
+    # disposition.attached_pic. It is a still image, not a video track: an
+    # audio-only MP4 with a 1920x1080 cover must not report video dimensions.
     def video_stream
-      @video_stream ||= streams.detect { |stream| stream["codec_type"] == "video" } || {}
+      @video_stream ||= streams.detect { |stream| stream["codec_type"] == "video" && !attached_pic?(stream) } || {}
+    end
+
+    def attached_pic?(stream)
+      stream.dig("disposition", "attached_pic").to_i == 1
     end
 
     def audio_stream

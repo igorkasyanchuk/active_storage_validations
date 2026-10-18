@@ -81,6 +81,39 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
     end
   end
 
+  describe "cover art" do
+    subject(:metadata) { analyzer.metadata }
+
+    context "with an audio-only container holding a cover image" do
+      let(:attachable) { audio_with_cover_art_file }
+
+      it "does not treat the cover as a video track" do
+        expect(metadata).to include(audio: true, video: false)
+        expect(metadata).not_to include(:width, :height)
+      end
+    end
+
+    context "when the cover precedes the video track" do
+      let(:attachable) { video_file }
+
+      before do
+        allow(analyzer).to receive(:media_from_path).and_return(
+          {
+            "streams" => [
+              { "codec_type" => "video", "width" => 1920, "height" => 1080, "disposition" => { "attached_pic" => 1 } },
+              { "codec_type" => "video", "width" => 640, "height" => 480, "disposition" => { "attached_pic" => 0 } }
+            ],
+            "format" => { "duration" => "1.0" }
+          }
+        )
+      end
+
+      it "returns the video track dimensions" do
+        expect(metadata).to include(width: 640, height: 480, video: true)
+      end
+    end
+  end
+
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "video_150x150.mp4").to_s }
     let(:attachable) do
