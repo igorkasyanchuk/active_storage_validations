@@ -5,8 +5,8 @@ module ActiveStorageValidations
   #
   # Extracts the following from a pdf attachable:
   #
-  # * Width (pts) => for the first page only
-  # * Height (pts) => for the first page only
+  # * Width (pts) => for the first page only, as displayed (/Rotate applied)
+  # * Height (pts) => for the first page only, as displayed (/Rotate applied)
   # * Pages (integer) => number of pages in the pdf
   #
   # Example:
@@ -74,11 +74,18 @@ module ActiveStorageValidations
     end
 
     def width
-      page_size_in_points[0]
+      page_size_in_points[rotated? ? 1 : 0]
     end
 
     def height
-      page_size_in_points[1]
+      page_size_in_points[rotated? ? 0 : 1]
+    end
+
+    # pdfinfo reports the MediaBox as stored, plus the page /Rotate ("Page rot:
+    # 90"). Swap the sides of quarter-turned pages so width / height describe
+    # the page as displayed, like the image and video analyzers do.
+    def rotated?
+      @media["page_rot"].to_i % 180 == 90
     end
 
     def page_size_in_points
