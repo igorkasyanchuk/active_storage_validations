@@ -51,6 +51,60 @@ RSpec.describe "command timeout integration" do
     end
   end
 
+  describe "timeout validity" do
+    validators = {
+      ActiveStorageValidations::AspectRatioValidator => { with: :square },
+      ActiveStorageValidations::ContentTypeValidator => { with: :png, spoofing_protection: true },
+      ActiveStorageValidations::DimensionValidator => { width: 150 },
+      ActiveStorageValidations::DurationValidator => { less_than: 5.minutes },
+      ActiveStorageValidations::PagesValidator => { less_than: 5 },
+      ActiveStorageValidations::ProcessableFileValidator => {},
+      ActiveStorageValidations::WithAudioValidator => {}
+    }
+
+    validators.each do |validator_class, check_options|
+      describe validator_class.name.demodulize do
+        subject(:validator) { validator_class.new(attributes: [ :file ], **check_options, timeout: timeout) }
+
+        [ 2.seconds, 0.5, nil ].each do |valid_timeout|
+          context "with timeout: #{valid_timeout.inspect}" do
+            let(:timeout) { valid_timeout }
+
+            it { expect { validator }.not_to raise_error }
+          end
+        end
+
+        [ 0, -1, "5", ->(_record) { 5 } ].each do |invalid_timeout|
+          context "with timeout: #{invalid_timeout.inspect}" do
+            let(:timeout) { invalid_timeout }
+
+            it "raises an error at validator initialization" do
+              expect { validator }.to raise_error(ArgumentError, /You must pass a positive number of seconds, or nil to disable it, to :timeout/)
+            end
+          end
+        end
+      end
+    end
+
+    describe "ActiveStorageValidations.command_timeout=" do
+      [ 0, -1, "5", ->(_record) { 5 } ].each do |invalid_timeout|
+        context "with #{invalid_timeout.inspect}" do
+          it "raises an error and keeps the previous timeout" do
+            expect { ActiveStorageValidations.command_timeout = invalid_timeout }
+              .to raise_error(ArgumentError, /command_timeout must be a positive number of seconds, or nil to disable it/)
+            expect(ActiveStorageValidations.command_timeout).to eq(10.seconds)
+          end
+        end
+      end
+
+      it "accepts nil to disable the deadline" do
+        ActiveStorageValidations.command_timeout = nil
+
+        expect(ActiveStorageValidations.command_timeout).to be_nil
+      end
+    end
+  end
+
   describe "timeout is not treated as a comparison bound" do
     context "with a duration comparison option" do
       let(:validator) do
