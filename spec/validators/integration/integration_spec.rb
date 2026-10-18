@@ -163,7 +163,7 @@ RSpec.describe "Integration tests" do
           {
             "width" => 150,
             "height" => 150,
-            "duration" => 1.7,
+            "duration" => 1.733,
             "audio" => false,
             "video" => true,
             "content_type" => "video/mp4",
