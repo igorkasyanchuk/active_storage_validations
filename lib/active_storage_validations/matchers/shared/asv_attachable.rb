@@ -9,23 +9,33 @@ module ActiveStorageValidations
 
       private
 
+      # Probe files go through the attribute writer: it only records a pending
+      # change, while `attach` saves a persisted record. A has_many_attached
+      # probe replaces the record's files, so only the probe files count.
       def attach_file(file = dummy_file)
-        @subject.public_send(@attribute_name).attach(file)
+        assign_files([ file ])
         @subject.public_send(@attribute_name)
       end
 
       def attach_files(count)
-        return unless count.positive?
-
-        file_array = Array.new(count, dummy_file)
-
-        @subject.public_send(@attribute_name).attach(file_array)
+        assign_files(Array.new(count, dummy_file))
       end
 
+      # Leaves the attribute empty (a pending removal for persisted files). The
+      # record's own state is restored by ASVValidatable#restore_subject.
       def detach_file
-        @subject.attachment_changes.delete(@attribute_name.to_s)
+        assign_files([])
       end
       alias :detach_files :detach_file
+
+      def assign_files(files)
+        value = many_attached? ? files : files.first
+        @subject.public_send("#{@attribute_name}=", value)
+      end
+
+      def many_attached?
+        @subject.public_send(@attribute_name).is_a?(ActiveStorage::Attached::Many)
+      end
 
       def file_attached?
         @subject.public_send(@attribute_name).attached?

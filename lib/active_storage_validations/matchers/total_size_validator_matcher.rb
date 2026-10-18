@@ -19,15 +19,6 @@ module ActiveStorageValidations
         message.join("\n")
       end
 
-      protected
-
-      # has_many_attached relation. The Hash attachable is unfurled in memory
-      # (byte_size comes from the stubbed io.size), no blob is uploaded.
-      def attach_file
-        @subject.public_send(@attribute_name).attach([ dummy_file ])
-        @subject.public_send(@attribute_name)
-      end
-
       private
 
       def describe_value(value)
