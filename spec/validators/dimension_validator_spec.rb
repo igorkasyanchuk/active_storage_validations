@@ -23,7 +23,7 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
       %i[width height].each do |dimension|
         describe ":#{dimension}" do
           context "when the value is an Integer, a Proc or a valid Hash" do
-            [ 150, ->(_record) { 150 }, { min: 100 }, { max: 0 }, { min: 100, max: ->(_record) { 200 } }, { in: 100..200 } ].each do |value|
+            [ 150, ->(_record) { 150 }, { min: 100 }, { max: 0 }, { min: 100, max: ->(_record) { 200 } }, { in: 100..200 }, { min: 100 }.with_indifferent_access ].each do |value|
               context "with #{value.inspect}" do
                 let(:validator_options) { { dimension => value } }
 
@@ -47,7 +47,7 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
             it { expect { validator }.to raise_error(ArgumentError, /\{ #{dimension}: value \} value must be an Integer/) }
           end
 
-          [ {}, { minimum: 1000 }, { min: 100, maximum: 200 } ].each do |value|
+          [ {}, { minimum: 1000 }, { min: 100, maximum: 200 }, { "min" => 100 } ].each do |value|
             context "when the Hash has no known key (e.g. #{dimension}: #{value.inspect})" do
               let(:validator_options) { { dimension => value } }
               let(:error_message) { "{ #{dimension}: { … } } only accepts :min, :max and :in (got #{value.keys.inspect})" }
