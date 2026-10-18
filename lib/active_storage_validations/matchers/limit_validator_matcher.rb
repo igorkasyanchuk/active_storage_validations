@@ -123,6 +123,7 @@ module ActiveStorageValidations
 
       def is_custom_message_valid?
         return true if !@custom_message || (@min&.zero? && @max.nil?)
+        raise ArgumentError, "#with_message needs #min or #max to build a file count the validator rejects" if @min.nil? && @max.nil?
 
         attach_files(@min.nil? || @min.zero? ? @max + 1 : @min - 1)
         validate
