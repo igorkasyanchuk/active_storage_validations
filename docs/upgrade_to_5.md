@@ -19,6 +19,8 @@ Go through this table. If no row matches, you are done.
 | Passes an empty `content_type` / `aspect_ratio` list (`[]`, or a Proc that can return `[]`) | Remove the validator, or expect every file to be rejected | [Empty lists](#empty-content_type--aspect_ratio-lists-fail-closed) |
 | Declares a malformed `dimension` option (`width: { minimum: 1000 }`, `width: 100..200`, `{ min: 100..100, width: 150 }`) | Fix the option | [Malformed `dimension` options](#malformed-dimension-options-raise-at-boot) |
 | Uses an `aspect_ratio` value that is not an exact `is_x_y` (`:is_16_9square`) | Fix the typo | [Strict `aspect_ratio`](#aspect_ratio-options-are-validated-strictly) |
+| Passes a non-numeric or negative comparison / `limit` bound, a reversed `between:` range, `with_audio: { with: "no" }`, or a `timeout:` of `0` or a Proc (statically or from a Proc) | Fix the option | [Invalid options raise](#invalid-options-raise) |
+| Has a `size` / `total_size` / `duration` / `pages` Proc that can return `nil` | Nothing if `nil` means "no bound"; otherwise return a real bound | [Comparison Procs returning `nil`](#comparison-procs-returning-nil-set-no-bound) |
 | Uses `with_audio: { with: false }` where `ffprobe` may be missing | Install `ffmpeg` wherever validations run | [`with_audio` fails closed](#with_audio--with-false--fails-closed) |
 | Matches on `:content_type_spoofed`, or overrides that locale key | Also handle `:content_type_analysis_failed` | [`content_type_analysis_failed`](#content_type_analysis_failed-error) |
 | Has specs asserting the English wording of `duration` errors in a non-English locale | Update the expected strings | [Localized duration values](#localized-duration-values) |
@@ -191,6 +193,34 @@ en:
         other: "could not be verified (authorized content types are %{authorized_human_content_types})"
 ```
 
+### Invalid options raise
+
+**Who is affected?** Only options that already crashed, or silently rejected (or accepted) files.
+
+**What changed.** These options now raise `ArgumentError` at boot:
+
+| Option | 4.x | 5.x |
+| --- | --- | --- |
+| `size: { less_than: "2MB" }` (any comparison bound that is not a number) | `ArgumentError` from `valid?` | Raises |
+| `size: { less_than: -1 }` (negative comparison bound) | Every file rejected | Raises |
+| `size: { between: 5.kilobytes..1.kilobyte }`, `between: 3...3` (reversed / empty range) | Every file rejected | Raises |
+| `limit: { max: -1 }` | Every record rejected, even without files | Raises |
+| `with_audio: { with: "no" }` (anything but `true` / `false`) | Behaved as `true` | Raises |
+| `duration: { less_than: 5.minutes, timeout: 0 }`, `ActiveStorageValidations.command_timeout = 0` | Every file failed with `media_metadata_missing` | Raises |
+| `timeout: ->(record) { 5 }` | `NoMethodError` from `valid?` | Raises (Procs are not supported for `timeout:`) |
+
+The same rules apply to a value returned by a Proc (`less_than: ->(record) { … }`, `with: ->(record) { … }`, `limit: { max: ->(record) { … } }`), which raises the same `ArgumentError` when it is evaluated. In particular, a `with_audio` Proc returning `nil` (e.g. a `nil` boolean column) used to reject silent files with `audio_present`.
+
+**How to fix.** Pass a non-negative number (Integer, Float or `ActiveSupport::Duration`), an ordered Range, `true` / `false` for `with_audio`, and a positive number of seconds or `nil` for `timeout:`. Make Procs return the same, or `nil` for "no bound" on comparison and `limit` options (see below).
+
+### Comparison Procs returning `nil` set no bound
+
+**Who is affected?** Only `size`, `total_size`, `duration` or `pages` Procs that can return `nil`.
+
+**What changed.** A Proc returning `nil` (`less_than: ->(record) { record.plan.max_upload_size }` on a plan without a limit) used to reject every file with a blank bound in the message ("file size must be less than  (current size is 1 KB)"). It now sets no bound and accepts the file, like `limit: { max: ->(record) { nil } }` already did.
+
+**How to fix.** Nothing if "no bound" is what `nil` meant. If you relied on `nil` rejecting every file, return `0` (or a real bound) from the Proc, or make the validator conditional (`if:` / `unless:`).
+
 ### Matchers require a validator and probe a copy
 
 **Who is affected?** Only test suites using the gem matchers in one of the ways below. Validation results in your app do not change.
@@ -262,9 +292,9 @@ pt:
         last_word_connector: " e "
 ```
 
-### `content_type` Proc results are checked
+### `content_type` / `aspect_ratio` Proc results are checked
 
-A `content_type` Proc returning an unsupported type (e.g. `"image/jpg"`) used to reject every file with a blank message. It now raises, when the Proc is evaluated, the same `ArgumentError` static options get at boot. Fix the Proc (`"image/jpeg"`, or a Marcel shorthand such as `:jpeg`).
+A `content_type` Proc returning an unsupported type (e.g. `"image/jpg"`) used to reject every file with a blank message, and an `aspect_ratio` Proc returning an unknown ratio (`:sqaure`, `"16:9"`) rejected every file with "must be 0:0". Both now raise, when the Proc is evaluated, the same `ArgumentError` static options get at boot. This also applies to a Proc nested in the list (`in: [:pdf, ->(record) { … }]`), whose returned Array is now flattened instead of dropped. Fix the Proc (`"image/jpeg"`, a Marcel shorthand such as `:jpeg`, `:square`, `:is_16_9`).
 
 ### Image analyzer default when Rails has not set a processor
 
