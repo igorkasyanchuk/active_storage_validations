@@ -54,24 +54,18 @@ module ActiveStorageValidations
     end
 
     def ensure_arguments_validity
-      return true if min_max_are_proc? || min_or_max_is_proc_and_other_not_present?
-
-      raise ArgumentError, "You must pass integers to :min and :max" if min_or_max_defined_and_not_integer?
+      raise ArgumentError, "You must pass integers to :min and :max" unless bounds_are_integer_or_proc?
       raise ArgumentError, "You must pass a higher value to :max than to :min" if min_higher_than_max?
     end
 
-    def min_max_are_proc?
-      options[:min]&.is_a?(Proc) && options[:max]&.is_a?(Proc)
+    # A Proc is a deferred integer (`min: 1, max: -> { record.plan_limit }`).
+    # Only static integers can be compared at boot.
+    def bounds_are_integer_or_proc?
+      AVAILABLE_CHECKS.all? { |bound| bound_is_integer_or_proc?(bound) }
     end
 
-    def min_or_max_is_proc_and_other_not_present?
-      (options[:min]&.is_a?(Proc) && options[:max].nil?) ||
-        (options[:min].nil? && options[:max]&.is_a?(Proc))
-    end
-
-    def min_or_max_defined_and_not_integer?
-      (options.key?(:min) && !options[:min].is_a?(Integer)) ||
-        (options.key?(:max) && !options[:max].is_a?(Integer))
+    def bound_is_integer_or_proc?(bound)
+      !options.key?(bound) || options[bound].is_a?(Integer) || options[bound].is_a?(Proc)
     end
 
     def min_higher_than_max?
