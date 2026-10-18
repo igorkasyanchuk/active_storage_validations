@@ -86,4 +86,54 @@ RSpec.describe ActiveStorageValidations::Matchers do
       end
     end
   end
+
+  describe ".mock_metadata" do
+    let(:analyzer_class) { ActiveStorageValidations::Analyzer::NullAnalyzer }
+    let(:attachable) { { io: StringIO.new, filename: "test.png", content_type: "image/png" } }
+
+    def mocked_metadata(&block)
+      described_class.mock_metadata(attachable, { width: 10 }, &block)
+    end
+
+    it "mocks every analyzer within the block" do
+      metadata = mocked_metadata { analyzer_class.new(attachable).metadata }
+
+      expect(metadata).to include(width: 10)
+    end
+
+    it "restores the analyzers after the block" do
+      mocked_metadata { nil }
+
+      expect(analyzer_class.new(attachable)).to be_a(analyzer_class)
+    end
+
+    it "does not mock analyzers in other threads" do
+      analyzer = mocked_metadata { Thread.new { analyzer_class.new(attachable) }.value }
+
+      expect(analyzer).to be_a(analyzer_class)
+    end
+
+    # Thread A enters, thread B enters, A leaves, B leaves: B must still see
+    # its own mock after A leaves, and nothing may stay mocked afterwards.
+    def overlapping_mocked_metadata
+      a_entered, a_left, b_entered = Array.new(3) { Queue.new }
+      thread_a = Thread.new do
+        described_class.mock_metadata(attachable, { width: 1 }) { a_entered << true && b_entered.pop }
+        a_left << true
+      end
+      thread_b = Thread.new do
+        a_entered.pop
+        described_class.mock_metadata(attachable, { width: 2 }) do
+          b_entered << true && a_left.pop
+          analyzer_class.new(attachable).metadata
+        end
+      end
+      thread_b.value.tap { thread_a.join }
+    end
+
+    it "isolates overlapping blocks in different threads" do
+      expect(overlapping_mocked_metadata).to include(width: 2)
+      expect(analyzer_class.new(attachable)).to be_a(analyzer_class)
+    end
+  end
 end
