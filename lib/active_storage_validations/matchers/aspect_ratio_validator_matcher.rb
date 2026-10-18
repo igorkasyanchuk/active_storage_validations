@@ -58,6 +58,7 @@ module ActiveStorageValidations
 
       def matches?(subject)
         initialize_subject(subject)
+        @allowed_aspect_ratios_not_allowed = @rejected_aspect_ratios_not_rejected = nil
 
         is_a_valid_active_storage_attribute? &&
           has_validator? &&
@@ -73,12 +74,12 @@ module ActiveStorageValidations
       protected
 
       def all_allowed_aspect_ratios_allowed?
-        @allowed_aspect_ratios_not_allowed ||= @allowed_aspect_ratios.reject { |aspect_ratio| aspect_ratio_allowed?(aspect_ratio) }
+        @allowed_aspect_ratios_not_allowed = @allowed_aspect_ratios.reject { |aspect_ratio| aspect_ratio_allowed?(aspect_ratio) }
         @allowed_aspect_ratios_not_allowed.empty?
       end
 
       def all_rejected_aspect_ratios_rejected?
-        @rejected_aspect_ratios_not_rejected ||= @rejected_aspect_ratios.select { |aspect_ratio| aspect_ratio_allowed?(aspect_ratio) }
+        @rejected_aspect_ratios_not_rejected = @rejected_aspect_ratios.select { |aspect_ratio| aspect_ratio_allowed?(aspect_ratio) }
         @rejected_aspect_ratios_not_rejected.empty?
       end
 
