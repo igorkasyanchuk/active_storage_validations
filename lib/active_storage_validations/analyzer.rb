@@ -41,9 +41,26 @@ module ActiveStorageValidations
     end
 
     def media(tempfile)
-      @media ||= wrap_attachable(@attachable).with_media_path(tempfile, **media_path_options) do |path|
+      @media ||= media_attachable.with_media_path(tempfile, **media_path_options) do |path|
         media_from_path(path)
       end
+    end
+
+    def media_attachable
+      @media_attachable ||= wrap_attachable(@attachable)
+    end
+
+    # Tempfile the attachable is copied to when it has no usable path (blob,
+    # StringIO, …). Named after the attachable's extension, like
+    # ActiveStorage::Blob#open: ImageMagick needs it to decode formats without
+    # a magic number (ICO, TGA), which then pass as an upload but not as a blob.
+    def create_media_tempfile(&block)
+      Tempfile.create([ "ActiveStorageValidations-", media_tempfile_extension ], binmode: true, &block)
+    end
+
+    def media_tempfile_extension
+      extension = File.extname(media_attachable.filename.to_s)
+      extension.match?(/\A\.[A-Za-z0-9]{1,16}\z/) ? extension : ""
     end
 
     # Override in a concrete subclass that only inspects the beginning of the
