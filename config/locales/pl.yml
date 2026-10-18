@@ -4,12 +4,18 @@ pl:
       content_type_invalid:
         one: "ma nieprawidłowy typ zawartości (autoryzowany typ zawartości to %{authorized_human_content_types})"
         other: "ma nieprawidłowy typ zawartości (autoryzowane typy treści to %{authorized_human_content_types})"
+        few: "ma nieprawidłowy typ zawartości (autoryzowane typy treści to %{authorized_human_content_types})"
+        many: "ma nieprawidłowy typ zawartości (autoryzowane typy treści to %{authorized_human_content_types})"
       content_type_spoofed:
         one: "ma typ zawartości, który nie jest równoważny z tym, który jest wykrywany przez jego zawartość (autoryzowany typ zawartości to %{authorized_human_content_types})"
         other: "ma typ zawartości, który nie jest równoważny z tym, który jest wykrywany przez jego zawartość (autoryzowane typy treści to %{authorized_human_content_types})"
+        few: "ma typ zawartości, który nie jest równoważny z tym, który jest wykrywany przez jego zawartość (autoryzowane typy treści to %{authorized_human_content_types})"
+        many: "ma typ zawartości, który nie jest równoważny z tym, który jest wykrywany przez jego zawartość (autoryzowane typy treści to %{authorized_human_content_types})"
       content_type_analysis_failed:
         one: "ma typ zawartości, którego nie można było zweryfikować na podstawie jego zawartości (autoryzowany typ zawartości to %{authorized_human_content_types})"
         other: "ma typ zawartości, którego nie można było zweryfikować na podstawie jego zawartości (autoryzowane typy treści to %{authorized_human_content_types})"
+        few: "ma typ zawartości, którego nie można było zweryfikować na podstawie jego zawartości (autoryzowane typy treści to %{authorized_human_content_types})"
+        many: "ma typ zawartości, którego nie można było zweryfikować na podstawie jego zawartości (autoryzowane typy treści to %{authorized_human_content_types})"
       file_size_not_less_than: "rozmiar pliku musi być mniejszy niż %{max} (obecny rozmiar to %{file_size})"
       file_size_not_less_than_or_equal_to: "rozmiar pliku musi być mniejszy lub równy %{max} (obecny rozmiar to %{file_size})"
       file_size_not_greater_than: "rozmiar pliku musi być większy niż %{min} (obecny rozmiar to %{file_size})"
@@ -32,14 +38,20 @@ pl:
         zero: "brak dołączonych plików (musi mieć między %{min} a %{max} pliki)"
         one: "załączony tylko 1 plik (musi mieć między %{min} a %{max} pliki)"
         other: "całkowita liczba plików musi wynosić między %{min} a %{max} pliki (dołączone są %{count} pliki)"
+        few: "całkowita liczba plików musi wynosić między %{min} a %{max} pliki (dołączone są %{count} pliki)"
+        many: "całkowita liczba plików musi wynosić między %{min} a %{max} pliki (dołączono %{count} plików)"
       limit_min_not_reached:
         zero: "brak dołączonych plików (musi mieć co najmniej %{min} pliki)"
         one: "dołączony tylko 1 plik (musi mieć co najmniej %{min} pliki)"
         other: "%{count} pliki dołączone (musi mieć co najmniej %{min} pliki)"
+        few: "%{count} pliki dołączone (musi mieć co najmniej %{min} pliki)"
+        many: "dołączono %{count} plików (musi mieć co najmniej %{min} pliki)"
       limit_max_exceeded:
         zero: "brak dołączonych plików (maksymalnie jest to %{max} pliki)"
         one: "zbyt wiele dołączonych plików (maksymalnie jest to %{max} pliki, otrzymano %{count})"
         other: "zbyt wiele dołączonych plików (maksymalnie jest to %{max} pliki, otrzymano %{count})"
+        few: "zbyt wiele dołączonych plików (maksymalnie jest to %{max} pliki, otrzymano %{count})"
+        many: "zbyt wiele dołączonych plików (maksymalnie jest to %{max} pliki, otrzymano %{count})"
       attachment_missing: "nie ma załączonego pliku"
       media_metadata_missing: "nie jest prawidłowym plikiem multimedialnym"
       dimension_min_not_included_in: "musi być równe lub większe od %{width} x %{height} pixeli"
@@ -71,24 +83,38 @@ pl:
       years:
         one: "%{count} rok"
         other: "%{count} lat"
+        few: "%{count} lata"
+        many: "%{count} lat"
       months:
         one: "%{count} miesiąc"
         other: "%{count} miesięcy"
+        few: "%{count} miesiące"
+        many: "%{count} miesięcy"
       weeks:
         one: "%{count} tydzień"
         other: "%{count} tygodni"
+        few: "%{count} tygodnie"
+        many: "%{count} tygodni"
       days:
         one: "%{count} dzień"
         other: "%{count} dni"
+        few: "%{count} dni"
+        many: "%{count} dni"
       hours:
         one: "%{count} godzina"
         other: "%{count} godzin"
+        few: "%{count} godziny"
+        many: "%{count} godzin"
       minutes:
         one: "%{count} minuta"
         other: "%{count} minut"
+        few: "%{count} minuty"
+        many: "%{count} minut"
       seconds:
         one: "%{count} sekunda"
         other: "%{count} sekund"
+        few: "%{count} sekundy"
+        many: "%{count} sekund"
       connectors:
         words_connector: ", "
         two_words_connector: " i "

@@ -41,7 +41,7 @@ vi:
         one: "quá nhiều tệp được đính kèm (tối đa là các tệp %{max}, có %{count})"
         other: "quá nhiều tệp được đính kèm (tối đa là các tệp %{max}, có %{count})"
       attachment_missing: "không có tập tin đính kèm"
-      media_metadata_missing: "không phải là ảnh"
+      media_metadata_missing: "không phải là tệp phương tiện hợp lệ"
       dimension_min_not_included_in: "phải lớn hơn hoặc bằng %{width} x %{height} pixel"
       dimension_max_not_included_in: "phải nhỏ hơn hoặc bằng %{width} x %{height} pixel"
       dimension_width_not_included_in: "chiều rộng không nằm trong %{min} và %{max} pixel"
