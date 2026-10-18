@@ -34,6 +34,7 @@ module ActiveStorageValidations
       end
 
       ensure_between_range_is_bounded!
+      ensure_bound_validity(options) unless options[check_option].is_a?(Proc)
     end
 
     def validate_each(record, attribute, value)
@@ -41,6 +42,54 @@ module ActiveStorageValidations
     end
 
     private
+
+    # The one comparison option the validator was given (check_validity!
+    # rejects zero or several).
+    def check_option
+      AVAILABLE_CHECKS.find { |check| options.key?(check) }
+    end
+
+    # Procs escape check_validity!: check what they return the same way. nil
+    # means no bound (like limit's :min / :max), see #is_valid?.
+    def set_flat_options(record)
+      flat_options = super
+      ensure_bound_validity(flat_options, from_proc: true) if options[check_option].is_a?(Proc)
+      flat_options
+    end
+
+    # A non-number used to boot then raise from valid? (`less_than: "2MB"`); a
+    # negative bound or a reversed / empty range rejected every file.
+    def ensure_bound_validity(flat_options, from_proc: false)
+      bound = flat_options[check_option]
+      return if bound.nil? && from_proc
+
+      if check_option == :between
+        return if valid_range_bound?(bound)
+
+        raise ArgumentError, "You must pass a Range of non-negative numbers, whose begin is not greater than its end, to :between (got #{bound.inspect}#{' from a Proc' if from_proc})"
+      else
+        return if valid_bound?(bound)
+
+        raise ArgumentError, "You must pass a non-negative number to :#{check_option} (got #{bound.inspect}#{' from a Proc' if from_proc})"
+      end
+    end
+
+    # ActiveSupport::Duration is a Numeric too.
+    def valid_bound?(value)
+      value.is_a?(Numeric) && !value.negative?
+    end
+
+    # A Proc may return a one-sided range (static ones are rejected at boot by
+    # #ensure_between_range_is_bounded!).
+    def valid_range_bound?(range)
+      return false unless range.is_a?(Range)
+
+      bounds = [ range.begin, range.end ].compact
+      return false unless bounds.all? { |bound| valid_bound?(bound) }
+      return true if bounds.size < 2
+
+      range.exclude_end? ? range.begin < range.end : range.begin <= range.end
+    end
 
     # Endless / beginless ranges (`1.kilobyte..`, `..2.megabytes`) pass
     # Range#include? but raise RangeError from Range#min / #max the first time
@@ -59,20 +108,19 @@ module ActiveStorageValidations
     def is_valid?(value, flat_options)
       return false if value < 0
 
-      # Integer 0 is a real bound (`equal_to: 0`). `.present?` treats it as
-      # absent, so the comparison would be skipped and every file would fail.
-      if bound_present?(flat_options, :between)
-        flat_options[:between].include?(value)
-      elsif bound_present?(flat_options, :less_than)
-        value < flat_options[:less_than]
-      elsif bound_present?(flat_options, :less_than_or_equal_to)
-        value <= flat_options[:less_than_or_equal_to]
-      elsif bound_present?(flat_options, :greater_than)
-        value > flat_options[:greater_than]
-      elsif bound_present?(flat_options, :greater_than_or_equal_to)
-        value >= flat_options[:greater_than_or_equal_to]
-      elsif bound_present?(flat_options, :equal_to)
-        value == flat_options[:equal_to]
+      # Integer 0 is a real bound (`equal_to: 0`), only nil (a Proc returning
+      # nil) means no bound. It used to fail every file with a blank bound in
+      # the message, while limit already accepted them.
+      bound = flat_options[check_option]
+      return true if bound.nil?
+
+      case check_option
+      when :between then bound.include?(value)
+      when :less_than then value < bound
+      when :less_than_or_equal_to then value <= bound
+      when :greater_than then value > bound
+      when :greater_than_or_equal_to then value >= bound
+      when :equal_to then value == bound
       end
     end
 

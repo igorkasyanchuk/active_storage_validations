@@ -89,5 +89,94 @@ RSpec.shared_examples "checks validator validity" do
         end
       end
     end
+
+    describe "comparison bound validity" do
+      subject(:validator) { validator_klass.new(attributes: [ :file ], check => bound) }
+
+      let(:number_error_message) { "You must pass a non-negative number to :#{check} (got #{invalid_bound.inspect})" }
+      let(:range_error_message) do
+        "You must pass a Range of non-negative numbers, whose begin is not greater than its end, to :between (got #{invalid_bound.inspect})"
+      end
+
+      %i[less_than less_than_or_equal_to greater_than greater_than_or_equal_to equal_to].each do |comparison|
+        describe ":#{comparison}" do
+          let(:check) { comparison }
+
+          [ 0, 2, 1.5 ].each do |valid_bound|
+            context "when the bound is #{valid_bound.inspect}" do
+              let(:bound) { valid_bound }
+
+              it { expect { validator }.not_to raise_error }
+            end
+          end
+
+          [ "2MB", -1, nil, 1..2 ].each do |invalid_value|
+            context "when the bound is #{invalid_value.inspect}" do
+              let(:bound) { invalid_value }
+              let(:invalid_bound) { invalid_value }
+
+              it "raises an error at validator initialization" do
+                expect { validator }.to raise_error(ArgumentError, number_error_message)
+              end
+            end
+          end
+
+          context "when a Proc returns an invalid bound" do
+            let(:bound) { ->(_record) { "2MB" } }
+
+            it "cannot be checked at validator initialization" do
+              expect { validator }.not_to raise_error
+            end
+
+            it "raises the same error when the Proc is evaluated" do
+              expect { validator.send(:set_flat_options, nil) }
+                .to raise_error(ArgumentError, "You must pass a non-negative number to :#{check} (got \"2MB\" from a Proc)")
+            end
+          end
+
+          context "when a Proc returns nil" do
+            let(:bound) { ->(_record) { nil } }
+
+            it "sets no bound" do
+              expect { validator.send(:set_flat_options, nil) }.not_to raise_error
+            end
+          end
+        end
+      end
+
+      describe ":between" do
+        let(:check) { :between }
+
+        [ 1..5, 0..0, 1...5 ].each do |valid_range|
+          context "when the range is #{valid_range.inspect}" do
+            let(:bound) { valid_range }
+
+            it { expect { validator }.not_to raise_error }
+          end
+        end
+
+        [ 5..1, 3...3, -1..5, "1".."5" ].each do |invalid_range|
+          context "when the range is #{invalid_range.inspect}" do
+            let(:bound) { invalid_range }
+            let(:invalid_bound) { invalid_range }
+
+            it "raises an error at validator initialization" do
+              expect { validator }.to raise_error(ArgumentError, range_error_message)
+            end
+          end
+        end
+
+        context "when a Proc returns a reversed range" do
+          let(:bound) { ->(_record) { 5..1 } }
+
+          it "raises the same error when the Proc is evaluated" do
+            expect { validator.send(:set_flat_options, nil) }.to raise_error(
+              ArgumentError,
+              "You must pass a Range of non-negative numbers, whose begin is not greater than its end, to :between (got 5..1 from a Proc)"
+            )
+          end
+        end
+      end
+    end
   end
 end
