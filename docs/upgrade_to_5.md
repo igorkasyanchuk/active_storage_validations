@@ -4,7 +4,7 @@
 
 - Same Ruby (`>= 3.3`) and Rails (`>= 7.0.1`) as 4.x
 - No validator, option, matcher method, or I18n key was renamed or removed
-- The breaking changes are edge cases: custom messages interpolating undocumented options, options that already crashed at runtime, empty authorized lists, and analysis failures that now fail closed
+- The breaking changes are edge cases: custom messages interpolating undocumented options, options that already crashed at runtime or were silently ignored, empty authorized lists, and analysis failures that now fail closed
 - The changelog is long because of the **FIXED** list: hardening found in review, none of it requiring a code change. The few fixes that can change whether a real upload passes are listed in [Fixes that can change validation results](#fixes-that-can-change-validation-results)
 
 ## Do I need to change anything?
@@ -17,6 +17,7 @@ Go through this table. If no row matches, you are done.
 | Reads raw options (`less_than_or_equal_to`, `width`, …) from `errors.details` | Read the documented value, or the option from the model | [Options no longer forwarded](#validator-options-are-no-longer-forwarded-to-errorsadd) |
 | Passes an endless / beginless Range (`between: 1.kilobyte..`, `width: { in: 100.. }`) | Use a single-bound option | [Unbounded ranges](#unbounded-between--dimension-ranges) |
 | Passes an empty `content_type` / `aspect_ratio` list (`[]`, or a Proc that can return `[]`) | Remove the validator, or expect every file to be rejected | [Empty lists](#empty-content_type--aspect_ratio-lists-fail-closed) |
+| Declares a malformed `dimension` option (`width: { minimum: 1000 }`, `width: 100..200`, `{ min: 100..100, width: 150 }`) | Fix the option | [Malformed `dimension` options](#malformed-dimension-options-raise-at-boot) |
 | Uses an `aspect_ratio` value that is not an exact `is_x_y` (`:is_16_9square`) | Fix the typo | [Strict `aspect_ratio`](#aspect_ratio-options-are-validated-strictly) |
 | Uses `with_audio: { with: false }` where `ffprobe` may be missing | Install `ffmpeg` wherever validations run | [`with_audio` fails closed](#with_audio--with-false--fails-closed) |
 | Matches on `:content_type_spoofed`, or overrides that locale key | Also handle `:content_type_analysis_failed` | [`content_type_analysis_failed`](#content_type_analysis_failed-error) |
@@ -103,6 +104,40 @@ validates :photo, dimension: { width: { min: 100 } }
 
 Ranges returned by Procs are not checked at boot (Procs bypass `check_validity!`). They no longer raise either, but prefer a single-bound option there too so the error message gets a real bound.
 
+### Malformed `dimension` options raise at boot
+
+**Who is affected?** Only `dimension` options the validator ignored, misread or crashed on. Every form documented in the README is unchanged.
+
+**What changed.** `check_validity!` only checked that `width`, `height`, `min` or `max` was present. These options now raise `ArgumentError` at boot:
+
+| Option | 4.x | 5.x |
+| --- | --- | --- |
+| `width: { minimum: 1000 }`, `width: {}` (no `:min` / `:max` / `:in`) | Loaded, validated nothing: every file accepted | Raises |
+| `width: { in: 100..200, max: 300 }` | `:in` won, `:max` ignored | Raises |
+| `width: 100..200` (Range without `in:`) | Compared as an exact width: every file rejected | Raises |
+| `width: { min: 100..200 }` | `ArgumentError` from `valid?` | Raises |
+| `width: nil` | Loaded, validated nothing | Raises |
+| `min: 100..100, width: { max: 500 }` | `width` bounds silently dropped | Raises |
+| `min: 100..100, width: 150` | `NoMethodError` from `valid?` | Raises |
+
+**How to fix.**
+
+```ruby
+# 4.x: loaded, accepted every file
+validates :photo, dimension: { width: { minimum: 1000 } }
+# 4.x: loaded, rejected every file
+validates :photo, dimension: { width: 100..200 }
+# 4.x: loaded, ignored the width max
+validates :photo, dimension: { min: 100..100, width: { max: 500 } }
+
+# 5.x
+validates :photo, dimension: { width: { min: 1000 } }
+validates :photo, dimension: { width: { in: 100..200 } }
+validates :photo, dimension: { width: { min: 100, max: 500 }, height: { min: 100 } }
+```
+
+Values returned by Procs (`width: -> { … }`) are not checked at boot.
+
 ### Empty `content_type` / `aspect_ratio` lists fail closed
 
 **Who is affected?** Only `with: []` / `in: []`, or a Proc that can return an empty list.
@@ -166,6 +201,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | `dimension` `width` / `height` `{ max: 0 }` (or a Proc returning `0`) | Check skipped, every file accepted | Bound applied |
 | `dimension` exclusive `in:` (`400...600`) | 600 accepted | 600 rejected |
 | `size`, `limit`, `total_size` with attachments marked for destruction | Doomed files counted | Ignored, like `attached:` |
+| Metadata validators and `content_type` with a persisted file marked for destruction (`has_one_attached`, or `has_many_attached` while attaching new files) | Doomed file still validated | Ignored |
 | `aspect_ratio` `is_x_y` | Exact to 3 decimals: 1366×768, 854×480 rejected as `:is_16_9` | 1-pixel tolerance on either axis |
 | `duration` | Rounded to 0.1s before comparing: 1.96s failed `less_than: 2.seconds` | Exact value compared ♻️ |
 | `duration` on WebM / Matroska audio (browser `MediaRecorder` Opus) | `media_metadata_missing` | Container duration used ♻️ |
