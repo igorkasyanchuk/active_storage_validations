@@ -34,7 +34,7 @@ RSpec.shared_examples "has valid rspec message methods" do
         FAILURE_MESSAGE
       when :processable_file
         <<~FAILURE_MESSAGE
-          is expected to validate the processable image of :#{model_attribute}
+          is expected to validate the processable file of :#{model_attribute}
         FAILURE_MESSAGE
       when :limit
         <<~FAILURE_MESSAGE
@@ -129,7 +129,7 @@ RSpec.shared_examples "has valid rspec message methods" do
         FAILURE_MESSAGE
       when :processable_file
         <<~FAILURE_MESSAGE
-          is expected not to validate the processable image of :#{model_attribute}
+          is expected not to validate the processable file of :#{model_attribute}
         FAILURE_MESSAGE
       when :limit
         <<~FAILURE_MESSAGE
