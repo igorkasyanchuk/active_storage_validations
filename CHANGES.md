@@ -44,6 +44,7 @@
       - `is_x_y` ratios also accept a side within a pixel of the other one scaled to `x:y`, so common sizes such as 1366×768 and 854×480 pass `:is_16_9` (1366 × 9 / 16 = 768.375). Everything the 4.x rule (ratios equal to 3 decimals) accepted still passes
     - **`content_type`**
       - Marcel 2 / Rails main (8.2+): `spoofing_protection` no longer rejects `audio/aac`, `application/xml` or `audio/mp4` (`file` reports aliases such as `text/xml`, `audio/x-m4a`), and Marcel 1 canonical options such as `audio/x-aac` are still accepted
+      - `spoofing_protection` no longer rejects genuine RAR archives on recent libmagic (Ubuntu 26.04), which reports them as `application/vnd.rar` instead of `application/x-rar`
       - `spoofing_protection` compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the check
       - A Proc nested in the list (`[:pdf, -> { … }]`) is checked at validation time like a top-level Proc, and an Array it returns is flattened. Unsupported types it returned were silently ignored, and a returned Array was dropped, so every file was rejected
     - **`dimension`**

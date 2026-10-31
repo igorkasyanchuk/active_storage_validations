@@ -56,6 +56,7 @@ module FixtureFiles
     %w[audio/mp4 audio/x-m4a],
     %w[audio/aac audio/x-hx-aac-adts],
     %w[application/x-rar-compressed application/x-rar],
+    %w[application/x-rar-compressed application/vnd.rar],
     # Detected type is an ancestor of the declared one (sniffer less specific)
     %w[text/csv text/plain],
     %w[text/css text/plain],
