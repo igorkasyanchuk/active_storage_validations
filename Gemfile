@@ -15,6 +15,9 @@ gemspec
 
 # Local default Gemfile: used by `bundle exec rake spec` without BUNDLE_GEMFILE.
 gem "rails", "8.1.3.1"
+# json 3.0 made JSON.parse keyword-only; Rails 8.1.3.1 ActiveSupport::JSON.decode
+# still passes a positional options hash (rails/rails#58601, fixed on 8.2 / main).
+gem "json", "< 3"
 # gem "sqlite3", ">= 2.5"
 # gem "nokogiri", ">= 1.18"
 
