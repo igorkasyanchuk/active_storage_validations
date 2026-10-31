@@ -29,8 +29,28 @@ module ActiveStorageValidations
       alias :detach_files :detach_file
 
       def assign_files(files)
+        return replace_many_files(files) if many_attached? && !replace_on_assign_to_many?
+
         value = many_attached? ? files : files.first
         @subject.public_send("#{@attribute_name}=", value)
+      end
+
+      # Rails 7.0 without `replace_on_assign_to_many` (unset unless
+      # `load_defaults` >= 6.0) appends assigned files to the current ones and
+      # ignores an empty assignment. Record the change the replacing writer would.
+      def replace_many_files(files)
+        name = @attribute_name.to_s
+        @subject.attachment_changes[name] =
+          if files.none?
+            ActiveStorage::Attached::Changes::DeleteMany.new(name, @subject)
+          else
+            ActiveStorage::Attached::Changes::CreateMany.new(name, @subject, files)
+          end
+      end
+
+      # Removed in Rails 7.1, where the writer always replaces.
+      def replace_on_assign_to_many?
+        !ActiveStorage.respond_to?(:replace_on_assign_to_many) || ActiveStorage.replace_on_assign_to_many
       end
 
       def many_attached?
