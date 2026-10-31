@@ -14,7 +14,7 @@ gemspec
 # your gem to rubygems.org.
 
 # Local default Gemfile: used by `bundle exec rake spec` without BUNDLE_GEMFILE.
-gem "rails", "8.1.3.1"
+gem "rails", "8.1.4"
 # gem "sqlite3", ">= 2.5"
 # gem "nokogiri", ">= 1.18"
 
