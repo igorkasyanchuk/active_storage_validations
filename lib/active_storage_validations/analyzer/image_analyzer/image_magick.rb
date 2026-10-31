@@ -20,7 +20,7 @@ module ActiveStorageValidations
     private
 
     def read_media
-      Tempfile.create(binmode: true) do |tempfile|
+      create_media_tempfile do |tempfile|
         begin
           info = media(tempfile)
           if info&.valid?
@@ -52,8 +52,16 @@ module ActiveStorageValidations
 
       tool = ::MiniMagick::Tool.new("identify")
       tool.format("%w\t%h\t%[orientation]")
-      tool << path
+      tool << first_frame(path)
       tool.command
+    end
+
+    # Restrict identify to the first frame, as MiniMagick does for Image#width.
+    # Without the frame selector ImageMagick decodes every frame of animated
+    # GIFs / multi-page TIFFs (slow enough to hit command_timeout) and prints
+    # one dimension triplet per frame.
+    def first_frame(path)
+      path.match?(/\[\d+\]\z/) ? path : "#{path}[0]"
     end
 
     def parse_identify_output(stdout)

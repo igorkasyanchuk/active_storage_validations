@@ -26,19 +26,27 @@ module ActiveStorageValidations
     include ASVFFProbable
 
     def metadata
-      read_media do |media|
-        {
-          width: (Integer(width) if width),
-          height: (Integer(height) if height),
-          duration: duration,
-          angle: angle,
-          audio: audio?,
-          video: video?
-        }.compact
-      end
+      read_media { |_media| metadata_from_streams }
     end
 
     private
+
+    # ffprobe can exit 0 on a well-formed container with zero streams (empty
+    # MP4/M4A). Hash#compact keeps false, so { audio: false, video: false }
+    # would be memoized and processable_file would treat it as a successful
+    # decode. {} is the documented "no analysis" miss.
+    def metadata_from_streams
+      return {} unless audio? || video?
+
+      {
+        width: (Integer(width) if width),
+        height: (Integer(height) if height),
+        duration: duration,
+        angle: angle,
+        audio: audio?,
+        video: video?
+      }.compact
+    end
 
     def width
       if rotated?
@@ -56,17 +64,18 @@ module ActiveStorageValidations
       end
     end
 
+    # Round to milliseconds so 1.96s is not stored as 2.0 (which made
+    # `less_than: 2.seconds` fail).
     def duration
-      duration = video_stream["duration"] || container["duration"]
-      Float(duration).round(1) if duration
+      parse_float(video_stream["duration"] || container["duration"])&.round(3)
     end
 
+    # ffprobe reports the rotation either as a stream tag (older encoders) or as
+    # Display Matrix side data. Encoders write it as "90", "90.0" or "-89.9"
+    # indifferently, so parse it as a float and round; an unparsable value
+    # means no known rotation rather than an exception escaping `valid?`.
     def angle
-      if tags["rotate"]
-        Integer(tags["rotate"])
-      elsif display_matrix && display_matrix["rotation"]
-        Integer(display_matrix["rotation"])
-      end
+      parse_float(tags["rotate"] || display_matrix&.dig("rotation"))&.round
     end
 
     def display_matrix
@@ -74,14 +83,15 @@ module ActiveStorageValidations
     end
 
     def display_aspect_ratio
-      if descriptor = video_stream["display_aspect_ratio"]
-        if terms = descriptor.split(":", 2)
-          numerator   = Integer(terms[0])
-          denominator = Integer(terms[1])
+      descriptor = video_stream["display_aspect_ratio"]
+      return unless descriptor
 
-          [ numerator, denominator ] unless numerator == 0
-        end
-      end
+      terms = descriptor.to_s.split(":", 2)
+      numerator = parse_integer(terms[0])
+      denominator = parse_integer(terms[1])
+      return if numerator.nil? || denominator.nil? || numerator.zero?
+
+      [ numerator, denominator ]
     end
 
     def rotated?
@@ -103,27 +113,30 @@ module ActiveStorageValidations
     end
 
     def encoded_width
-      @encoded_width ||= Float(video_stream["width"]) if video_stream["width"]
+      @encoded_width ||= parse_float(video_stream["width"])
     end
 
     def encoded_height
-      @encoded_height ||= Float(video_stream["height"]) if video_stream["height"]
+      @encoded_height ||= parse_float(video_stream["height"])
     end
 
     def display_height_scale
-      @display_height_scale ||= Float(display_aspect_ratio.last) / display_aspect_ratio.first if display_aspect_ratio
+      return unless display_aspect_ratio
+
+      last = parse_float(display_aspect_ratio.last)
+      @display_height_scale ||= last / display_aspect_ratio.first if last
     end
 
     def tags
       @tags ||= video_stream["tags"] || {}
     end
 
+    # ffprobe reports an Array of hashes. Default to [] (Rails does the same)
+    # so Enumerable#detect yields those hashes. A Hash default made detect
+    # yield [key, value] pairs and could raise TypeError from valid?.
     def side_data
-      @side_data ||= video_stream["side_data_list"] || {}
-    end
-
-    def container
-      @container ||= @media["format"] || {}
+      list = video_stream["side_data_list"]
+      @side_data ||= list.is_a?(Array) ? list : []
     end
   end
 end

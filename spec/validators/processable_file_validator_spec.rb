@@ -37,6 +37,45 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
       end
     end
 
+    # The analyzer follows the declared type, normalized, and only falls back to
+    # the type Rails identified for the blob when the declared one is blank or
+    # generic.
+    [ "application/octet-stream", "IMAGE/PNG", "" ].each do |declared_type|
+      context "when a processable image is declared as #{declared_type.inspect}" do
+        subject(:record) { model.has_to_be_processable.attach(image) and model }
+
+        let(:image) { fixture_file("image_150x150.png", filename: "image_150x150.png", content_type: declared_type) }
+
+        it { is_expected_to_be_valid }
+      end
+    end
+
+    context "when a processable image is attached as application/octet-stream without identification" do
+      subject(:record) { model.has_to_be_processable.attach(image) and model }
+
+      let(:image) do
+        fixture_file("image_150x150.png", filename: "image_150x150.png", content_type: "application/octet-stream").merge(identify: false)
+      end
+
+      it "falls back to the filename" do
+        expect(record.has_to_be_processable.blob.content_type).to eq("application/octet-stream")
+        is_expected_to_be_valid
+      end
+    end
+
+    # Rails identifies the blob as video/mp4: routing on that would hand the
+    # file to the video analyzer and let it pass image-only validators.
+    context "when a video is declared as an image" do
+      subject(:record) { model.has_to_be_processable.attach(video) and model }
+
+      let(:video) { fixture_file("video.mp4", filename: "video.png", content_type: "image/png") }
+
+      it "is analyzed as the declared image and rejected" do
+        expect(record.has_to_be_processable.blob.content_type).to eq("video/mp4")
+        is_expected_not_to_be_valid
+      end
+    end
+
     context "when provided with a file that is not processable" do
       # validates :has_to_be_processable, processable_file: true
       subject(:record) { model.has_to_be_processable.attach(tar_file_with_image_content_type) and model }
@@ -50,6 +89,35 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
       it { is_expected_not_to_be_valid }
       it { is_expected_to_include_error_message("file_not_processable", error_options: error_options) }
       it { is_expected_to_have_error_options(error_options) }
+    end
+
+    context "when provided with an empty media container" do
+      # ffprobe exits 0 with zero streams; that must not count as a decode.
+      %w[video audio].each do |media_type|
+        context "when the declared type is #{media_type}" do
+          subject(:record) { model.has_to_be_processable.attach(empty_container) and model }
+
+          let(:empty_container) do
+            case media_type
+            when "video" then video_file
+            when "audio" then audio_file
+            end
+          end
+          let(:analyzer_class) do
+            media_type == "video" ? ActiveStorageValidations::Analyzer::VideoAnalyzer : ActiveStorageValidations::Analyzer::AudioAnalyzer
+          end
+          let(:error_options) { { filename: empty_container[:filename] } }
+
+          before do
+            allow_any_instance_of(analyzer_class).to receive(:media_from_path).and_return( # rubocop:disable RSpec/AnyInstance
+              { "streams" => [], "format" => { "nb_streams" => 0, "format_name" => "mov,mp4,m4a,3gp,3g2,mj2" } }
+            )
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("file_not_processable", error_options: error_options) }
+        end
+      end
     end
 
     context "when provided with a StringIO that is an image" do

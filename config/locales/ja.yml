@@ -7,6 +7,9 @@ ja:
       content_type_spoofed:
         one: "のファイルタイプがファイル内容から検出されたものと異なります (許可されたファイルタイプは%{authorized_human_content_types})"
         other: "のファイルタイプがファイル内容から検出されたものと異なります (許可されたファイルタイプは%{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "のファイルタイプをファイル内容から検証できませんでした (許可されたファイルタイプは%{authorized_human_content_types})"
+        other: "のファイルタイプをファイル内容から検証できませんでした (許可されたファイルタイプは%{authorized_human_content_types})"
       file_size_not_less_than: "のファイルサイズは%{max}未満にしてください (添付ファイルのサイズは%{file_size})"
       file_size_not_less_than_or_equal_to: "のファイルサイズは%{max}以下にしてください (添付ファイルのサイズは%{file_size})"
       file_size_not_greater_than: "のファイルサイズは%{min}より大きくしてください (添付ファイルのサイズは%{file_size})"
@@ -16,7 +19,7 @@ ja:
       total_file_size_not_less_than: "のファイルサイズの合計は%{max}未満にしてください (添付ファイルのサイズは%{total_file_size})"
       total_file_size_not_less_than_or_equal_to: "のファイルサイズの合計は%{max}以下にしてください (添付ファイルのサイズは%{total_file_size})"
       total_file_size_not_greater_than: "のファイルサイズの合計は%{min}より大きくしてください (添付ファイルのサイズは%{total_file_size})"
-      total_file_size_not_greater_than_or_equal_to: "のファイルサイズの合計は%{min}以上してください (添付ファイルのサイズは%{total_file_size})"
+      total_file_size_not_greater_than_or_equal_to: "のファイルサイズの合計は%{min}以上にしてください (添付ファイルのサイズは%{total_file_size})"
       total_file_size_not_between: "のファイルサイズの合計は%{min}以上%{max}以下にしてください (添付ファイルのサイズは%{total_file_size})"
       total_file_size_not_equal_to: "のファイルサイズの合計は%{exact}にしてください (添付ファイルのサイズは%{total_file_size})"
       duration_not_less_than: "の再生時間は%{max}未満にしてください (添付ファイルの再生時間は%{duration})"
@@ -26,9 +29,9 @@ ja:
       duration_not_between: "の再生時間は%{min}以上%{max}以下にしてください (添付ファイルの再生時間は%{duration})"
       duration_not_equal_to: "の再生時間は%{exact}にしてください (添付ファイルの再生時間は%{duration})"
       limit_out_of_range:
-        zero: "には%{min}件以上%{max}以下のファイルを添付してください (添付されたファイルは%{count}件)"
-        one: "には%{min}件以上%{max}以下のファイルを添付してください (添付されたファイルは%{count}件)"
-        other: "には%{min}件以上%{max}以下のファイルを添付してください (添付されたファイルは%{count}件)"
+        zero: "には%{min}件以上%{max}件以下のファイルを添付してください (添付されたファイルは%{count}件)"
+        one: "には%{min}件以上%{max}件以下のファイルを添付してください (添付されたファイルは%{count}件)"
+        other: "には%{min}件以上%{max}件以下のファイルを添付してください (添付されたファイルは%{count}件)"
       limit_min_not_reached:
         zero: "には%{min}件以上のファイルを添付してください (添付されたファイルは%{count}件)"
         one: "には%{min}件以上のファイルを添付してください (添付されたファイルは%{count}件)"
@@ -53,7 +56,7 @@ ja:
       aspect_ratio_not_portrait: "のアスペクト比は縦長にしてください (添付されたメディアの解像度は%{width}x%{height})"
       aspect_ratio_not_landscape: "のアスペクト比は横長にしてください (添付されたメディアの解像度は%{width}x%{height})"
       aspect_ratio_not_x_y: "のアスペクト比は%{authorized_aspect_ratios}にしてください (添付されたメディアの解像度は%{width}x%{height})"
-      aspect_ratio_invalid: "のアスペクト比を検出できません (許可されたアスペクト比は%{authorized_aspect_ratios})"
+      aspect_ratio_invalid: "のアスペクト比が無効です (許可されたアスペクト比は%{authorized_aspect_ratios})"
       file_not_processable: "のメディアを処理できません"
       audio_missing: "には音声トラックが必要です"
       audio_present: "に音声トラックを含めることはできません"
@@ -63,3 +66,30 @@ ja:
       pages_not_greater_than_or_equal_to: "のページ数は%{min}以上にしてください (添付されたファイルは%{pages}ページ)"
       pages_not_between: "のページ数は%{min}以上%{max}以下にしてください (添付されたファイルは%{pages}ページ)"
       pages_not_equal_to: "のページ数は%{exact}にしてください (添付されたファイルは%{pages}ページ)"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count}年"
+        other: "%{count}年"
+      months:
+        one: "%{count}か月"
+        other: "%{count}か月"
+      weeks:
+        one: "%{count}週間"
+        other: "%{count}週間"
+      days:
+        one: "%{count}日"
+        other: "%{count}日"
+      hours:
+        one: "%{count}時間"
+        other: "%{count}時間"
+      minutes:
+        one: "%{count}分"
+        other: "%{count}分"
+      seconds:
+        one: "%{count}秒"
+        other: "%{count}秒"
+      connectors:
+        words_connector: ""
+        two_words_connector: ""
+        last_word_connector: ""

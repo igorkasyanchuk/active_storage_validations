@@ -21,8 +21,19 @@ module ActiveStorageValidations
     ERROR_TYPES = %i[
       content_type_invalid
       content_type_spoofed
+      content_type_analysis_failed
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[content_type].freeze
+    # Audio / video flavors of one container that the sniffers cannot tell
+    # apart, since they read the container and not the codecs: Magika reports
+    # audio/ogg for an Ogg Theora video, and browsers declare MediaRecorder
+    # recordings as audio/webm while both sniffers report video/webm. Spoofing
+    # compares each group as one type (Marcel itself is left untouched).
+    SAME_CONTAINER_CONTENT_TYPES = [
+      %w[audio/ogg video/ogg],
+      %w[audio/webm video/webm]
+    ].freeze
 
     # State for a single attachable check. Active Model builds one validator per
     # class and reuses it for every record and every thread, so this must travel
@@ -31,7 +42,11 @@ module ActiveStorageValidations
 
     def check_validity!
       ensure_exactly_one_validator_option
-      ensure_content_types_validity
+      unless options[:with].is_a?(Proc) || options[:in].is_a?(Proc)
+        types = static_content_types
+        ensure_content_types_present!(types)
+        ensure_content_types_validity(types.grep_v(Proc))
+      end
       ensure_spoofing_protection_validity
     end
 
@@ -39,8 +54,6 @@ module ActiveStorageValidations
       return if no_attachments?(record, attribute)
 
       authorized_content_types = authorized_content_types_from_options(record)
-      return if authorized_content_types.empty?
-
       attachables_and_blobs(record, attribute).each do |attachable, blob|
         context = Context.new(authorized_content_types, blob.content_type, blob.filename.to_s)
         is_valid?(record, attribute, attachable, blob, context)
@@ -51,8 +64,15 @@ module ActiveStorageValidations
 
     def authorized_content_types_from_options(record)
       flat_options = set_flat_options(record)
+      # A Proc nested in the list may return an Array of its own.
+      content_types = (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).flatten.compact
 
-      (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).compact.map do |type|
+      # Procs escape check_validity!, nested ones included; an unknown type they
+      # return (e.g. "image/jpg") would otherwise reject every file with a blank
+      # message.
+      ensure_content_types_validity(content_types) if proc_content_types?
+
+      content_types.filter_map do |type|
         case type
         when String, Symbol then Marcel::MimeType.for(declared_type: type.to_s, extension: type.to_s)
         when Regexp then type
@@ -94,7 +114,12 @@ module ActiveStorageValidations
         return false
       end
 
-      if content_type_mismatch?(context.content_type, detected_content_type)
+      # A blank detected type means the sniffer produced nothing (command timed
+      # out, file the backend cannot read, invalid CLI output). That is not
+      # evidence of spoofing, so fail closed with a dedicated error instead.
+      if detected_content_type.blank?
+        add_content_type_analysis_failed_error(record, attribute, attachable, context)
+      elsif content_type_mismatch?(marcel_attachable_content_type(context), detected_content_type)
         add_content_type_spoofed_error(record, attribute, attachable, context, detected_content_type)
       else
         true
@@ -123,25 +148,54 @@ module ActiveStorageValidations
       ERROR_MESSAGE
     end
 
+    # Compare the Marcel-resolved type (declared type + filename fallback), not
+    # the raw blob content_type. A blank declared type still authorizes via
+    # filename; spoofing must use the same resolved type or it would skip the
+    # sniffer comparison.
     def content_type_mismatch?(attachable_content_type, detected_content_type)
       attachable_content_type.present? &&
-        !content_types_intersect?(attachable_content_type, detected_content_type)
+        !content_types_related?(attachable_content_type, detected_content_type)
     end
 
-    def content_types_intersect?(attachable_content_type, detected_content_type)
-      enlarged_content_type(content_type_without_parameters(attachable_content_type)).intersect?(
-        enlarged_content_type(content_type_without_parameters(detected_content_type))
-      )
+    # The declared and detected types match when they are the same type (or
+    # Marcel aliases of it), or when one is an ancestor of the other: the
+    # sniffer may be less specific than the claim (`text/plain` for a CSV,
+    # `application/zip` for a DOCX) or more specific (`text/csv` for a declared
+    # `text/plain`). Two siblings never match: comparing both types' parents
+    # let a PHP script (`text/x-php`) pass as `text/csv`, since both are
+    # `text/plain` children, or a JAR pass as a DOCX (both under zip).
+    def content_types_related?(attachable_content_type, detected_content_type)
+      declared = content_type_family(content_type_without_parameters(attachable_content_type))
+      detected = content_type_family(content_type_without_parameters(detected_content_type))
+
+      declared.intersect?(detected) ||
+        ancestor_content_types(declared).intersect?(detected) ||
+        ancestor_content_types(detected).intersect?(declared)
     end
 
-    def enlarged_content_type(content_type)
-      related = related_marcel_content_types(content_type)
-      [
-        content_type,
-        *related,
-        *parent_content_types(content_type),
-        *related.flat_map { |type| parent_content_types(type) }
-      ].compact.uniq
+    # The type with its Marcel canonical type and aliases, and the other
+    # flavors of its container (SAME_CONTAINER_CONTENT_TYPES).
+    def content_type_family(content_type)
+      family = [ content_type, *related_marcel_content_types(content_type) ].compact
+      same_container = SAME_CONTAINER_CONTENT_TYPES.select { |group| family.intersect?(group) }
+
+      (family + same_container.flatten).uniq
+    end
+
+    # Every type up the Marcel parent chain of the given types (and the aliases
+    # of each ancestor), e.g. xlsm → x-tika-ooxml → zip.
+    def ancestor_content_types(content_types)
+      ancestors = []
+      pending = content_types.flat_map { |type| parent_content_types(type) }
+
+      while (type = pending.shift)
+        next if ancestors.include?(type)
+
+        ancestors << type
+        pending.concat(content_type_family(type), parent_content_types(type))
+      end
+
+      ancestors
     end
 
     # Marcel 2 (Rails 8.2+) stores `text/xml`, `audio/x-m4a`, `audio/x-aac`, …
@@ -181,6 +235,12 @@ module ActiveStorageValidations
       false
     end
 
+    def add_content_type_analysis_failed_error(record, attribute, attachable, context)
+      errors_options = initialize_and_populate_error_options(options, attachable, context)
+      add_error(record, attribute, ERROR_TYPES.third, **errors_options)
+      false
+    end
+
     def initialize_and_populate_error_options(options, attachable, context)
       errors_options = initialize_error_options(options, attachable)
       errors_options[:content_type] = context.content_type
@@ -194,15 +254,22 @@ module ActiveStorageValidations
       Array(content_type)
         .map do |content_type|
           case content_type
-          when String, Symbol
-            content_type.to_s.match?(/\//) ? Marcel::TYPE_EXTS[canonical_marcel_content_type(content_type.to_s)]&.first&.upcase : content_type.upcase
-          when Regexp
-            content_type.source
+          when String, Symbol then human_content_type(content_type.to_s)
+          when Regexp then content_type.source
           end
         end
         .flatten
         .compact
         .join(", ")
+    end
+
+    # "image/png" => "PNG", "png" => "PNG". Types Marcel knows no extension for
+    # (e.g. "inode/x-empty" detected on an empty file) fall back to the type
+    # itself rather than disappearing from the message.
+    def human_content_type(content_type)
+      return content_type.upcase unless content_type.match?(/\//)
+
+      Marcel::TYPE_EXTS[canonical_marcel_content_type(content_type)]&.first&.upcase || content_type
     end
 
     def ensure_exactly_one_validator_option
@@ -211,10 +278,24 @@ module ActiveStorageValidations
       end
     end
 
-    def ensure_content_types_validity
-      return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
+    # Procs are resolved per record, so their result is checked at validation
+    # time (see #authorized_content_types_from_options) instead of at boot.
+    def proc_content_types?
+      static_content_types.any?(Proc)
+    end
 
-      (Array(options[:with]) + Array(options[:in])).each do |content_type|
+    def static_content_types
+      (Array(options[:with]) + Array(options[:in])).compact
+    end
+
+    def ensure_content_types_present!(content_types)
+      return unless content_types.empty?
+
+      raise ArgumentError, "You must pass at least one content type to the validator"
+    end
+
+    def ensure_content_types_validity(content_types)
+      content_types.each do |content_type|
         raise ArgumentError, invalid_content_type_option_message(content_type) if invalid_option?(content_type)
       end
     end

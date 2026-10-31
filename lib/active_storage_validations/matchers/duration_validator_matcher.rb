@@ -17,7 +17,7 @@ module ActiveStorageValidations
         initialize_timeoutable
       end
 
-      def description
+      def base_description
         "validate file duration of :#{@attribute_name}"
       end
 
@@ -29,12 +29,22 @@ module ActiveStorageValidations
 
       private
 
+      def describe_value(value)
+        value.is_a?(ActiveSupport::Duration) ? value.inspect : "#{value} seconds"
+      end
+
       def failure_message_unit
         "seconds"
       end
 
+      # Analyzers round to milliseconds. A 1-second step made `less_than(1.second)`
+      # probe duration 0, which DurationValidator treats as missing metadata.
       def smallest_measurement
-        1.second
+        0.001.seconds
+      end
+
+      def lowest_comparable_value
+        smallest_measurement
       end
 
       def mock_value_for(io, duration)

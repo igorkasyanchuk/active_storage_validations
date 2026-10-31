@@ -7,6 +7,9 @@ vi:
       content_type_spoofed:
         one: "có một loại nội dung không tương đương với loại được phát hiện thông qua nội dung của nó (loại nội dung được ủy quyền là %{authorized_human_content_types})"
         other: "có một loại nội dung không tương đương với loại được phát hiện thông qua nội dung của nó (các loại nội dung được ủy quyền là %{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "có một loại nội dung không thể được xác minh thông qua nội dung của nó (loại nội dung được ủy quyền là %{authorized_human_content_types})"
+        other: "có một loại nội dung không thể được xác minh thông qua nội dung của nó (các loại nội dung được ủy quyền là %{authorized_human_content_types})"
       file_size_not_less_than: "kích thước tệp phải nhỏ hơn %{max} (kích thước hiện tại là %{file_size})"
       file_size_not_less_than_or_equal_to: "kích thước tệp phải nhỏ hơn hoặc bằng %{max} (kích thước hiện tại là %{file_size})"
       file_size_not_greater_than: "kích thước tệp phải lớn hơn %{min} (kích thước hiện tại là %{file_size})"
@@ -38,7 +41,7 @@ vi:
         one: "quá nhiều tệp được đính kèm (tối đa là các tệp %{max}, có %{count})"
         other: "quá nhiều tệp được đính kèm (tối đa là các tệp %{max}, có %{count})"
       attachment_missing: "không có tập tin đính kèm"
-      media_metadata_missing: "không phải là ảnh"
+      media_metadata_missing: "không phải là tệp phương tiện hợp lệ"
       dimension_min_not_included_in: "phải lớn hơn hoặc bằng %{width} x %{height} pixel"
       dimension_max_not_included_in: "phải nhỏ hơn hoặc bằng %{width} x %{height} pixel"
       dimension_width_not_included_in: "chiều rộng không nằm trong %{min} và %{max} pixel"
@@ -63,3 +66,30 @@ vi:
       pages_not_greater_than_or_equal_to: "số trang phải lớn hơn hoặc bằng %{min} (số trang hiện tại là %{pages})"
       pages_not_between: "số trang phải nằm trong khoảng từ %{min} đến %{max} (số trang hiện tại là %{pages})"
       pages_not_equal_to: "số trang phải bằng %{exact} (số trang hiện tại là %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} năm"
+        other: "%{count} năm"
+      months:
+        one: "%{count} tháng"
+        other: "%{count} tháng"
+      weeks:
+        one: "%{count} tuần"
+        other: "%{count} tuần"
+      days:
+        one: "%{count} ngày"
+        other: "%{count} ngày"
+      hours:
+        one: "%{count} giờ"
+        other: "%{count} giờ"
+      minutes:
+        one: "%{count} phút"
+        other: "%{count} phút"
+      seconds:
+        one: "%{count} giây"
+        other: "%{count} giây"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " và "
+        last_word_connector: " và "

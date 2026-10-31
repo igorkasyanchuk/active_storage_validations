@@ -40,18 +40,33 @@ module ActiveStorageValidations
     #
     # Some file could be passed several times, we just need to perform the
     # analysis once on the file, therefore the use of #uniq.
+    #
+    # Files whose attachment is marked for destruction are skipped, like in
+    # ASVActiveStorageable#attached_files: they will not remain after save.
     def attachables_and_blobs(record, attribute)
       changes = changes_for(record, attribute)
 
       return to_enum(:attachables_and_blobs, record, attribute) if changes.blank? || !block_given?
 
-      if changes.is_a?(ActiveStorage::Attached::Changes::CreateMany)
-        changes.attachables.zip(changes.blobs).uniq { |attachable, blob| attachable_blob_key(attachable, blob) }.each do |attachable, blob|
-          yield attachable, blob
-        end
-      else
-        yield changes.is_a?(ActiveStorage::Attached::Changes::CreateOne) ? changes.attachable : changes.blob, changes.blob
+      doomed_blob_ids = blob_ids_marked_for_destruction(record, attribute)
+
+      changed_attachables_and_blobs(changes).each do |attachable, blob|
+        yield attachable, blob unless blob&.id && doomed_blob_ids.include?(blob.id)
       end
+    end
+
+    def changed_attachables_and_blobs(changes)
+      if changes.is_a?(ActiveStorage::Attached::Changes::CreateMany)
+        changes.attachables.zip(changes.blobs).uniq { |attachable, blob| attachable_blob_key(attachable, blob) }
+      else
+        [ [ changes.is_a?(ActiveStorage::Attached::Changes::CreateOne) ? changes.attachable : changes.blob, changes.blob ] ]
+      end
+    end
+
+    def blob_ids_marked_for_destruction(record, attribute)
+      Array.wrap(record.public_send(attribute))
+        .select { |file| file.try(:marked_for_destruction?) }
+        .map(&:blob_id)
     end
 
     def attachable_blob_key(attachable, blob)
@@ -87,34 +102,6 @@ module ActiveStorageValidations
       content_type && content_type.downcase.split(/[;,\s]/, 2).first
     end
 
-    # Retrieve the content_type from attachable using the same logic as Rails
-    # ActiveStorage::Blob::Identifiable#identify_content_type
-    def attachable_content_type_rails_like(attachable)
-      Marcel::MimeType.for(
-        attachable_io(attachable, max_byte_size: 4.kilobytes),
-        name: attachable_filename(attachable).to_s,
-        declared_type: full_attachable_content_type(attachable)
-      )
-    end
-
-    # Retrieve the media type of the attachable, which is the first part of the
-    # content type (or mime type).
-    # Possible values are: application/audio/example/font/image/model/text/video
-    def attachable_media_type(attachable)
-      (full_attachable_content_type(attachable) || marcel_content_type_from_filename(attachable)).split("/").first
-    end
-
-    def attachable_io(attachable, max_byte_size: nil)
-      wrapped = wrap_attachable(attachable)
-      io = wrapped.read(max_byte_size: max_byte_size)
-      wrapped.rewind
-      io
-    end
-
-    def rewind_attachable_io(attachable)
-      wrap_attachable(attachable).rewind
-    end
-
     def attachable_filename(attachable)
       wrap_attachable(attachable).filename
     end
@@ -129,7 +116,6 @@ module ActiveStorageValidations
     def supports_file_attachment?
       Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
     end
-    alias :supports_pathname_attachment? :supports_file_attachment?
 
     # Retrieve the content_type from the file name only
     def marcel_content_type_from_filename(attachable)

@@ -8,13 +8,29 @@ module ActiveStorageValidations
   module ASVAnalyzable
     extend ActiveSupport::Concern
 
-    DEFAULT_IMAGE_PROCESSOR = :mini_magick
+    DEFAULT_IMAGE_PROCESSOR = :vips
     # Keys written by the content-type sniffers. They record what the file
     # claims to be, not whether an analyzer could decode it, so they must never
     # count as evidence that a media analysis happened.
     CONTENT_TYPE_METADATA_KEYS = %i[content_type content_type_backend].freeze
+    # What browsers and clients send when they do not know the type.
+    GENERIC_CONTENT_TYPE = "application/octet-stream"
+
+    # Every validator that runs analyzers accepts +timeout:+. Checked here, after
+    # the validator's own check_validity!, rather than in each of them.
+    def initialize(*)
+      super
+      ensure_timeout_validity
+    end
 
     private
+
+    def ensure_timeout_validity
+      return unless options.key?(:timeout)
+      return if ActiveStorageValidations.valid_command_timeout?(options[:timeout])
+
+      raise ArgumentError, "You must pass a positive number of seconds, or nil to disable it, to :timeout (got #{options[:timeout].inspect})"
+    end
 
     # Retrieve the ASV metadata from the blob.
     # If the blob has not been analyzed by our gem yet, the gem will analyze the
@@ -27,7 +43,7 @@ module ActiveStorageValidations
 
       return media_metadata(blob) if blob_has_asv_metadata?(blob, metadata_keys)
 
-      new_metadata = generate_metadata_for(attachable, metadata_keys) || {}
+      new_metadata = generate_metadata_for(attachable, metadata_keys, blob) || {}
       blob.merge_into_active_storage_validations_metadata(memoize_unavailable_keys(new_metadata, metadata_keys))
       persist_asv_metadata(blob)
 
@@ -122,23 +138,43 @@ module ActiveStorageValidations
       metadata_keys.all? { |key| cached.key?(key) }
     end
 
-    def generate_metadata_for(attachable, metadata_keys)
+    def generate_metadata_for(attachable, metadata_keys, blob = nil)
       if content_type_metadata_keys?(metadata_keys)
         content_type_analyzer_for(attachable).content_type
       else
-        metadata_analyzer_for(attachable).metadata
+        metadata_analyzer_for(attachable, blob).metadata
       end
     end
 
-    def metadata_analyzer_for(attachable)
-      return pdf_analyzer_for(attachable) if attachable_content_type(attachable) == "application/pdf"
+    def metadata_analyzer_for(attachable, blob = nil)
+      content_type = analyzable_content_type(attachable, blob)
+      return pdf_analyzer_for(attachable) if content_type == "application/pdf"
 
-      case attachable_media_type(attachable)
+      case content_type.to_s.split("/").first
       when "image" then image_analyzer_for(attachable)
       when "video" then video_analyzer_for(attachable)
       when "audio" then audio_analyzer_for(attachable)
       else fallback_analyzer_for(attachable)
       end
+    end
+
+    # Pick the analyzer from the declared type (downcased, parameters removed),
+    # then from the type Rails identified for the blob (its magic bytes, unless
+    # attached with `identify: false`), then from the filename. Blank and
+    # generic types are skipped: a PNG uploaded as application/octet-stream,
+    # IMAGE/PNG or "" used to get the null analyzer (file_not_processable).
+    #
+    # The declared type stays first on purpose: routing on the identified type
+    # would analyze a video or PDF uploaded as image/png with the video / PDF
+    # analyzer, so image-only validators (dimension, aspect_ratio,
+    # processable_file) would accept it.
+    def analyzable_content_type(attachable, blob)
+      [ full_attachable_content_type(attachable), blob&.content_type ].each do |type|
+        type = content_type_without_parameters(type.to_s)
+        return type if type.present? && type != GENERIC_CONTENT_TYPE
+      end
+
+      marcel_content_type_from_filename(attachable)
     end
 
     def pdf_analyzer_for(attachable)
@@ -151,13 +187,37 @@ module ActiveStorageValidations
         ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick.new(attachable, **analyzer_timeout_options)
       when :vips
         ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips.new(attachable, **analyzer_timeout_options)
+      else
+        # Rails 7.2+ allows :disabled (no variants). Unknown processors must not
+        # return nil — `.metadata` would raise from valid? instead of failing closed.
+        fallback_analyzer_for(attachable)
       end
     end
 
     def image_processor
-      # Rails returns nil for default image processor, because it is set in an after initialize callback
-      # https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/engine.rb
-      ActiveStorage.variant_processor || DEFAULT_IMAGE_PROCESSOR
+      # Rails may still return nil before its after-initialize callback sets the
+      # processor (https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/engine.rb).
+      # Fall back to libvips, which Rails 7.1+ uses for variants and which the
+      # README recommends. `:disabled` (Rails 7.2+) is handled in
+      # #image_analyzer_for via NullAnalyzer.
+      processor = ActiveStorage.variant_processor || DEFAULT_IMAGE_PROCESSOR
+      processor.is_a?(Class) ? image_processor_for_transformer(processor) : processor
+    end
+
+    # Rails 8.2+ also accepts a transformer class
+    # (`config.active_storage.variant_processor = MyTransformer`). It names the
+    # image library only when it extends Rails' ImageMagick / Vips transformer;
+    # any other class gets the default analyzer instead of failing every image.
+    # Ancestors are compared by name: referencing the constants would autoload
+    # them, and they require the image_processing gem.
+    def image_processor_for_transformer(transformer)
+      ancestor_names = transformer.ancestors.map(&:name)
+
+      if ancestor_names.include?("ActiveStorage::Transformers::ImageMagick")
+        :mini_magick
+      else
+        DEFAULT_IMAGE_PROCESSOR
+      end
     end
 
     def video_analyzer_for(attachable)

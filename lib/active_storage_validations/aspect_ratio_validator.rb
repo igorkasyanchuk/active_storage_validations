@@ -18,7 +18,7 @@ module ActiveStorageValidations
 
     AVAILABLE_CHECKS = %i[with in].freeze
     NAMED_ASPECT_RATIOS = %i[square portrait landscape].freeze
-    ASPECT_RATIO_REGEX = /is_([1-9]\d*)_([1-9]\d*)/
+    ASPECT_RATIO_REGEX = /\Ais_([1-9]\d*)_([1-9]\d*)\z/
     ERROR_TYPES = %i[
       aspect_ratio_not_square
       aspect_ratio_not_portrait
@@ -27,8 +27,8 @@ module ActiveStorageValidations
       aspect_ratio_invalid
       media_metadata_missing
     ].freeze
-    PRECISION = 3
     METADATA_KEYS = %i[width height].freeze
+    RATIO_PRECISION = 3
 
     def check_validity!
       ensure_at_least_one_validator_option
@@ -37,8 +37,6 @@ module ActiveStorageValidations
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
-
-      return if authorized_aspect_ratios(record).empty?
 
       validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
     end
@@ -49,7 +47,13 @@ module ActiveStorageValidations
     # Active Model reuses one validator instance across records and threads, so
     # per-validation state cannot live in an instance variable.
     def authorized_aspect_ratios(record)
-      authorized_aspect_ratios_from_options(set_flat_options(record)).compact
+      # A Proc nested in the list may return an Array of its own.
+      aspect_ratios = authorized_aspect_ratios_from_options(set_flat_options(record)).flatten.compact
+
+      # Procs escape check_validity!; an unknown value they return (`:sqaure`,
+      # "16:9") would otherwise reject every file with "must be 0:0".
+      ensure_aspect_ratios_validity(aspect_ratios) if proc_aspect_ratios?
+      aspect_ratios
     end
 
     def is_valid?(record, attribute, attachable, metadata)
@@ -79,7 +83,7 @@ module ActiveStorageValidations
     end
 
     def aspect_ratio_error_mapping(aspect_ratios)
-      return :aspect_ratio_invalid if aspect_ratios.many?
+      return :aspect_ratio_invalid if aspect_ratios.empty? || aspect_ratios.many?
 
       aspect_ratio = aspect_ratios.first
       NAMED_ASPECT_RATIOS.include?(aspect_ratio) ? :"aspect_ratio_not_#{aspect_ratio}" : :aspect_ratio_not_x_y
@@ -111,11 +115,32 @@ module ActiveStorageValidations
     end
 
     def valid_regex_aspect_ratio?(aspect_ratio, metadata)
-      aspect_ratio =~ ASPECT_RATIO_REGEX
-      x = ::Regexp.last_match(1).to_i
-      y = ::Regexp.last_match(2).to_i
+      x, y = ratio_components(aspect_ratio)
+      width = metadata[:width].to_i
+      height = metadata[:height].to_i
+      return false unless x.positive? && y.positive? && width.positive? && height.positive?
 
-      x > 0 && y > 0 && (x.to_f / y).round(PRECISION) == (metadata[:width].to_f / metadata[:height]).round(PRECISION)
+      matching_ratio?(width, height, x, y)
+    end
+
+    def ratio_components(aspect_ratio)
+      aspect_ratio =~ ASPECT_RATIO_REGEX
+      [ ::Regexp.last_match(1).to_i, ::Regexp.last_match(2).to_i ]
+    end
+
+    # The file matches x:y when either:
+    # - both ratios are equal once rounded to RATIO_PRECISION decimals, the
+    #   4.x rule, which leaves a few pixels of slack on large images
+    #   (2200×1237, 4032×3025), or
+    # - one side is within a pixel of the other one scaled to x:y, i.e. its
+    #   floor or ceil, so common sizes such as 1366×768 (1366 × 9 / 16 =
+    #   768.375) and 854×480 match 16:9.
+    # Strictly under a pixel: a `<= 1` margin was far too loose on small
+    # images (2×2 matched 1:2, 100×2 matched 100:1).
+    def matching_ratio?(width, height, x, y)
+      (width.to_f / height).round(RATIO_PRECISION) == (x.to_f / y).round(RATIO_PRECISION) ||
+        (height - width * y / x.to_f).abs < 1 ||
+        (width - height * x / y.to_f).abs < 1
     end
 
     def ensure_at_least_one_validator_option
@@ -124,19 +149,33 @@ module ActiveStorageValidations
       raise ArgumentError, "You must pass either :with or :in to the validator"
     end
 
+    # Procs (top-level or nested in the list) are checked when they are
+    # evaluated, see #authorized_aspect_ratios.
     def ensure_aspect_ratio_validity
-      return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
+      ratios = authorized_aspect_ratios_from_options(options).compact
+      raise ArgumentError, "You must pass at least one aspect ratio to the validator" if ratios.empty?
 
-      authorized_aspect_ratios_from_options(options).each do |aspect_ratio|
-        unless NAMED_ASPECT_RATIOS.include?(aspect_ratio) || aspect_ratio =~ ASPECT_RATIO_REGEX
-          raise ArgumentError, invalid_aspect_ratio_message
-        end
+      ensure_aspect_ratios_validity(ratios.grep_v(Proc))
+    end
+
+    def ensure_aspect_ratios_validity(aspect_ratios)
+      aspect_ratios.each do |aspect_ratio|
+        raise ArgumentError, invalid_aspect_ratio_message(aspect_ratio) unless valid_aspect_ratio?(aspect_ratio)
       end
     end
 
-    def invalid_aspect_ratio_message
+    def valid_aspect_ratio?(aspect_ratio)
+      NAMED_ASPECT_RATIOS.include?(aspect_ratio) ||
+        ((aspect_ratio.is_a?(Symbol) || aspect_ratio.is_a?(String)) && aspect_ratio.match?(ASPECT_RATIO_REGEX))
+    end
+
+    def proc_aspect_ratios?
+      authorized_aspect_ratios_from_options(options).any?(Proc)
+    end
+
+    def invalid_aspect_ratio_message(aspect_ratio)
       <<~ERROR_MESSAGE
-        You must pass a valid aspect ratio to the validator
+        You must pass a valid aspect ratio to the validator (got #{aspect_ratio.inspect})
         It should either be a named aspect ratio (#{NAMED_ASPECT_RATIOS.join(', ')})
         Or an aspect ratio like 'is_16_9' (matching /#{ASPECT_RATIO_REGEX.source}/)
       ERROR_MESSAGE
@@ -151,10 +190,7 @@ module ActiveStorageValidations
         if NAMED_ASPECT_RATIOS.include?(aspect_ratio)
           aspect_ratio
         else
-          aspect_ratio =~ ASPECT_RATIO_REGEX
-          x = ::Regexp.last_match(1).to_i
-          y = ::Regexp.last_match(2).to_i
-
+          x, y = ratio_components(aspect_ratio)
           "#{x}:#{y}"
         end
       end.join(", ")

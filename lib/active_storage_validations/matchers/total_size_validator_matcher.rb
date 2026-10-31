@@ -9,7 +9,7 @@ module ActiveStorageValidations
     end
 
     class TotalSizeValidatorMatcher < BaseComparisonValidatorMatcher
-      def description
+      def base_description
         "validate total file size of :#{@attribute_name}"
       end
 
@@ -19,15 +19,11 @@ module ActiveStorageValidations
         message.join("\n")
       end
 
-      protected
-
-      def attach_file
-        # has_many_attached relation
-        @subject.public_send(@attribute_name).attach([ dummy_blob ])
-        @subject.public_send(@attribute_name)
-      end
-
       private
+
+      def describe_value(value)
+        ActiveSupport::NumberHelper.number_to_human_size(value)
+      end
 
       def failure_message_unit
         "bytes"

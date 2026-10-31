@@ -18,6 +18,10 @@ module ActiveStorageValidations
 
       private
 
+      def allow_blank_description
+        "allowing blank" if @allow_blank
+      end
+
       def is_allowing_blank?
         return true unless @allow_blank
 

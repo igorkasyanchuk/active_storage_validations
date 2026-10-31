@@ -39,6 +39,21 @@ module ActiveStorageValidations
     end
     private_class_method :restore_stubbed_method
 
+    # Prepended once on Analyzer.singleton_class, so it also covers every
+    # analyzer subclass. The mock lives in the current thread (or fiber) state:
+    # concurrent probes (`parallelize(with: :threads)`) and real validations in
+    # other threads never see it. A per-probe singleton-method stub restored
+    # overlapping stubs out of order and could leave a mock installed for good.
+    module AnalyzerMock
+      KEY = :active_storage_validations_analyzer_mock
+
+      def new(...)
+        ActiveSupport::IsolatedExecutionState[KEY] || super
+      end
+    end
+
+    # Makes Analyzer.new return mocked metadata for the duration of the block
+    # so metadata matchers can probe bounds without real media files.
     def self.mock_metadata(attachment, metadata = {})
       asv_metadata_available_keys = { width: nil, height: nil, duration: nil, content_type: nil }
       merged = asv_metadata_available_keys.merge(metadata)
@@ -51,9 +66,17 @@ module ActiveStorageValidations
         { content_type: detected_content_type, content_type_backend: "file" }
       )
 
-      stub_method(ActiveStorageValidations::Analyzer, :new, mock) do
-        yield
-      end
+      with_analyzer_mock(mock) { yield }
     end
+
+    def self.with_analyzer_mock(mock)
+      ActiveStorageValidations::Analyzer.singleton_class.prepend(AnalyzerMock)
+      previous = ActiveSupport::IsolatedExecutionState[AnalyzerMock::KEY]
+      ActiveSupport::IsolatedExecutionState[AnalyzerMock::KEY] = mock
+      yield
+    ensure
+      ActiveSupport::IsolatedExecutionState[AnalyzerMock::KEY] = previous
+    end
+    private_class_method :with_analyzer_mock
   end
 end

@@ -17,6 +17,46 @@ RSpec.describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
     it_behaves_like "has custom matcher"
   end
 
+  # The probes run on the record the caller passed, not on a copy: a `dup` is a
+  # new record, with no id and an empty association cache.
+  describe "subject state" do
+    subject(:configured_matcher) { matcher.less_than(2.kilobytes) }
+
+    # validates :persisted_only, size: { less_than: 2.kilobytes }, if: :persisted?
+    let(:model_attribute) { :persisted_only }
+
+    context "when the validator only runs on persisted records" do
+      let(:instance) { klass.new.tap { |record| record.save!(validate: false) } }
+
+      it { is_expected_to_match_for(instance) }
+    end
+
+    context "when the record has errors of its own" do
+      let(:instance) { klass.new.tap { |record| record.errors.add(:base, "kept") } }
+
+      it "restores them" do
+        configured_matcher.matches?(instance)
+
+        expect(instance.errors.full_messages).to eq([ "kept" ])
+      end
+    end
+  end
+
+  describe "#failure_message" do
+    subject(:configured_matcher) { matcher.less_than_or_equal_to(1.megabyte) }
+
+    let(:model_attribute) { :failure_message }
+
+    it "lists the probes the validator accepted whereas the matcher expected a rejection" do
+      is_expected_to_have_failure_message(<<~FAILURE_MESSAGE.chomp)
+        is expected to validate file size of :failure_message
+          but there seem to have issues with the matcher methods you used, since:
+          validation passed when provided with a 1048577 bytes test file
+          whereas it should have failed
+      FAILURE_MESSAGE
+    end
+  end
+
   describe "#less_than" do
     let(:matcher_method) { :less_than }
     let(:model_attribute) { matcher_method }
@@ -102,6 +142,8 @@ RSpec.describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
 
       it { is_expected_not_to_match_for(klass) }
     end
+
+    it_behaves_like "base comparison validator matcher between honors exclusive range"
   end
 
   describe "#equal_to" do

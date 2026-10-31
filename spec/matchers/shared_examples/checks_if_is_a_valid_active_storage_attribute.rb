@@ -9,6 +9,14 @@ RSpec.shared_examples "checks if is a valid active storage attribute" do
     it { is_expected_not_to_match_for(klass) }
   end
 
+  context "when the passed model attribute has no validator of the matcher type" do
+    subject(:configured_matcher) { matcher }
+
+    let(:model_attribute) { :without_validator }
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+
   context "when the passed model attribute is not an active storage attribute" do
     subject(:configured_matcher) { matcher }
 

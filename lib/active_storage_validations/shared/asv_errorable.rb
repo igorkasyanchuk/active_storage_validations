@@ -6,9 +6,19 @@ module ActiveStorageValidations
   module ASVErrorable
     extend ActiveSupport::Concern
 
+    # Gem configuration options that are never error message data.
+    CONFIGURATION_OPTIONS = %i[with in timeout spoofing_protection].freeze
+
+    # Builds the options handed to +errors.add+. Like Rails' own validators
+    # (LengthValidator::RESERVED_OPTIONS, NumericalityValidator#filtered_options)
+    # the validator's check options (AVAILABLE_CHECKS) and the gem configuration
+    # are left out: they may hold Procs or Ranges that would otherwise end up in
+    # +errors.details+ and in the I18n interpolation arguments. Validators add
+    # the resolved values their messages document (:min, :max, :count, …)
+    # themselves. Rails options (:if, :on, :message, …) are forwarded as Rails
+    # does; ActiveModel::Error#details strips them.
     def initialize_error_options(options, file = nil)
-      not_explicitly_written_options = %i[with in]
-      curated_options = options.except(*not_explicitly_written_options)
+      curated_options = options.except(*CONFIGURATION_OPTIONS, *check_options)
 
       active_storage_validations_options = {
         validator_type: self.class.to_sym,
@@ -28,6 +38,10 @@ module ActiveStorageValidations
     end
 
     private
+
+    def check_options
+      self.class.const_defined?(:AVAILABLE_CHECKS) ? self.class::AVAILABLE_CHECKS : []
+    end
 
     def get_filename(file)
       return nil unless file

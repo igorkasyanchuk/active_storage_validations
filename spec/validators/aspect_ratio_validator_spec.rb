@@ -21,7 +21,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
       context "when the passed option is an invalid" do
         let(:error_message) do
           <<~ERROR_MESSAGE
-            You must pass a valid aspect ratio to the validator
+            You must pass a valid aspect ratio to the validator (got #{invalid_value.inspect})
             It should either be a named aspect ratio (#{ActiveStorageValidations::AspectRatioValidator::NAMED_ASPECT_RATIOS.join(', ')})
             Or an aspect ratio like 'is_16_9' (matching /#{ActiveStorageValidations::AspectRatioValidator::ASPECT_RATIO_REGEX.source}/)
           ERROR_MESSAGE
@@ -30,6 +30,8 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
         describe "named aspect ratio" do
           subject(:model) { validator_test_class::CheckValidityInvalidNamedArgument.new(params) }
 
+          let(:invalid_value) { :television }
+
           it "raises an error at model initialization" do
             expect { model }.to raise_error(ArgumentError, error_message)
           end
@@ -37,6 +39,8 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
 
         describe "is_x_y aspect ratio" do
           subject(:model) { validator_test_class::CheckValidityInvalidIsXyArgument.new(params) }
+
+          let(:invalid_value) { :is_0_1 }
 
           it "raises an error at model initialization" do
             expect { model }.to raise_error(ArgumentError, error_message)
@@ -49,6 +53,35 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
 
         it "does not perform a check, and therefore is valid" do
           expect { model }.not_to raise_error
+        end
+
+        # validates :invalid, aspect_ratio: ->(record) { :invalid }
+        it "checks the aspect ratios returned by the Proc at validation time" do
+          model.invalid.attach(image_150x150_file)
+
+          expect { model.valid? }.to raise_error(ArgumentError, /You must pass a valid aspect ratio to the validator \(got :invalid\)/)
+        end
+
+        # validates :nested_invalid, aspect_ratio: { in: [ :square, ->(record) { "16:9" } ] }
+        it "checks the aspect ratios returned by a Proc nested in the list at validation time" do
+          model.nested_invalid.attach(image_150x150_file)
+
+          expect { model.valid? }.to raise_error(ArgumentError, /You must pass a valid aspect ratio to the validator \(got "16:9"\)/)
+        end
+
+        # validates :nested_list, aspect_ratio: { in: [ :portrait, ->(record) { [ :square, :landscape ] } ] }
+        it "authorizes the aspect ratios of a list returned by a nested Proc" do
+          model.nested_list.attach(image_150x150_file)
+
+          expect(model).to be_valid
+        end
+      end
+
+      context "when the authorized list is empty" do
+        subject(:validator) { described_class.new(attributes: [ :file ], with: []) }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, "You must pass at least one aspect ratio to the validator")
         end
       end
     end
@@ -73,12 +106,20 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
         is_1_0
         is_0_0
         is_01_2
+        is_16_9_extra
+        not_is_16_9
+        is_16_9x
       ]
     end
 
     it "accepts ratios like 'is_16_9'" do
       expect(accepted_is_x_y_strings).to all(match(aspect_ratio_regex))
       expect(not_accepted_is_x_y_strings).to all(satisfy { |value| !value.match?(aspect_ratio_regex) })
+    end
+
+    it "rejects ratios with surrounding characters at boot" do
+      expect { described_class.new(attributes: [ :file ], with: :is_16_9_extra) }
+        .to raise_error(ArgumentError, /You must pass a valid aspect ratio to the validator/)
     end
   end
 
@@ -221,6 +262,90 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
           end
         end
       end
+    end
+
+    describe "custom ratio pixel rounding" do
+      let(:attribute) { :with_regex }
+
+      # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
+      def stub_dimensions(width, height)
+        allow_any_instance_of(described_class).to receive(:metadata_for).and_return({ width: width, height: height })
+      end
+      # rubocop:enable RSpec/AnyInstance
+
+      context "when the image is 16:9 rounded to the nearest pixel (1366x768)" do
+        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+        before { stub_dimensions(1366, 768) }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when the image is 16:9 rounded to the nearest pixel (854x480)" do
+        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+        before { stub_dimensions(854, 480) }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when the image is 2 pixels off 16:9 (1920x1082)" do
+        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+        before { stub_dimensions(1920, 1082) }
+
+        let(:error_options) do
+          {
+            authorized_aspect_ratios: "16:9",
+            width: 1920,
+            height: 1082,
+            filename: square_image_file[:filename]
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("aspect_ratio_not_x_y", error_options: error_options) }
+      end
+
+      {
+        # 4.x rule (ratios equal to 3 decimals): a few pixels of slack on large images
+        [ 2200, 1237, :is_16_9 ] => true,
+        [ 6000, 3374, :is_16_9 ] => true,
+        [ 4032, 3025, :is_4_3 ] => true,
+        # one side is the floor or ceil of the other one scaled to x:y
+        [ 1921, 1080, :is_16_9 ] => true,
+        [ 2, 1, :is_16_9 ] => true,
+        # a whole pixel off is a large share of a small side
+        [ 2, 2, :is_1_2 ] => false,
+        [ 100, 2, :is_100_1 ] => false,
+        [ 1001, 1000, :is_1_1 ] => false
+      }.each do |(width, height, aspect_ratio), expected|
+        context "when a #{width}x#{height} image is validated as #{aspect_ratio}" do
+          subject(:valid) { validator.send(:valid_regex_aspect_ratio?, aspect_ratio, { width: width, height: height }) }
+
+          let(:validator) { described_class.new(attributes: [ :file ], with: aspect_ratio) }
+
+          it { is_expected.to be(expected) }
+        end
+      end
+    end
+
+    context "when the Proc returns an empty list" do
+      subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+      let(:attribute) { :with_empty_proc }
+      let(:error_options) do
+        {
+          authorized_aspect_ratios: "",
+          width: 150,
+          height: 150,
+          filename: square_image_file[:filename]
+        }
+      end
+
+      it { is_expected_not_to_be_valid }
+      it { is_expected_to_include_error_message("aspect_ratio_invalid", error_options: error_options) }
+      it { is_expected_to_have_error_options(error_options) }
     end
 
     describe "Edge cases" do

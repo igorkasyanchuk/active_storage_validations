@@ -56,6 +56,84 @@ RSpec.describe ActiveStorageValidations::Analyzer::PdfAnalyzer do
     end
   end
 
+  describe "page rotation" do
+    subject(:metadata) { analyzer.metadata }
+
+    context "with a page rotated by 90 degrees" do
+      let(:attachable) { pdf_200x300_rotated_90_file }
+
+      it "returns the dimensions as displayed" do
+        expect(metadata).to eq({ width: 300, height: 200, pages: 1 })
+      end
+    end
+
+    describe "pdfinfo Page rot" do
+      let(:attachable) { pdf_200x300_file }
+
+      before do
+        allow(analyzer).to receive(:media_from_path).and_return(
+          { "page_size" => "200 x 300 pts", "page_rot" => page_rot, "pages" => "1" }
+        )
+      end
+
+      [
+        [ "0", 200, 300 ],
+        [ "90", 300, 200 ],
+        [ "180", 200, 300 ],
+        [ "270", 300, 200 ],
+        [ "-90", 300, 200 ]
+      ].each do |reported_rotation, width, height|
+        context "when it is #{reported_rotation} degrees" do
+          let(:page_rot) { reported_rotation }
+
+          it "returns #{width}x#{height}" do
+            expect(metadata).to eq({ width: width, height: height, pages: 1 })
+          end
+        end
+      end
+    end
+  end
+
+  describe "pages parsing" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) do
+      {
+        io: open_fixture(Rails.root.join("public", "pdf_150x150.pdf")),
+        filename: "pdf_150x150.pdf",
+        content_type: "application/pdf"
+      }
+    end
+
+    before do
+      allow(analyzer).to receive(:media_from_path).and_return(pdfinfo)
+    end
+
+    context "when pdfinfo omits Pages" do
+      let(:pdfinfo) { { "page_size" => "150 x 150 pts" } }
+
+      it "omits pages rather than caching 0" do
+        expect(metadata).to eq({ width: 150, height: 150 })
+      end
+    end
+
+    context "when pdfinfo reports Pages: 0" do
+      let(:pdfinfo) { { "page_size" => "150 x 150 pts", "pages" => "0" } }
+
+      it "omits pages rather than caching 0" do
+        expect(metadata).to eq({ width: 150, height: 150 })
+      end
+    end
+
+    context "when pdfinfo reports only Pages: 0" do
+      let(:pdfinfo) { { "pages" => "0" } }
+
+      it "returns empty metadata so analysis can retry" do
+        expect(metadata).to eq({})
+      end
+    end
+  end
+
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "pdf_150x150.pdf").to_s }
     let(:attachable) do

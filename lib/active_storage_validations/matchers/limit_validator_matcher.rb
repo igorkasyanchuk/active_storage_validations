@@ -35,7 +35,7 @@ module ActiveStorageValidations
         @min = @max = nil
       end
 
-      def description
+      def base_description
         "validate the limit files of :#{@attribute_name}"
       end
 
@@ -56,9 +56,10 @@ module ActiveStorageValidations
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject.new : subject
+        initialize_subject(subject)
 
         is_a_valid_active_storage_attribute? &&
+          has_validator? &&
           is_context_valid? &&
           is_except_on_valid? &&
           is_allowing_blank? &&
@@ -71,61 +72,73 @@ module ActiveStorageValidations
           file_count_not_larger_than_max?
       end
 
-        private
+      private
 
-      def build_failure_message(message)
-        return unless @failure_message_artefacts.present?
+      def chain_descriptions
+        [
+          ("at least #{describe_count(@min)}" if @min),
+          ("at most #{describe_count(@max)}" if @max)
+        ].compact
+      end
 
-        message << "  but there seem to have issues with the matcher methods you used, since:"
-        @failure_message_artefacts.each do |error_case|
-          message << "  validation failed when provided with #{error_case[:count]} file(s)"
-        end
-        message << "  whereas it should have passed"
+      def describe_count(count)
+        "#{count} #{"file".pluralize(count)}"
       end
 
       def file_count_not_smaller_than_min?
-        @min.nil? || @min.zero? || (@allow_blank && @min == 1) || !passes_validation_with_limits(@min - 1)
+        @min.nil? || @min.zero? || (@allow_blank && @min == 1) || rejects_count?(@min - 1)
       end
 
       def file_count_equal_min?
-        @min.nil? || @min.zero? || passes_validation_with_limits(@min)
+        return true if @min.nil?
+        return false unless accepts_count?(@min)
+
+        !@min.zero? || validator_min_zero?
       end
 
       def file_count_larger_than_min?
-        @min.nil? || @min.zero? || @min == @max || passes_validation_with_limits(@min + 1)
+        @min.nil? || @min == @max || accepts_count?(@min + 1)
+      end
+
+      def validator_min_zero?
+        attribute_validator&.options&.[](:min) == 0
       end
 
       def file_count_smaller_than_max?
-        @max.nil? || @min == @max || passes_validation_with_limits(@max - 1)
+        @max.nil? || @min == @max || accepts_count?(@max - 1)
       end
 
       def file_count_equal_max?
-        @max.nil? || passes_validation_with_limits(@max)
+        @max.nil? || accepts_count?(@max)
       end
 
       def file_count_not_larger_than_max?
-        @max.nil? || !passes_validation_with_limits(@max + 1)
+        @max.nil? || rejects_count?(@max + 1)
+      end
+
+      def accepts_count?(count)
+        passes_validation_with_limits(count) || add_failure_message_artefact("#{count} file(s)", passed: false)
+      end
+
+      def rejects_count?(count)
+        !passes_validation_with_limits(count) || add_failure_message_artefact("#{count} file(s)", passed: true)
       end
 
       def passes_validation_with_limits(count)
         attach_files(count)
         validate
         detach_files
-        is_valid? || add_failure_message_artefact(count)
+        is_valid?
       end
 
       def is_custom_message_valid?
         return true if !@custom_message || (@min&.zero? && @max.nil?)
+        raise ArgumentError, "#with_message needs #min or #max to build a file count the validator rejects" if @min.nil? && @max.nil?
 
-        @min.nil? ? attach_files(@max + 1) : attach_files(@min - 1)
+        attach_files(@min.nil? || @min.zero? ? @max + 1 : @min - 1)
         validate
         detach_files
         has_an_error_message_which_is_custom_message?
-      end
-
-      def add_failure_message_artefact(count)
-        @failure_message_artefacts << { count: count }
-        false
       end
     end
   end

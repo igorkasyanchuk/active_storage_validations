@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "delegate"
 require_relative "base_comparison_validator"
 
 module ActiveStorageValidations
@@ -14,8 +15,21 @@ module ActiveStorageValidations
       duration_not_greater_than_or_equal_to
       duration_not_between
       duration_not_equal_to
+      media_metadata_missing
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[duration].freeze
+
+    # Durations are rendered like ActiveSupport::Duration#inspect
+    # ("1 minute and 30 seconds") but through the active_storage_validations.duration
+    # I18n keys (units + sentence connectors) shipped in every bundled locale.
+    # The English wording is the fallback for locales the gem does not ship.
+    DURATION_UNITS = ActiveSupport::Duration::PARTS
+    DEFAULT_DURATION_CONNECTORS = {
+      words_connector: ", ",
+      two_words_connector: " and ",
+      last_word_connector: ", and "
+    }.freeze
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
@@ -52,11 +66,55 @@ module ActiveStorageValidations
       add_error(record, attribute, error_type, **errors_options)
     end
 
+    # Analyzer precision is milliseconds. `end - 1` on a Duration is 1 second.
+    def exclusive_range_step
+      0.001.seconds
+    end
+
     def format_bound_value(value)
       return nil unless value
 
-      custom_value = value == value.to_i ? value.to_i : value
-      ActiveSupport::Duration.build(custom_value).inspect
+      # Encoder padding makes fixture files 2.024s, 5.029s, … Error copy still
+      # talks in tenths of a second; comparison uses the analyzer's millisecond value.
+      rounded = value.to_f.round(1)
+      custom_value = rounded == rounded.to_i ? rounded.to_i : rounded
+      duration_in_words(ActiveSupport::Duration.build(custom_value))
+    end
+
+    def duration_in_words(duration)
+      parts = duration.parts.presence || { seconds: duration.value.to_i }
+
+      words = parts.sort_by { |unit, _count| DURATION_UNITS.index(unit) }.map do |unit, count|
+        count = LocalizedCount.new(count) unless count.is_a?(Integer)
+        I18n.t("active_storage_validations.duration.#{unit}", count: count, default: default_unit_translation(unit))
+      end
+
+      words.to_sentence(locale: false, **duration_connectors)
+    end
+
+    # A decimal count (1.5 seconds) must still pick the plural form as a
+    # number, but its text follows the locale's decimal separator ("1,5" in
+    # French), like number_to_human_size does for sizes. I18n interpolates
+    # %{count} with #to_s.
+    class LocalizedCount < SimpleDelegator
+      def to_s
+        ActiveSupport::NumberHelper.number_to_delimited(__getobj__)
+      end
+
+      # Plural rules (rails-i18n) may check `count.is_a?(Numeric)`.
+      def is_a?(klass)
+        super || __getobj__.is_a?(klass)
+      end
+      alias_method :kind_of?, :is_a?
+    end
+    private_constant :LocalizedCount
+
+    def default_unit_translation(unit)
+      { one: "%{count} #{unit.to_s.singularize}", other: "%{count} #{unit}" }
+    end
+
+    def duration_connectors
+      I18n.t("active_storage_validations.duration.connectors", default: DEFAULT_DURATION_CONNECTORS)
     end
 
     def populate_error_options(errors_options, flat_options, duration)

@@ -31,11 +31,14 @@ module ActiveStorageValidations
       media_metadata_missing
     ].freeze
     METADATA_KEYS = %i[width height].freeze
+    DIMENSION_HASH_KEYS = %i[min max in].freeze
 
     def check_validity!
       ensure_at_least_one_validator_option
+      ensure_dimension_option_validity
       ensure_dimension_in_option_validity
       ensure_min_max_option_validity
+      ensure_min_max_not_combined_with_dimension
     end
 
     def validate_each(record, attribute, _value)
@@ -52,20 +55,92 @@ module ActiveStorageValidations
       end
     end
 
+    # A misspelled or empty width / height Hash (`{ minimum: 1000 }`, `{}`) used
+    # to load and validate nothing, and a bare Range (`width: 100..200`) was
+    # compared as an exact width. Procs are evaluated per record and cannot be
+    # checked here.
+    def ensure_dimension_option_validity
+      %i[width height].each do |dimension|
+        next unless options.key?(dimension)
+
+        value = options[dimension]
+        next if value.is_a?(Numeric) || value.is_a?(Proc)
+
+        unless value.is_a?(Hash)
+          raise ArgumentError, "{ #{dimension}: value } value must be an Integer, a Proc or a Hash with :min, :max or :in (e.g. #{dimension}: { in: 100..200 })"
+        end
+
+        ensure_dimension_hash_validity(dimension, value)
+      end
+    end
+
+    def ensure_dimension_hash_validity(dimension, value)
+      # A HashWithIndifferentAccess stores String keys but answers [:min]; a
+      # plain Hash with String keys does not, so it must keep raising.
+      keys = value.is_a?(ActiveSupport::HashWithIndifferentAccess) ? value.keys.map(&:to_sym) : value.keys
+      if value.empty? || (keys - DIMENSION_HASH_KEYS).any?
+        raise ArgumentError, "{ #{dimension}: { … } } only accepts :min, :max and :in (got #{value.keys.inspect})"
+      end
+
+      if value.key?(:in) && (value.key?(:min) || value.key?(:max))
+        raise ArgumentError, "{ #{dimension}: { in: } } cannot be combined with :min / :max"
+      end
+
+      %i[min max].each do |bound|
+        next unless value.key?(bound)
+        next if value[bound].is_a?(Numeric) || value[bound].is_a?(Proc)
+
+        raise ArgumentError, "{ #{dimension}: { #{bound}: value } } value must be an Integer or a Proc"
+      end
+    end
+
+    # Top-level min / max overwrite the width / height bounds and skip their
+    # own checks, so combining both silently dropped a bound.
+    def ensure_min_max_not_combined_with_dimension
+      return unless %i[min max].any? { |bound| options.key?(bound) }
+      return unless %i[width height].any? { |dimension| options.key?(dimension) }
+
+      raise ArgumentError, "{ min: } / { max: } cannot be combined with :width / :height (use width: { min:, max: } and height: { min:, max: } instead)"
+    end
+
     def ensure_dimension_in_option_validity
       %i[width height].each do |dimension|
-        if options[dimension]&.is_a?(Hash) && options[dimension][:in].present?
-          raise ArgumentError, "{ #{dimension}: { in: value } } value must be a Range (min..max)" if !options[dimension][:in].is_a?(Range) && !options[dimension][:in].is_a?(Proc)
+        next unless options[dimension].is_a?(Hash) && options[dimension].key?(:in)
+
+        in_option = options[dimension][:in]
+        unless in_option.is_a?(Range) || in_option.is_a?(Proc)
+          raise ArgumentError, "{ #{dimension}: { in: value } } value must be a Range (min..max)"
         end
+
+        ensure_range_has_both_bounds!(
+          in_option,
+          "{ #{dimension}: { in: } } value must be a Range with both bounds (use #{dimension}: { min: } or #{dimension}: { max: } for a single bound)"
+        )
       end
     end
 
     def ensure_min_max_option_validity
       %i[min max].each do |bound|
-        if options[bound].present?
-          raise ArgumentError, "{ #{bound}: value } value must be a Range (#{bound}_width..#{bound}_height)" if !options[bound]&.is_a?(Range) && !options[bound]&.is_a?(Proc)
+        next unless options[bound].present?
+
+        unless options[bound].is_a?(Range) || options[bound].is_a?(Proc)
+          raise ArgumentError, "{ #{bound}: value } value must be a Range (#{bound}_width..#{bound}_height)"
         end
+
+        ensure_range_has_both_bounds!(
+          options[bound],
+          "{ #{bound}: } value must be a Range with both bounds (#{bound}_width..#{bound}_height)"
+        )
       end
+    end
+
+    # Endless / beginless ranges (`100..`, `..800`) raise RangeError from
+    # Range#min / #max. Procs are evaluated per record and cannot be checked here.
+    def ensure_range_has_both_bounds!(value, message)
+      return if value.is_a?(Proc)
+      return if value.is_a?(Range) && !value.begin.nil? && !value.end.nil?
+
+      raise ArgumentError, message
     end
 
     def is_valid?(record, attribute, file, metadata)
@@ -86,19 +161,65 @@ module ActiveStorageValidations
     end
 
     def min_max_validation?(flat_options)
-      flat_options[:min] || flat_options[:max]
+      bound_present?(flat_options, :min) || bound_present?(flat_options, :max)
     end
 
+    # { min: 100..200, max: 800..600 } options: one error per violated bound,
+    # reported on both dimensions (:width / :height) at once.
     def validate_min_max(record, attribute, metadata, flat_options, errors_options)
-      return false unless validate_min(record, attribute, metadata, flat_options, errors_options)
-      return false unless validate_max(record, attribute, metadata, flat_options, errors_options)
+      %i[min max].all? { |bound| validate_bound(bound, record, attribute, metadata, flat_options, errors_options) }
+    end
 
-      true
+    def validate_bound(bound, record, attribute, metadata, flat_options, errors_options)
+      return true unless invalid_bound?(bound, flat_options, metadata)
+
+      errors_options[:width] = flat_options[:width][bound]
+      errors_options[:height] = flat_options[:height][bound]
+      add_error(record, attribute, :"dimension_#{bound}_not_included_in", **errors_options)
+      false
+    end
+
+    def invalid_bound?(bound, flat_options, metadata)
+      return false unless bound_present?(flat_options, bound)
+
+      %i[width height].any? { |dimension| invalid_dimension_bound?(bound, dimension, flat_options, metadata) }
+    end
+
+    # { width: { min:, max: } } options: the error names the dimension and
+    # carries the violated bound as :length.
+    def validate_dimension_min_max(record, attribute, dimension, metadata, flat_options, errors_options)
+      %i[min max].each do |bound|
+        validate_dimension_bound(bound, record, attribute, dimension, metadata, flat_options, errors_options)
+      end
+    end
+
+    def validate_dimension_bound(bound, record, attribute, dimension, metadata, flat_options, errors_options)
+      return true unless invalid_dimension_bound?(bound, dimension, flat_options, metadata)
+
+      errors_options[:length] = flat_options[dimension][bound]
+      error_type = bound == :min ? :not_greater_than_or_equal_to : :not_less_than_or_equal_to
+      add_error(record, attribute, :"dimension_#{dimension}_#{error_type}", **errors_options)
+      false
+    end
+
+    def invalid_dimension_bound?(bound, dimension, flat_options, metadata)
+      limit = dimension_limit(flat_options, dimension, bound)
+      return false if limit.nil?
+
+      bound == :min ? metadata[dimension] < limit : metadata[dimension] > limit
+    end
+
+    # Integer 0 is a real bound (`width: { max: 0 }`). Truthiness would skip it.
+    def dimension_limit(flat_options, dimension, bound)
+      limits = flat_options[dimension]
+      return unless limits.is_a?(Hash) && bound_present?(limits, bound)
+
+      limits[bound]
     end
 
     def validate_width_height(record, attribute, metadata, flat_options, errors_options)
       %i[width height].each do |dimension|
-        next unless flat_options[dimension]
+        next unless bound_present?(flat_options, dimension)
 
         if flat_options[dimension].is_a?(Hash)
           validate_range(record, attribute, dimension, metadata, flat_options, errors_options)
@@ -107,51 +228,6 @@ module ActiveStorageValidations
         end
       end
     end
-
-    # rubocop:disable Metrics/BlockLength
-    %i[min max].each do |bound|
-      define_method("validate_#{bound}") do |record, attribute, metadata, flat_options, errors_options|
-        if send(:"invalid_#{bound}?", flat_options, metadata)
-          send(:"add_#{bound}_error", record, attribute, flat_options, errors_options)
-          false
-        else
-          true
-        end
-      end
-
-      define_method("validate_dimension_#{bound}") do |record, attribute, dimension, metadata, flat_options, errors_options|
-        if send(:"invalid_dimension_#{bound}?", flat_options, dimension, metadata)
-          send(:"add_dimension_#{bound}_error", record, attribute, dimension, flat_options, errors_options)
-          false
-        else
-          true
-        end
-      end
-
-      define_method("invalid_#{bound}?") do |flat_options, metadata|
-        flat_options[bound] && (
-          send(:"invalid_dimension_#{bound}?", flat_options, :width, metadata) ||
-          send(:"invalid_dimension_#{bound}?", flat_options, :height, metadata)
-        )
-      end
-
-      define_method("invalid_dimension_#{bound}?") do |flat_options, dimension, metadata|
-        flat_options[dimension][bound] && metadata[dimension].public_send(bound == :min ? :< : :>, flat_options[dimension][bound])
-      end
-
-      define_method("add_#{bound}_error") do |record, attribute, flat_options, errors_options|
-        errors_options[:width] = flat_options[:width][bound]
-        errors_options[:height] = flat_options[:height][bound]
-        add_error(record, attribute, :"dimension_#{bound}_not_included_in", **errors_options)
-      end
-
-      define_method("add_dimension_#{bound}_error") do |record, attribute, dimension, flat_options, errors_options|
-        error_type = bound == :min ? :not_greater_than_or_equal_to : :not_less_than_or_equal_to
-        errors_options[:length] = flat_options[dimension][bound]
-        add_error(record, attribute, :"dimension_#{dimension}_#{error_type}", **errors_options)
-      end
-    end
-    # rubocop:enable Metrics/BlockLength
 
     def validate_range(record, attribute, dimension, metadata, flat_options, errors_options)
       if in_option_used?(flat_options, dimension)
@@ -173,23 +249,29 @@ module ActiveStorageValidations
     end
 
     def in_option_used?(flat_options, dimension)
-      flat_options[dimension][:in]
+      bound_present?(flat_options[dimension], :in)
     end
 
     def outside_range?(value, options)
-      value < options[:min] || value > options[:max]
+      if bound_present?(options, :in)
+        !options[:in].include?(value)
+      else
+        min_exceeded?(value, options) || max_exceeded?(value, options)
+      end
+    end
+
+    def min_exceeded?(value, options)
+      bound_present?(options, :min) && value < options[:min]
+    end
+
+    def max_exceeded?(value, options)
+      bound_present?(options, :max) && value > options[:max]
     end
 
     def add_range_error(record, attribute, dimension, flat_options, errors_options)
       errors_options[:min] = flat_options[dimension][:min]
       errors_options[:max] = flat_options[dimension][:max]
       add_error(record, attribute, :"dimension_#{dimension}_not_included_in", **errors_options)
-    end
-
-    def validate_dimension_min_max(record, attribute, dimension, metadata, flat_options, errors_options)
-      %i[min max].each do |bound|
-        send(:"validate_dimension_#{bound}", record, attribute, dimension, metadata, flat_options, errors_options)
-      end
     end
 
     def validate_exact(record, attribute, dimension, metadata, flat_options, errors_options)
@@ -206,23 +288,39 @@ module ActiveStorageValidations
       flat_options = set_flat_options(record)
 
       %i[width height].each do |dimension|
-        if flat_options[dimension] and flat_options[dimension].is_a?(Hash)
-          if (range = flat_options[dimension][:in])
-            flat_options[dimension][:min], flat_options[dimension][:max] = range.min, range.max
+        if flat_options[dimension].is_a?(Hash)
+          # A width / height Proc returns the caller's own Hash (maybe a frozen
+          # constant): copy it before adding the flattened :min / :max bounds.
+          flat_options[dimension] = flat_options[dimension].dup
+          if bound_present?(flat_options[dimension], :in)
+            range = flat_options[dimension][:in]
+            # Range#begin / #end never raise; a Proc may still return an unbounded range.
+            # Exclusive ranges reject the end bound — error :max is the last included value.
+            flat_options[dimension][:min] = range.begin
+            flat_options[dimension][:max] = last_included_range_end(range)
           end
         end
       end
 
       %i[min max].each do |bound|
-        if (range = flat_options[bound])
+        if bound_present?(flat_options, bound)
+          range = flat_options[bound]
           flat_options[:width] ||= {}
           flat_options[:height] ||= {}
-          flat_options[:width][bound] = range.first
-          flat_options[:height][bound] = range.last
+          flat_options[:width][bound] = range.begin
+          flat_options[:height][bound] = range.end
         end
       end
 
       flat_options
+    end
+
+    # Exclusive ranges (`400...600`) reject the end bound. Error messages must
+    # advertise the last included value, not the excluded endpoint.
+    def last_included_range_end(range)
+      return range.end unless range.respond_to?(:exclude_end?) && range.exclude_end?
+
+      range.end - 1
     end
   end
 end

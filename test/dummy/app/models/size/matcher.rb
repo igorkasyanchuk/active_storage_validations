@@ -13,8 +13,13 @@
 class Size::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :without_validator
+
   has_one_attached :custom_matcher
   validates :custom_matcher, size: { less_than_or_equal_to: 5.megabytes }
+
+  has_one_attached :persisted_only
+  validates :persisted_only, size: { less_than: 2.kilobytes }, if: :persisted?
 
   has_one_attached :less_than
   has_one_attached :less_than_or_equal_to
@@ -28,6 +33,8 @@ class Size::Matcher < ApplicationRecord
   validates :greater_than, size: { greater_than: 7.kilobytes }
   validates :greater_than_or_equal_to, size: { greater_than_or_equal_to: 7.kilobytes }
   validates :between, size: { between: 2.kilobytes..7.kilobytes }
+  has_one_attached :between_exclusive
+  validates :between_exclusive, size: { between: 2.kilobytes...7.kilobytes }
   validates :equal_to, size: { equal_to: 5.kilobytes }
   validates :many_greater_than, size: { greater_than: 7.kilobytes }
 
@@ -63,6 +70,8 @@ class Size::Matcher < ApplicationRecord
   if Rails.gem_version >= Gem::Version.new("8.0.0")
     has_one_attached :with_except_on_symbol
     validates :with_except_on_symbol, size: { less_than_or_equal_to: 5.megabytes }, except_on: :update
+    has_one_attached :with_except_on_create
+    validates :with_except_on_create, size: { less_than_or_equal_to: 5.megabytes }, except_on: :create
     has_one_attached :with_except_on_array
     validates :with_except_on_array, size: { less_than_or_equal_to: 5.megabytes }, except_on: %i[update custom]
     has_one_attached :with_several_validators_and_except_on

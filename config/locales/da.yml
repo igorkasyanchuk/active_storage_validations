@@ -7,6 +7,9 @@ da:
       content_type_spoofed:
         one: "har en indholdstype, der ikke svarer til den, der registreres gennem dens indhold (autoriseret indholdstype er %{authorized_human_content_types})"
         other: "har en indholdstype, der ikke svarer til den, der registreres gennem dens indhold (autoriserede indholdstyper er %{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "har en indholdstype, der ikke kunne verificeres gennem dens indhold (autoriseret indholdstype er %{authorized_human_content_types})"
+        other: "har en indholdstype, der ikke kunne verificeres gennem dens indhold (autoriserede indholdstyper er %{authorized_human_content_types})"
       file_size_not_less_than: "filstørrelsen skal være mindre end %{max} (den nuværende størrelse er %{file_size})"
       file_size_not_less_than_or_equal_to: "filstørrelsen skal være mindre end eller lig med %{max} (den nuværende størrelse er %{file_size})"
       file_size_not_greater_than: "filstørrelsen skal være større end %{min} (den nuværende størrelse er %{file_size})"
@@ -63,3 +66,30 @@ da:
       pages_not_greater_than_or_equal_to: "sideantal skal være større end eller lig med %{min} (aktuelt sideantal er %{pages})"
       pages_not_between: "sideantal skal være mellem %{min} og %{max} (aktuelt sideantal er %{pages})"
       pages_not_equal_to: "sideantal skal være lig med %{exact} (aktuelt sideantal er %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} år"
+        other: "%{count} år"
+      months:
+        one: "%{count} måned"
+        other: "%{count} måneder"
+      weeks:
+        one: "%{count} uge"
+        other: "%{count} uger"
+      days:
+        one: "%{count} dag"
+        other: "%{count} dage"
+      hours:
+        one: "%{count} time"
+        other: "%{count} timer"
+      minutes:
+        one: "%{count} minut"
+        other: "%{count} minutter"
+      seconds:
+        one: "%{count} sekund"
+        other: "%{count} sekunder"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " og "
+        last_word_connector: " og "

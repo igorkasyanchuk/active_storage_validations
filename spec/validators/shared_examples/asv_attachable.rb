@@ -87,6 +87,45 @@ RSpec.shared_examples "ASVAttachable" do
     end
   end
 
+  describe "attachments marked for destruction" do
+    before do
+      skip if file_not_matching_requirements.nil? # validators like :limit or :attached don't apply here
+    end
+
+    describe "one" do
+      before do
+        skip if validator_sym == :total_size # has_many_attached only
+
+        subject.asv_attachable.attach(file_not_matching_requirements)
+        subject.save!(validate: false)
+      end
+
+      it "still reports errors for the persisted invalid file" do
+        expect(subject.invalid?).to be(true)
+      end
+
+      it "ignores the persisted invalid file once marked for destruction" do
+        subject.asv_attachable.mark_for_destruction
+
+        expect(subject.valid?).to be(true)
+      end
+    end
+
+    describe "many" do
+      before do
+        subject.asv_attachables.attach(file_not_matching_requirements)
+        subject.save!(validate: false)
+      end
+
+      it "ignores the persisted invalid file once marked for destruction when a new file is attached" do
+        subject.asv_attachables.first.mark_for_destruction
+        subject.asv_attachables.attach(file_matching_requirements)
+
+        expect(subject.valid?).to be(true)
+      end
+    end
+  end
+
   context "when multiple new files are attached at once" do
     it "still reports errors for the invalid file when another new file is valid" do
       skip if file_not_matching_requirements.nil? # validators like :limit or :attached don't apply here

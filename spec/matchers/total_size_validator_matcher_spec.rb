@@ -93,6 +93,8 @@ RSpec.describe ActiveStorageValidations::Matchers::TotalSizeValidatorMatcher do
 
       it { is_expected_not_to_match_for(klass) }
     end
+
+    it_behaves_like "base comparison validator matcher between honors exclusive range"
   end
 
   describe "#equal_to" do
@@ -194,6 +196,24 @@ RSpec.describe ActiveStorageValidations::Matchers::TotalSizeValidatorMatcher do
           it { is_expected_to_match_for(klass) }
         end
       end
+    end
+  end
+
+  describe "probe attachments" do
+    subject(:configured_matcher) { matcher.less_than(2.kilobytes) }
+
+    let(:model_attribute) { :less_than }
+
+    it "does not create or upload blobs" do
+      expect { configured_matcher.matches?(klass) }.not_to change(ActiveStorage::Blob, :count)
+    end
+
+    it "does not open tempfiles" do
+      allow(Tempfile).to receive(:new).and_call_original
+
+      configured_matcher.matches?(klass)
+
+      expect(Tempfile).not_to have_received(:new)
     end
   end
 end

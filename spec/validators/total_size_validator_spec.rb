@@ -137,6 +137,31 @@ RSpec.describe ActiveStorageValidations::TotalSizeValidator do
       it_behaves_like "comparison between option"
     end
 
+    describe "exclusive :between (e.g. between: 2.kilobytes...7.kilobytes)" do
+      let(:attribute) { :between_exclusive }
+      let(:error_options) do
+        {
+          total_file_size: "7 KB",
+          min: "2 KB",
+          max: ActiveSupport::NumberHelper.number_to_human_size(7.kilobytes - 1)
+        }
+      end
+
+      context "when provided with files inside the exclusive range" do
+        subject(:record) { model.public_send(attribute).attach(file_5ko) and model }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when provided with files at the exclusive end bound" do
+        subject(:record) { model.public_send(attribute).attach(file_7ko) and model }
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("total_file_size_not_between", with_locales: [ "en" ], error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+    end
+
     describe ":equal_to" do
       let(:file_having_lower_than_equal_to_option) { file_1ko }
       let(:file_having_exact_equal_to_option) { file_5ko }
@@ -197,6 +222,32 @@ RSpec.describe ActiveStorageValidations::TotalSizeValidator do
         it { is_expected_to_include_error_message("total_file_size_not_equal_to", with_locales: [ "en" ], error_options: error_options) }
         it { is_expected_to_have_error_options(error_options) }
       end
+    end
+  end
+
+  describe "attachments marked for destruction" do
+    let(:model) { validator_test_class::Check.new(params) }
+
+    context "when a file that would exceed the total is marked for destruction" do
+      subject(:record) do
+        model.less_than.attach([ file_1ko, file_5ko ])
+        model.less_than.attachments.max_by { |attachment| attachment.blob.byte_size }.mark_for_destruction
+        model
+      end
+
+      it { is_expected_to_be_valid }
+    end
+
+    context "when replacing a persisted file via mark_for_destruction" do
+      subject(:record) do
+        model.less_than.attach(file_1ko)
+        model.save!
+        model.less_than.attachments.first.mark_for_destruction
+        model.less_than.attach(file_1ko)
+        model
+      end
+
+      it { is_expected_to_be_valid }
     end
   end
 

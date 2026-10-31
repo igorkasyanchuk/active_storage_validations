@@ -31,18 +31,21 @@ module ActiveStorageValidations
         @attribute_name = attribute_name
       end
 
-      def description
+      def base_description
         "validate that :#{@attribute_name} must be attached"
       end
 
       def failure_message
-        "is expected to validate attachment of :#{@attribute_name}"
+        message = [ "is expected to validate attachment of :#{@attribute_name}" ]
+        build_failure_message(message)
+        message.join("\n")
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject.new : subject
+        initialize_subject(subject)
 
         is_a_valid_active_storage_attribute? &&
+          has_validator? &&
           is_context_valid? &&
           is_except_on_valid? &&
           is_custom_message_valid? &&
@@ -53,33 +56,23 @@ module ActiveStorageValidations
       private
 
       def is_valid_when_file_attached?
-        attach_file unless file_attached?
+        attach_file
         validate
-        is_valid?
+        is_valid? || add_failure_message_artefact("a file attached", passed: false)
       end
 
       def is_invalid_when_file_not_attached?
-        detach_file if file_attached?
+        detach_file
         validate
-        !is_valid?
+        !is_valid? || add_failure_message_artefact("no file attached", passed: true)
       end
 
       def is_custom_message_valid?
         return true unless @custom_message
 
-        detach_file if file_attached?
+        detach_file
         validate
         has_an_error_message_which_is_custom_message?
-      end
-
-      def file_attached?
-        @subject.public_send(@attribute_name).attached?
-      end
-
-      def detach_file
-        @subject.public_send(@attribute_name).detach
-        # Unset the direct relation since `detach` on an unpersisted record does not set `attached?` to false.
-        @subject.public_send("#{@attribute_name}=", nil)
       end
     end
   end

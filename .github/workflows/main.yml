@@ -19,7 +19,7 @@ jobs:
       - name: Setup Ruby and install gems
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.4.9 # recommended Rails & Ruby version for the root Gemfile
+          ruby-version: 4.0.9 # recommended Rails & Ruby version for the root Gemfile
           bundler-cache: true
 
       - name: Run linters
@@ -61,7 +61,7 @@ jobs:
       - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get -y install libvips libvips-tools ffmpeg poppler-utils
+          sudo apt-get -y install libvips libvips-tools ffmpeg poppler-utils xz-utils
 
       - name: Verify libvips
         run: vips -v
@@ -71,12 +71,40 @@ jobs:
 
       - name: Install Magika CLI
         run: |
-          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/google/magika/releases/download/cli/v1.1.0/magika-cli-installer.sh | sh
+          # Pin the tarball SHA-256 from the GitHub release asset digest
+          # (https://github.com/google/magika/releases/tag/cli/v1.1.0). Do not
+          # pipe the installer script.
+          MAGIKA_VERSION='cli/v1.1.0'
+          case "$(uname -m)" in
+            x86_64)
+              ARCHIVE='magika-cli-x86_64-unknown-linux-gnu.tar.xz'
+              SHA256='6b4c1010c84d1f4f06205ccef4597f1690bcd7744f46d841eee26426bc100485'
+              ;;
+            aarch64)
+              ARCHIVE='magika-cli-aarch64-unknown-linux-gnu.tar.xz'
+              SHA256='2183e4745e1f0e59d1b7066d1ff88fe409b38c9ebf119a9de6a81afd10e6aaf7'
+              ;;
+            *)
+              echo "Unsupported architecture: $(uname -m)" >&2
+              exit 1
+              ;;
+          esac
+          WORKDIR="$(mktemp -d)"
+          curl --proto '=https' --tlsv1.2 -fsSL -o "${WORKDIR}/${ARCHIVE}" \
+            "https://github.com/google/magika/releases/download/${MAGIKA_VERSION}/${ARCHIVE}"
+          echo "${SHA256}  ${WORKDIR}/${ARCHIVE}" | sha256sum --check --strict
+          tar -xJf "${WORKDIR}/${ARCHIVE}" -C "${WORKDIR}"
+          BIN="$(find "${WORKDIR}" -type f -name magika | head -n 1)"
+          if [ -z "$BIN" ]; then
+            echo "magika binary not found in ${ARCHIVE}" >&2
+            tar -tf "${WORKDIR}/${ARCHIVE}"
+            exit 1
+          fi
+          install -D -m 0755 "$BIN" "$HOME/.local/bin/magika"
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          echo "$HOME/.magika/bin" >> $GITHUB_PATH
 
       - name: Verify Magika
-        run: magika --version || (ls -la "$HOME/.local/bin" "$HOME/.magika/bin" 2>/dev/null; which magika; exit 1)
+        run: magika --version || (ls -la "$HOME/.local/bin" 2>/dev/null; which magika; exit 1)
 
       - name: Check out code
         uses: actions/checkout@v7

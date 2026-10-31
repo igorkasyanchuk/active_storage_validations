@@ -7,7 +7,7 @@ module ActiveStorageValidations
     private
 
     def read_media
-      Tempfile.create(binmode: true) do |tempfile|
+      create_media_tempfile do |tempfile|
         begin
           if media(tempfile)
             yield media(tempfile)

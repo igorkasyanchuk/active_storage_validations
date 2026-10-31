@@ -20,6 +20,15 @@ module ActiveStorageValidations
 
       private
 
+      def spoofing_protection_description
+        case @spoofing_protection
+        when UNSET then nil
+        when false then "without spoofing protection"
+        when true then "with spoofing protection"
+        else "with #{@spoofing_protection.inspect} spoofing protection"
+        end
+      end
+
       def is_spoofing_protection_valid?
         return true if @spoofing_protection.equal?(UNSET)
 

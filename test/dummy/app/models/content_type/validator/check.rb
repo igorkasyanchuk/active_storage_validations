@@ -41,11 +41,16 @@ class ContentType::Validator::Check < ApplicationRecord
     has_one_attached :"#{content_type[:media]}_#{content_type[:type]}_spoof"
     validates :"#{content_type[:media]}_#{content_type[:type]}_spoof",
               content_type: { with: content_type[:type], spoofing_protection: true }
+    has_one_attached :"#{content_type[:media]}_#{content_type[:type]}_spoof_magika"
+    validates :"#{content_type[:media]}_#{content_type[:type]}_spoof_magika",
+              content_type: { with: content_type[:type], spoofing_protection: :magika }
   end
   has_one_attached :video_ogv
   validates :video_ogv, content_type: [ "video/theora" ]
   has_one_attached :video_ogv_spoof
   validates :video_ogv_spoof, content_type: { with: "video/theora", spoofing_protection: true }
+  has_one_attached :video_ogv_spoof_magika
+  validates :video_ogv_spoof_magika, content_type: { with: "video/theora", spoofing_protection: :magika }
 
   has_one_attached :content_type_with_parameter
   validates :content_type_with_parameter, content_type: :rar
@@ -56,12 +61,14 @@ class ContentType::Validator::Check < ApplicationRecord
   has_one_attached :spoofing_protection_pdf_file
   has_one_attached :spoofing_protection_pdf_magika
   has_one_attached :no_spoofing_protection
+  has_one_attached :with_empty_proc
   validates :spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
   validates :spoofing_protection_file, content_type: { with: :jpg, spoofing_protection: :file }
   validates :spoofing_protection_magika, content_type: { with: :jpg, spoofing_protection: :magika }
   validates :spoofing_protection_pdf_file, content_type: { with: :pdf, spoofing_protection: :file }
   validates :spoofing_protection_pdf_magika, content_type: { with: :pdf, spoofing_protection: :magika }
   validates :no_spoofing_protection, content_type: :jpg
+  validates :with_empty_proc, content_type: ->(_record) { [] }
   has_many_attached :many_spoofing_protection
   validates :many_spoofing_protection, content_type: { with: :jpg, spoofing_protection: true }
 end

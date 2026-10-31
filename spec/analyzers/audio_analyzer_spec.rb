@@ -19,11 +19,34 @@ RSpec.describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
   let(:media_io) { open_fixture(media_path) }
   let(:media_content_type) { "audio/mp3" }
   let(:media_content_type_rotated) { media_content_type }
-  let(:expected_metadata) { { duration: 1.0, bit_rate: 32000, sample_rate: 44100, audio: true, tags: { "encoder" => "Lavc60.3." } } }
-  let(:expected_metadata_over_10ko) { { duration: 2.0, bit_rate: 107286, sample_rate: 44100, audio: true, tags: { "encoder" => "LAME3.100" } } }
-  let(:expected_metadata_rotated) { { duration: 1.0, bit_rate: 32000, sample_rate: 44100, audio: true, tags: { "encoder" => "Lavc60.3." } } }
+  let(:expected_metadata) { { duration: 1.032, bit_rate: 32000, sample_rate: 44100, audio: true } }
+  let(:expected_metadata_over_10ko) { { duration: 2.024, bit_rate: 107286, sample_rate: 44100, audio: true } }
+  let(:expected_metadata_rotated) { { duration: 1.032, bit_rate: 32000, sample_rate: 44100, audio: true } }
 
   it_behaves_like "returns the right metadata for any attachable"
+
+  describe "#metadata" do
+    subject(:metadata) { analyzer.metadata }
+
+    context "when the container carries the duration but the audio stream does not (WebM / Opus)" do
+      let(:attachable) { audio_3s_webm }
+
+      it "falls back to the container duration" do
+        expect(metadata).to eq({ duration: 3.008, sample_rate: 48000, audio: true })
+      end
+    end
+
+    context "when the audio stream has tags (ID3 / Vorbis comments)" do
+      let(:attachable) { audio_1s_tagged }
+
+      # Tags are free-form and can be large / non-ASCII; everything returned here
+      # ends up in the blob custom metadata that Active Storage sends to S3 / GCS
+      # (see storage_metadata_constraints_spec.rb).
+      it "does not extract them" do
+        expect(metadata).to eq({ duration: 1.007, sample_rate: 48000, audio: true })
+      end
+    end
+  end
 
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "audio_2s.mp3").to_s }
@@ -41,6 +64,70 @@ RSpec.describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
     it "returns empty metadata when ffprobe times out" do
       allow(analyzer).to receive(:run_command).and_return(timed_out_command_result)
       expect(analyzer.metadata).to eq({})
+    end
+  end
+
+  describe "duration precision" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) { audio_1s_tagged }
+
+    before do
+      allow(analyzer).to receive(:media_from_path).and_return(
+        {
+          "streams" => [ { "codec_type" => "audio", "duration" => "1.96", "sample_rate" => "44100" } ],
+          "format" => {}
+        }
+      )
+    end
+
+    it "keeps sub-second precision instead of rounding to 0.1s" do
+      expect(metadata[:duration]).to eq(1.96)
+    end
+  end
+
+  describe "malformed ffprobe output" do
+    let(:attachable) { audio_1s_tagged }
+
+    context "when duration and bit_rate are N/A" do
+      subject(:metadata) { analyzer.metadata }
+
+      before do
+        allow(analyzer).to receive(:media_from_path).and_return(
+          {
+            "streams" => [ { "codec_type" => "audio", "duration" => "N/A", "bit_rate" => "N/A", "sample_rate" => "44100" } ],
+            "format" => { "duration" => "N/A" }
+          }
+        )
+      end
+
+      it "omits unparsable fields instead of raising" do
+        expect { metadata }.not_to raise_error
+        expect(metadata).to include(sample_rate: 44100, audio: true)
+        expect(metadata).not_to have_key(:duration)
+        expect(metadata).not_to have_key(:bit_rate)
+      end
+    end
+  end
+
+  describe "empty container" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) { audio_1s_tagged }
+
+    context "when ffprobe succeeds with no audio stream" do
+      before do
+        allow(analyzer).to receive(:media_from_path).and_return(
+          {
+            "streams" => [],
+            "format" => { "nb_streams" => 0, "format_name" => "mov,mp4,m4a,3gp,3g2,mj2", "duration" => "1.0" }
+          }
+        )
+      end
+
+      it "returns empty metadata rather than { audio: false } with a container duration" do
+        expect(metadata).to eq({})
+      end
     end
   end
 end
