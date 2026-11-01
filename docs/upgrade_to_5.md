@@ -277,6 +277,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | `duration` | Rounded to 0.1s before comparing: 1.96s failed `less_than: 2.seconds` | Exact value compared ♻️ |
 | `duration` on WebM / Matroska audio (browser `MediaRecorder` Opus) | `media_metadata_missing` | Container duration used ♻️ |
 | `processable_file` on an empty media container (zero streams) | Accepted (also by `with_audio: { with: false }`) | Rejected ♻️ |
+| `processable_file` with libvips' untrusted loaders blocked (Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+) on a file declared as BMP, ICO, PSD, SVG, JPEG XL, JPEG 2000 or Netpbm | Accepted whatever its content | Accepted only when its leading bytes are one of those formats |
 | `content_type` `spoofing_protection` on Marcel 2 / Rails main (8.2+) | `audio/aac`, `application/xml`, `audio/mp4` rejected | Accepted |
 | `content_type` `spoofing_protection` with a blank declared content type | Mismatch check skipped | Checked against the filename-resolved type |
 | `with_audio: { with: -> { … } }` | Proc treated as truthy, every file failed | Proc evaluated |

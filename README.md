@@ -835,7 +835,7 @@ end
 
 #### Notes
 
-Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call `Vips.block_untrusted(true)`, so libvips refuses to load formats marked untrusted (e.g. SVG, BMP). Analysis then returns empty metadata by design. `processable_file` does **not** treat that as failure for those content types. `dimension` / `aspect_ratio` still need width/height — use MiniMagick for those formats, or skip those validators for them.
+Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call `Vips.block_untrusted(true)`, so libvips refuses to load formats marked untrusted (e.g. SVG, BMP). Analysis then returns empty metadata by design. `processable_file` does **not** treat that as failure for those formats (BMP, ICO, PSD, SVG, JPEG XL, JPEG 2000, Netpbm), as long as the file's leading bytes are one of them: a file merely declared as `image/bmp` or `image/svg+xml` is still `file_not_processable`. `dimension` / `aspect_ratio` still need width/height — use MiniMagick for those formats, or skip those validators for them.
 
 An empty but well-formed container (`ffprobe` exits 0 with no audio or video stream) is not processable. That is the same fail-closed miss as a corrupt file or a missing CLI.
 

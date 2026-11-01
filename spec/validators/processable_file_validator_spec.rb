@@ -178,6 +178,47 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
         it { is_expected_to_be_valid }
       end
 
+      context "when provided with a PSD" do
+        # validates :has_to_be_processable, processable_file: true
+        subject(:record) { model.has_to_be_processable.attach(psd_file) and model }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when provided with a binary PPM (Marcel has no magic for it)" do
+        # validates :has_to_be_processable, processable_file: true
+        subject(:record) { model.has_to_be_processable.attach(ppm) and model }
+
+        let(:ppm) do
+          {
+            io: StringIO.new("P6\n# comment\n2 1\n255\n".b + ("\xFF\x00\x00".b * 2)),
+            filename: "image.ppm",
+            content_type: "image/x-portable-pixmap"
+          }
+        end
+
+        it { is_expected_to_be_valid }
+      end
+
+      # Only the file's bytes grant the exemption, never the declared type.
+      %w[image/bmp image/svg+xml image/vnd.microsoft.icon image/x-portable-anymap].each do |declared_type|
+        context "when provided with a non-image declared as #{declared_type}" do
+          # validates :has_to_be_processable, processable_file: true
+          subject(:record) { model.has_to_be_processable.attach(not_an_image) and model }
+
+          let(:not_an_image) do
+            {
+              io: StringIO.new("not an image at all\n" * 10),
+              filename: "image.#{Marcel::TYPE_EXTS[declared_type].first}",
+              content_type: declared_type
+            }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("file_not_processable", error_options: { filename: not_an_image[:filename] }) }
+        end
+      end
+
       context "when provided with a file that is not processable" do
         # validates :has_to_be_processable, processable_file: true
         subject(:record) { model.has_to_be_processable.attach(tar_file_with_image_content_type) and model }
