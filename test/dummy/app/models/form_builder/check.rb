@@ -28,6 +28,16 @@ class FormBuilder::Check < ApplicationRecord
   has_one_attached :with_non_matching_regex
   validates :with_non_matching_regex, content_type: /\Aimage\/(png|gif)\z/
 
+  has_one_attached :with_type_and_proc
+  validates :with_type_and_proc, content_type: [ :pdf, ->(record) { :png } ]
+
+  has_one_attached :with_type_and_non_matching_regex
+  validates :with_type_and_non_matching_regex, content_type: [ :pdf, /\Aimage\/(png|gif)\z/ ]
+
+  has_one_attached :with_type_validator_and_proc_validator
+  validates :with_type_validator_and_proc_validator, content_type: :pdf
+  validates :with_type_validator_and_proc_validator, content_type: ->(record) { [ :pdf, :png ] }
+
   has_one_attached :no_content_type_validator
   validates :no_content_type_validator, attached: true
 

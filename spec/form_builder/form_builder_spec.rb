@@ -57,6 +57,30 @@ RSpec.describe ActiveStorageValidations::FormBuilder do
         end
       end
 
+      context "with a type and a Proc in the same list" do
+        subject(:html) { builder.file_field(:with_type_and_proc) }
+
+        it "skips accept rather than hiding the Proc's types" do
+          expect(html).not_to include("accept=")
+        end
+      end
+
+      context "with a type and a non-matching Regexp in the same list" do
+        subject(:html) { builder.file_field(:with_type_and_non_matching_regex) }
+
+        it "skips accept rather than hiding the Regexp's types" do
+          expect(html).not_to include("accept=")
+        end
+      end
+
+      context "with a static validator and a Proc validator" do
+        subject(:html) { builder.file_field(:with_type_validator_and_proc_validator) }
+
+        it "sets accept from the static validator, which every file must pass" do
+          expect(html).to include('accept="application/pdf"')
+        end
+      end
+
       context "with an explicit accept option" do
         subject(:html) { builder.file_field(:with_symbol, accept: "image/jpeg") }
 
