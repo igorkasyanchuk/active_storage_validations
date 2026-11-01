@@ -125,10 +125,53 @@ RSpec.describe ActiveStorageValidations::Matchers::SizeValidatorMatcher do
 
   describe "#on" do
     it_behaves_like "works with context"
+
+    context "when only some of the attribute validators have a context" do
+      # validates :with_one_validator_without_context, size: { less_than_or_equal_to: 5.megabytes }
+      # validates :with_one_validator_without_context, size: { greater_than: 1.kilobyte }, on: :create
+      subject(:configured_matcher) { matcher.less_than_or_equal_to(5.megabytes) }
+
+      let(:model_attribute) { :with_one_validator_without_context }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    context "when several attribute validators share a context" do
+      # validates :with_several_validators_sharing_a_context, size: { … }, on: :update
+      # validates :with_several_validators_sharing_a_context, size: { … }, on: %i[update custom]
+      subject(:configured_matcher) { matcher.less_than_or_equal_to(5.megabytes).on(%i[update custom]) }
+
+      let(:model_attribute) { :with_several_validators_sharing_a_context }
+
+      it { is_expected_to_match_for(klass) }
+    end
   end
 
   describe "#except_on" do
     it_behaves_like "works with except_on"
+
+    # Rails :except_on is available since Rails 8.0
+    if Rails.gem_version >= Gem::Version.new("8.0.0")
+      context "when only some of the attribute validators have an except_on context" do
+        # validates :with_one_validator_without_except_on, size: { less_than_or_equal_to: 5.megabytes }
+        # validates :with_one_validator_without_except_on, size: { greater_than: 1.kilobyte }, except_on: :update
+        subject(:configured_matcher) { matcher.less_than_or_equal_to(5.megabytes) }
+
+        let(:model_attribute) { :with_one_validator_without_except_on }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      context "when several attribute validators share an except_on context" do
+        # validates :with_several_validators_sharing_an_except_on, size: { … }, except_on: :update
+        # validates :with_several_validators_sharing_an_except_on, size: { … }, except_on: %i[update custom]
+        subject(:configured_matcher) { matcher.less_than_or_equal_to(5.megabytes).except_on(%i[update custom]) }
+
+        let(:model_attribute) { :with_several_validators_sharing_an_except_on }
+
+        it { is_expected_to_match_for(klass) }
+      end
+    end
   end
 
   describe "Combinations" do
