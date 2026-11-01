@@ -41,6 +41,8 @@ class ContentType::Matcher < ApplicationRecord
 
   has_one_attached :with_spoofing_protection
   validates :with_spoofing_protection, content_type: { in: [ "image/png" ], spoofing_protection: true }
+  has_one_attached :without_spoofing_protection
+  validates :without_spoofing_protection, content_type: { in: [ "image/png" ] }
   has_one_attached :with_spoofing_protection_magika
   validates :with_spoofing_protection_magika, content_type: { in: [ "image/png" ], spoofing_protection: :magika }
 
