@@ -198,7 +198,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 
 1. Analyzers live under `lib/active_storage_validations/analyzer/` (content-type sniffers under `analyzer/content_type_analyzer/`)
 2. Results are cached on the blob via `ASVBlobMetadatable` as string keys `asv_*` (S3 metadata constraints). `blob.save!` runs only when the blob is already persisted; new blobs keep `asv_*` in memory until the record is saved
-   - The cache is signed (`asv_signature`: HMAC-SHA256 of `[checksum, sorted asv_* values]`, key from `Rails.application.key_generator`). A `before_create` on the blob drops unverified `asv_*` keys, so client-written ones (direct uploads permit `metadata: {}`) never reach the database. `active_storage_validations_metadata` returns signed values, or unsigned ones on a persisted blob (4.x caches) while `ActiveStorageValidations.trust_legacy_metadata` is true (default: upgrading must not re-analyze every upload). A present but invalid signature is never trusted. Never read `metadata["custom"]["asv_*"]` directly
+   - Client-written `asv_*` keys are dropped when a new blob is initialized (see the `ASVBlobMetadatable` pitfall below). Never read `metadata["custom"]["asv_*"]` directly
 3. Blobs are treated as immutable: once metadata keys exist, re-analysis is skipped — except content-type spoofing, which also keys the cache on `asv_content_type_backend` (`file` vs `magika`)
 4. Run specs with both `IMAGE_PROCESSOR=vips` and `IMAGE_PROCESSOR=mini_magick` when touching image analysis
 5. Content-type sniffer changes usually need both `File` and `Magika` coverage under `spec/analyzers/content_type_analyzers/`
