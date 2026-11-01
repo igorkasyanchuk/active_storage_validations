@@ -296,8 +296,17 @@ module ActiveStorageValidations
 
     def ensure_content_types_validity(content_types)
       content_types.each do |content_type|
+        ensure_content_type_class!(content_type)
         raise ArgumentError, invalid_content_type_option_message(content_type) if invalid_option?(content_type)
       end
+    end
+
+    # Anything else (`Mime[:png]`, an Integer) used to load, then be dropped
+    # from the authorized list and reject every file with a blank message.
+    def ensure_content_type_class!(content_type)
+      return if content_type.is_a?(String) || content_type.is_a?(Symbol) || content_type.is_a?(Regexp)
+
+      raise ArgumentError, "You must pass content types as Strings, Symbols or Regexps (got #{content_type.inspect}, use #{content_type.to_s.inspect} instead)"
     end
 
     def invalid_content_type_option_message(content_type)

@@ -232,6 +232,7 @@ en:
 | `with_audio: { with: "no" }` (anything but `true` / `false`) | Behaved as `true` | Raises |
 | `duration: { less_than: 5.minutes, timeout: 0 }`, `ActiveStorageValidations.command_timeout = 0` | Every file failed with `media_metadata_missing` | Raises |
 | `timeout: ->(record) { 5 }` | `NoMethodError` from `valid?` | Raises (Procs are not supported for `timeout:`) |
+| `content_type: Mime[:png]` (a type that is neither a String, a Symbol nor a Regexp) | Every file rejected with a blank "authorized content types are" message | Raises (use `"image/png"` or `:png`) |
 
 The same rules apply to a value returned by a Proc (`less_than: ->(record) { … }`, `with: ->(record) { … }`, `limit: { max: ->(record) { … } }`), which raises the same `ArgumentError` when it is evaluated if it has the wrong type (a String bound, a non-boolean `with:`). A comparison or `limit` Proc may still return a negative number, a Float / BigDecimal or a reversed range, e.g. a quota the record is already over: the file then fails with the usual validation error, as in 4.x. In particular, a `with_audio` Proc returning `nil` (e.g. a `nil` boolean column) used to reject silent files with `audio_present`.
 

@@ -72,6 +72,16 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
             end
           end
 
+          [ Mime[:png], 123 ].each do |content_type|
+            context "when the passed option is neither a String, a Symbol nor a Regexp (e.g. #{content_type.inspect})" do
+              subject(:validator) { described_class.new(attributes: :dummy, in: [ :pdf, content_type ]) }
+
+              it "raises an error at initialization" do
+                expect { validator }.to raise_error(ArgumentError, /You must pass content types as Strings, Symbols or Regexps \(got #{Regexp.escape(content_type.inspect)}/)
+              end
+            end
+          end
+
           context "when the passed option is a historical type Marcel 2 stores as an alias (e.g. 'audio/x-aac')" do
             # See: https://github.com/rails/marcel/releases#release-v2.0.0
             subject(:validator) { described_class.new(attributes: :dummy, with: "audio/x-aac") }
