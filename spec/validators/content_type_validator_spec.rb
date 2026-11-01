@@ -278,7 +278,9 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
 
         {
           alias_flac: [ "x.flac", %w[audio/flac audio/x-flac] ], # validates :alias_flac, content_type: "audio/x-flac"
-          alias_msaccess: [ "x.mdb", %w[application/x-msaccess application/vnd.ms-access] ] # "application/x-msaccess"
+          alias_msaccess: [ "x.mdb", %w[application/x-msaccess application/vnd.ms-access] ], # "application/x-msaccess"
+          format_parameter: [ "x.ditamap", %w[application/dita+xml] ], # "application/dita+xml;format=map"
+          capitalized_type: [ "x.vsdm", %w[application/vnd.ms-visio.drawing.macroEnabled.12] ] # same type
         }.each do |rule_attribute, (rule_filename, declared_types)|
           declared_types.each do |rule_declared_type|
             context "with a #{rule_filename} file declared as #{rule_declared_type} on #{rule_attribute}" do

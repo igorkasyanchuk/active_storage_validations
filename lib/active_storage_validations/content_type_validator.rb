@@ -73,7 +73,7 @@ module ActiveStorageValidations
     # Resolve a type as Marcel resolves an upload of it (declared type +
     # extension), or the two never compare equal: a .flac file declared as
     # the "audio/x-flac" alias resolves to "audio/flac", and the declared type
-    # alone drops the parameters of "application/x-x509-cert;format=der".
+    # alone drops the parameters of "application/dita+xml;format=map".
     def authorized_marcel_content_type(type)
       extension = type.include?("/") ? marcel_extension(type) : type
       Marcel::MimeType.for(declared_type: type, extension: extension)
@@ -290,7 +290,10 @@ module ActiveStorageValidations
         raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
       end
 
-      all_available_marcel_content_types.exclude?(type)
+      # Some Marcel types only exist with their parameters or capitals
+      # ("application/dita+xml;format=map", "…macroEnabled.12").
+      all_available_marcel_content_types.exclude?(type) &&
+        all_available_marcel_content_types.none? { |marcel_type| marcel_type.casecmp?(content_type.to_s) }
     end
 
     def all_available_marcel_content_types
