@@ -102,8 +102,9 @@ module ActiveStorageValidations
         attribute_validator&.options&.[](:min) == 0
       end
 
+      # No count below `max(0)` to probe.
       def file_count_smaller_than_max?
-        @max.nil? || @min == @max || passes_validation_with_limits(@max - 1)
+        @max.nil? || @max.zero? || @min == @max || passes_validation_with_limits(@max - 1)
       end
 
       def file_count_equal_max?
@@ -125,7 +126,10 @@ module ActiveStorageValidations
         return true if !@custom_message || (@min&.zero? && @max.nil?)
         raise ArgumentError, "#with_message needs #min or #max to build a file count the validator rejects" if @min.nil? && @max.nil?
 
-        attach_files(@min.nil? || @min.zero? ? @max + 1 : @min - 1)
+        count = custom_message_probe_count
+        return true unless count
+
+        attach_files(count)
         validate
         detach_files
         has_an_error_message_which_is_custom_message?
@@ -134,6 +138,15 @@ module ActiveStorageValidations
       def add_failure_message_artefact(count)
         @failure_message_artefacts << { count: count }
         false
+      end
+
+      # A file count the validator rejects: below min, else above max. 0 files
+      # is not a rejected count under allow_blank (the validator is skipped).
+      def custom_message_probe_count
+        below_min = @min - 1 if @min&.positive?
+        below_min = nil if below_min&.zero? && @allow_blank
+
+        below_min || (@max + 1 if @max)
       end
     end
   end

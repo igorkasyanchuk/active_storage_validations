@@ -73,4 +73,8 @@ class Limit::Matcher < ApplicationRecord
 
   has_many_attached :min_zero
   validates :min_zero, limit: { min: 0 }
+  has_many_attached :max_zero
+  validates :max_zero, limit: { max: 0 }
+  has_many_attached :allow_blank_with_message
+  validates :allow_blank_with_message, limit: { min: 1, max: 3, message: "Invalid limits." }, allow_blank: true
 end
