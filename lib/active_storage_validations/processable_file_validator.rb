@@ -40,6 +40,12 @@ module ActiveStorageValidations
       image/x-portable-graymap
       image/x-portable-pixmap
     ].freeze
+    # Leading bytes read to recognize those formats (Marcel's SVG rules look up
+    # to ~1 KB in).
+    FILE_HEAD_BYTES = 4096
+    # Netpbm (P1-P6) header: magic number, then width and height. Marcel only
+    # knows the ASCII flavors, and has no rule for the binary ones (P4-P6).
+    NETPBM_HEADER = /\AP[1-6]\s+(?:#[^\n]*\n\s*)*\d+\s+\d+/n
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
@@ -60,7 +66,24 @@ module ActiveStorageValidations
     def vips_unanalyzable_by_policy?(attachable)
       image_processor == :vips &&
         self.class.vips_untrusted_operations_blocked? &&
-        VIPS_UNTRUSTED_CONTENT_TYPES.include?(attachable_content_type(attachable))
+        vips_untrusted_format?(attachable)
+    end
+
+    # Recognize the format from the file's leading bytes. The declared content
+    # type is the client's word: any file uploaded as image/bmp or
+    # image/svg+xml used to pass.
+    def vips_untrusted_format?(attachable)
+      head = file_head(attachable)
+
+      VIPS_UNTRUSTED_CONTENT_TYPES.include?(Marcel::Magic.by_magic(StringIO.new(head))&.type) ||
+        head.match?(NETPBM_HEADER)
+    end
+
+    # Only the leading bytes are read (a ranged download for a blob).
+    def file_head(attachable)
+      attachable_io(attachable, max_byte_size: FILE_HEAD_BYTES).to_s.b
+    rescue SystemCallError, IOError
+      "".b
     end
 
     class << self
