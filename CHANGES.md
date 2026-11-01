@@ -81,6 +81,7 @@
       - Exclusive ranges are honored by `#between`, `#width_between`, `#height_between` (`80...100` used to be read as inclusive)
       - `validate_dimensions_of` `#width_min` / `#height_min` / `#width_max` / `#height_max` probe the inclusive bound itself, so an exclusive validator no longer satisfies them
       - `validate_dimensions_of(...).width_min(n)` / `.height_min(n)` match when `n` is above 2000px and the other axis is bounded too (no more hard-coded 2000px neutral value)
+      - Metadata matchers no longer write their mocked metadata into the record's other attachments: matchers validate the caller's record, so an unanalyzed blob on another attribute was analyzed under the mock, and the fake values were cached and saved on it. Only the probe file is mocked
       - Zero and near-zero bounds match a correct validator: `validate_limits_of(...).min(0)` (no longer passes against `min: 1`), `validate_duration_of(...).less_than(1.second)` (1ms step), `validate_duration_of` / `validate_pages_of` `#greater_than_or_equal_to(0)` / `#equal_to(0)`, `validate_dimensions_of` `#width_min(0)` / `#height_min(0)` / `#width_max(1)` / `#height_max(1)`
       - `validate_with_audio_of(...).without_audio.with_message(...)` probes a file with an audio track
       - `duration`, `pages` and `content_type` `ERROR_TYPES` include `:media_metadata_missing` / `:attachment_missing`, so matchers recognize those errors

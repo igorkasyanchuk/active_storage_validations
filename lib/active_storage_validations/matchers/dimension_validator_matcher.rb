@@ -257,7 +257,7 @@ module ActiveStorageValidations
       end
 
       def passes_validation_with_dimensions(width, height)
-        mock_dimensions_for(attach_file, width, height) do
+        mock_dimensions_for(width, height) do
           validate
           detach_file
           is_valid?
@@ -267,15 +267,16 @@ module ActiveStorageValidations
       def is_custom_message_valid?
         return true unless @custom_message
 
-        mock_dimensions_for(attach_file, -1, -1) do
+        mock_dimensions_for(-1, -1) do
           validate
           detach_file
           has_an_error_message_which_is_custom_message?
         end
       end
 
-      def mock_dimensions_for(attachment, width, height)
-        Matchers.mock_metadata(attachment, { width: width, height: height }) do
+      def mock_dimensions_for(width, height)
+        Matchers.mock_metadata(io, { width: width, height: height }) do
+          attach_file
           yield
         end
       end

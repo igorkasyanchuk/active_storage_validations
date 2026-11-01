@@ -95,10 +95,25 @@ RSpec.describe ActiveStorageValidations::Matchers do
       described_class.mock_metadata(attachable, { width: 10 }, &block)
     end
 
-    it "mocks every analyzer within the block" do
+    it "mocks the analyzers of the given attachable within the block" do
       metadata = mocked_metadata { analyzer_class.new(attachable).metadata }
 
       expect(metadata).to include(width: 10)
+    end
+
+    it "mocks the analyzers of an attachable wrapping the given io" do
+      metadata = described_class.mock_metadata(attachable[:io], { width: 10 }) do
+        analyzer_class.new(attachable).metadata
+      end
+
+      expect(metadata).to include(width: 10)
+    end
+
+    it "does not mock the analyzers of other attachables" do
+      other_attachable = attachable.merge(io: StringIO.new)
+      analyzer = mocked_metadata { analyzer_class.new(other_attachable) }
+
+      expect(analyzer).to be_a(analyzer_class)
     end
 
     it "restores the analyzers after the block" do
