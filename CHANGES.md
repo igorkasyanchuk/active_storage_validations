@@ -48,6 +48,7 @@
       - Marcel 2 / Rails main (8.2+): `spoofing_protection` no longer rejects `audio/aac`, `application/xml` or `audio/mp4` (`file` reports aliases such as `text/xml`, `audio/x-m4a`), and Marcel 1 canonical options such as `audio/x-aac` are still accepted
       - `spoofing_protection` no longer rejects genuine RAR archives on recent libmagic (Ubuntu 26.04), which reports them as `application/vnd.rar` instead of `application/x-rar`
       - `spoofing_protection` compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the check
+      - A type Marcel resolves differently on upload matches it: an alias (`"audio/x-flac"`, `"audio/x-aac"` on Marcel 1, `"application/x-msaccess"`) or a type with parameters (`"application/x-x509-cert;format=der"`) rejected every upload of its own type
       - A Proc nested in the list (`[:pdf, -> { … }]`) is checked at validation time like a top-level Proc, and an Array it returns is flattened. Unsupported types it returned were silently ignored, and a returned Array was dropped, so every file was rejected
     - **`dimension`**
       - Each error carries its own values only: with `width: { in: 100..200 }, height: { max: 300 }`, the height error also carried the width's `min` / `max` in `errors.details` (and to a custom `%{min}` message)

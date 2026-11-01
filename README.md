@@ -357,7 +357,7 @@ Notes:
 
 #### Content type shorthands
 
-If you choose to use a content_type 'shorthand' (like `png`), note that it will be converted to a full content type using `Marcel::MimeType.for` under the hood. Therefore, you should check if the content_type is registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb). On Marcel 2 (Rails 8.2+), historical aliases such as `audio/x-aac` are still valid options and resolve to their canonical type (`audio/aac`). If the type is not registered, you can register it by adding the following code to your `config/initializers/mime_types.rb` file:
+If you choose to use a content_type 'shorthand' (like `png`), note that it will be converted to a full content type using `Marcel::MimeType.for` under the hood. Therefore, you should check if the content_type is registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb). Aliases such as `audio/x-flac` or `application/x-msaccess` are valid options and match uploads of their canonical type (`audio/flac`, `application/vnd.ms-access`). If the type is not registered, you can register it by adding the following code to your `config/initializers/mime_types.rb` file:
 
 ```ruby
 Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files

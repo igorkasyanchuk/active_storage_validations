@@ -74,10 +74,23 @@ module ActiveStorageValidations
 
       content_types.filter_map do |type|
         case type
-        when String, Symbol then Marcel::MimeType.for(declared_type: type.to_s, extension: type.to_s)
+        when String, Symbol then authorized_marcel_content_type(type.to_s)
         when Regexp then type
         end
       end
+    end
+
+    # Resolve a type as Marcel resolves an upload of it (declared type +
+    # extension), or the two never compare equal: a .flac file declared as
+    # the "audio/x-flac" alias resolves to "audio/flac", and the declared type
+    # alone drops the parameters of "application/x-x509-cert;format=der".
+    def authorized_marcel_content_type(type)
+      extension = type.include?("/") ? marcel_extension(type) : type
+      Marcel::MimeType.for(declared_type: type, extension: extension)
+    end
+
+    def marcel_extension(content_type)
+      (Marcel::TYPE_EXTS[content_type] || Marcel::TYPE_EXTS[canonical_marcel_content_type(content_type)])&.first
     end
 
     # Check if the provided content_type is authorized and not spoofed against

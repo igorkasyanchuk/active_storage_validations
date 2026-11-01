@@ -280,6 +280,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | `processable_file` on an empty media container (zero streams) | Accepted (also by `with_audio: { with: false }`) | Rejected ♻️ |
 | `processable_file` with libvips' untrusted loaders blocked (Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+) on a file declared as BMP, ICO, PSD, SVG, JPEG XL, JPEG 2000 or Netpbm | Accepted whatever its content | Accepted only when its leading bytes are one of those formats |
 | `content_type` `spoofing_protection` on Marcel 2 / Rails main (8.2+) | `audio/aac`, `application/xml`, `audio/mp4` rejected | Accepted |
+| `content_type` with an alias (`"audio/x-flac"`, `"application/x-msaccess"`) or a type with parameters (`"application/x-x509-cert;format=der"`) | Every upload of that type rejected | Accepted |
 | `content_type` `spoofing_protection` with a blank declared content type | Mismatch check skipped | Checked against the filename-resolved type |
 | `with_audio: { with: -> { … } }` | Proc treated as truthy, every file failed | Proc evaluated |
 | `dimension` / `aspect_ratio` on a PDF whose first page is rotated (`/Rotate 90`) | Stored page size (200×300) | Displayed page size (300×200) ♻️ |
