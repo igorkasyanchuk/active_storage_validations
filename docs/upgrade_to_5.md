@@ -141,7 +141,7 @@ validates :photo, dimension: { width: { in: 100..200 } }
 validates :photo, dimension: { width: { min: 100, max: 500 }, height: { min: 100 } }
 ```
 
-Values returned by Procs (`width: -> { … }`) are not checked at boot.
+Values returned by Procs (`width: -> { … }`, `min: -> { … }`) cannot be checked at boot. They are checked the same way when the Proc is evaluated, and raise the same `ArgumentError` from `valid?`: a Proc returning `{ minimum: 1000 }` used to accept every file, a Range was compared as an exact width (every file rejected) and an Integer `min:` raised `NoMethodError`. A Proc returning `nil` sets no bound, and a Proc may return a one-sided range.
 
 ### Empty `content_type` / `aspect_ratio` lists fail closed
 

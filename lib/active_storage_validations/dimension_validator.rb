@@ -35,9 +35,7 @@ module ActiveStorageValidations
 
     def check_validity!
       ensure_at_least_one_validator_option
-      ensure_dimension_option_validity
-      ensure_dimension_in_option_validity
-      ensure_min_max_option_validity
+      ensure_options_validity(options)
       ensure_min_max_not_combined_with_dimension
     end
 
@@ -55,26 +53,48 @@ module ActiveStorageValidations
       end
     end
 
+    # Static options are checked at boot. Procs escape check_validity!, so what
+    # they return is checked the same way when they are evaluated: a misspelled
+    # Hash (`{ minimum: 1000 }`) validated nothing, a Range was compared as an
+    # exact width and a non-Range :min / :max raised NoMethodError from valid?.
+    # A Proc returning nil sets no bound.
+    def ensure_options_validity(options, from_proc: false)
+      ensure_dimension_option_validity(options, from_proc)
+      ensure_dimension_in_option_validity(options, from_proc)
+      ensure_min_max_option_validity(options, from_proc)
+    end
+
+    def proc_options?(value = options.slice(*AVAILABLE_CHECKS))
+      case value
+      when Proc then true
+      when Hash then value.values.any? { |nested| proc_options?(nested) }
+      else false
+      end
+    end
+
     # A misspelled or empty width / height Hash (`{ minimum: 1000 }`, `{}`) used
     # to load and validate nothing, and a bare Range (`width: 100..200`) was
-    # compared as an exact width. Procs are evaluated per record and cannot be
-    # checked here.
-    def ensure_dimension_option_validity
+    # compared as an exact width.
+    def ensure_dimension_option_validity(options, from_proc)
       %i[width height].each do |dimension|
         next unless options.key?(dimension)
 
         value = options[dimension]
-        next if value.is_a?(Numeric) || value.is_a?(Proc)
+        next if value.is_a?(Numeric) || value.is_a?(Proc) || (value.nil? && from_proc)
 
         unless value.is_a?(Hash)
-          raise ArgumentError, "{ #{dimension}: value } value must be an Integer, a Proc or a Hash with :min, :max or :in (e.g. #{dimension}: { in: 100..200 })"
+          raise ArgumentError, "{ #{dimension}: value } value must be an Integer, a Proc or a Hash with :min, :max or :in (e.g. #{dimension}: { in: 100..200 })#{proc_result_message(value, from_proc)}"
         end
 
-        ensure_dimension_hash_validity(dimension, value)
+        ensure_dimension_hash_validity(dimension, value, from_proc)
       end
     end
 
-    def ensure_dimension_hash_validity(dimension, value)
+    def proc_result_message(value, from_proc)
+      " (got #{value.inspect} from a Proc)" if from_proc
+    end
+
+    def ensure_dimension_hash_validity(dimension, value, from_proc = false)
       # A HashWithIndifferentAccess stores String keys but answers [:min]; a
       # plain Hash with String keys does not, so it must keep raising.
       keys = value.is_a?(ActiveSupport::HashWithIndifferentAccess) ? value.keys.map(&:to_sym) : value.keys
@@ -88,9 +108,9 @@ module ActiveStorageValidations
 
       %i[min max].each do |bound|
         next unless value.key?(bound)
-        next if value[bound].is_a?(Numeric) || value[bound].is_a?(Proc)
+        next if value[bound].is_a?(Numeric) || value[bound].is_a?(Proc) || (value[bound].nil? && from_proc)
 
-        raise ArgumentError, "{ #{dimension}: { #{bound}: value } } value must be an Integer or a Proc"
+        raise ArgumentError, "{ #{dimension}: { #{bound}: value } } value must be an Integer or a Proc#{proc_result_message(value[bound], from_proc)}"
       end
     end
 
@@ -103,14 +123,19 @@ module ActiveStorageValidations
       raise ArgumentError, "{ min: } / { max: } cannot be combined with :width / :height (use width: { min:, max: } and height: { min:, max: } instead)"
     end
 
-    def ensure_dimension_in_option_validity
+    def ensure_dimension_in_option_validity(options, from_proc)
       %i[width height].each do |dimension|
         next unless options[dimension].is_a?(Hash) && options[dimension].key?(:in)
 
         in_option = options[dimension][:in]
-        unless in_option.is_a?(Range) || in_option.is_a?(Proc)
-          raise ArgumentError, "{ #{dimension}: { in: value } } value must be a Range (min..max)"
+        next if in_option.nil? && from_proc
+
+        unless numeric_range?(in_option) || in_option.is_a?(Proc)
+          raise ArgumentError, "{ #{dimension}: { in: value } } value must be a Range (min..max)#{proc_result_message(in_option, from_proc)}"
         end
+
+        # A Proc may return a one-sided range, as for comparison validators.
+        next if from_proc
 
         ensure_range_has_both_bounds!(
           in_option,
@@ -119,19 +144,26 @@ module ActiveStorageValidations
       end
     end
 
-    def ensure_min_max_option_validity
+    def ensure_min_max_option_validity(options, from_proc)
       %i[min max].each do |bound|
-        next unless options[bound].present?
+        next if options[bound].nil?
 
-        unless options[bound].is_a?(Range) || options[bound].is_a?(Proc)
-          raise ArgumentError, "{ #{bound}: value } value must be a Range (#{bound}_width..#{bound}_height)"
+        unless numeric_range?(options[bound]) || options[bound].is_a?(Proc)
+          raise ArgumentError, "{ #{bound}: value } value must be a Range (#{bound}_width..#{bound}_height)#{proc_result_message(options[bound], from_proc)}"
         end
+
+        next if from_proc
 
         ensure_range_has_both_bounds!(
           options[bound],
           "{ #{bound}: } value must be a Range with both bounds (#{bound}_width..#{bound}_height)"
         )
       end
+    end
+
+    # Pixel bounds only: a String range (`"100".."200"`) compared nothing.
+    def numeric_range?(value)
+      value.is_a?(Range) && [ value.begin, value.end ].compact.all?(Numeric)
     end
 
     # Endless / beginless ranges (`100..`, `..800`) raise RangeError from
@@ -282,6 +314,7 @@ module ActiveStorageValidations
 
     def process_options(record)
       flat_options = set_flat_options(record)
+      ensure_options_validity(flat_options, from_proc: true) if proc_options?
 
       %i[width height].each do |dimension|
         if flat_options[dimension].is_a?(Hash)

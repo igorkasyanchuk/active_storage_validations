@@ -755,6 +755,37 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
       end
     end
 
+    describe "Proc results" do
+      {
+        width_proc_misspelled_hash: "only accepts :min, :max and :in",
+        width_proc_range: "value must be an Integer, a Proc or a Hash",
+        width_in_proc_integer: "{ width: { in: value } } value must be a Range",
+        min_proc_integer: "{ min: value } value must be a Range"
+      }.each do |attribute, message|
+        context "with #{attribute}" do
+          subject(:record) { model.public_send(attribute).attach(image_500x700_file) and model }
+
+          it "raises like the static option" do
+            expect { record.valid? }.to raise_error(ArgumentError, /#{Regexp.escape(message)}/)
+          end
+        end
+      end
+
+      context "when the Proc returns nil" do
+        # validates :width_proc_nil, dimension: { width: ->(_record) { nil } }
+        subject(:record) { model.width_proc_nil.attach(image_500x700_file) and model }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when a nested Proc returns nil" do
+        # validates :width_min_proc_nil, dimension: { width: { min: ->(_record) { nil }, max: 100 } }
+        subject(:record) { model.width_min_proc_nil.attach(image_500x700_file) and model }
+
+        it { is_expected_to_include_error_message("dimension_width_not_less_than_or_equal_to", error_options: { length: 100, filename: "image_500x700_file.png" }) }
+      end
+    end
+
     describe "Edge cases" do
       describe "width: { max: 0 }" do
         %w[value proc].each do |value_type|
