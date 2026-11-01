@@ -312,6 +312,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - `ProcessableFileValidator` grants the libvips untrusted-format exemption from the file's leading bytes (`Marcel::Magic`, plus `NETPBM_HEADER` since Marcel has no rule for binary P4-P6), never from the declared content type: garbage declared as `image/bmp` passed
 - `FormBuilder` must not infer `accept` from a validator whose list has an entry it cannot express (Proc, narrow Regexp): listing only the other types hides allowed files. Another validator on the attribute may still set it (files must pass every validator)
 - `DimensionValidator` errors get their own values (`**errors_options, min:, max:`): mutating the shared `errors_options` leaked the width error's `min` / `max` into the height error. `validate_min_max` reports both bounds (`map`, then `all?`)
+- `DimensionValidatorMatcher#axis_bounds` probes an unchained axis within the validator's declared bounds (exact, `in:`, `min` / `max`, top-level `min:` / `max:` ranges, Procs evaluated on the subject); 1000px is only the fallback when no bound exists
 - Keep `json` `< 3` on the Rails 8.1 Gemfile. json 3.0 made `JSON.parse` keyword-only; Rails 8.1.3.1 `ActiveSupport::JSON.decode` still passes a positional options hash (fixed on Rails 8.2 / main as rails/rails#58601)
 
 ## Read First When Contributing

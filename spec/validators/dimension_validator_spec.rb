@@ -730,6 +730,31 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
       end
     end
 
+    describe "Several errors on one file" do
+      describe "width: { in: 100..200 }, height: { max: 300 }" do
+        # validates :width_in_height_max, dimension: { width: { in: 100..200 }, height: { max: 300 } }
+        subject(:record) { model.width_in_height_max.attach(image_500x700_file) and model }
+
+        let(:error_details) { record.tap(&:valid?).errors.details[:width_in_height_max] }
+
+        it "gives each error its own values only" do
+          expect(error_details).to contain_exactly(
+            a_hash_including(error: :dimension_width_not_included_in, min: 100, max: 200),
+            { error: :dimension_height_not_less_than_or_equal_to, validator_type: :dimension, filename: "image_500x700_file.png", length: 300 }
+          )
+        end
+      end
+
+      describe "min: 600..100, max: 650..300" do
+        # validates :min_max_both_violable, dimension: { min: 600..100, max: 650..300 }
+        # 500x700: below the min width and above the max height
+        subject(:record) { model.min_max_both_violable.attach(image_500x700_file) and model }
+
+        it { is_expected_to_include_error_message("dimension_min_not_included_in", error_options: { width: 600, height: 100, filename: "image_500x700_file.png" }) }
+        it { is_expected_to_include_error_message("dimension_max_not_included_in", error_options: { width: 650, height: 300, filename: "image_500x700_file.png" }) }
+      end
+    end
+
     describe "Edge cases" do
       describe "width: { max: 0 }" do
         %w[value proc].each do |value_type|

@@ -49,6 +49,8 @@
       - `spoofing_protection` compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the check
       - A Proc nested in the list (`[:pdf, -> { … }]`) is checked at validation time like a top-level Proc, and an Array it returns is flattened. Unsupported types it returned were silently ignored, and a returned Array was dropped, so every file was rejected
     - **`dimension`**
+      - Each error carries its own values only: with `width: { in: 100..200 }, height: { max: 300 }`, the height error also carried the width's `min` / `max` in `errors.details` (and to a custom `%{min}` message)
+      - `min:` and `max:` both report their error when a file violates both (only the `min:` one was added)
       - A `width:` / `height:` Proc returning a frozen Hash no longer raises `FrozenError` from `valid?`, and a non-frozen one is no longer modified (the flattened `:min` / `:max` were written into it)
     - **`with_audio`**
       - `with: -> { … }` evaluates the Proc. It used to be treated as truthy, so every file failed
@@ -73,6 +75,7 @@
       - `PdfAnalyzer` no longer caches `pages: 0` (or 0-pt width / height) when `pdfinfo` omits them, so the analysis can retry and `processable_file` no longer treats `{ pages: 0 }` as a decoded file
       - Audio stream tags (ID3 / Vorbis) are no longer cached as `asv_tags`. No validator read them, and a large or non-ASCII tag hash could exceed S3's 2 KB object-metadata limit and fail the upload
       - `blob.remove_active_storage_validations_metadata!` persists the cleared cache on saved blobs (it only changed memory, so `reload` restored stale `asv_*`) and keeps non-`asv_*` custom metadata
+    - **Form builder**
     - **Locales**
       - `media_metadata_missing` no longer says "is not an image" for every unreadable video, audio or PDF in Ukrainian and Vietnamese
       - Japanese `aspect_ratio_invalid` said the aspect ratio "cannot be detected" when it is merely not one of the allowed ones; Japanese `limit_out_of_range` and `total_file_size_not_greater_than_or_equal_to` wording fixed
