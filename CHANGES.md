@@ -84,6 +84,8 @@
       - `validate_dimensions_of` single-axis chains (`#width_min(200)`, `#height_max(300)`, …) match a validator that also bounds the other axis: that axis is probed within the validator's own bounds instead of at 1000px
       - Metadata matchers no longer write their mocked metadata into the record's other attachments: matchers validate the caller's record, so an unanalyzed blob on another attribute was analyzed under the mock, and the fake values were cached and saved on it. Only the probe file is mocked
       - `#on` / `#except_on` no longer raise when only some of the attribute's validators have a context (and the chain has none), nor when several validators list the same context (`.on(%i[update custom])` against `on: :update` and `on: %i[update custom]`)
+      - `validate_limits_of(...).max(0)` no longer raises "negative array size", and `#with_message` combined with `#allow_blank` and `#min(1)` probes `max + 1` files instead of 0, which `allow_blank` skips
+      - `validate_content_type_of(...).spoofing_protection(false)` matches a validator without the option (it defaults to `false`)
       - Zero and near-zero bounds match a correct validator: `validate_limits_of(...).min(0)` (no longer passes against `min: 1`), `validate_duration_of(...).less_than(1.second)` (1ms step), `validate_duration_of` / `validate_pages_of` `#greater_than_or_equal_to(0)` / `#equal_to(0)`, `validate_dimensions_of` `#width_min(0)` / `#height_min(0)` / `#width_max(1)` / `#height_max(1)`
       - `validate_with_audio_of(...).without_audio.with_message(...)` probes a file with an audio track
       - `duration`, `pages` and `content_type` `ERROR_TYPES` include `:media_metadata_missing` / `:attachment_missing`, so matchers recognize those errors

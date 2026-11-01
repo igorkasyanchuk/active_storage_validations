@@ -66,6 +66,12 @@ class Size::Matcher < ApplicationRecord
   has_one_attached :with_several_validators_and_contexts
   validates :with_several_validators_and_contexts, size: { less_than_or_equal_to: 5.megabytes }, on: :update
   validates :with_several_validators_and_contexts, size: { less_than_or_equal_to: 5.megabytes }, on: :custom
+  has_one_attached :with_one_validator_without_context
+  validates :with_one_validator_without_context, size: { less_than_or_equal_to: 5.megabytes }
+  validates :with_one_validator_without_context, size: { greater_than: 1.kilobyte }, on: :create
+  has_one_attached :with_several_validators_sharing_a_context
+  validates :with_several_validators_sharing_a_context, size: { less_than_or_equal_to: 5.megabytes }, on: :update
+  validates :with_several_validators_sharing_a_context, size: { less_than_or_equal_to: 5.megabytes }, on: %i[update custom]
 
   if Rails.gem_version >= Gem::Version.new("8.0.0")
     has_one_attached :with_except_on_symbol
@@ -77,6 +83,12 @@ class Size::Matcher < ApplicationRecord
     has_one_attached :with_several_validators_and_except_on
     validates :with_several_validators_and_except_on, size: { less_than_or_equal_to: 5.megabytes }, except_on: :update
     validates :with_several_validators_and_except_on, size: { less_than_or_equal_to: 5.megabytes }, except_on: :custom
+    has_one_attached :with_one_validator_without_except_on
+    validates :with_one_validator_without_except_on, size: { less_than_or_equal_to: 5.megabytes }
+    validates :with_one_validator_without_except_on, size: { greater_than: 1.kilobyte }, except_on: :update
+    has_one_attached :with_several_validators_sharing_an_except_on
+    validates :with_several_validators_sharing_an_except_on, size: { less_than_or_equal_to: 5.megabytes }, except_on: :update
+    validates :with_several_validators_sharing_an_except_on, size: { less_than_or_equal_to: 5.megabytes }, except_on: %i[update custom]
   end
 
   has_one_attached :as_instance

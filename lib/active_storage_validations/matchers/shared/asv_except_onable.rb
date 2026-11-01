@@ -26,10 +26,14 @@ module ActiveStorageValidations
         return true if !@except_on && attribute_validators.none? { |validator| validator.options[:except_on] }
 
         ensure_except_on_present!
+        # Some validators have no :except_on: they run in the default context.
+        return true unless @except_on
+
         ensure_except_on_valid!
 
         if @except_on.is_a?(Array)
-          (validator_except_on_contexts & @except_on.map(&:to_s)) == validator_except_on_contexts || raise_except_on_not_listed_error
+          # Several validators may list the same context.
+          (validator_except_on_contexts.uniq & @except_on.map(&:to_s)) == validator_except_on_contexts.uniq || raise_except_on_not_listed_error
         elsif @except_on.is_a?(Symbol)
           validator_except_on_contexts.include?(@except_on.to_s) || raise_except_on_not_listed_error
         end
