@@ -129,21 +129,63 @@ module ActiveStorageValidations
       end
 
       def last_included_dimension(range)
-        range.exclude_end? ? range.end - 1 : range.end
+        range.end && range.exclude_end? ? range.end - 1 : range.end
       end
 
       def valid_width
-        neutral_dimension(@width_min, @width_max)
+        neutral_dimension(*axis_bounds(:width, @width_min, @width_max))
       end
 
       def valid_height
-        neutral_dimension(@height_min, @height_max)
+        neutral_dimension(*axis_bounds(:height, @height_min, @height_max))
       end
 
-      # A value satisfying the bounds declared on one axis, used while probing
-      # the other axis. It is derived from the declared bounds only: a fixed
-      # ceiling (the former 2000px default) fell below any larger min and made
-      # e.g. `width_min(2048).height_min(100)` fail its height probes.
+      # Bounds of the axis a probe does not test: the chained ones, else the
+      # validator's own. A fixed fallback (1000px) fell outside e.g.
+      # `height: { max: 300 }`, so `width_min(200)` failed on a validator that
+      # also bounds the height.
+      def axis_bounds(axis, chained_min, chained_max)
+        return [ chained_min, chained_max ] if chained_min || chained_max
+
+        bounds = attribute_validators.map { |validator| declared_axis_bounds(validator.options, axis) }
+        [ bounds.filter_map(&:first).max, bounds.filter_map(&:last).min ]
+      end
+
+      def declared_axis_bounds(options, axis)
+        option = resolve_option(options[axis])
+
+        case option
+        when Numeric then [ option, option ]
+        when Hash then declared_hash_bounds(option)
+        else [ range_side(options[:min], axis), range_side(options[:max], axis) ]
+        end
+      end
+
+      def declared_hash_bounds(option)
+        range = resolve_option(option[:in])
+        return [ range.begin, last_included_dimension(range) ] if range.is_a?(Range)
+
+        [ resolve_option(option[:min]), resolve_option(option[:max]) ]
+      end
+
+      # Top-level `min: width..height` / `max: width..height`.
+      def range_side(option, axis)
+        range = resolve_option(option)
+        return unless range.is_a?(Range)
+
+        axis == :width ? range.begin : range.end
+      end
+
+      def resolve_option(option)
+        return option unless option.is_a?(Proc)
+
+        option.arity.zero? ? option.call : option.call(@subject)
+      end
+
+      # A value satisfying the bounds of one axis, used while probing the
+      # other axis. A fixed ceiling (the former 2000px default) fell below any
+      # larger min and made e.g. `width_min(2048).height_min(100)` fail its
+      # height probes.
       def neutral_dimension(min, max)
         return (min + max) / 2 if min && max
         return min + 1 if min
