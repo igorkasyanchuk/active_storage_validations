@@ -92,15 +92,14 @@ module ActiveStorageValidations
     # { min: 100..200, max: 800..600 } options: one error per violated bound,
     # reported on both dimensions (:width / :height) at once.
     def validate_min_max(record, attribute, metadata, flat_options, errors_options)
-      %i[min max].all? { |bound| validate_bound(bound, record, attribute, metadata, flat_options, errors_options) }
+      %i[min max].map { |bound| validate_bound(bound, record, attribute, metadata, flat_options, errors_options) }.all?
     end
 
     def validate_bound(bound, record, attribute, metadata, flat_options, errors_options)
       return true unless invalid_bound?(bound, flat_options, metadata)
 
-      errors_options[:width] = flat_options[:width][bound]
-      errors_options[:height] = flat_options[:height][bound]
-      add_error(record, attribute, :"dimension_#{bound}_not_included_in", **errors_options)
+      add_error(record, attribute, :"dimension_#{bound}_not_included_in",
+        **errors_options, width: flat_options[:width][bound], height: flat_options[:height][bound])
       false
     end
 
@@ -121,9 +120,8 @@ module ActiveStorageValidations
     def validate_dimension_bound(bound, record, attribute, dimension, metadata, flat_options, errors_options)
       return true unless invalid_dimension_bound?(bound, dimension, flat_options, metadata)
 
-      errors_options[:length] = flat_options[dimension][bound]
       error_type = bound == :min ? :not_greater_than_or_equal_to : :not_less_than_or_equal_to
-      add_error(record, attribute, :"dimension_#{dimension}_#{error_type}", **errors_options)
+      add_error(record, attribute, :"dimension_#{dimension}_#{error_type}", **errors_options, length: flat_options[dimension][bound])
       false
     end
 
@@ -182,15 +180,13 @@ module ActiveStorageValidations
     end
 
     def add_range_error(record, attribute, dimension, flat_options, errors_options)
-      errors_options[:min] = flat_options[dimension][:min]
-      errors_options[:max] = flat_options[dimension][:max]
-      add_error(record, attribute, :"dimension_#{dimension}_not_included_in", **errors_options)
+      add_error(record, attribute, :"dimension_#{dimension}_not_included_in",
+        **errors_options, min: flat_options[dimension][:min], max: flat_options[dimension][:max])
     end
 
     def validate_exact(record, attribute, dimension, metadata, flat_options, errors_options)
       if metadata[dimension] != flat_options[dimension]
-        errors_options[:length] = flat_options[dimension]
-        add_error(record, attribute, :"dimension_#{dimension}_not_equal_to", **errors_options)
+        add_error(record, attribute, :"dimension_#{dimension}_not_equal_to", **errors_options, length: flat_options[dimension])
         false
       else
         true
