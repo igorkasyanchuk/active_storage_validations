@@ -624,5 +624,46 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
         end
       end
     end
+
+    describe "single-axis chains on a validator bounding both axes" do
+      # validates :both_axes_bounded, dimension: { width: { min: 200, max: 500 }, height: { min: 100, max: 300 } }
+      # validates :both_axes_bounded_proc, dimension: { width: ->(_record) { { in: 200..500 } }, height: { max: ->(_record) { 300 } } }
+      # validates :both_axes_min_max, dimension: { min: 200..100, max: 500..300 }
+      %i[both_axes_bounded both_axes_bounded_proc both_axes_min_max].each do |attribute|
+        context "with :#{attribute}" do
+          let(:model_attribute) { attribute }
+
+          {
+            width_min: 200, width_max: 500, width_between: 200..500
+          }.each do |chain, value|
+            context "when provided with ##{chain}" do
+              subject(:configured_matcher) { matcher.public_send(chain, value) }
+
+              it { is_expected_to_match_for(klass) }
+            end
+          end
+
+          context "when provided with #height_max" do
+            subject(:configured_matcher) { matcher.height_max(300) }
+
+            it { is_expected_to_match_for(klass) }
+          end
+
+          context "when provided with a wrong #width_min" do
+            subject(:configured_matcher) { matcher.width_min(150) }
+
+            it { is_expected_not_to_match_for(klass) }
+          end
+        end
+      end
+
+      context "with :both_axes_bounded and #height_min" do
+        subject(:configured_matcher) { matcher.height_min(100) }
+
+        let(:model_attribute) { :both_axes_bounded }
+
+        it { is_expected_to_match_for(klass) }
+      end
+    end
   end
 end

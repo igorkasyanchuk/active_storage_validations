@@ -115,6 +115,14 @@ class Dimension::Matcher < ApplicationRecord
   validates :large_width_min_and_height_min, dimension: { width: { min: 2048 }, height: { min: 100 } }
   validates :large_height_min_and_width_min, dimension: { width: { min: 100 }, height: { min: 2048 } }
 
+  # Both axes bounded: single-axis chains probe the other axis within its bounds
+  has_one_attached :both_axes_bounded
+  validates :both_axes_bounded, dimension: { width: { min: 200, max: 500 }, height: { min: 100, max: 300 } }
+  has_one_attached :both_axes_bounded_proc
+  validates :both_axes_bounded_proc, dimension: { width: ->(_record) { { in: 200..500 } }, height: { max: ->(_record) { 300 } } }
+  has_one_attached :both_axes_min_max
+  validates :both_axes_min_max, dimension: { min: 200..100, max: 500..300 }
+
   # 1px max: matcher max-1 probe would be 0px (media_metadata_missing)
   has_one_attached :width_max_one
   has_one_attached :height_max_one
