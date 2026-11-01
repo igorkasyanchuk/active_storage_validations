@@ -50,6 +50,13 @@ class ContentType::Validator::Check < ApplicationRecord
   has_one_attached :content_type_with_parameter
   validates :content_type_with_parameter, content_type: :rar
 
+  # Marcel resolves an upload of these to their canonical type: the rule must
+  # be resolved the same way
+  has_one_attached :alias_flac
+  validates :alias_flac, content_type: "audio/x-flac"
+  has_one_attached :alias_msaccess
+  validates :alias_msaccess, content_type: "application/x-msaccess"
+
   has_one_attached :spoofing_protection
   has_one_attached :spoofing_protection_file
   has_one_attached :spoofing_protection_magika

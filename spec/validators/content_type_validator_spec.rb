@@ -272,6 +272,33 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
 
         it { is_expected_to_be_valid }
       end
+
+      describe "types Marcel resolves differently on upload" do
+        subject(:record) { model.public_send(attribute).attach(io: StringIO.new("file"), filename: filename, content_type: declared_type) and model }
+
+        {
+          alias_flac: [ "x.flac", %w[audio/flac audio/x-flac] ], # validates :alias_flac, content_type: "audio/x-flac"
+          alias_msaccess: [ "x.mdb", %w[application/x-msaccess application/vnd.ms-access] ] # "application/x-msaccess"
+        }.each do |rule_attribute, (rule_filename, declared_types)|
+          declared_types.each do |rule_declared_type|
+            context "with a #{rule_filename} file declared as #{rule_declared_type} on #{rule_attribute}" do
+              let(:attribute) { rule_attribute }
+              let(:filename) { rule_filename }
+              let(:declared_type) { rule_declared_type }
+
+              it { is_expected_to_be_valid }
+            end
+          end
+
+          context "with a PNG file on #{rule_attribute}" do
+            let(:attribute) { rule_attribute }
+            let(:filename) { "x.png" }
+            let(:declared_type) { "image/png" }
+
+            it { is_expected_not_to_be_valid }
+          end
+        end
+      end
     end
 
     describe ":spoofing_protection" do
