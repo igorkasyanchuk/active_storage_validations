@@ -26,6 +26,7 @@ Go through this table. If no row matches, you are done.
 | Uses `content_type` `spoofing_protection` | Nothing, unless real uploads start failing as `content_type_spoofed` | [Sibling types rejected](#spoofing_protection-rejects-sibling-types) |
 | Matches on `:content_type_spoofed`, or overrides that locale key | Also handle `:content_type_analysis_failed` | [`content_type_analysis_failed`](#content_type_analysis_failed-error) |
 | Has specs asserting the English wording of `duration` errors in a non-English locale | Update the expected strings | [Localized duration values](#localized-duration-values) |
+| Uses `duration: { equal_to: … }` on real uploads, or asserts `duration` error strings | Use a `between:` range; expect millisecond values ("5.029 seconds") | [Millisecond durations](#duration-is-compared-to-the-millisecond) |
 | Has matcher specs on an attribute without that validator, relying on a matcher's side effects on the subject, or asserting a matcher description / failure message | Fix the spec | [Matchers](#matchers-require-a-validator-and-leave-the-subject-unchanged) |
 
 Optional, ops only: three analyzer fixes change cached metadata, so blobs analyzed under 4.x can be re-analyzed. See [Already-analyzed blobs](#already-analyzed-blobs-optional).
@@ -275,7 +276,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | `size`, `limit`, `total_size` with attachments marked for destruction | Doomed files counted | Ignored, like `attached:` |
 | Metadata validators and `content_type` with a persisted file marked for destruction (`has_one_attached`, or `has_many_attached` while attaching new files) | Doomed file still validated | Ignored |
 | `aspect_ratio` `is_x_y` | Exact to 3 decimals: 1366×768, 854×480 rejected as `:is_16_9` | Still exact to 3 decimals, and also accepted when one side is within a pixel of the other one scaled to `x:y` |
-| `duration` | Rounded to 0.1s before comparing: 1.96s failed `less_than: 2.seconds` | Exact value compared ♻️ |
+| `duration` | Rounded to 0.1s before comparing: 1.96s failed `less_than: 2.seconds`, a 5.029s file passed `equal_to: 5.seconds` | Compared to the millisecond ♻️, see [below](#duration-is-compared-to-the-millisecond) |
 | `duration` of a file whose tracks differ (a 0.04s video track and a 30s audio track) | The video (or audio) track's duration: 0.04s | The longest of the container and its tracks: 30s ♻️ |
 | `duration` on WebM / Matroska audio (browser `MediaRecorder` Opus) | `media_metadata_missing` | Container duration used ♻️ |
 | `processable_file` on an empty media container (zero streams) | Accepted (also by `with_audio: { with: false }`) | Rejected ♻️ |
@@ -332,6 +333,21 @@ pt:
         words_connector: ", "
         two_words_connector: " e "
         last_word_connector: " e "
+```
+
+### `duration` is compared to the millisecond
+
+Analyzed durations are no longer rounded to 0.1s before comparing (see the table above), and error messages now show the same millisecond value: a 5.029s file failing `less_than_or_equal_to: 5.seconds` reads "(current duration is 5.029 seconds)", where 5.0 read "(current duration is 5 seconds)" and looked like a bug. Specs asserting the rounded wording need an update.
+
+Encoders pad audio and video, so a "5-second" file rarely lasts exactly 5.000s. `equal_to: 5.seconds` passed a 5.029s file under 4.x and rejects it now. Use a range instead:
+
+```ruby
+# 4.x: a 5.029s file passed (rounded to 5.0)
+# 5.x: rejected, "must be equal to 5 seconds (current duration is 5.029 seconds)"
+validates :clip, duration: { equal_to: 5.seconds }
+
+# 5.x
+validates :clip, duration: { between: 5.seconds..5.1.seconds }
 ```
 
 ### `content_type` / `aspect_ratio` Proc results are checked

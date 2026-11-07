@@ -74,22 +74,31 @@ module ActiveStorageValidations
     def format_bound_value(value)
       return nil unless value
 
-      # Encoder padding makes fixture files 2.024s, 5.029s, … Error copy still
-      # talks in tenths of a second; comparison uses the analyzer's millisecond value.
-      rounded = value.to_f.round(1)
-      custom_value = rounded == rounded.to_i ? rounded.to_i : rounded
-      duration_in_words(ActiveSupport::Duration.build(custom_value))
+      # Milliseconds, the precision of the analyzer and of the comparison.
+      # Rounding to tenths read "must be less than or equal to 5 seconds
+      # (current duration is 5 seconds)" for a 5.029s file.
+      duration_in_words(ActiveSupport::Duration.build(value.to_f.round(3)))
     end
 
     def duration_in_words(duration)
       parts = duration.parts.presence || { seconds: duration.value.to_i }
 
       words = parts.sort_by { |unit, _count| DURATION_UNITS.index(unit) }.map do |unit, count|
+        count = whole_or_milliseconds(count)
         count = LocalizedCount.new(count) unless count.is_a?(Integer)
         I18n.t("active_storage_validations.duration.#{unit}", count: count, default: default_unit_translation(unit))
       end
 
       words.to_sentence(locale: false, **duration_connectors)
+    end
+
+    # Duration#parts leaves float noise in the seconds (61.234 is 1 minute and
+    # 1.2339999999999236 seconds) and keeps whole floats (5.0).
+    def whole_or_milliseconds(count)
+      return count if count.is_a?(Integer)
+
+      rounded = count.to_f.round(3)
+      rounded == rounded.to_i ? rounded.to_i : rounded
     end
 
     # A decimal count (1.5 seconds) must still pick the plural form as a
