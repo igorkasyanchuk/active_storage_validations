@@ -763,7 +763,7 @@ The `aspect_ratio` validator has several options:
 This validator can define aspect ratios in several ways:
 - Symbols:
   - prebuilt aspect ratios: `:square`, `:portrait`, `:landscape`
-  - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc. A file matches a custom ratio when both ratios are equal once rounded to 3 decimals, or when one of its sides is within a pixel of the other one scaled to that ratio, so sizes such as 1366×768 (1366 × 9 / 16 = 768.375) match `:is_16_9`, while 1920×1082 does not.
+  - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc. A file matches a custom ratio when both ratios are equal once rounded to 3 decimals, or when one of its sides is within a pixel of the other one scaled to that ratio, so sizes such as 1366×768 (1366 × 9 / 16 = 768.375) match `:is_16_9`, while 1920×1082 does not. That pixel of slack only applies to images at least x×y pixels: a 4×3 or 1×1 image does not match `:is_16_9`.
 
 #### Examples
 
