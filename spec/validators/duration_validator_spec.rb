@@ -38,7 +38,6 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
 
     it_behaves_like "works fine with attachables"
 
-
     describe ":less_than" do
       let(:file_having_lower_than_less_than_option) { audio_1s }
       let(:file_having_exact_less_than_option) { audio_2s }
@@ -330,6 +329,12 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
 
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
+
+    it_behaves_like "interpolates custom message placeholders" do
+      let(:file_not_matching_placeholders) { audio_5s }
+      let(:message_for_unanalyzable_file) { "With message placeholders must be under 2 seconds (got )" }
+      let(:message_for_file_not_matching) { "With message placeholders must be under 2 seconds (got 5.029 seconds)" }
+    end
   end
 
   describe "duration values in error messages" do

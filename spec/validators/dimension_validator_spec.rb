@@ -790,5 +790,12 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
+
+    # %{width} is the validator option, forwarded to every error.
+    it_behaves_like "interpolates custom message placeholders" do
+      let(:file_not_matching_placeholders) { image_700x500_file }
+      let(:message_for_unanalyzable_file) { "must be px wide (150)" }
+      let(:message_for_file_not_matching) { "must be 150px wide (150)" }
+    end
   end
 end

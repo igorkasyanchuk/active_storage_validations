@@ -40,14 +40,14 @@ module ActiveStorageValidations
         duration = begin
           metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:duration, nil)
         rescue ActiveStorage::FileNotFoundError
-          add_attachment_missing_error(record, attribute, attachable)
+          add_attachment_missing_error(record, attribute, attachable, bound_error_options(attachable, flat_options))
           next
         end
 
         # to_f, not to_i: durations are floats, and truncating would treat any
         # file shorter than a second as unanalyzable.
         if duration.to_f <= 0
-          add_media_metadata_missing_error(record, attribute, attachable)
+          add_media_metadata_missing_error(record, attribute, attachable, bound_error_options(attachable, flat_options))
           next
         end
 
@@ -58,8 +58,7 @@ module ActiveStorageValidations
     private
 
     def populate_error_options_and_add_error(record, attribute, attachable, flat_options, duration)
-      errors_options = initialize_error_options(options, attachable)
-      populate_error_options(errors_options, flat_options, duration)
+      errors_options = bound_error_options(attachable, flat_options, duration)
 
       error_type = set_error_type(flat_options)
 
@@ -124,6 +123,14 @@ module ActiveStorageValidations
 
     def duration_connectors
       I18n.t("active_storage_validations.duration.connectors", default: DEFAULT_DURATION_CONNECTORS)
+    end
+
+    # A file that cannot be analyzed has no duration, but a custom message
+    # may still show the bounds (`message: "must be under %{max}"`).
+    def bound_error_options(attachable, flat_options, duration = nil)
+      errors_options = initialize_error_options(options, attachable)
+      populate_error_options(errors_options, flat_options, duration)
+      errors_options
     end
 
     def populate_error_options(errors_options, flat_options, duration)
