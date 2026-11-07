@@ -18,7 +18,11 @@ module ActiveStorageValidations
     # Loop through the newly submitted attachables to validate them. Using
     # attachables is the only way to get the attached file io that is necessary
     # to perform file analyses.
-    def validate_changed_files_from_metadata(record, attribute, metadata_keys)
+    #
+    # +validation_options+ (flattened options, authorized ratios, …) are
+    # computed once by the caller and passed to every +is_valid?+: Proc
+    # options used to be evaluated again for each file (N+1 queries).
+    def validate_changed_files_from_metadata(record, attribute, metadata_keys, *validation_options)
       attachables_and_blobs(record, attribute).each do |attachable, blob|
         metadata = begin
           metadata_for(blob, attachable, metadata_keys)
@@ -27,7 +31,7 @@ module ActiveStorageValidations
           next
         end
 
-        is_valid?(record, attribute, attachable, metadata)
+        is_valid?(record, attribute, attachable, metadata, *validation_options)
       end
     end
 
@@ -57,10 +61,22 @@ module ActiveStorageValidations
 
     def changed_attachables_and_blobs(changes)
       if changes.is_a?(ActiveStorage::Attached::Changes::CreateMany)
-        changes.attachables.zip(changes.blobs).uniq { |attachable, blob| attachable_blob_key(attachable, blob) }
+        attachables = changes.attachables.map { |attachable| pending_upload_attachable(changes, attachable) }
+        attachables.zip(changes.blobs).uniq { |attachable, blob| attachable_blob_key(attachable, blob) }
       else
         [ [ changes.is_a?(ActiveStorage::Attached::Changes::CreateOne) ? changes.attachable : changes.blob, changes.blob ] ]
       end
+    end
+
+    # Rails 7.1+ `Many#attach` hands the blobs of an earlier, unsaved `attach`
+    # back as attachables: new records, not uploaded yet, so analyzing them
+    # downloaded nothing (ActiveStorage::FileNotFoundError, attachment_missing).
+    # The attachable each one was built from waits in `pending_uploads`.
+    def pending_upload_attachable(changes, attachable)
+      return attachable unless attachable.is_a?(ActiveStorage::Blob) && attachable.new_record?
+      return attachable unless changes.respond_to?(:pending_uploads)
+
+      changes.pending_uploads.find { |upload| upload.blob.equal?(attachable) }&.attachable || attachable
     end
 
     def blob_ids_marked_for_destruction(record, attribute)

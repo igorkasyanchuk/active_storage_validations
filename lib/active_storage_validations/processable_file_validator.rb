@@ -16,6 +16,7 @@ module ActiveStorageValidations
 
     ERROR_TYPES = %i[
       file_not_processable
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[].freeze
 

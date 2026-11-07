@@ -17,19 +17,18 @@ module ActiveStorageValidations
     include ASVSymbolizable
 
     AVAILABLE_CHECKS = %i[with].freeze
-    ERROR_TYPES = %i[audio_missing audio_present].freeze
+    ERROR_TYPES = %i[audio_missing audio_present attachment_missing].freeze
     METADATA_KEYS = %i[audio].freeze
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
+      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS, set_flat_options(record).fetch(:with, true))
     end
 
     private
 
-    def is_valid?(record, attribute, attachable, metadata)
-      expected_audio = set_flat_options(record).fetch(:with, true)
+    def is_valid?(record, attribute, attachable, metadata, expected_audio)
       return if audio_track?(metadata) == expected_audio
 
       errors_options = initialize_error_options(options, attachable)

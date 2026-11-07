@@ -64,6 +64,31 @@ RSpec.describe "forged asv_* metadata" do
     end
   end
 
+  # Rails' direct upload endpoint also permits a custom metadata that is not a
+  # Hash, which the Disk service keeps.
+  [ "x", [ "a" ] ].each do |custom_metadata|
+    context "with a custom metadata that is not a Hash (#{custom_metadata.inspect})" do
+      # validates :width_max, dimension: { width: { max: 500 } }
+      subject(:model) { Dimension::Validator::Check.new }
+
+      let(:blob) do
+        direct_upload(
+          Rails.root.join("public", "image_700x500.png"),
+          filename: "image_700x500.png",
+          content_type: "image/png",
+          custom_metadata: custom_metadata
+        )
+      end
+
+      before { model.width_max.attach(blob.signed_id) }
+
+      it "analyzes the file instead of raising" do
+        expect(model).not_to be_valid
+        expect(model.errors.details[:width_max].pluck(:error)).to eq([ :dimension_width_not_less_than_or_equal_to ])
+      end
+    end
+  end
+
   context "with a forged cache in an attach(io:, metadata:) hash" do
     # validates :width_max, dimension: { width: { max: 500 } }
     subject(:model) { Dimension::Validator::Check.new }
