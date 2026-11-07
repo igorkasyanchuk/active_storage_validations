@@ -61,6 +61,14 @@ class ContentType::Validator::Check < ApplicationRecord
   validates :format_parameter, content_type: "application/dita+xml;format=map"
   has_one_attached :capitalized_type
   validates :capitalized_type, content_type: "application/vnd.ms-visio.drawing.macroEnabled.12"
+  has_one_attached :duplicate_types
+  validates :duplicate_types, content_type: [ :jpg, :jpeg, "image/jpeg" ]
+  has_one_attached :media_types
+  validates :media_types, content_type: [ :mp3, :m4a, :mov, :mpg ]
+  has_one_attached :wildcard
+  validates :wildcard, content_type: "image/*"
+  has_one_attached :wildcard_and_type
+  validates :wildcard_and_type, content_type: [ "image/*", :pdf ]
 
   has_one_attached :spoofing_protection
   has_one_attached :spoofing_protection_file

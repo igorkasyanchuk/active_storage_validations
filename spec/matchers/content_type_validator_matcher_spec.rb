@@ -133,6 +133,45 @@ RSpec.describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher d
         end
       end
 
+      context "when the content_type only exists with its parameters (e.g. 'application/dita+xml;format=map')" do
+        let(:model_attribute) { :parameterized_type }
+
+        context "when provided with that type" do
+          subject(:configured_matcher) { matcher.allowing("application/dita+xml;format=map") }
+
+          it { is_expected_to_match_for(klass) }
+        end
+
+        context "when rejecting that type" do
+          subject(:configured_matcher) { matcher.rejecting("application/dita+xml;format=map") }
+
+          it { is_expected_not_to_match_for(klass) }
+        end
+      end
+
+      # Every type Marcel knows of that media type must be allowed.
+      context "when provided with a media type wildcard (e.g. 'image/*')" do
+        subject(:configured_matcher) { matcher.allowing("image/*") }
+
+        context "when the validator allows that wildcard" do
+          let(:model_attribute) { :wildcard }
+
+          it { is_expected_to_match_for(klass) }
+        end
+
+        context "when the validator allows them through a Regexp (/\\Aimage\\/.*\\z/)" do
+          let(:model_attribute) { :allowing_several_through_regex }
+
+          it { is_expected_to_match_for(klass) }
+        end
+
+        context "when the validator allows one of its types" do
+          let(:model_attribute) { :allowing_one }
+
+          it { is_expected_not_to_match_for(klass) }
+        end
+      end
+
       context "when the content_type specifier (e.g. 'svg+xml') is not strictly equal to the file extension (e.g. '.svg')" do
         let(:model_attribute) { :allowing_sneaky_edge_cases }
         let(:allowed_types) { [ "image/svg+xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ] }
@@ -208,6 +247,21 @@ RSpec.describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher d
         it { is_expected_not_to_match_for(klass) }
       end
     end
+
+    # None of the types Marcel knows of that media type may be allowed.
+    context "when provided with a media type wildcard (e.g. 'video/*')" do
+      context "when the validator allows none of its types" do
+        subject(:configured_matcher) { matcher.rejecting("video/*") }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      context "when the validator allows one of its types" do
+        subject(:configured_matcher) { matcher.rejecting("image/*") }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
   end
 
   describe "#allow_blank" do
@@ -232,6 +286,35 @@ RSpec.describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher d
 
   describe "#spoofing_protection" do
     it_behaves_like "works with spoofing protection"
+  end
+
+  describe "content type sniffers" do
+    %i[with_spoofing_protection with_spoofing_protection_magika].each do |attribute|
+      context "with #{attribute}" do
+        subject(:configured_matcher) { matcher.allowing("image/png").rejecting("image/gif").spoofing_protection(spoofing) }
+
+        let(:model_attribute) { attribute }
+        let(:spoofing) { attribute == :with_spoofing_protection ? true : :magika }
+
+        around do |example|
+          paths = ActiveStorage.paths.slice(:file, :magika)
+          ActiveStorage.paths.merge!(file: "/nonexistent/file", magika: "/nonexistent/magika")
+          example.run
+        ensure
+          ActiveStorage.paths.except!(:file, :magika).merge!(paths)
+        end
+
+        it "never runs the CLI, so it matches without it" do
+          analyses = []
+          subscriber = ActiveSupport::Notifications.subscribe("analyze.active_storage_validations") { |*, payload| analyses << payload }
+
+          is_expected_to_match_for(klass)
+          expect(analyses).to be_empty
+        ensure
+          ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+        end
+      end
+    end
   end
 
   describe "probe attachments" do

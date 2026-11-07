@@ -103,29 +103,53 @@ module ActiveStorageValidations
         end
       end
 
+      # A type Marcel knows as written is kept: Marcel resolves the
+      # parameterized ones (`application/dita+xml;format=map`) without their
+      # parameters, which their validator does not authorize.
       def normalize_content_type(content_type)
-        Marcel::MimeType.for(declared_type: content_type.to_s, extension: content_type.to_s)
+        type = content_type.to_s
+        return type if Marcel::TYPE_EXTS.key?(type)
+        return type if type.match?(ActiveStorageValidations::ContentTypeValidator::WILDCARD_CONTENT_TYPE)
+
+        Marcel::MimeType.for(declared_type: type, extension: type)
       end
 
+      # A wildcard ("image/*") is allowed when every type Marcel knows of that
+      # media type is, and rejected when none of them is.
       def all_allowed_content_types_allowed?
-        @allowed_content_types_not_allowed = @allowed_content_types.reject { |type| type_allowed?(type) }
+        @allowed_content_types_not_allowed = @allowed_content_types.reject do |type|
+          probe_content_types(type).all? { |probe| type_allowed?(probe) }
+        end
         @allowed_content_types_not_allowed.empty?
       end
 
       def all_rejected_content_types_rejected?
-        @rejected_content_types_not_rejected = @rejected_content_types.select { |type| type_allowed?(type) }
+        @rejected_content_types_not_rejected = @rejected_content_types.select do |type|
+          probe_content_types(type).any? { |probe| type_allowed?(probe) }
+        end
         @rejected_content_types_not_rejected.empty?
       end
 
-      def type_allowed?(content_type)
-        attach_file_with_content_type(content_type)
-        validate
-        detach_file
-        is_valid?
+      def probe_content_types(type)
+        return [ type ] unless type.match?(ActiveStorageValidations::ContentTypeValidator::WILDCARD_CONTENT_TYPE)
+
+        media_type = type.delete_suffix("*")
+        Marcel::TYPE_EXTS.keys.select { |marcel_type| marcel_type.start_with?(media_type) }
       end
 
-      def attach_file_with_content_type(content_type)
-        @subject.public_send(@attribute_name).attach(attachment_for(content_type))
+      # The probe file is empty, so spoofing_protection would only run the
+      # `file` / `magika` CLI to have its verdict ignored (see
+      # #validator_errors_for_attribute), and raise when the CLI is missing.
+      # Mock the sniffer like the metadata matchers mock their analyzers.
+      def type_allowed?(content_type)
+        attachment = attachment_for(content_type)
+
+        Matchers.mock_metadata(attachment, { content_type: content_type.to_s }) do
+          @subject.public_send(@attribute_name).attach(attachment)
+          validate
+          detach_file
+          is_valid?
+        end
       end
 
       def is_custom_message_valid?

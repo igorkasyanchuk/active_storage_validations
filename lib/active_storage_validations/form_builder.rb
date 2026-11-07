@@ -34,7 +34,8 @@ module ActiveStorageValidations
     # Proc, a narrow Regexp): listing only the others would hide files the
     # validator allows.
     def accept_types_for(validator)
-      types = Array(validator.options[:with]) + Array(validator.options[:in])
+      # A nested list (`[IMAGE_TYPES, :pdf]`) is flattened, like the validator does.
+      types = (Array(validator.options[:with]) + Array(validator.options[:in])).flatten
       accept_types = types.map { |type| accept_type_for(type) }
       accept_types if accept_types.any? && accept_types.all?
     end

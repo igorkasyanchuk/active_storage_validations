@@ -25,10 +25,20 @@ module ActiveStorageValidations
     ].freeze
     METADATA_KEYS = %i[content_type].freeze
 
+    # Marcel lists a rarer extension first for some common types: messages
+    # read "MPGA" for an MP3, "QT" for a MOV, "MP4A" for an M4A.
+    HUMAN_EXTENSIONS = {
+      "audio/mpeg" => "mp3",
+      "audio/mp4" => "m4a",
+      "video/quicktime" => "mov",
+      "video/mpeg" => "mpg"
+    }.freeze
     # State for a single attachable check. Active Model builds one validator per
     # class and reuses it for every record and every thread, so this must travel
     # through arguments rather than instance variables.
     Context = Struct.new(:authorized_content_types, :content_type, :filename)
+    # "image/*", as in the HTML accept attribute: any type of that media type.
+    WILDCARD_CONTENT_TYPE = %r{\A[a-z][a-z-]*/\*\z}
 
     def check_validity!
       ensure_exactly_one_validator_option
@@ -62,12 +72,15 @@ module ActiveStorageValidations
       # message.
       ensure_content_types_validity(content_types) if proc_content_types?
 
+      # `[:jpg, :jpeg]` is one type: the message listed it twice ("JPG, JPG"),
+      # and counted two, so it read "types are".
       content_types.map do |type|
         case type
+        when WILDCARD_CONTENT_TYPE then type.to_s
         when String, Symbol then authorized_marcel_content_type(type.to_s)
         when Regexp then type
         end
-      end
+      end.uniq
     end
 
     # Resolve a type as Marcel resolves an upload of it (declared type +
@@ -93,6 +106,8 @@ module ActiveStorageValidations
     def authorized_content_type?(record, attribute, attachable, context)
       attachable_content_type_is_authorized = context.authorized_content_types.any? do |authorized_content_type|
         case authorized_content_type
+        when WILDCARD_CONTENT_TYPE
+          marcel_attachable_content_type(context).to_s.start_with?(authorized_content_type.delete_suffix("*"))
         when String then authorized_content_type == marcel_attachable_content_type(context)
         when Regexp then authorized_content_type.match?(marcel_attachable_content_type(context).to_s)
         end
@@ -227,6 +242,7 @@ module ActiveStorageValidations
         end
         .flatten
         .compact
+        .uniq
         .join(", ")
     end
 
@@ -234,9 +250,11 @@ module ActiveStorageValidations
     # (e.g. "inode/x-empty" detected on an empty file) fall back to the type
     # itself rather than disappearing from the message.
     def human_content_type(content_type)
+      return content_type if content_type.match?(WILDCARD_CONTENT_TYPE)
       return content_type.upcase unless content_type.match?(/\//)
 
-      Marcel::TYPE_EXTS[canonical_marcel_content_type(content_type)]&.first&.upcase || content_type
+      canonical = canonical_marcel_content_type(content_type)
+      (HUMAN_EXTENSIONS[canonical] || Marcel::TYPE_EXTS[canonical]&.first)&.upcase || content_type
     end
 
     def ensure_exactly_one_validator_option
@@ -285,6 +303,8 @@ module ActiveStorageValidations
     end
 
     def invalid_content_type?(content_type)
+      return invalid_media_type?(content_type) if content_type.to_s.match?(WILDCARD_CONTENT_TYPE)
+
       type = content_type_without_parameters(content_type.to_s)
       if type == "image/jpg"
         raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
@@ -294,6 +314,12 @@ module ActiveStorageValidations
       # ("application/dita+xml;format=map", "…macroEnabled.12").
       all_available_marcel_content_types.exclude?(type) &&
         all_available_marcel_content_types.none? { |marcel_type| marcel_type.casecmp?(content_type.to_s) }
+    end
+
+    # "imag/*" would reject every file.
+    def invalid_media_type?(content_type)
+      media_type = content_type.to_s.delete_suffix("*")
+      all_available_marcel_content_types.none? { |marcel_type| marcel_type.start_with?(media_type) }
     end
 
     def all_available_marcel_content_types
