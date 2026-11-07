@@ -14,7 +14,7 @@ RSpec.describe ActiveStorageValidations do
   # before Rails (a script, a Bundler.require order) used to raise NameError.
   describe "requiring the gem without Rails loaded" do
     subject(:result) do
-      Open3.capture2e(RbConfig.ruby, "-rbundler/setup", "-I", lib_path, "-e", script)
+      Open3.capture3(RbConfig.ruby, "-rbundler/setup", "-I", lib_path, "-e", script)
     end
 
     let(:lib_path) { File.expand_path("../../lib", __dir__) }
@@ -25,10 +25,12 @@ RSpec.describe ActiveStorageValidations do
       RUBY
     end
 
+    # Only stdout is compared: Ruby may warn on stderr about the Rails version
+    # under test (Rails 7.0 loads tsort, no longer a default gem on Ruby 4.1).
     it "loads the Rails integration it needs" do
-      output, status = result
+      output, errors, status = result
 
-      expect(status).to be_success, output
+      expect(status).to be_success, errors
       expect(output).to eq("Rails::Engine Rails::Railtie")
     end
   end
