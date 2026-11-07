@@ -238,6 +238,20 @@ RSpec.describe ActiveStorageValidations::TotalSizeValidator do
       it { is_expected_to_be_valid }
     end
 
+    context "when every file is marked for destruction" do
+      # validates :greater_than, total_size: { greater_than: 7.kilobytes }
+      subject(:record) do
+        model.greater_than.attach([ file_5ko, file_5ko ])
+        model.save!
+        model.greater_than.attachments.each(&:mark_for_destruction)
+        model
+      end
+
+      it "validates nothing, as for a record without files" do
+        expect(record).to be_valid
+      end
+    end
+
     context "when replacing a persisted file via mark_for_destruction" do
       subject(:record) do
         model.less_than.attach(file_1ko)
