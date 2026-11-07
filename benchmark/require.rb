@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Measure gem load time (faker-style sanity check).
-# Rails is preloaded because Engine/Railtie subclass Rails::Engine / Rails::Railtie.
+# Rails is preloaded so its own load time is not counted.
 #
 #   bundle exec ruby benchmark/require.rb
 

@@ -13,10 +13,39 @@ RSpec.describe ActiveStorageValidations::LimitValidator do
       context "when the passed argument to min or max is not an integer" do
         subject(:model) { validator_test_class::CheckValidityInvalidArgument.new(params) }
 
-        let(:error_message) { "You must pass integers to :min and :max" }
+        let(:error_message) { "You must pass non-negative integers to :min and :max" }
 
         it "raises an error at model initialization" do
           expect { model }.to raise_error(ArgumentError, error_message)
+        end
+      end
+
+      context "when the passed argument to min or max is negative" do
+        subject(:validator) { described_class.new(attributes: [ :files ], max: -1) }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, "You must pass non-negative integers to :min and :max")
+        end
+      end
+
+      context "when a Proc returns anything but a number" do
+        subject(:validator) { described_class.new(attributes: [ :files ], max: ->(_record) { "3" }) }
+
+        it "raises an error when the Proc is evaluated" do
+          expect { validator.send(:ensure_proc_bounds_validity, validator.send(:set_flat_options, nil)) }
+            .to raise_error(ArgumentError, 'You must pass numbers to :min and :max (got "3" from a Proc for :max)')
+        end
+      end
+
+      # Data, not configuration: a decimal plan column, or a quota the record
+      # is already over.
+      [ -1, 2.0, BigDecimal("2") ].each do |value|
+        context "when a Proc returns #{value.inspect}" do
+          subject(:validator) { described_class.new(attributes: [ :files ], max: ->(_record) { value }) }
+
+          it "does not raise" do
+            expect { validator.send(:ensure_proc_bounds_validity, validator.send(:set_flat_options, nil)) }.not_to raise_error
+          end
         end
       end
 
@@ -113,16 +142,55 @@ RSpec.describe ActiveStorageValidations::LimitValidator do
           end
         end
       end
+
+      describe "0" do
+        %w[value proc].each do |value_type|
+          describe value_type do
+            let(:model) { "#{validator_test_class}::CheckMax#{'Proc' if value_type == 'proc'}".constantize.new(params) }
+            let(:attribute) { :"max_zero#{'_proc' if value_type == 'proc'}" }
+
+            context "when provided with no files" do
+              subject(:record) { model }
+
+              it { is_expected_to_be_valid }
+            end
+
+            context "when provided with a file" do
+              subject(:record) { model.public_send(attribute).attach(file_1) and model }
+
+              let(:file_1) { png_file }
+              let(:error_options) do
+                {
+                  min: nil,
+                  max: 0,
+                  count: 1
+                }
+              end
+
+              it { is_expected_not_to_be_valid }
+              it { is_expected_to_include_error_message("limit_max_exceeded", error_options: error_options) }
+              it { is_expected_to_have_error_options(error_options) }
+            end
+          end
+        end
+      end
     end
 
     describe "Combinations" do
       describe ":min + :max" do
         # validates :range, limit: { min: 1, max: 3 }
         # validates :range_proc, limit: { min: -> (record) { 1 }, max: -> (record) { 3 } }
-        %w[value proc].each do |value_type|
-          describe value_type do
-            let(:model) { "#{validator_test_class}::CheckRange#{'Proc' if value_type == 'proc'}".constantize.new(params) }
-            let(:attribute) { :"range#{'_proc' if value_type == 'proc'}" }
+        # validates :range_min_proc, limit: { min: -> (record) { 1 }, max: 3 }
+        # validates :range_max_proc, limit: { min: 1, max: -> (record) { 3 } }
+        {
+          value: [ "CheckRange", :range ],
+          proc: [ "CheckRangeProc", :range_proc ],
+          min_proc_max_integer: [ "CheckRangeMinProc", :range_min_proc ],
+          min_integer_max_proc: [ "CheckRangeMaxProc", :range_max_proc ]
+        }.each do |value_type, (klass_name, attribute_name)|
+          describe value_type.to_s do
+            let(:model) { "#{validator_test_class}::#{klass_name}".constantize.new(params) }
+            let(:attribute) { attribute_name }
 
             context "when provided with a right number of files" do
               subject(:record) { model.public_send(attribute).attach([ file_1, file_2 ]) and model }
@@ -171,6 +239,32 @@ RSpec.describe ActiveStorageValidations::LimitValidator do
           end
         end
       end
+    end
+  end
+
+  describe "attachments marked for destruction" do
+    let(:model) { validator_test_class::CheckMax.new(params) }
+
+    context "when a has_many file that would exceed :max is marked for destruction" do
+      subject(:record) do
+        model.max.attach([ png_file, gif_file ])
+        model.max.attachments.first.mark_for_destruction
+        model
+      end
+
+      it { is_expected_to_be_valid }
+    end
+
+    context "when replacing a persisted file via mark_for_destruction" do
+      subject(:record) do
+        model.max.attach(png_file)
+        model.save!
+        model.max.attachments.first.mark_for_destruction
+        model.max.attach(gif_file)
+        model
+      end
+
+      it { is_expected_to_be_valid }
     end
   end
 

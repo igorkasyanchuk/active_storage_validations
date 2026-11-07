@@ -7,6 +7,9 @@ de:
       content_type_spoofed:
         one: "hat einen Inhaltstyp, der nicht dem entspricht, der durch seinen Inhalt erkannt wird (autorisierter Inhaltstyp ist %{authorized_human_content_types})"
         other: "hat einen Inhaltstyp, der nicht dem entspricht, der durch seinen Inhalt erkannt wird (autorisierte Inhaltstypen sind %{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "hat einen Inhaltstyp, der nicht anhand seines Inhalts überprüft werden konnte (autorisierter Inhaltstyp ist %{authorized_human_content_types})"
+        other: "hat einen Inhaltstyp, der nicht anhand seines Inhalts überprüft werden konnte (autorisierte Inhaltstypen sind %{authorized_human_content_types})"
       file_size_not_less_than: "Dateigröße muss kleiner als %{max} sein (aktuelle Dateigröße ist %{file_size})"
       file_size_not_less_than_or_equal_to: "Dateigröße muss kleiner oder gleich %{max} sein (aktuelle Dateigröße ist %{file_size})"
       file_size_not_greater_than: "Dateigröße muss größer als %{min} sein (aktuelle Dateigröße ist %{file_size})"
@@ -63,3 +66,30 @@ de:
       pages_not_greater_than_or_equal_to: "Die Seitenanzahl muss größer oder gleich %{min} sein (die aktuelle Seitenanzahl beträgt %{pages})."
       pages_not_between: "Die Seitenanzahl muss zwischen %{min} und %{max} liegen (die aktuelle Seitenanzahl beträgt %{pages})."
       pages_not_equal_to: "Die Seitenanzahl muss gleich %{exact} sein (die aktuelle Seitenanzahl beträgt %{pages})."
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} Jahr"
+        other: "%{count} Jahre"
+      months:
+        one: "%{count} Monat"
+        other: "%{count} Monate"
+      weeks:
+        one: "%{count} Woche"
+        other: "%{count} Wochen"
+      days:
+        one: "%{count} Tag"
+        other: "%{count} Tage"
+      hours:
+        one: "%{count} Stunde"
+        other: "%{count} Stunden"
+      minutes:
+        one: "%{count} Minute"
+        other: "%{count} Minuten"
+      seconds:
+        one: "%{count} Sekunde"
+        other: "%{count} Sekunden"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " und "
+        last_word_connector: " und "

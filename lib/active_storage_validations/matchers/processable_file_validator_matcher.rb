@@ -37,18 +37,21 @@ module ActiveStorageValidations
         @attribute_name = attribute_name
       end
 
-      def description
-        "validate that :#{@attribute_name} is a processable image"
+      def base_description
+        "validate that :#{@attribute_name} is a processable file"
       end
 
       def failure_message
-        "is expected to validate the processable image of :#{@attribute_name}"
+        message = [ "is expected to validate the processable file of :#{@attribute_name}" ]
+        build_failure_message(message)
+        message.join("\n")
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject.new : subject
+        initialize_subject(subject)
 
         is_a_valid_active_storage_attribute? &&
+          has_validator? &&
           is_context_valid? &&
           is_except_on_valid? &&
           is_allowing_blank? &&
@@ -64,14 +67,14 @@ module ActiveStorageValidations
         attach_file(processable_image)
         validate
         detach_file
-        is_valid?
+        is_valid? || add_failure_message_artefact("a processable file", passed: false)
       end
 
       def is_invalid_when_file_not_processable?
         attach_file(not_processable_image)
         validate
         detach_file
-        !is_valid?
+        !is_valid? || add_failure_message_artefact("a non-processable file", passed: true)
       end
 
       def is_custom_message_valid?

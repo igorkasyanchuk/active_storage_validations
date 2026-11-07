@@ -20,14 +20,22 @@ module ActiveStorageValidations
 
       private
 
+      def spoofing_protection_description
+        case @spoofing_protection
+        when UNSET then nil
+        when false then "without spoofing protection"
+        when true then "with spoofing protection"
+        else "with #{@spoofing_protection.inspect} spoofing protection"
+        end
+      end
+
       def is_spoofing_protection_valid?
         return true if @spoofing_protection.equal?(UNSET)
 
         expected = normalize_spoofing_protection(@spoofing_protection)
+        # The validator option defaults to false.
         attribute_validators.any? do |validator|
-          next false unless validator.options.key?(:spoofing_protection)
-
-          normalize_spoofing_protection(validator.options[:spoofing_protection]) == expected
+          normalize_spoofing_protection(validator.options.fetch(:spoofing_protection, false)) == expected
         end
       end
 

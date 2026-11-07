@@ -1,12 +1,38 @@
 # frozen_string_literal: true
 
 require "rails_helper"
+require "open3"
 
 RSpec.describe ActiveStorageValidations do
   let(:instance) { ActiveStorageValidations::Check.new }
 
   it "is part of the app's modules" do
     expect(described_class).to be_a(Module)
+  end
+
+  # Engine / Railtie subclass Rails::Engine / Rails::Railtie: requiring the gem
+  # before Rails (a script, a Bundler.require order) used to raise NameError.
+  describe "requiring the gem without Rails loaded" do
+    subject(:result) do
+      Open3.capture3(RbConfig.ruby, "-rbundler/setup", "-I", lib_path, "-e", script)
+    end
+
+    let(:lib_path) { File.expand_path("../../lib", __dir__) }
+    let(:script) do
+      <<~RUBY
+        require "active_storage_validations"
+        print ActiveStorageValidations::Engine.superclass, " ", ActiveStorageValidations::Railtie.superclass
+      RUBY
+    end
+
+    # Only stdout is compared: Ruby may warn on stderr about the Rails version
+    # under test (Rails 7.0 loads tsort, no longer a default gem on Ruby 4.1).
+    it "loads the Rails integration it needs" do
+      output, errors, status = result
+
+      expect(status).to be_success, errors
+      expect(output).to eq("Rails::Engine Rails::Railtie")
+    end
   end
 
   describe "concerns" do

@@ -16,6 +16,8 @@ module ActiveStorageValidations
       pages_not_greater_than_or_equal_to
       pages_not_between
       pages_not_equal_to
+      media_metadata_missing
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[pages].freeze
 
@@ -32,6 +34,9 @@ module ActiveStorageValidations
     def is_valid?(record, attribute, file, metadata)
       flat_options = set_flat_options(record)
       errors_options = initialize_error_options(options, file)
+      # Also for a file that cannot be analyzed: a custom message may show the
+      # bounds (`message: "must have at most %{max} pages"`).
+      populate_error_options(errors_options, flat_options)
 
       unless valid_metadata?(metadata)
         add_media_metadata_missing_error(record, attribute, file, errors_options)
@@ -40,7 +45,6 @@ module ActiveStorageValidations
 
       return true if super(metadata[:pages], flat_options)
 
-      populate_error_options(errors_options, flat_options)
       errors_options[:pages] = format_bound_value(metadata[:pages])
 
       keys = AVAILABLE_CHECKS & flat_options.keys

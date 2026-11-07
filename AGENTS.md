@@ -43,8 +43,8 @@ docs/upgrade_to_*.md                       # Upgrade guides
 | `ASVAttachable` | Loop attachables/blobs; metadata validation path |
 | `ASVAnalyzable` | Pick analyzer; cache results on blob custom metadata (`asv_*`) |
 | `ASVCommandable` | Timed external commands with process-group kill (`command_timeout`) |
-| `ASVErrorable` | `add_error` with `validator_type`, `filename`, bounds |
-| `ASVOptionable` | Flatten options; evaluate Proc options |
+| `ASVErrorable` | `add_error` with `validator_type`, `filename`, resolved bounds; check / configuration options are not forwarded |
+| `ASVOptionable` | Keep the validator check options (`AVAILABLE_CHECKS`) and evaluate their Procs |
 | `ASVSymbolizable` | Map validator class → error symbol (`:content_type`, …) |
 | `ASVLoggable` | `Rails.logger` helper used by analyzers |
 
@@ -60,7 +60,11 @@ require "active_storage_validations/matchers"
 
 - Ruby `>= 3.3` (CI also covers 3.4 and 4.0)
 - Rails `>= 7.0.1` (6.1 and 7.0.0 dropped)
-- See `docs/upgrade_to_4.md` and the Unreleased section of `CHANGES.md`
+- See `docs/upgrade_to_4.md`, `docs/upgrade_to_5.md` and the 5.0.0 section of `CHANGES.md`
+
+### Behavior changes (v5)
+
+Same Ruby / Rails support as v4. `errors.add` receives only the documented values (`ASVErrorable`; custom messages interpolating raw options raise), unbounded static `between:` / `dimension` `in:` ranges and non-exact `aspect_ratio` values raise at boot, empty `content_type` / `aspect_ratio` lists fail closed, `with_audio` fails closed on empty analyzer metadata, a failed spoofing analysis adds `content_type_analysis_failed`, invalid comparison / `limit` bounds, `with_audio` `with:` and `timeout:` values raise at boot (Proc results when evaluated), and a comparison Proc returning `nil` sets no bound. Migration steps: `docs/upgrade_to_5.md`. Do not soften these back to the 4.x behavior without a project decision.
 
 ### FormBuilder `accept` inference (v4)
 
@@ -76,7 +80,7 @@ External analyzer commands (`ffprobe`, `pdfinfo`, `file`, `magika`, ImageMagick 
 
 ### Content-type spoofing backends (v4)
 
-`content_type` `spoofing_protection` accepts `true` / `:file` (UNIX `file` CLI) or `:magika` (Google Magika CLI). Detected types are cached as `asv_content_type` plus `asv_content_type_backend`; switching backend re-analyzes. Legacy blobs with only `asv_content_type` are treated as the `:file` backend. Matcher: `#spoofing_protection` / `#spoofing_protection(:magika)`. Install Magika in any environment that uses `:magika` (CI pins the CLI to `cli/v1.1.0` in `.github/workflows/main.yml`).
+`content_type` `spoofing_protection` accepts `true` / `:file` (UNIX `file` CLI) or `:magika` (Google Magika CLI). Detected types are cached as `asv_content_type` plus `asv_content_type_backend`; switching backend re-analyzes. Legacy blobs with only `asv_content_type` are treated as the `:file` backend. Matcher: `#spoofing_protection` / `#spoofing_protection(:magika)`. Install Magika in any environment that uses `:magika` (CI installs the checksummed `cli/v1.1.0` linux tarball in `.github/workflows/main.yml`).
 
 A missing `file` or `magika` binary raises `ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::CommandLineToolNotInstalledError` (shared ancestor; both backends resolve that constant).
 
@@ -87,6 +91,8 @@ Matchers support `#except_on` for Rails `:except_on` (available since Rails 8.0)
 ### Matcher comparison bounds
 
 `BaseComparisonValidatorMatcher` (`#less_than`, `#less_than_or_equal_to`, `#greater_than`, `#greater_than_or_equal_to`, `#between`, `#equal_to`) must probe the inclusive endpoint itself. Checking only `min + 1` / `max - 1` lets `less_than(n)` satisfy `#less_than_or_equal_to(n)`. Shared examples: `"base comparison validator matcher less_than_or_equal_to rejects less_than"`, `"… greater_than_or_equal_to rejects greater_than"`, `"… equal_to rejects looser comparisons"`.
+
+`DimensionValidatorMatcher` probes one axis with a neutral value on the other axis derived from the declared bounds (`#neutral_dimension`). Do not reintroduce a fixed ceiling (the former 2000px default broke `width_min(2048).height_min(100)`).
 
 `AttachedValidator` rejects `:allow_blank` / `:allow_nil`. Do not add `#allow_blank` to `validate_attached_of` or document that chain.
 
@@ -107,7 +113,7 @@ bundle exec rubocop --parallel
 
 Focus examples with `:focus` / `fit` / `fdescribe` (`filter_run_when_matching :focus` is enabled).
 
-SimpleCov runs unless `NO_COVERAGE=1`. `minimum_coverage` is 50 (`spec/spec_helper.rb`) so a targeted file still finishes; the full suite is ~97%. CI uploads the coverage artifact from the Ruby 3.4 / Rails 8.1 / vips job.
+SimpleCov runs unless `NO_COVERAGE=1`. `minimum_coverage` is 50 locally so a targeted file still finishes; CI (`CI=true`) requires 90. The full suite is ~97%. CI uploads the coverage artifact from the Ruby 3.4 / Rails 8.1 / vips job.
 
 ### Multi-Rails testing via `BUNDLE_GEMFILE`
 
@@ -138,9 +144,9 @@ IMAGE_PROCESSOR=vips bundle exec rake spec
 IMAGE_PROCESSOR=mini_magick bundle exec rake spec
 ```
 
-`spec/rails_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem). Unset locally: validators use MiniMagick (ASV default) and both image-analyzer unit specs run. When `IMAGE_PROCESSOR` is set, examples tagged `image_processor: :vips` / `:mini_magick` for the other processor are excluded (not pending).
+`spec/rails_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem). Unset locally: validators use libvips (ASV default) and both image-analyzer unit specs run. When `IMAGE_PROCESSOR` is set, examples tagged `image_processor: :vips` / `:mini_magick` for the other processor are excluded (not pending).
 
-Live Magika examples are gated with `magika_cli_available?` (`FixtureFiles` in `spec/support/files.rb`); most Magika unit specs stub the CLI. Fixture IOs go through `open_fixture` / `register_fixture_io` and are closed after each example.
+Live Magika examples are gated with `magika_cli_available?` (`FixtureFiles` in `spec/support/files.rb`); most Magika unit specs stub the CLI. Each Magika run loads its model (~2.5s): a group with many live examples uses `magika_batch(paths)` (`spec/support/magika_batch.rb`), which runs the real CLI once on all its fixtures and answers each analyzer call with that file's entry. Do not add per-example live Magika calls to the spoofing matrix (it took 7 of the suite's 8 minutes). Fixture IOs go through `open_fixture` / `register_fixture_io` and are closed after each example.
 
 ### Benchmarks
 
@@ -192,6 +198,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 
 1. Analyzers live under `lib/active_storage_validations/analyzer/` (content-type sniffers under `analyzer/content_type_analyzer/`)
 2. Results are cached on the blob via `ASVBlobMetadatable` as string keys `asv_*` (S3 metadata constraints). `blob.save!` runs only when the blob is already persisted; new blobs keep `asv_*` in memory until the record is saved
+   - Client-written `asv_*` keys are dropped when a new blob is initialized (see the `ASVBlobMetadatable` pitfall below). Never read `metadata["custom"]["asv_*"]` directly
 3. Blobs are treated as immutable: once metadata keys exist, re-analysis is skipped — except content-type spoofing, which also keys the cache on `asv_content_type_backend` (`file` vs `magika`)
 4. Run specs with both `IMAGE_PROCESSOR=vips` and `IMAGE_PROCESSOR=mini_magick` when touching image analysis
 5. Content-type sniffer changes usually need both `File` and `Magika` coverage under `spec/analyzers/content_type_analyzers/`
@@ -223,7 +230,8 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 - `docs/` — upgrade guides for humans consuming the gem
 - `AGENTS.md` — this file; agent-oriented contributor guidance (humans can use it too)
 - `.cursor/rules/` — Cursor project rules (commit messages, spec conventions); referenced from this file
-- `.cursor/skills/` — Agent skills (e.g. `/commit`, `update-rails-matrix`); not shipped in the gem. `.claude/skills/` symlinks the ones Claude Code should load
+- `.cursor/skills/` — Agent skills (e.g. `/commit`, `update-rails-matrix`); not shipped in the gem
+- `CLAUDE.md` + `.claude/` — Claude Code bridge: glob table for `.cursor/rules/`, `/commit` wrapper delegating to `.cursor/skills/commit/`, `update-rails-matrix` symlinked from `.cursor/skills/`, shared permissions; conventions stay in `.cursor/rules/` and this file
 - Do not invent an Appraisal setup; keep using `BUNDLE_GEMFILE=`
 - `gemfiles/rails_X_Y.gemfile` floor Rails at the latest patch (`'~> 7.2.0', '>= 7.2.4'`) so a lock refresh cannot fall back to an older release; raise the floor when bumping a lock to a new patch
 - Do not reintroduce a Minitest suite for the gem itself (consumer matchers may still support Minitest)
@@ -234,10 +242,11 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 |-----|------|
 | User guide | `README.md` |
 | Changelog | `CHANGES.md` |
-| Upgrade to 2.x / 3.x / 4.x | `docs/upgrade_to_2.md`, `docs/upgrade_to_3.md`, `docs/upgrade_to_4.md` |
+| Upgrade to 2.x / 3.x / 4.x / 5.x | `docs/upgrade_to_2.md`, `docs/upgrade_to_3.md`, `docs/upgrade_to_4.md`, `docs/upgrade_to_5.md` |
 | Commit messages | [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) (Conventional Commits; always apply for agents) |
-| `/commit` skill | [`.cursor/skills/commit/SKILL.md`](.cursor/skills/commit/SKILL.md) |
+| `/commit` skill | [`.cursor/skills/commit/SKILL.md`](.cursor/skills/commit/SKILL.md) (Claude Code wrapper: [`.claude/skills/commit/SKILL.md`](.claude/skills/commit/SKILL.md)) |
 | Rails / Ruby test matrix updates | [`.cursor/skills/update-rails-matrix/SKILL.md`](.cursor/skills/update-rails-matrix/SKILL.md) (assess versions, bump gemfiles + CI) |
+| Claude Code bridge | [`CLAUDE.md`](CLAUDE.md) (which `.cursor/rules/` file to read per path) |
 | Spec conventions | [`.cursor/rules/spec.mdc`](.cursor/rules/spec.mdc) (shared; named `subject`), plus [`spec-validators.mdc`](.cursor/rules/spec-validators.mdc), [`spec-matchers.mdc`](.cursor/rules/spec-matchers.mdc), [`spec-analyzers.mdc`](.cursor/rules/spec-analyzers.mdc), [`spec-integration.mdc`](.cursor/rules/spec-integration.mdc) |
 
 ## Git / commit messages
@@ -257,16 +266,67 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Magika / `file` are optional system CLIs (not Ruby gems); override paths with `ActiveStorage.paths[:magika]` / `ActiveStorage.paths[:file]` when needed. Rescue missing tools via `ContentTypeAnalyzer::CommandLineToolNotInstalledError` (not a per-backend subclass)
 - `AttachedValidator#check_validity!` rejects `:allow_blank` / `:allow_nil`; the attached matcher has no `#allow_blank`
 - Comparison matcher inclusive chains (`#less_than_or_equal_to`, `#greater_than_or_equal_to`, `#between`) must fail when the validator is exclusive (`less_than` / `greater_than`)
+- `DimensionValidatorMatcher` `#width_min` / `#height_min` / `#width_max` / `#height_max` must probe the inclusive bound itself (`min` / `max`) *and* `min + 1` / `max - 1`. Bound-only probes let exact `width: n` satisfy `#width_min(n)`; interior-only probes let exclusive min satisfy `#width_min`. Skip the `max - 1` probe when it would be `< 1` (`#width_max(1)`): a 0px probe is `media_metadata_missing`, not a bound miss
+- `DurationValidator` exclusive `between:` error `:max` must use `#exclusive_range_step` (one unit of `precision:`, 1ms by default), not `end - 1` (1 second on a Duration)
+- `DurationValidator` `precision:` (Integer 0..3, `DEFAULT_PRECISION = 3`) rounds the analyzed duration before comparing and in messages, after the `media_metadata_missing` check (a 0.4s file rounded to 0 is still a duration). `DurationValidatorMatcher` probes one unit of the validator's precision (`#smallest_measurement`), which is why `BaseComparisonValidatorMatcher` resolves chained bounds in `#matches?` (`#chain_bound`), once the subject is known
+- `LimitValidatorMatcher` `#min(0)` must probe 0 files and require `options[:min] == 0`. Skipping all min probes lets `#min(0)` match `min: 1` or a max-only validator
+- `DimensionValidatorMatcher` `#width_min(0)` / `#height_min(0)` skip the 0px success probe (same `media_metadata_missing` trap) and require `width: { min: 0 }` / `height: { min: 0 }` on the validator
+- Comparison matchers `#greater_than_or_equal_to(0)` / `#equal_to(0)` on duration / pages cannot probe 0 (`media_metadata_missing`). Probe the first comparable value (1ms / 1 page) and require the validator option; size / total_size still probe 0 bytes
+- `ASVBlobMetadatable` drops `asv_*` keys from a new blob in `after_initialize` (`if: :new_record?`): direct uploads (`metadata: {}` is permitted), `create_and_upload!(metadata:)` and `attach(io:, metadata:)` all go through `Blob.new`, so afterwards only the gem writes `asv_*`, and a persisted blob's cache (4.x included) is trusted. Never strip in `before_create`/`before_save`: the gem caches its analysis on new blobs in memory before the record is saved
+- `ASVBlobMetadatable#remove_active_storage_validations_metadata!` must assign via `custom_metadata=` and `save!` if the blob is persisted (in-place `delete_if` does not persist; `reload` restored `asv_*`)
+- `DimensionValidator` `width` / `height` `{ min:, max: }` (and `{ min: 0.. }` after flattening) must use `bound_present?`, not truthiness: `width: { max: 0 }` is a real bound
+- `PdfAnalyzer` must omit non-positive `pages` / width / height (`@media["pages"].to_i` of a missing key is `0`; `Hash#compact` keeps `0` and memoizes a fake analysis)
+- `DimensionValidator` `in:` must use `Range#include?` so exclusive ranges (`400...600`) reject the end bound; flattening to `min`/`max` via `#begin`/`#end` treats them as inclusive
 - `ValidatorHelpers` filter errors with `error.options[:validator_type] == (kwargs[:validator] || validator_sym)` — keep the parentheses; `==` binds tighter than `||`
 - Do not reintroduce a Minitest suite for the gem; keep consumer matcher docs for both RSpec and Minitest/shoulda
 - Matcher `stub_method` uses a singleton-method wrap (not `Minitest::Mock` / `Object#stub`). Minitest 6 extracted mock to `minitest-mock`; do not reintroduce that dependency
 - Do not add `ActiveStorageValidations::Attachable` (or other short names that apps use as concerns). The gem module is included into Active Record, so `include Attachable` in an app model under this namespace would resolve to the gem constant. Use the `ASV*` prefix (`spec/global/active_storage_validations_spec.rb`)
 - Do not `File.open` dummy fixtures and leave the FD for GC. Use `open_fixture` / `register_fixture_io` (`FixtureFiles`); do not reintroduce an `ObjectSpace` sweep or a raised `NOFILE` rlimit to mask leaks
-- Keep `json` `< 3` on the Rails 8.1 Gemfile. json 3.0 made `JSON.parse` keyword-only; Rails 8.1.3.1 `ActiveSupport::JSON.decode` still passes a positional options hash (fixed on Rails 8.2 / main as rails/rails#58601)
+- Blob `asv_*` metadata is forwarded to the storage service as object metadata (S3: 2 KB, ASCII). Analyzers must only return small scalar values — never free-form hashes such as audio stream tags. Enforced over every dummy fixture by `spec/analyzers/storage_metadata_constraints_spec.rb`
+- `ASVFFProbable#media_duration` (both ffprobe analyzers) is the longest of the container, audio and video track durations. Matroska / WebM report audio duration on the container only, and reading the track first let a 0.04s video track with a 30s audio track pass `less_than: 10.seconds`
+- Image analyzers swap width / height for EXIF orientations 5 to 8 only (`Vips#rotated_image?` reads the `orientation` field, which also covers TIFF; `ImageMagick::QUARTER_TURN_ORIENTATIONS`). Rails' analyzers swap 2 and 4 (mirrors) and miss 5 and 7: do not copy them back. `image_700x500_rotated_90.jpg` is stored 500×700 with orientation 6; `"applies the exif orientation"` rewrites its tag to each value
+- ImageMagick reports the page (`%W` / `%H`) for GIFs only (`#gif_canvas?`), which is the size libvips reports. A PNG page is a virtual canvas (vpAg / oFFs from a crop) that libvips ignores
+- `VideoAnalyzer` rounds width / height (`854 * (240.0 / 427)` is 479.99…); `PdfAnalyzer::PAGE_SIZE_NUMBER` accepts pdfinfo's exponent form (`2e+06`)
+- ImageMagick `identify` must target the first frame (`path[0]`, see `ImageMagick#first_frame`); without it every frame of an animated GIF / multi-page TIFF is decoded
+- `BaseComparisonValidator#min` / `#max` and `DimensionValidator` `in:` / `min:` / `max:` bounds must use `Range#begin` / `#end`, not `#min` / `#max` (`RangeError` on endless / beginless ranges); `check_validity!` rejects unbounded static `between:` and dimension ranges
+- `ASVAttachableAdapter` handlers hand a path to the analyzer commands only through `Base#with_path_or_copy`: a regular file identical to the io (`File.file?` + `File.identical?`), passed through `File.expand_path` (relative `-image.png` / `clip:1.mp4` are read as an option / ffmpeg protocol). Anything else (StringIO, streaming wrappers, unlinked or anonymous Tempfile, `Rack::Test::UploadedFile` on a StringIO) is copied to the tempfile
+- Analyzers create that tempfile with `Analyzer#create_media_tempfile`, named with the attachable extension like `ActiveStorage::Blob#open` (ImageMagick decodes ICO / TGA from the extension). Do not go back to a bare `Tempfile.create(binmode: true)`
+- Empty analyzer metadata (`{}`) means "no analysis happened" and must fail closed in every metadata validator, `with_audio` included (`media_metadata_missing`), for both `with: true` and `with: false`. Only a memoized blank `audio` key (image / PDF analyzed) means "no audio track"
+- `ContentTypeValidator`: Proc options bypass `check_validity!`, so `authorized_content_types_from_options` re-runs `ensure_content_types_validity` on the Proc result. This includes a Proc nested in the list (`[:pdf, -> { … }]`, `proc_content_types?` looks at every entry), whose returned Array is flattened
+- `AspectRatioValidator`, `WithAudioValidator`, `BaseComparisonValidator`, `LimitValidator` and `DimensionValidator` check Proc results like static options (`ensure_aspect_ratios_validity`, `ensure_with_validity`, `BaseComparisonValidator#set_flat_options` → `ensure_bound_validity`, `LimitValidator#ensure_proc_bounds_validity`, `DimensionValidator#process_options` → `ensure_options_validity(from_proc: true)`, where `nil` and one-sided ranges are allowed). Static comparison bounds are non-negative Numerics (`ActiveSupport::Duration` included), `between:` ranges ordered. Proc results only need the right type (any Numeric, a Range of Numerics): a negative or reversed bound is data (a quota already exceeded) and must fail the file, not raise. A Proc returning `nil` is "no bound" (`BaseComparisonValidator#is_valid?` returns true), like `limit`
+- `timeout:` is checked once for every analyzing validator by `ASVAnalyzable#initialize` (after the validator's own `check_validity!`), and `ActiveStorageValidations.command_timeout=` uses the same `valid_command_timeout?` rule: positive Numeric or `nil`. Procs are rejected: analyzers never see the record
+- `ContentTypeValidator` / `AspectRatioValidator` must fail closed on an empty authorized list: static `[]` raises at boot; a Proc that returns `[]` rejects the file. Do not `return if authorized_*.empty?`
+- `ContentTypeValidator#content_types_related?`: declared and detected types match only as the same type / Marcel alias, or as ancestor / descendant along the transitive `TYPE_PARENTS` chain. Never compare both types' parents: siblings (`text/csv` vs `text/x-php`, DOCX vs JAR) must stay `content_type_spoofed`. Only `SAME_CONTAINER_CONTENT_TYPES` (Ogg / WebM audio vs video) are treated as one type. The pairs and real-upload matrix (genuine fixtures, browser-declared variants, payloads under `test/dummy/public/spoofed/`, both backends) live in `spec/support/spoofing.rb`: update it with any change
+- `ContentTypeValidator#authorized_marcel_content_type` resolves a String rule with its Marcel extension, like an upload (`declared_type` + filename): resolved from the declared type alone, an alias (`audio/x-flac`, `application/x-msaccess`) or a parameterized type (`application/dita+xml;format=map`) never equals what the upload resolves to. `invalid_content_type?` also accepts the Marcel type verbatim (parameters, capitals such as `…macroEnabled.12`)
+- `ContentTypeValidator`: a blank detected type from the sniffer is `content_type_analysis_failed`, never `content_type_spoofed`; the matcher ignores both (`ContentTypeValidatorMatcher::SPOOFING_ERRORS`) because its probe files are empty tempfiles
+- `ASVCommandable` must keep the `windows?` branch: `Process.spawn(pgroup: true)` and `Process.kill(sig, -pid)` raise on Windows (use `new_pgroup: true` and a direct `KILL`). The spec simulates it by stubbing `windows?`
+- `ASVCommandable#run_command` reaps the child in a background waiter thread and, in `ensure`, KILLs the process group while that waiter is alive: an exception raised into the caller (`Rack::Timeout`, job shutdown) must not leave the command running or a zombie
+- `VideoAnalyzer#angle` parses rotation as a rounded float and rescues unparsable values (`"90.0"` is a real-world tag). `duration` / `bit_rate` / `sample_rate` / dimensions must do the same (`ASVFFProbable#parse_float` / `#parse_integer`); ffprobe JSON must rescue `JSON::ParserError` like Magika (never raise from `valid?`)
+- `image_analyzer_for` must not return `nil`: `:disabled` (Rails 7.2+) and unknown processors fall through to `NullAnalyzer` so validation fails closed instead of `NoMethodError`
+- `AspectRatioValidator::ASPECT_RATIO_REGEX` is anchored (`\A…\z`); the unanchored version accepted `:is_16_9square` at boot
+- `ASVAttachableAdapter` handlers expose only `content_type`, `filename` and `with_media_path(tempfile, max_bytes: nil)`. Do not reintroduce `read` / `rewind` (nor `attachable_io` / `rewind_attachable_io` on `ASVAttachable`): the io is rewound by `copy_to_tempfile`, nothing else reads it
+- `ASVErrorable#initialize_error_options` mirrors Rails' `RESERVED_OPTIONS`: `AVAILABLE_CHECKS` and `CONFIGURATION_OPTIONS` (`with in timeout spoofing_protection precision`) never reach `errors.add`. Validators set the documented values (`min`, `max`, `length`, …) explicitly; specs must not expect raw options such as `width: { in: 400..600 }` in `error.options`
+- `DurationValidator#format_bound_value` shows the comparison's precision (milliseconds by default) (tenths read "less than or equal to 5 seconds (current duration is 5 seconds)"); `#whole_or_milliseconds` drops `Duration#parts` float noise. Do not reintroduce rounding in messages, nor `5.seconds` for a 5.029s fixture in the dummy models
+- `ASVErrorable#add_error` interpolates the placeholders of a custom String `message:` that an error does not carry as blank (`#blank_custom_message_values`): `%{max}` on `media_metadata_missing` raised `I18n::MissingInterpolationArgument` on upload. Raw options (`#raw_option_placeholders`: `CONFIGURATION_OPTIONS` + `check_options`) and Rails' `attribute` / `model` / `value` are excluded, so `%{less_than}` still raises (v5 breaking change). `DimensionValidator` overrides it with the configuration only: `%{width}` / `%{min}` / … are also its message values. `duration` / `pages` / `aspect_ratio` pass their bounds on unanalyzable-file errors
+- `AspectRatioValidator#matching_ratio?` grants the one-pixel slack only to images at least x×y (4×3, 2×1 and 1×1 matched 16:9); `TotalSizeValidator` returns early when every file is marked for destruction
+- `DurationValidator` humanizes values through `active_storage_validations.duration.<unit>` (`one` / `other`) and `.connectors` keys in every locale (`spec/global/locales_spec.rb` enforces parity; `ru` / `uk` / `pl` must also carry `few` / `many` for every pluralized key, see `extra_plural_forms` there). Decimal counts go through `DurationValidator::LocalizedCount` so `%{count}` follows the locale's separator while plural rules still see a number, with English defaults for other locales. Duration specs use `seconds_in_words(n)` / the `localized { … }` helper because messages are asserted in every locale
+- `ContentTypeAnalyzer::File#media_path_options` caps blob downloads at `LIBMAGIC_BYTES_LIMIT` (1 MiB), and `#file_command` pins libmagic to the same limit (`-P bytes=…`; libmagic 5.4x defaults to 7 MiB, so uploads would be sniffed on more bytes than blobs). Keep `-E`: without it `file` exits 0 and prints "cannot open …" on stdout, which would be cached as the detected type. Both flags need `file` >= 5.26. `Magika` must keep the full download (it samples the end of the file). Other analyzers use `Analyzer#media_path_options` (`{}`)
+- `PdfAnalyzer` reports the first page as displayed: swap width / height when pdfinfo's `Page rot` is a quarter turn (`% 180 == 90`)
+- `ASVFFProbable#video_stream` must skip `disposition.attached_pic` streams (cover art): an audio-only MP4 with a cover is not a video
+- Matcher probe attachments are in-memory `StringIO`s (`Matchers::ASVAttachable#io`, `#not_processable_image`, `ContentTypeValidatorMatcher#attachment_for`) and `validate_total_size_of` attaches a Hash, not a persisted blob. Do not reintroduce `Tempfile.new` / `create_and_upload!` there
+- `Matchers.mock_metadata` mocks `Analyzer.new` through `Matchers::AnalyzerMock`, prepended once on `Analyzer.singleton_class` and reading the mock from `ActiveSupport::IsolatedExecutionState`. Do not go back to a per-probe `stub_method(Analyzer, :new, …)`: overlapping threads restored each other's stub out of order and left analyzers mocked for good (`stub_method` stays for the per-matcher `io.size`)
+- Matchers probe the caller's record itself (`ASVValidatable#initialize_subject`), never a `dup`: a copy is a new record with no id and an empty association cache, so `if: :persisted?` and association-backed Procs broke. Probe files go through the attribute writer (`ASVAttachable#assign_files`), never `attach` (it saves a persisted record), and `ASVValidatable::SubjectRestoration` restores the record's pending attachment change and errors after `matches?`. `#validation_context` passes the default context (`:update` for a persisted record) explicitly, and switches to `PROBE_CONTEXT` when the validator `:except_on` lists it (`except_on: :create` skipped every probe)
+- Matchers must fail when the attribute has no validator of their type (`has_validator?` in every `#matches?`); chains whose probes all pass without a validator (`allowing`, no chain) otherwise match anything. Reset per-run state (`@failure_message_artefacts`, `content_type` / `aspect_ratio` `*_not_allowed` lists) at the top of `#matches?`
+- Matcher failure messages record only probes with an unexpected outcome (`add_failure_message_artefact(probe, passed:)` from `accepts_*?` / `rejects_*?`), never a rejection the matcher expected. `#description` = `base_description` + `chain_descriptions` + shared option qualifiers (`ASVRspecable::OPTION_DESCRIPTIONS`)
+- `Matchers.mock_metadata` mocks only the analyzers of its probe attachable (the Hash, or the IO it wraps; `MockedAnalyzer#mocks?`). Matchers validate the caller's record, so its other attachments are analyzed during probes: mocking every `Analyzer.new` cached the fake metadata on their blobs and saved it. Metadata matchers pass their `io`, never the `Attached` returned by `attach_file`
+- `ProcessableFileValidator` grants the libvips untrusted-format exemption from the file's leading bytes (`Marcel::Magic`, plus `NETPBM_HEADER` since Marcel has no rule for binary P4-P6), never from the declared content type: garbage declared as `image/bmp` passed
+- `FormBuilder` must not infer `accept` from a validator whose list has an entry it cannot express (Proc, narrow Regexp): listing only the other types hides allowed files. Another validator on the attribute may still set it (files must pass every validator)
+- `DimensionValidator` errors get their own values (`**errors_options, min:, max:`): mutating the shared `errors_options` leaked the width error's `min` / `max` into the height error. `validate_min_max` reports both bounds (`map`, then `all?`)
+- `DimensionValidatorMatcher#axis_bounds` probes an unchained axis within the validator's declared bounds (exact, `in:`, `min` / `max`, top-level `min:` / `max:` ranges, Procs evaluated on the subject); 1000px is only the fallback when no bound exists
 
 ## Read First When Contributing
 
-1. `README.md` (Contributing section) and `docs/upgrade_to_4.md`
+1. `README.md` (Contributing section), `docs/upgrade_to_4.md` and `docs/upgrade_to_5.md`
 2. `.cursor/rules/git.mdc` (commit / PR title format)
 3. `lib/active_storage_validations.rb` + `railtie.rb`
 4. A simple validator: `attached_validator.rb`

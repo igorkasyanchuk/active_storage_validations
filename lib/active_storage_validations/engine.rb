@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "rails/engine"
+
 module ActiveStorageValidations
   # Registers the gem as a Rails engine so `config/locales/*.yml` is added to
   # the I18n load path. Initializers live on {Railtie} (Active Record include,

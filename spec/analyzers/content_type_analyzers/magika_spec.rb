@@ -49,6 +49,31 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::Magika d
       end
     end
 
+    context "when the blob is larger than libmagic's read limit" do
+      let(:file_backend_limit) { ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File::LIBMAGIC_BYTES_LIMIT }
+      let(:attachable) do
+        ActiveStorage::Blob.create_and_upload!(
+          io: StringIO.new("\0" * (file_backend_limit + 1)),
+          filename: "big.bin",
+          content_type: "application/octet-stream",
+          service_name: "test"
+        )
+      end
+
+      before do
+        allow(analyzer).to receive(:run_command).and_return(successful_command_result(magika_json))
+        allow(attachable).to receive(:download).and_call_original
+        allow(attachable).to receive(:download_chunk).and_call_original
+      end
+
+      it "still downloads the whole blob (Magika samples the end of the file)" do
+        content_type
+
+        expect(attachable).to have_received(:download)
+        expect(attachable).not_to have_received(:download_chunk)
+      end
+    end
+
     context "when Magika JSON is invalid" do
       before { allow(analyzer).to receive(:run_command).and_return(successful_command_result("not-json")) }
 

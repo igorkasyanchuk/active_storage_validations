@@ -7,6 +7,9 @@ nl:
       content_type_spoofed:
         one: "heeft een inhoudstype dat niet gelijk is aan het type dat wordt gedetecteerd door de inhoud (geautoriseerd inhoudstype is %{authorized_human_content_types})"
         other: "heeft een inhoudstype dat niet gelijk is aan het type dat wordt gedetecteerd door de inhoud (geautoriseerde inhoudstypen zijn %{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "heeft een inhoudstype dat niet kon worden geverifieerd via de inhoud (geautoriseerd inhoudstype is %{authorized_human_content_types})"
+        other: "heeft een inhoudstype dat niet kon worden geverifieerd via de inhoud (geautoriseerde inhoudstypen zijn %{authorized_human_content_types})"
       file_size_not_less_than: "bestandsgrootte moet kleiner zijn dan %{max} (huidige grootte is %{file_size})"
       file_size_not_less_than_or_equal_to: "bestandsgrootte moet kleiner zijn dan of gelijk zijn aan %{max} (huidige grootte is %{file_size})"
       file_size_not_greater_than: "bestandsgrootte moet groter zijn dan %{min} (huidige grootte is %{file_size})"
@@ -63,3 +66,30 @@ nl:
       pages_not_greater_than_or_equal_to: "het aantal pagina's moet groter zijn dan of gelijk zijn aan %{min} (het huidige aantal pagina's is %{pages})"
       pages_not_between: "het aantal pagina's moet tussen %{min} en %{max} liggen (het huidige aantal pagina's is %{pages})"
       pages_not_equal_to: "het aantal pagina's moet gelijk zijn aan %{exact} (het huidige aantal pagina's is %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} jaar"
+        other: "%{count} jaar"
+      months:
+        one: "%{count} maand"
+        other: "%{count} maanden"
+      weeks:
+        one: "%{count} week"
+        other: "%{count} weken"
+      days:
+        one: "%{count} dag"
+        other: "%{count} dagen"
+      hours:
+        one: "%{count} uur"
+        other: "%{count} uur"
+      minutes:
+        one: "%{count} minuut"
+        other: "%{count} minuten"
+      seconds:
+        one: "%{count} seconde"
+        other: "%{count} seconden"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " en "
+        last_word_connector: " en "

@@ -223,6 +223,17 @@ RSpec.describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher d
     end
   end
 
+  describe "reusing the matcher on another record" do
+    subject(:configured_matcher) { matcher.allowing(:square) }
+
+    let(:model_attribute) { :validatable_different_error_messages }
+
+    it "does not keep the result of the previous record" do
+      expect(configured_matcher.matches?(klass.new(title: "American Psycho"))).to be(true)
+      expect(configured_matcher.matches?(klass.new(title: "Quo vadis"))).to be(false)
+    end
+  end
+
   describe "Combinations" do
     describe "#allowing + #with_message" do
       let(:model_attribute) { :allowing_one_with_message }

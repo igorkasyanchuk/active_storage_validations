@@ -20,7 +20,7 @@ module ActiveStorageValidations
     private
 
     def read_media
-      Tempfile.create(binmode: true) do |tempfile|
+      create_media_tempfile do |tempfile|
         begin
           info = media(tempfile)
           if info&.valid?
@@ -51,13 +51,22 @@ module ActiveStorageValidations
       require "mini_magick"
 
       tool = ::MiniMagick::Tool.new("identify")
-      tool.format("%w\t%h\t%[orientation]")
-      tool << path
+      tool.format("%w\t%h\t%W\t%H\t%m\t%[orientation]")
+      tool << first_frame(path)
       tool.command
     end
 
+    # Restrict identify to the first frame, as MiniMagick does for Image#width.
+    # Without the frame selector ImageMagick decodes every frame of animated
+    # GIFs / multi-page TIFFs (slow enough to hit command_timeout) and prints
+    # one set of fields per frame.
+    def first_frame(path)
+      path.match?(/\[\d+\]\z/) ? path : "#{path}[0]"
+    end
+
     def parse_identify_output(stdout)
-      width, height, orientation = stdout.to_s.strip.split("\t", 3)
+      width, height, page_width, page_height, format, orientation = stdout.to_s.strip.split("\t", 6)
+      width, height = page_width, page_height if gif_canvas?(format, page_width, page_height)
       ImageInfo.new(
         width: width.to_i,
         height: height.to_i,
@@ -65,8 +74,19 @@ module ActiveStorageValidations
       )
     end
 
+    # A GIF frame is drawn on the logical screen, which is the size the image
+    # displays at (and the one libvips reports); the first frame can be smaller.
+    # Other formats keep %w / %h: the page of a PNG (vpAg / oFFs chunks left
+    # by an ImageMagick crop) is a virtual canvas that libvips ignores.
+    def gif_canvas?(format, page_width, page_height)
+      format.to_s.start_with?("GIF") && page_width.to_i.positive? && page_height.to_i.positive?
+    end
+
+    # EXIF orientations 5 to 8 turn the image a quarter; TopRight (2) and
+    # BottomLeft (4) only mirror it.
+    QUARTER_TURN_ORIENTATIONS = %w[ LeftTop RightTop RightBottom LeftBottom ].freeze
     def rotated_image?(image)
-      %w[ RightTop LeftBottom TopRight BottomLeft ].include?(image["%[orientation]"])
+      QUARTER_TURN_ORIENTATIONS.include?(image["%[orientation]"])
     end
 
     def supported?

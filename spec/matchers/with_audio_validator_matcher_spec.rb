@@ -40,6 +40,24 @@ RSpec.describe ActiveStorageValidations::Matchers::WithAudioValidatorMatcher do
     it_behaves_like "works with custom message"
   end
 
+  describe "Combinations" do
+    describe "#without_audio + #with_message" do
+      let(:model_attribute) { :without_audio_with_message }
+
+      context "when provided with the message specified in the model validations" do
+        subject(:configured_matcher) { matcher.without_audio.with_message("Custom message") }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      context "when provided with a different message than the model validation message" do
+        subject(:configured_matcher) { matcher.without_audio.with_message("<wrong message>") }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
+  end
+
   describe "#on" do
     it_behaves_like "works with context"
   end

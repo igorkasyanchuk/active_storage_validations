@@ -4,6 +4,7 @@ require_relative "shared/asv_active_storageable"
 require_relative "shared/asv_analyzable"
 require_relative "shared/asv_attachable"
 require_relative "shared/asv_errorable"
+require_relative "shared/asv_optionable"
 require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
@@ -12,10 +13,18 @@ module ActiveStorageValidations
     include ASVAnalyzable
     include ASVAttachable
     include ASVErrorable
+    include ASVOptionable
     include ASVSymbolizable
 
-    ERROR_TYPES = %i[audio_missing audio_present].freeze
+    AVAILABLE_CHECKS = %i[with].freeze
+    ERROR_TYPES = %i[audio_missing audio_present media_metadata_missing].freeze
     METADATA_KEYS = %i[audio].freeze
+
+    def check_validity!
+      return unless options.key?(:with) && !options[:with].is_a?(Proc)
+
+      ensure_with_validity(options[:with])
+    end
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
@@ -26,7 +35,9 @@ module ActiveStorageValidations
     private
 
     def is_valid?(record, attribute, attachable, metadata)
-      expected_audio = options.fetch(:with, true)
+      return add_media_metadata_missing_error(record, attribute, attachable) unless media_analyzed?(metadata)
+
+      expected_audio = expected_audio(record)
       return if audio_track?(metadata) == expected_audio
 
       errors_options = initialize_error_options(options, attachable)
@@ -34,10 +45,33 @@ module ActiveStorageValidations
       add_error(record, attribute, error_type, **errors_options)
     end
 
+    # A Proc escapes check_validity!. Anything but true / false (a nil column,
+    # "no") used to be compared as is: never equal to the analyzed boolean,
+    # so it rejected files with a misleading audio_present error.
+    def expected_audio(record)
+      expected_audio = set_flat_options(record).fetch(:with, true)
+      ensure_with_validity(expected_audio) if options[:with].is_a?(Proc)
+      expected_audio
+    end
+
+    def ensure_with_validity(value)
+      return if value == true || value == false
+
+      raise ArgumentError, "You must pass true, false or a Proc returning true or false to :with (got #{value.inspect})"
+    end
+
+    # Empty metadata means no analysis happened at all (ffprobe missing or
+    # timed out, unreadable file, unsupported media type). Fail closed rather
+    # than reading it as "no audio track", which would let `with: false` accept
+    # a file that was never inspected.
+    def media_analyzed?(metadata)
+      metadata.present?
+    end
+
     # Files the analyzer cannot inspect for audio streams (images, pdfs) have no
     # audio metadata, or a memoized unavailable value. Both mean no audio track.
     def audio_track?(metadata)
-      metadata&.fetch(:audio, false) == true
+      metadata.fetch(:audio, false) == true
     end
   end
 end

@@ -38,12 +38,14 @@ module ActiveStorageValidations
         @expected_audio = true
       end
 
-      def description
+      def base_description
         "validate that :#{@attribute_name} #{audio_expectation}"
       end
 
       def failure_message
-        "is expected to validate that :#{@attribute_name} #{audio_expectation}"
+        message = [ "is expected to validate that :#{@attribute_name} #{audio_expectation}" ]
+        build_failure_message(message)
+        message.join("\n")
       end
 
       def without_audio
@@ -52,9 +54,10 @@ module ActiveStorageValidations
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject.new : subject
+        initialize_subject(subject)
 
         is_a_valid_active_storage_attribute? &&
+          has_validator? &&
           is_context_valid? &&
           is_except_on_valid? &&
           is_allowing_blank? &&
@@ -71,17 +74,23 @@ module ActiveStorageValidations
       end
 
       def is_valid_with_expected_audio?
-        validation_passes_with_audio?(@expected_audio)
+        validation_passes_with_audio?(@expected_audio) ||
+          add_failure_message_artefact(describe_audio(@expected_audio), passed: false)
       end
 
       def is_invalid_with_unexpected_audio?
-        !validation_passes_with_audio?(!@expected_audio)
+        !validation_passes_with_audio?(!@expected_audio) ||
+          add_failure_message_artefact(describe_audio(!@expected_audio), passed: true)
+      end
+
+      def describe_audio(audio)
+        audio ? "a file with an audio track" : "a file without an audio track"
       end
 
       def is_custom_message_valid?
         return true unless @custom_message
 
-        with_audio_metadata(false) do
+        with_audio_metadata(!@expected_audio) do
           attach_file(video_file)
           validate
           detach_file

@@ -12,4 +12,8 @@
 class Duration::Validator::WithMessage < ApplicationRecord
   has_one_attached :with_message
   validates :with_message, duration: { less_than: 2.seconds, message: "Custom message" }
+  has_one_attached :with_message_placeholders
+  validates :with_message_placeholders, duration: { less_than: 2.seconds, message: "%{attribute} must be under %{max} (got %{duration})" }
+  has_one_attached :with_message_raw_option
+  validates :with_message_raw_option, duration: { less_than: 2.seconds, message: "must be under %{less_than}" }
 end

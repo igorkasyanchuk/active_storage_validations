@@ -27,6 +27,7 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       files = attached_files(record, attribute).reject(&:blank?)
       flat_options = set_flat_options(record)
+      ensure_proc_bounds_validity(flat_options)
       count = files.count
 
       return if files_count_valid?(count, flat_options)
@@ -39,13 +40,12 @@ module ActiveStorageValidations
     private
 
     def files_count_valid?(count, flat_options)
-      if flat_options[:max].present? && flat_options[:min].present?
-        count >= flat_options[:min] && count <= flat_options[:max]
-      elsif flat_options[:max].present?
-        count <= flat_options[:max]
-      elsif flat_options[:min].present?
-        count >= flat_options[:min]
-      end
+      has_min = bound_present?(flat_options, :min)
+      has_max = bound_present?(flat_options, :max)
+      return true unless has_min || has_max
+
+      (!has_min || count >= flat_options[:min]) &&
+        (!has_max || count <= flat_options[:max])
     end
 
     def ensure_at_least_one_validator_option
@@ -55,24 +55,39 @@ module ActiveStorageValidations
     end
 
     def ensure_arguments_validity
-      return true if min_max_are_proc? || min_or_max_is_proc_and_other_not_present?
-
-      raise ArgumentError, "You must pass integers to :min and :max" if min_or_max_defined_and_not_integer?
+      raise ArgumentError, "You must pass non-negative integers to :min and :max" unless bounds_are_integer_or_proc?
       raise ArgumentError, "You must pass a higher value to :max than to :min" if min_higher_than_max?
     end
 
-    def min_max_are_proc?
-      options[:min]&.is_a?(Proc) && options[:max]&.is_a?(Proc)
+    # A Proc is a deferred integer (`min: 1, max: -> { record.plan_limit }`).
+    # Only static integers can be compared at boot. A negative :max used to
+    # reject every record, even one without files.
+    def bounds_are_integer_or_proc?
+      AVAILABLE_CHECKS.all? { |bound| bound_is_integer_or_proc?(bound) }
     end
 
-    def min_or_max_is_proc_and_other_not_present?
-      (options[:min]&.is_a?(Proc) && options[:max].nil?) ||
-        (options[:min].nil? && options[:max]&.is_a?(Proc))
+    def bound_is_integer_or_proc?(bound)
+      !options.key?(bound) || valid_bound?(options[bound]) || options[bound].is_a?(Proc)
     end
 
-    def min_or_max_defined_and_not_integer?
-      (options.key?(:min) && !options[:min].is_a?(Integer)) ||
-        (options.key?(:max) && !options[:max].is_a?(Integer))
+    def valid_bound?(value)
+      value.is_a?(Integer) && !value.negative?
+    end
+
+    # Procs escape check_validity!, so a non-number they return raises like a
+    # static option. nil means no bound. Their result is data, not
+    # configuration: a Float / BigDecimal plan column is compared as is, and a
+    # negative value (a quota the record is already over) fails the record
+    # with the usual error, as in 4.x.
+    def ensure_proc_bounds_validity(flat_options)
+      AVAILABLE_CHECKS.each do |bound|
+        next unless options[bound].is_a?(Proc)
+
+        value = flat_options[bound]
+        next if value.nil? || value.is_a?(Numeric)
+
+        raise ArgumentError, "You must pass numbers to :min and :max (got #{value.inspect} from a Proc for :#{bound})"
+      end
     end
 
     def min_higher_than_max?
@@ -88,9 +103,12 @@ module ActiveStorageValidations
     end
 
     def set_error_type(flat_options, count)
-      if flat_options[:min] && flat_options[:max]
+      has_min = bound_present?(flat_options, :min)
+      has_max = bound_present?(flat_options, :max)
+
+      if has_min && has_max
         :limit_out_of_range
-      elsif flat_options[:min] && count < flat_options[:min]
+      elsif has_min && count < flat_options[:min]
         :limit_min_not_reached
       else
         :limit_max_exceeded

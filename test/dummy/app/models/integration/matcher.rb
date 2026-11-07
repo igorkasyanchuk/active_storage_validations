@@ -19,4 +19,12 @@ class Integration::Matcher < ApplicationRecord
                         size: { less_than_or_equal_to: 2.megabytes },
                         content_type: { in: [ "image/png", "image/jpeg" ], spoofing_protection: true },
                         processable_file: true
+
+  has_one_attached :example_3
+  validates :example_3, dimension: { width: { min: 100 } }
+
+  # Validated while example_3 is probed (matchers probe the caller's record):
+  # its persisted blob must keep its real metadata.
+  has_one_attached :example_4
+  validates :example_4, dimension: { width: { min: 120 } }
 end

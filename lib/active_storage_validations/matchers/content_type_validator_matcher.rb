@@ -32,6 +32,9 @@ module ActiveStorageValidations
       include ASVTimeoutable
       include ASVValidatable
 
+      # Errors added by the spoofing analysis, see #validator_errors_for_attribute
+      SPOOFING_ERRORS = %i[content_type_spoofed content_type_analysis_failed].freeze
+
       def initialize(attribute_name)
         initialize_allow_blankable
         initialize_contextable
@@ -44,7 +47,7 @@ module ActiveStorageValidations
         @allowed_content_types = @rejected_content_types = []
       end
 
-      def description
+      def base_description
         "validate the content types allowed on :#{@attribute_name}"
       end
 
@@ -67,9 +70,11 @@ module ActiveStorageValidations
       end
 
       def matches?(subject)
-        @subject = subject.is_a?(Class) ? subject.new : subject
+        initialize_subject(subject)
+        @allowed_content_types_not_allowed = @rejected_content_types_not_rejected = nil
 
         is_a_valid_active_storage_attribute? &&
+          has_validator? &&
           is_context_valid? &&
           is_except_on_valid? &&
           is_allowing_blank? &&
@@ -81,6 +86,13 @@ module ActiveStorageValidations
       end
 
       protected
+
+      def chain_descriptions
+        [
+          ("allowing #{@allowed_content_types.to_sentence(locale: false)}" if @allowed_content_types.any?),
+          ("rejecting #{@rejected_content_types.to_sentence(locale: false)}" if @rejected_content_types.any?)
+        ].compact
+      end
 
       def build_failure_message(message)
         if @allowed_content_types_not_allowed.present?
@@ -107,12 +119,12 @@ module ActiveStorageValidations
       end
 
       def all_allowed_content_types_allowed?
-        @allowed_content_types_not_allowed ||= @allowed_content_types.reject { |type| type_allowed?(type) }
+        @allowed_content_types_not_allowed = @allowed_content_types.reject { |type| type_allowed?(type) }
         @allowed_content_types_not_allowed.empty?
       end
 
       def all_rejected_content_types_rejected?
-        @rejected_content_types_not_rejected ||= @rejected_content_types.select { |type| type_allowed?(type) }
+        @rejected_content_types_not_rejected = @rejected_content_types.select { |type| type_allowed?(type) }
         @rejected_content_types_not_rejected.empty?
       end
 
@@ -124,7 +136,7 @@ module ActiveStorageValidations
       end
 
       def attach_file_with_content_type(content_type)
-        @subject.public_send(@attribute_name).attach(attachment_for(content_type))
+        attach_file(attachment_for(content_type))
       end
 
       def is_custom_message_valid?
@@ -132,11 +144,12 @@ module ActiveStorageValidations
 
         attach_invalid_content_type_file
         validate
+        detach_file
         has_an_error_message_which_is_custom_message?
       end
 
       def attach_invalid_content_type_file
-        @subject.public_send(@attribute_name).attach(attachment_for("fake/fake"))
+        attach_file(attachment_for("fake/fake"))
       end
 
       def attachment_for(content_type)
@@ -145,17 +158,17 @@ module ActiveStorageValidations
         suffix = Marcel::TYPE_EXTS[type]&.first || "fake"
 
         {
-          io: Tempfile.new("."),
+          io: StringIO.new,
           filename: "test.#{suffix}",
           content_type: content_type
         }
       end
 
       # Due to the way we build test attachments in #attachment_for
-      # (ie spoofed file basically), we need to ignore the error related to
+      # (ie spoofed file basically), we need to ignore the errors related to
       # content type spoofing in our matcher to pass the tests
       def validator_errors_for_attribute
-        super.reject { |hash| hash[:error] == :content_type_spoofed }
+        super.reject { |hash| SPOOFING_ERRORS.include?(hash[:error]) }
       end
     end
   end

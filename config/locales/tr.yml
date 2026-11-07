@@ -7,6 +7,9 @@ tr:
       content_type_spoofed:
         one: "içeriği aracılığıyla algılanan içerik türüne eşdeğer olmayan bir içerik türüne sahiptir (yetkili içerik türü %{authorized_human_content_types})"
         other: "içeriği aracılığıyla algılanan içerik türüne eşdeğer olmayan bir içerik türüne sahiptir (yetkili içerik türleri %{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "içeriği aracılığıyla doğrulanamayan bir içerik türüne sahiptir (yetkili içerik türü %{authorized_human_content_types})"
+        other: "içeriği aracılığıyla doğrulanamayan bir içerik türüne sahiptir (yetkili içerik türleri %{authorized_human_content_types})"
       file_size_not_less_than: "dosya boyutu %{max} boyutundan küçük olmalıdır (geçerli boyut %{file_size}'dir)"
       file_size_not_less_than_or_equal_to: "dosya boyutu %{max} değerinden küçük veya ona eşit olmalıdır (geçerli boyut %{file_size}'dir)"
       file_size_not_greater_than: "dosya boyutu %{min} boyutundan büyük olmalıdır (geçerli boyut %{file_size}'dir)"
@@ -63,3 +66,30 @@ tr:
       pages_not_greater_than_or_equal_to: "sayfa sayısı %{min} değerinden fazla veya eşit olmalıdır (geçerli sayfa sayısı %{pages})"
       pages_not_between: "sayfa sayısı %{min} ile %{max} arasında olmalıdır (geçerli sayfa sayısı %{pages})"
       pages_not_equal_to: "sayfa sayısı %{exact} değerine eşit olmalıdır (geçerli sayfa sayısı %{pages})"
+  active_storage_validations:
+    duration:
+      years:
+        one: "%{count} yıl"
+        other: "%{count} yıl"
+      months:
+        one: "%{count} ay"
+        other: "%{count} ay"
+      weeks:
+        one: "%{count} hafta"
+        other: "%{count} hafta"
+      days:
+        one: "%{count} gün"
+        other: "%{count} gün"
+      hours:
+        one: "%{count} saat"
+        other: "%{count} saat"
+      minutes:
+        one: "%{count} dakika"
+        other: "%{count} dakika"
+      seconds:
+        one: "%{count} saniye"
+        other: "%{count} saniye"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " ve "
+        last_word_connector: " ve "
