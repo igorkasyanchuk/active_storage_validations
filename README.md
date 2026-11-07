@@ -167,6 +167,11 @@ Notes:
 <br>
 <br>
 
+**Attachments marked for destruction**<br>
+Files whose attachment is marked for destruction (e.g. nested attributes with `_destroy`) are not validated: they will be gone once the record is saved. `attached` still fails when every attachment is marked for destruction.
+<br>
+<br>
+
 **Proc usage**<br>
 Every validator can use procs instead of values in all the validator examples:
 ```ruby
@@ -177,7 +182,7 @@ class User < ApplicationRecord
 end
 ```
 
-Static options are checked when the model class loads; a proc's result is only known at validation time, so an unsupported value returned by a `content_type` proc (e.g. `"image/jpg"`) raises the same `ArgumentError` from `valid?` instead of silently rejecting every file.
+Static options are checked when the model class loads; a proc's result is only known at validation time, so an unsupported value returned by a proc (`"image/jpg"` for `content_type`, `:sqaure` for `aspect_ratio`) raises the same `ArgumentError` from `valid?` instead of silently rejecting every file.
 
 **Performance optimization**<br>
 Some validators rely on an expensive operation (metadata analysis and content type analysis). To mitigate the performance cost, the gem leverages the `ActiveStorage::Blob.metadata` method to store retrieved metadata. Therefore, once the file has been analyzed by our gem, the expensive analysis operation will not be triggered again for new validations.
@@ -284,7 +289,7 @@ Validates if the attachment has an allowed content type.
 
 The `content_type` validator has several possible options:
 - `with`: defines the allowed content type (string, symbol or regex)
-- `in`: defines the allowed content types (array of strings or symbols)
+- `in`: defines the allowed content types (array of strings, symbols or regexes)
 - `spoofing_protection`: enables content type spoofing protection (`false` by default). Allowed values: `true` / `:file` (UNIX `file` CLI), `:magika` (Google Magika CLI)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) when spoofing protection runs `file` or `magika`
 
@@ -497,7 +502,7 @@ en:
       file_size_not_equal_to: "file size must be equal to %{exact} (current size is %{file_size})"
 ```
 
-The `size` validator error messages expose 4 values that you can use:
+The `size` validator error messages expose 5 values that you can use:
 - `file_size` containing the current file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed file size (e.g. `1KB`)
 - `exact` containing the allowed file size (e.g. `1MB`)
@@ -626,7 +631,7 @@ The `dimension` validator error messages expose 6 values that you can use:
 - `min` containing the minimum width or height allowed
 - `max` containing the maximum width or height allowed (for exclusive `in:` ranges, the last included value: `400...600` reports `599`)
 - `width` containing the minimum or maximum width allowed
-- `height` containing the minimum or maximum width allowed
+- `height` containing the minimum or maximum height allowed
 - `length` containing the exact width or height allowed
 - `filename` containing the current filename in error
 
@@ -648,7 +653,7 @@ The `duration` validator has several possible options:
 - `equal_to`: defines the allowed duration
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
-Duration is compared at sub-second precision (the analyzer no longer rounds to 0.1s). A 1.96s file passes `less_than: 2.seconds`. A file lasts as long as its longest track (the container, its audio and its video).
+Duration is compared to the millisecond (the analyzer no longer rounds to 0.1s): a 1.96s file passes `less_than: 2.seconds`. Encoders pad audio and video, so a "5-second" file often lasts 5.029s and fails `equal_to: 5.seconds`; prefer a range (`between: 5.seconds..5.1.seconds`). A file lasts as long as its longest track (the container, its audio and its video).
 
 #### Examples
 
@@ -681,11 +686,11 @@ en:
       duration_not_equal_to: "duration must be equal to %{exact} (current duration is %{duration})"
 ```
 
-The `duration` validator error messages expose 4 values that you can use:
-- `duration` containing the current duration size (e.g. `2 minutes`)
+The `duration` validator error messages expose 5 values that you can use:
+- `duration` containing the current duration size, to the millisecond (e.g. `2 minutes`, `5.029 seconds`)
 - `min` containing the minimum allowed duration size (e.g. `1 second`)
 - `exact` containing the allowed duration (e.g. `3 seconds`)
-- `max` containing the maximum allowed duration (e.g. `2 minutes`; for exclusive `between:` ranges, the last included value, displayed at 0.1s precision so `2.seconds...7.seconds` reports `7 seconds`)
+- `max` containing the maximum allowed duration (e.g. `2 minutes`; for exclusive `between:` ranges, the last included value, so `2.seconds...7.seconds` reports `6.999 seconds`)
 - `filename` containing the current file name
 
 Duration values are humanized in the current locale (e.g. `1 minute et 30 secondes` in French) through the `active_storage_validations.duration` keys shipped with every bundled locale: one `one` / `other` pair per unit (plus the `few` / `many` forms Russian, Ukrainian and Polish need with rails-i18n pluralization rules) (`years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`) plus the sentence `connectors`. Locales the gem does not ship fall back to the English wording. Override them in your application locales like any other key:
@@ -917,6 +922,8 @@ Translation files are available [here](https://github.com/igorkasyanchuk/active_
 
 If you wish to customize the error messages, just copy, paste and update the translation files into your application locales.
 
+Each validator section above lists the values its messages expose (`%{min}`, `%{max}`, `%{filename}`, …). A custom `message:` is shared by all the errors of its validator: a value an error does not carry is left blank, such as `%{duration}` when the file cannot be analyzed (`media_metadata_missing`). Those errors carry the bounds of `duration`, `pages` (`%{min}`, `%{max}`, `%{exact}`) and `aspect_ratio` (`%{authorized_aspect_ratios}`).
+
 ## Test matchers
 
 The gem also provides RSpec-compatible and Minitest-compatible matchers for testing the validators.
@@ -1043,6 +1050,8 @@ describe User do
   it { is_expected.to validate_processable_file_of(:avatar).timeout(5.seconds) }
 end
 ```
+
+`validate_limits_of(...).with_message(...)` needs `#min` or `#max` to build a file count the validator rejects.
 
 ### Minitest
 
