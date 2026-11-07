@@ -659,8 +659,9 @@ The `duration` validator has several possible options:
 - `between`: defines the allowed file duration range (a `Range` with both bounds, its begin not greater than its end)
 - `equal_to`: defines the allowed duration
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
+- `precision`: the number of decimal places of a second the duration is rounded to before it is compared and shown in messages, an Integer from `0` to `3` (default `3`, milliseconds)
 
-Duration is compared to the millisecond (the analyzer no longer rounds to 0.1s): a 1.96s file passes `less_than: 2.seconds`. Encoders pad audio and video, so a "5-second" file often lasts 5.029s and fails `equal_to: 5.seconds`; prefer a range (`between: 5.seconds..5.1.seconds`). A file lasts as long as its longest track (the container, its audio and its video).
+Duration is compared to the millisecond by default (the analyzer no longer rounds to 0.1s): a 1.96s file passes `less_than: 2.seconds`. Encoders pad audio and video, so a "5-second" file often lasts 5.029s and fails `equal_to: 5.seconds`: round it with `precision: 1` (tenths, as before 4.2) or `precision: 0` (whole seconds). A file lasts as long as its longest track (the container, its audio and its video).
 
 #### Examples
 
@@ -675,6 +676,7 @@ class User < ApplicationRecord
   validates :intro_song, duration: { greater_than_or_equal_to: 1.second } # restricts the file duration to >= 1 second
   validates :intro_song, duration: { between: 1.second..2.minutes } # restricts the file duration to between 1 second and 2 minutes
   validates :intro_song, duration: { equal_to: 1.minute } # restricts the duration to exactly 1 minute
+  validates :intro_song, duration: { equal_to: 5.seconds, precision: 1 } # a 5.029s file passes: compared as 5.0s
   validates :intro_song, duration: { less_than: 5.minutes, timeout: 5.seconds } # custom analyzer timeout
 end
 ```
@@ -1022,6 +1024,7 @@ describe User do
   it { is_expected.to validate_duration_of(:introduction).greater_than_or_equal_to(1.minute) }
   it { is_expected.to validate_duration_of(:introduction).between(100..500.seconds) }
   it { is_expected.to validate_duration_of(:avatar).equal_to(5.minutes) }
+  it { is_expected.to validate_duration_of(:avatar).equal_to(5.seconds).precision(1) } # probes follow the validator's precision even without #precision
 
   # with_audio
   it { is_expected.to validate_with_audio_of(:video) }

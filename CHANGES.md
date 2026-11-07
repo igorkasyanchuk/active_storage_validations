@@ -43,9 +43,9 @@
     - `processable_file` checks the file itself before excusing a libvips-untrusted format. With Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+, libvips refuses BMP, ICO, PSD, SVG, JPEG XL, JPEG 2000 and Netpbm, and the gem lets those formats through. It trusted the declared content type, so any file uploaded as `image/bmp` passed. It now reads the file's first bytes
   - **CHANGED** (fixes you may notice: a file can pass or fail differently than under 4.1)
     - `duration`
-      - ♻️ Durations are compared to the millisecond instead of being rounded to 0.1s: a 1.96s file now passes `less_than: 2.seconds`, a 2.04s file now fails `less_than_or_equal_to: 2.seconds`. **Check your `equal_to:` rules**: encoders pad files, so a "5-second" file often lasts 5.029s and now fails `equal_to: 5.seconds`. Use a range such as `between: 5.seconds..5.1.seconds`
+      - ♻️ Durations are compared to the millisecond instead of being rounded to 0.1s: a 1.96s file now passes `less_than: 2.seconds`, a 2.04s file now fails `less_than_or_equal_to: 2.seconds`. **Check your `equal_to:` rules**: encoders pad files, so a "5-second" file often lasts 5.029s and now fails `equal_to: 5.seconds`. Add `precision: 1` to compare tenths of a second, as 4.1 did (see **ADDED**)
       - ♻️ A file lasts as long as its longest track. The video (or audio) track came first, so an MP4 with a 0.04s video track and a 30s audio track passed `less_than: 10.seconds`
-      - Error messages show durations to the millisecond (`5.029 seconds`) and in the user's language (see **ADDED**). Rounded to tenths, a 5.029s file failing `less_than_or_equal_to: 5.seconds` read "current duration is 5 seconds"
+      - Error messages show durations to the millisecond (`5.029 seconds`, or at the `precision:` you set) and in the user's language (see **ADDED**). Rounded to tenths, a 5.029s file failing `less_than_or_equal_to: 5.seconds` read "current duration is 5 seconds"
     - Sizes are the displayed ones (`dimension`, `aspect_ratio`)
       - ♻️ EXIF orientation: width and height are swapped for the quarter turns (orientations 5 to 8) only. Mirrored images (2, 4) were swapped by mistake and mirrored quarter turns (5, 7) were not. libvips also reads the TIFF Orientation tag
       - ♻️ An animated GIF is measured by its canvas with ImageMagick too. It used the first frame, which can be smaller
@@ -62,6 +62,7 @@
       - `spoofing_protection` accepts genuine RAR archives on recent libmagic (`application/vnd.rar`, Ubuntu 26.04), and `audio/aac`, `application/xml`, `audio/mp4` on Rails 8.2+ (Marcel 2). With a blank declared type, it checks the type resolved from the filename instead of skipping the check
     - A Proc returning an invalid value raises `ArgumentError` from `valid?`, as the same static option does at boot: an unknown type for `content_type` (`"image/jpg"`), an unknown ratio for `aspect_ratio` (`:sqaure`). It rejected every file with a broken message ("must be 0:0"). A Proc nested in a list (`[:pdf, -> { … }]`) is checked too, and an Array it returns is flattened
   - **ADDED**
+    - `duration` `precision:` option: the number of decimal places of a second a duration is rounded to before it is compared and shown, from `0` to `3` (default `3`, milliseconds). `duration: { equal_to: 5.seconds, precision: 1 }` accepts a 5.029s file. `validate_duration_of` probes at the validator's precision, and `#precision(n)` checks it
     - Duration values in error messages are translated: `%{duration}`, `%{min}`, `%{max}` and `%{exact}` read `1 minute et 30 secondes` in French, through new `active_storage_validations.duration` keys in all 17 bundled locales. Decimals follow the locale separator; other locales fall back to English. Non-English apps get new wording, so specs asserting the old English text need updating
   - **FIXED** (no visible change besides removing crashes and wrong rejections)
     - Error messages

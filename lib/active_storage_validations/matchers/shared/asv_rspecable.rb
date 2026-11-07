@@ -14,6 +14,7 @@ module ActiveStorageValidations
         context_description
         except_on_description
         timeout_description
+        precision_description
         spoofing_protection_description
       ].freeze
 

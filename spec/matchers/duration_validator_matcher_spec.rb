@@ -147,6 +147,56 @@ RSpec.describe ActiveStorageValidations::Matchers::DurationValidatorMatcher do
     end
   end
 
+  describe "#precision" do
+    context "when the validator rounds to tenths (equal_to: 5.seconds, precision: 1)" do
+      let(:model_attribute) { :equal_to_with_precision }
+
+      context "when the matcher does not chain #precision" do
+        subject(:configured_matcher) { matcher.equal_to(5.seconds) }
+
+        it "probes one tenth around the bound" do
+          is_expected_to_match_for(klass)
+        end
+      end
+
+      context "when the matcher chains the same precision" do
+        subject(:configured_matcher) { matcher.equal_to(5.seconds).precision(1) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      context "when the matcher chains another precision" do
+        subject(:configured_matcher) { matcher.equal_to(5.seconds).precision(2) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
+
+    context "when the validator is exclusive and rounds to tenths (less_than: 2.seconds, precision: 1)" do
+      let(:model_attribute) { :less_than_with_precision }
+
+      context "when the matcher uses the same bound" do
+        subject(:configured_matcher) { matcher.less_than(2.seconds) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      context "when the matcher is inclusive" do
+        subject(:configured_matcher) { matcher.less_than_or_equal_to(2.seconds) }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
+
+    context "when the validator keeps the default precision (milliseconds)" do
+      subject(:configured_matcher) { matcher.equal_to(5.seconds).precision(1) }
+
+      let(:model_attribute) { :equal_to }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+  end
+
   describe "#allow_blank" do
     it_behaves_like "works with allow_blank"
   end

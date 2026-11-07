@@ -31,6 +31,28 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
 
   describe "#check_validity!" do
     it_behaves_like "checks validator validity"
+
+    describe ":precision" do
+      subject(:validator) { described_class.new(attributes: [ :file ], less_than: 1.minute, precision: precision) }
+
+      [ 0, 1, 3 ].each do |value|
+        context "when it is #{value}" do
+          let(:precision) { value }
+
+          it { expect { validator }.not_to raise_error }
+        end
+      end
+
+      [ 4, -1, 1.5, "1", nil ].each do |value|
+        context "when it is #{value.inspect}" do
+          let(:precision) { value }
+
+          it "raises an error at validator initialization" do
+            expect { validator }.to raise_error(ArgumentError, /You must pass an Integer from 0 to 3 to :precision/)
+          end
+        end
+      end
+    end
   end
 
   describe "Validator checks" do
@@ -205,6 +227,51 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
       end
 
       it_behaves_like "comparison equal_to option"
+    end
+
+    describe ":precision" do
+      context "with equal_to: 5.seconds, precision: 1 and a 5.029s file" do
+        # validates :equal_to_with_precision, duration: { equal_to: 5.seconds, precision: 1 }
+        subject(:record) { model.equal_to_with_precision.attach(audio_5s) and model }
+
+        it "compares the duration rounded to tenths" do
+          is_expected_to_be_valid
+        end
+      end
+
+      context "with less_than_or_equal_to: 5.seconds, precision: 0" do
+        # validates :less_than_or_equal_to_with_precision, duration: { less_than_or_equal_to: 5.seconds, precision: 0 }
+        let(:attribute) { :less_than_or_equal_to_with_precision }
+
+        context "with a 5.029s file" do
+          subject(:record) { model.public_send(attribute).attach(audio_5s) and model }
+
+          it { is_expected_to_be_valid }
+        end
+
+        context "with a 7.014s file" do
+          subject(:record) { model.public_send(attribute).attach(audio_7s) and model }
+
+          let(:error_options) do
+            { duration: seconds_in_words(7), filename: audio_7s[:filename], min: nil, max: seconds_in_words(5) }
+          end
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_include_error_message("duration_not_less_than_or_equal_to", error_options: error_options) }
+        end
+      end
+
+      context "with an exclusive between: 2.seconds...7.seconds, precision: 1 and a 7.014s file" do
+        # validates :between_exclusive_with_precision, duration: { between: 2.seconds...7.seconds, precision: 1 }
+        subject(:record) { model.between_exclusive_with_precision.attach(audio_7s) and model }
+
+        let(:error_options) do
+          { duration: seconds_in_words(7), filename: audio_7s[:filename], min: seconds_in_words(2), max: seconds_in_words(6.9) }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("duration_not_between", with_locales: [ "en" ], error_options: error_options) }
+      end
     end
 
     describe "Edge cases" do

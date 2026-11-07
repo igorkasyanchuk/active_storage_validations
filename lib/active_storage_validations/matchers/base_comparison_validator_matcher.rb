@@ -35,47 +35,45 @@ module ActiveStorageValidations
         @attribute_name = attribute_name
         @min = @max = @exact = nil
         @chain_descriptions = {}
+        @bound_chains = []
       end
 
       def less_than(value)
-        @max = value - smallest_measurement
         @chain_descriptions[:less_than] = "less than #{describe_value(value)}"
-        self
+        chain_bound { @max = value - smallest_measurement }
       end
 
       def less_than_or_equal_to(value)
-        @max = value
         @chain_descriptions[:less_than_or_equal_to] = "less than or equal to #{describe_value(value)}"
-        self
+        chain_bound { @max = value }
       end
 
       def greater_than(value)
-        @min = value + smallest_measurement
         @chain_descriptions[:greater_than] = "greater than #{describe_value(value)}"
-        self
+        chain_bound { @min = value + smallest_measurement }
       end
 
       def greater_than_or_equal_to(value)
-        @min = value
         @chain_descriptions[:greater_than_or_equal_to] = "greater than or equal to #{describe_value(value)}"
-        self
+        chain_bound { @min = value }
       end
 
       def between(range)
-        @min = range.begin
-        @max = last_included_bound(range)
         @chain_descriptions[:between] = "between #{describe_value(range.begin)} and #{describe_value(range.end)}#{" (excluded)" if range.exclude_end?}"
-        self
+        chain_bound do
+          @min = range.begin
+          @max = last_included_bound(range)
+        end
       end
 
       def equal_to(value)
-        @exact = value
         @chain_descriptions[:equal_to] = "equal to #{describe_value(value)}"
-        self
+        chain_bound { @exact = value }
       end
 
       def matches?(subject)
         initialize_subject(subject)
+        resolve_bounds
 
         is_a_valid_active_storage_attribute? &&
           has_validator? &&
@@ -108,6 +106,19 @@ module ActiveStorageValidations
 
       def failure_message_unit
         raise NotImplementedError
+      end
+
+      # Bounds are resolved once the subject is known: the probe step
+      # (#smallest_measurement) may depend on the validator (duration
+      # `precision:`).
+      def chain_bound(&block)
+        @bound_chains << block
+        self
+      end
+
+      def resolve_bounds
+        @min = @max = @exact = nil
+        @bound_chains.each(&:call)
       end
 
       def not_lower_than_min?

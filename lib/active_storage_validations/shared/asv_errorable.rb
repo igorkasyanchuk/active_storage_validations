@@ -7,7 +7,7 @@ module ActiveStorageValidations
     extend ActiveSupport::Concern
 
     # Gem configuration options that are never error message data.
-    CONFIGURATION_OPTIONS = %i[with in timeout spoofing_protection].freeze
+    CONFIGURATION_OPTIONS = %i[with in timeout spoofing_protection precision].freeze
     # Placeholders of a custom message (`%{max}` / `%<max>s`).
     CUSTOM_MESSAGE_VALUE = /%\{(\w+)\}|%<(\w+)>/
     # Values ActiveModel::Error#generate_message interpolates itself.
