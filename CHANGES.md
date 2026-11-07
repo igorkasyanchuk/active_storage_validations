@@ -3,6 +3,7 @@
   - Fix `content_type` on Marcel 2 / Rails main (8.2+) : `spoofing_protection` no longer rejects `audio/aac`, `application/xml`, or `audio/mp4` (`file` detections such as `audio/x-hx-aac-adts`, `text/xml`, `audio/x-m4a` are aliases), and options that were canonical in Marcel 1 (e.g. `audio/x-aac`) are still accepted
 - **MISC**
   - Upgrade dev dependencies (simplecov from 1.1.0 to 1.2)
+  - Bump the local Rails pin to 8.1.4.1
 
 # Released
 - 4.1.1
