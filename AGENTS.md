@@ -146,7 +146,7 @@ IMAGE_PROCESSOR=mini_magick bundle exec rake spec
 
 `spec/rails_helper.rb` sets `config.active_storage.variant_processor` from `IMAGE_PROCESSOR` and disables Active Storage previewers (so CI does not need the `image_processing` gem). Unset locally: validators use libvips (ASV default) and both image-analyzer unit specs run. When `IMAGE_PROCESSOR` is set, examples tagged `image_processor: :vips` / `:mini_magick` for the other processor are excluded (not pending).
 
-Live Magika examples are gated with `magika_cli_available?` (`FixtureFiles` in `spec/support/files.rb`); most Magika unit specs stub the CLI. Fixture IOs go through `open_fixture` / `register_fixture_io` and are closed after each example.
+Live Magika examples are gated with `magika_cli_available?` (`FixtureFiles` in `spec/support/files.rb`); most Magika unit specs stub the CLI. Each Magika run loads its model (~2.5s): a group with many live examples uses `magika_batch(paths)` (`spec/support/magika_batch.rb`), which runs the real CLI once on all its fixtures and answers each analyzer call with that file's entry. Do not add per-example live Magika calls to the spoofing matrix (it took 7 of the suite's 8 minutes). Fixture IOs go through `open_fixture` / `register_fixture_io` and are closed after each example.
 
 ### Benchmarks
 

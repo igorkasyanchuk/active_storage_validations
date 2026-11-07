@@ -119,6 +119,7 @@
       - Matchers build probe attachments on in-memory `StringIO`s instead of never-closed `Tempfile`s, and `validate_total_size_of` no longer uploads a real blob per probe
     - Tests & tooling
       - Add a storage-metadata contract spec: every analyzer runs over every dummy fixture and must return ASCII scalars that fit S3's 2 KB metadata limit (`spec/analyzers/storage_metadata_constraints_spec.rb`)
+      - Run the Magika CLI once for the whole spoofing real-upload matrix (`magika_batch`) instead of once per example: the suite went from 8 minutes to under 1
       - Raise SimpleCov `minimum_coverage` to 90 when `CI=true` (50 for local single-file runs); upgrade simplecov to 1.2
       - Install Magika CLI in CI from the checksummed `cli/v1.1.0` tarball instead of piping the installer script
       - Remove the unused dummy `Document` model and its `documents` table

@@ -616,6 +616,8 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
 
         { file: "spoof", magika: "spoof_magika" }.each do |backend, suffix|
           describe "#{backend} backend", if: backend == :file || magika_cli_available? do
+            magika_batch(Dir[Rails.root.join("public", "{most_common_mime_types,spoofed}", "*")]) if backend == :magika
+
             # validates :image_jpg_spoof(_magika), content_type: { with: :jpg, spoofing_protection: true / :magika }, …
             describe "genuine files of the most common formats" do
               most_common_mime_types.each do |common_mime_type|
