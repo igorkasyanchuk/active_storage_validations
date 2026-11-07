@@ -239,6 +239,17 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
         end
       end
 
+      context "when the file breaks the bound" do
+        # validates :less_than_or_equal_to_with_precision, duration: { less_than_or_equal_to: 5.seconds, precision: 0 }
+        subject(:record) { model.less_than_or_equal_to_with_precision.attach(audio_7s) and model }
+
+        it "does not forward the option to errors.add, like timeout" do
+          record.valid?
+
+          expect(record.errors.details[:less_than_or_equal_to_with_precision].first).not_to have_key(:precision)
+        end
+      end
+
       context "with less_than_or_equal_to: 5.seconds, precision: 0" do
         # validates :less_than_or_equal_to_with_precision, duration: { less_than_or_equal_to: 5.seconds, precision: 0 }
         let(:attribute) { :less_than_or_equal_to_with_precision }
