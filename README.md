@@ -928,7 +928,7 @@ Translation files are available [here](https://github.com/igorkasyanchuk/active_
 
 If you wish to customize the error messages, just copy, paste and update the translation files into your application locales.
 
-Each validator section above lists the values its messages expose (`%{min}`, `%{max}`, `%{filename}`, …). Those resolved values, plus `validator_type` and `filename`, are what you will find in `record.errors.details`; the validator options themselves (`less_than: ->(record) { … }`, `timeout:`, `spoofing_protection:`, …) are not forwarded, so `errors.details` stays JSON-serializable, as with Rails' built-in validators. Custom messages must interpolate the documented values only (see [upgrade to 5.x](docs/upgrade_to_5.md#validator-options-are-no-longer-forwarded-to-errorsadd)).
+Each validator section above lists the values its messages expose (`%{min}`, `%{max}`, `%{filename}`, …). Those resolved values, plus `validator_type` and `filename`, are what you will find in `record.errors.details`; the validator options themselves (`less_than: ->(record) { … }`, `timeout:`, `spoofing_protection:`, …) are not forwarded, so `errors.details` stays JSON-serializable, as with Rails' built-in validators. Custom messages must interpolate the documented values only (see [upgrade to 5.x](docs/upgrade_to_5.md#validator-options-are-no-longer-forwarded-to-errorsadd)). A custom `message:` is shared by all the errors of its validator: a value an error does not carry is left blank, such as `%{duration}` when the file cannot be analyzed (`media_metadata_missing`). Those errors carry the bounds of `duration`, `pages` (`%{min}`, `%{max}`, `%{exact}`) and `aspect_ratio` (`%{authorized_aspect_ratios}`).
 
 ## Test matchers
 

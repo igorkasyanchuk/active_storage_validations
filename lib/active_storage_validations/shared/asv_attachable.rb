@@ -130,8 +130,8 @@ module ActiveStorageValidations
 
     # Add an attachment missing error when an ActiveStorage::FileNotFoundError
     # is raised.
-    def add_attachment_missing_error(record, attribute, attachable)
-      errors_options = initialize_error_options(options, attachable)
+    def add_attachment_missing_error(record, attribute, attachable, already_set_errors_options = nil)
+      errors_options = already_set_errors_options || initialize_error_options(options, attachable)
       add_error(record, attribute, :attachment_missing, **errors_options)
     end
   end

@@ -303,6 +303,13 @@ module ActiveStorageValidations
         **errors_options, min: flat_options[dimension][:min], max: flat_options[dimension][:max])
     end
 
+    # `%{width}` / `%{height}` / `%{min}` / `%{max}` are also the values of
+    # some dimension errors: blank them in a custom message, like any other
+    # value an error does not carry.
+    def raw_option_placeholders
+      CONFIGURATION_OPTIONS
+    end
+
     def validate_exact(record, attribute, dimension, metadata, flat_options, errors_options)
       if metadata[dimension] != flat_options[dimension]
         add_error(record, attribute, :"dimension_#{dimension}_not_equal_to", **errors_options, length: flat_options[dimension])

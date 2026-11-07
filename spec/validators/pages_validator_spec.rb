@@ -231,5 +231,11 @@ RSpec.describe ActiveStorageValidations::PagesValidator do
 
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
+
+    it_behaves_like "interpolates custom message placeholders" do
+      let(:file_not_matching_placeholders) { pdf_7_pages_file }
+      let(:message_for_unanalyzable_file) { "must have at most 5 pages (got )" }
+      let(:message_for_file_not_matching) { "must have at most 5 pages (got 7)" }
+    end
   end
 end

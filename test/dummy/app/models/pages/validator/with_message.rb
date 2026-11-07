@@ -12,4 +12,6 @@
 class Pages::Validator::WithMessage < ApplicationRecord
   has_one_attached :with_message
   validates :with_message, pages: { equal_to: 5, message: "Custom message" }
+  has_one_attached :with_message_placeholders
+  validates :with_message_placeholders, pages: { less_than_or_equal_to: 5, message: "must have at most %{max} pages (got %{pages})" }
 end

@@ -40,6 +40,8 @@
       - Exclusive ranges report the last included value as error `:max` (`400...600` reports `599`; `duration` `2.seconds...7.seconds` uses a 1ms step instead of advertising "6 seconds")
       - `size` / `limit` / `total_size` ignore attachments marked for destruction, so nested-attributes replace flows no longer count a doomed file
       - `limit: { min: 1, max: -> { … } }` (a Proc on only one side) now loads instead of raising "You must pass integers"
+    - **Custom messages**
+      - A custom `message:` interpolating a value that an error does not carry no longer raises `I18n::MissingInterpolationArgument` from `errors.full_messages` (a 500 on an upload): `message: "must be under %{max}"` on a file `duration`, `pages` or `aspect_ratio` cannot analyze (`media_metadata_missing`, `attachment_missing`). Those errors now carry the bounds (`%{min}` / `%{max}` / `%{exact}`, `%{authorized_aspect_ratios}`), and any other value of the message is left blank (`%{duration}` of a file that has none). Raw options (`%{less_than}`) still raise, see **BREAKING**
     - **`duration`**
       - ♻️ A file lasts as long as its longest track: the analyzers read the video (or audio) stream duration first, so an MP4 with a 0.04s video track and a 30s audio track passed `less_than: 10.seconds`. The duration is now the longest of the container, the audio track and the video track
       - ♻️ No longer rounds the analyzed duration to 0.1s before comparing: a 1.96s file passes `less_than: 2.seconds`, a 2.04s file fails `less_than_or_equal_to: 2.seconds`

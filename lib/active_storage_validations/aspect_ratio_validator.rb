@@ -57,12 +57,13 @@ module ActiveStorageValidations
     end
 
     def is_valid?(record, attribute, attachable, metadata)
-      media_metadata_present?(record, attribute, attachable, metadata) &&
-        authorized_aspect_ratio?(record, attribute, attachable, metadata)
+      aspect_ratios = authorized_aspect_ratios(record)
+
+      media_metadata_present?(record, attribute, attachable, metadata, aspect_ratios) &&
+        authorized_aspect_ratio?(record, attribute, attachable, metadata, aspect_ratios)
     end
 
-    def authorized_aspect_ratio?(record, attribute, attachable, metadata)
-      aspect_ratios = authorized_aspect_ratios(record)
+    def authorized_aspect_ratio?(record, attribute, attachable, metadata, aspect_ratios)
       attachable_aspect_ratio_is_authorized = aspect_ratios.any? do |authorized_aspect_ratio|
         case authorized_aspect_ratio
         when :square then valid_square_aspect_ratio?(metadata)
@@ -89,10 +90,13 @@ module ActiveStorageValidations
       NAMED_ASPECT_RATIOS.include?(aspect_ratio) ? :"aspect_ratio_not_#{aspect_ratio}" : :aspect_ratio_not_x_y
     end
 
-    def media_metadata_present?(record, attribute, attachable, metadata)
+    # A custom message may show the authorized ratios
+    # (`message: "must be %{authorized_aspect_ratios}"`) for a file that
+    # cannot be analyzed too.
+    def media_metadata_present?(record, attribute, attachable, metadata, aspect_ratios)
       return true if metadata[:width].to_i > 0 && metadata[:height].to_i > 0
 
-      add_media_metadata_missing_error(record, attribute, attachable)
+      add_media_metadata_missing_error(record, attribute, attachable, initialize_and_populate_error_options(options, attachable, aspect_ratios))
       false
     end
 

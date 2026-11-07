@@ -330,6 +330,25 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
 
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
+
+    it_behaves_like "interpolates custom message placeholders" do
+      let(:file_not_matching_placeholders) { audio_5s }
+      let(:message_for_unanalyzable_file) { "With message placeholders must be under 2 seconds (got )" }
+      let(:message_for_file_not_matching) { "With message placeholders must be under 2 seconds (got 5.029 seconds)" }
+    end
+
+    # Raw options are no longer message values since 5.0 (upgrade guide).
+    describe "custom message interpolating a raw option" do
+      subject(:model) { validator_test_class::WithMessage.new(params) }
+
+      before { model.with_message_raw_option.attach(audio_5s) }
+
+      it "still raises" do
+        model.valid?
+
+        expect { model.errors.full_messages }.to raise_error(I18n::MissingInterpolationArgument, /less_than/)
+      end
+    end
   end
 
   describe "duration values in error messages" do

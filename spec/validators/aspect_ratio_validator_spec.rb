@@ -420,5 +420,11 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
 
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
+
+    it_behaves_like "interpolates custom message placeholders" do
+      let(:file_not_matching_placeholders) { image_700x500_file }
+      let(:message_for_unanalyzable_file) { "must be square (got x)" }
+      let(:message_for_file_not_matching) { "must be square (got 700x500)" }
+    end
   end
 end
