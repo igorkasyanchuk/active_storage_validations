@@ -39,6 +39,36 @@ module ActiveStorageValidations
     end
     private_class_method :restore_stubbed_method
 
+    # Prepended once on Analyzer.singleton_class, so it also covers every
+    # analyzer subclass. The mock lives in the current thread (or fiber) state:
+    # concurrent probes (`parallelize(with: :threads)`) and real validations in
+    # other threads never see it. A per-probe singleton-method stub restored
+    # overlapping stubs out of order and could leave a mock installed for good.
+    #
+    # Only the probe file is mocked. Matchers validate the caller's own record,
+    # so the other attachments of that record (an unanalyzed persisted blob)
+    # are analyzed during the probe too: mocking them cached the probe's fake
+    # metadata on their blobs, and saved it.
+    module AnalyzerMock
+      KEY = :active_storage_validations_analyzer_mock
+
+      def new(attachable, *args, **kwargs, &block)
+        mock = ActiveSupport::IsolatedExecutionState[KEY]
+        mock&.mocks?(attachable) ? mock : super
+      end
+    end
+
+    MockedAnalyzer = Struct.new(:io, :metadata, :content_type) do
+      def mocks?(attachable)
+        attachable.equal?(io) || (attachable.is_a?(Hash) && attachable[:io].equal?(io))
+      end
+    end
+    private_constant :MockedAnalyzer
+
+    # Makes Analyzer.new return mocked metadata for the duration of the block
+    # so metadata matchers can probe bounds without real media files. Only the
+    # analyzers of +attachment+ (a probe attachable Hash, or the IO it wraps)
+    # are mocked.
     def self.mock_metadata(attachment, metadata = {})
       asv_metadata_available_keys = { width: nil, height: nil, duration: nil, content_type: nil }
       merged = asv_metadata_available_keys.merge(metadata)
@@ -46,14 +76,23 @@ module ActiveStorageValidations
       # which call #content_type — not #metadata. Default to the dummy file type
       # so stacked validators with spoofing_protection still pass under the mock.
       detected_content_type = merged[:content_type].presence || "image/png"
-      mock = Struct.new(:metadata, :content_type).new(
+      mock = MockedAnalyzer.new(
+        attachment.is_a?(Hash) ? attachment[:io] : attachment,
         merged,
         { content_type: detected_content_type, content_type_backend: "file" }
       )
 
-      stub_method(ActiveStorageValidations::Analyzer, :new, mock) do
-        yield
-      end
+      with_analyzer_mock(mock) { yield }
     end
+
+    def self.with_analyzer_mock(mock)
+      ActiveStorageValidations::Analyzer.singleton_class.prepend(AnalyzerMock)
+      previous = ActiveSupport::IsolatedExecutionState[AnalyzerMock::KEY]
+      ActiveSupport::IsolatedExecutionState[AnalyzerMock::KEY] = mock
+      yield
+    ensure
+      ActiveSupport::IsolatedExecutionState[AnalyzerMock::KEY] = previous
+    end
+    private_class_method :with_analyzer_mock
   end
 end

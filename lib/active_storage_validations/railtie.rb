@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "rails/railtie"
+
 module ActiveStorageValidations
   class Railtie < ::Rails::Railtie
     # Using after: :load_config_initializers would cause a stack level too deep error

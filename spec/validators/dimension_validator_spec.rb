@@ -43,6 +43,19 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
           expect { model }.to raise_error(ArgumentError, error_message)
         end
       end
+
+      context "when a Proc returns a frozen Hash" do
+        subject(:validator) { described_class.new(attributes: [ :file ], width: ->(_record) { limits }) }
+
+        let(:limits) { { in: 100..140 }.freeze }
+
+        it "resolves the bounds without modifying the Hash" do
+          flat_options = validator.send(:process_options, nil)
+
+          expect(flat_options[:width]).to include(min: 100, max: 140)
+          expect(limits).to eq({ in: 100..140 })
+        end
+      end
     end
 
     describe "#ensure_min_max_option_validity" do
@@ -295,6 +308,36 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 it { is_expected_not_to_be_valid }
                 it { is_expected_to_include_error_message("dimension_#{dimension}_not_included_in", error_options: error_options) }
                 it { is_expected_to_have_error_options(error_options) }
+              end
+            end
+
+            if value_type == "value"
+              describe "#{dimension}: exclusive :in (e.g { #{dimension}: { in: 400...600 } })" do
+                # validates :width_in_exclusive, dimension: { width: { in: 400...600 } }
+                # validates :height_in_exclusive, dimension: { height: { in: 400...600 } }
+                let(:attribute) { :"#{dimension}_in_exclusive" }
+
+                context "when provided with a #{dimension} value inside the exclusive range" do
+                  subject(:record) { model.public_send(attribute).attach(image_500x500_file) and model }
+
+                  it { is_expected_to_be_valid }
+                end
+
+                context "when provided with the exclusive end bound (#{dimension} = 600)" do
+                  subject(:record) { model.public_send(attribute).attach(image_600x600_file) and model }
+
+                  let(:error_options) do
+                    {
+                      min: 400,
+                      max: 599,
+                      filename: "image_600x600_file.png"
+                    }
+                  end
+
+                  it { is_expected_not_to_be_valid }
+                  it { is_expected_to_include_error_message("dimension_#{dimension}_not_included_in", error_options: error_options) }
+                  it { is_expected_to_have_error_options(error_options) }
+                end
               end
             end
           end
@@ -560,7 +603,121 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
       end
     end
 
+    describe "Several errors on one file" do
+      describe "width: { in: 100..200 }, height: { max: 300 }" do
+        # validates :width_in_height_max, dimension: { width: { in: 100..200 }, height: { max: 300 } }
+        subject(:record) { model.width_in_height_max.attach(image_500x700_file) and model }
+
+        let(:error_details) { record.tap(&:valid?).errors.details[:width_in_height_max] }
+
+        it "gives each error its own values only" do
+          expect(error_details).to contain_exactly(
+            a_hash_including(error: :dimension_width_not_included_in, min: 100, max: 200),
+            a_hash_including(error: :dimension_height_not_less_than_or_equal_to, filename: "image_500x700_file.png", length: 300)
+          )
+          height_error = error_details.find { |details| details[:error] == :dimension_height_not_less_than_or_equal_to }
+          expect(height_error.keys).not_to include(:min, :max)
+        end
+      end
+
+      describe "min: 600..100, max: 650..300" do
+        # validates :min_max_both_violable, dimension: { min: 600..100, max: 650..300 }
+        # 500x700: below the min width and above the max height
+        subject(:record) { model.min_max_both_violable.attach(image_500x700_file) and model }
+
+        it { is_expected_to_include_error_message("dimension_min_not_included_in", error_options: { width: 600, height: 100, filename: "image_500x700_file.png" }) }
+        it { is_expected_to_include_error_message("dimension_max_not_included_in", error_options: { width: 650, height: 300, filename: "image_500x700_file.png" }) }
+      end
+    end
+
     describe "Edge cases" do
+      describe "width: { max: 0 }" do
+        %w[value proc].each do |value_type|
+          describe value_type do
+            subject(:record) { model.public_send(attribute).attach(image_150x150_file) and model }
+
+            let(:attribute) { :"width_max_zero#{'_proc' if value_type == 'proc'}" }
+            let(:error_options) do
+              {
+                length: 0,
+                filename: "image_150x150_file.png"
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_include_error_message("dimension_width_not_less_than_or_equal_to", error_options: error_options) }
+            it { is_expected_to_have_error_options(error_options) }
+          end
+        end
+      end
+
+      context "when ActiveStorage.variant_processor is :disabled" do
+        subject(:record) { model.public_send(attribute).attach(image_500x500_file) and model }
+
+        let(:attribute) { :width }
+        let(:error_options) do
+          {
+            filename: "image_500x500_file.png"
+          }
+        end
+
+        around do |example|
+          previous = ActiveStorage.variant_processor
+          ActiveStorage.variant_processor = :disabled
+          example.run
+        ensure
+          ActiveStorage.variant_processor = previous
+        end
+
+        it "fails closed with media_metadata_missing instead of raising" do
+          expect { record.valid? }.not_to raise_error
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+
+      # Rails 8.2+: config.active_storage.variant_processor = MyTransformer
+      context "when ActiveStorage.variant_processor is a transformer class" do
+        let(:validator) { described_class.new(attributes: [ :file ], width: 500) }
+
+        around do |example|
+          previous = ActiveStorage.variant_processor
+          ActiveStorage.variant_processor = transformer
+          example.run
+        ensure
+          ActiveStorage.variant_processor = previous
+        end
+
+        context "with a custom transformer" do
+          let(:transformer) { Class.new }
+
+          it "analyzes images with the default libvips analyzer" do
+            expect(validator.send(:image_processor)).to eq(:vips)
+          end
+
+          context "when validating an image", image_processor: :vips do
+            subject(:record) { model.width.attach(image_500x500_file) and model }
+
+            it { is_expected_to_be_valid }
+          end
+        end
+
+        context "with a subclass of Rails' ImageMagick transformer" do
+          # Stand-in named like the Rails class: the real one requires image_processing.
+          let(:transformer) do
+            image_magick_transformer = Class.new
+            image_magick_transformer.define_singleton_method(:name) { "ActiveStorage::Transformers::ImageMagick" }
+            Class.new(image_magick_transformer)
+          end
+
+          it "analyzes images with ImageMagick" do
+            expect(validator.send(:image_processor)).to eq(:mini_magick)
+          end
+        end
+      end
+
       context "when the passed file is not a valid media" do
         subject(:record) { model.public_send(attribute).attach(empty_io_file) and model }
 
@@ -633,5 +790,12 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
+
+    # %{width} is the validator option, forwarded to every error.
+    it_behaves_like "interpolates custom message placeholders" do
+      let(:file_not_matching_placeholders) { image_700x500_file }
+      let(:message_for_unanalyzable_file) { "must be px wide (150)" }
+      let(:message_for_file_not_matching) { "must be 150px wide (150)" }
+    end
   end
 end

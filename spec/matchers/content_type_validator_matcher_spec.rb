@@ -234,6 +234,20 @@ RSpec.describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher d
     it_behaves_like "works with spoofing protection"
   end
 
+  describe "probe attachments" do
+    subject(:configured_matcher) { matcher.allowing("image/png").rejecting("image/gif").spoofing_protection }
+
+    let(:model_attribute) { :with_spoofing_protection }
+
+    it "does not open tempfiles that would outlive the matcher" do
+      allow(Tempfile).to receive(:new).and_call_original
+
+      configured_matcher.matches?(klass)
+
+      expect(Tempfile).not_to have_received(:new)
+    end
+  end
+
   describe "Combinations" do
     describe "#allowing + #with_message" do
       let(:model_attribute) { :allowing_one_with_message }

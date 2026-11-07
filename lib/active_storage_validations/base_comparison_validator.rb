@@ -43,17 +43,19 @@ module ActiveStorageValidations
     def is_valid?(value, flat_options)
       return false if value < 0
 
-      if flat_options[:between].present?
+      # Integer 0 is a real bound (`equal_to: 0`). `.present?` treats it as
+      # absent, so the comparison would be skipped and every file would fail.
+      if bound_present?(flat_options, :between)
         flat_options[:between].include?(value)
-      elsif flat_options[:less_than].present?
+      elsif bound_present?(flat_options, :less_than)
         value < flat_options[:less_than]
-      elsif flat_options[:less_than_or_equal_to].present?
+      elsif bound_present?(flat_options, :less_than_or_equal_to)
         value <= flat_options[:less_than_or_equal_to]
-      elsif flat_options[:greater_than].present?
+      elsif bound_present?(flat_options, :greater_than)
         value > flat_options[:greater_than]
-      elsif flat_options[:greater_than_or_equal_to].present?
+      elsif bound_present?(flat_options, :greater_than_or_equal_to)
         value >= flat_options[:greater_than_or_equal_to]
-      elsif flat_options[:equal_to].present?
+      elsif bound_present?(flat_options, :equal_to)
         value == flat_options[:equal_to]
       end
     end
@@ -77,7 +79,25 @@ module ActiveStorageValidations
     end
 
     def max(flat_options)
-      flat_options[:between]&.max || flat_options[:less_than] || flat_options[:less_than_or_equal_to]
+      if (range = flat_options[:between])
+        last_included_range_end(range)
+      else
+        flat_options[:less_than] || flat_options[:less_than_or_equal_to]
+      end
+    end
+
+    # Exclusive ranges (`1...5`) reject the end bound. Error messages must
+    # advertise the last included value, not the excluded endpoint.
+    def last_included_range_end(range)
+      return range.max unless range.exclude_end?
+
+      range.end - exclusive_range_step
+    end
+
+    # Integer comparisons (bytes, pages) step by 1. Duration overrides this
+    # so `7.seconds - 1` is not advertised as "6 seconds".
+    def exclusive_range_step
+      1
     end
   end
 end

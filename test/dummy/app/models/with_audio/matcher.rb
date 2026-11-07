@@ -3,6 +3,8 @@
 class WithAudio::Matcher < ApplicationRecord
   include Validatable
 
+  has_one_attached :without_validator
+
   has_one_attached :custom_matcher
   validates :custom_matcher, with_audio: true
 
@@ -29,6 +31,8 @@ class WithAudio::Matcher < ApplicationRecord
   if Rails.gem_version >= Gem::Version.new("8.0.0")
     has_one_attached :with_except_on_symbol
     validates :with_except_on_symbol, with_audio: true, except_on: :update
+    has_one_attached :with_except_on_create
+    validates :with_except_on_create, with_audio: true, except_on: :create
     has_one_attached :with_except_on_array
     validates :with_except_on_array, with_audio: true, except_on: %i[update custom]
     has_one_attached :with_several_validators_and_except_on
@@ -50,6 +54,9 @@ class WithAudio::Matcher < ApplicationRecord
 
   has_one_attached :silent_video
   validates :silent_video, with_audio: { with: false }
+
+  has_one_attached :without_audio_with_message
+  validates :without_audio_with_message, with_audio: { with: false, message: "Custom message" }
 
   has_one_attached :not_validated
 end

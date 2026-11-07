@@ -148,6 +148,7 @@ Notes:
 - Setting `command_timeout` (or per-validator `timeout:`) to `nil` disables the deadline
 - ImageMagick analysis runs `identify` through the same killable command runner (MiniMagick is only used to build the argv)
 - For libvips, a timeout may not immediately free the Ruby thread stuck in FFI/C; the validation still fails closed and emits `timeout.active_storage_validations`
+- On Windows there are no POSIX process groups: a timed out command is killed directly (its own child processes, if any, are not), without the TERM grace period
 
 ## Validators
 
@@ -166,6 +167,11 @@ Notes:
 <br>
 <br>
 
+**Attachments marked for destruction**<br>
+Files whose attachment is marked for destruction (e.g. nested attributes with `_destroy`) are not validated: they will be gone once the record is saved. `attached` still fails when every attachment is marked for destruction.
+<br>
+<br>
+
 **Proc usage**<br>
 Every validator can use procs instead of values in all the validator examples:
 ```ruby
@@ -176,12 +182,18 @@ class User < ApplicationRecord
 end
 ```
 
+Static options are checked when the model class loads; a proc's result is only known at validation time, so an unsupported value returned by a proc (`"image/jpg"` for `content_type`, `:sqaure` for `aspect_ratio`) raises the same `ArgumentError` from `valid?` instead of silently rejecting every file.
+
 **Performance optimization**<br>
 Some validators rely on an expensive operation (metadata analysis and content type analysis). To mitigate the performance cost, the gem leverages the `ActiveStorage::Blob.metadata` method to store retrieved metadata. Therefore, once the file has been analyzed by our gem, the expensive analysis operation will not be triggered again for new validations.
 
 As stated in the Rails documentation: "Blobs are intended to be immutable in so far as their reference to a specific file goes". We based our performance optimization on the same assumption, so if you do not follow it, the gem will not work as expected.
 
 This also covers metadata the analyzer cannot extract from a given file (e.g. a `duration` validation on an image): the gem remembers that the value is unavailable, so the validation keeps failing with `media_metadata_missing` but the file is only analyzed once. Files that yield no metadata at all — missing command-line tool, [timed out](#configuration) command, unreadable file — are not remembered and get analyzed again on the next validation.
+
+Clients cannot pre-fill this cache to skip the analysis (e.g. through Rails' direct upload endpoint, which accepts `metadata: { custom: … }`): a new blob drops `asv_*` keys when it is initialized, so only the gem writes them.
+
+To force re-analysis of a persisted blob, call `blob.remove_active_storage_validations_metadata!`. That clears `asv_*` keys and, when the blob is already saved, writes the change so `reload` does not restore them. Non-`asv_*` custom metadata is kept.
 
 ---
 
@@ -227,6 +239,8 @@ The `limit` validator has 2 possible options:
 - `min`: defines the minimum allowed number of files
 - `max`: defines the maximum allowed number of files
 
+Attachments marked for destruction are ignored, so they do not count against `:min` / `:max`.
+
 #### Examples
 
 Use it like this:
@@ -235,6 +249,8 @@ class User < ApplicationRecord
   has_many_attached :certificates
 
   validates :certificates, limit: { min: 1, max: 10 } # restricts the number of files to between 1 and 10
+  validates :certificates, limit: { min: 1, max: ->(record) { record.admin? ? 100 : 10 } } # mix a static bound with a Proc
+  validates :certificates, limit: { max: 0 } # freeze uploads (empty is valid, any file is not)
 end
 ```
 
@@ -273,7 +289,7 @@ Validates if the attachment has an allowed content type.
 
 The `content_type` validator has several possible options:
 - `with`: defines the allowed content type (string, symbol or regex)
-- `in`: defines the allowed content types (array of strings or symbols)
+- `in`: defines the allowed content types (array of strings, symbols or regexes)
 - `spoofing_protection`: enables content type spoofing protection (`false` by default). Allowed values: `true` / `:file` (UNIX `file` CLI), `:magika` (Google Magika CLI)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) when spoofing protection runs `file` or `magika`
 
@@ -339,13 +355,14 @@ ActiveStorageValidations.configure { |config| config.infer_file_field_accept = f
 
 Notes:
 - Only broad MIME-type regexes of the form `/\Aimage\/.*\z/` (or `video` / `audio` / etc.) are inferred, as `image/*`
-- Other regexes (e.g. `/\Aimage\/(png|gif)\z/`) are skipped, since they cannot be reliably represented in `accept`
-- Proc / dynamic `content_type` options are skipped: they are not called while the form renders, because their result can depend on record state that is only set on submit, and a raising proc would break the whole view for what is merely a frontend hint. Backend validation is unchanged; pass a custom `accept:` on those fields if you want the picker filtered
+- Other regexes (e.g. `/\Aimage\/(png|gif)\z/`) cannot be reliably represented in `accept`
+- Proc / dynamic `content_type` options are not evaluated: they are not called while the form renders, because their result can depend on record state that is only set on submit, and a raising proc would break the whole view for what is merely a frontend hint. Backend validation is unchanged; pass a custom `accept:` on those fields if you want the picker filtered
+- A validator with such a regex or Proc in its list sets no `accept` at all: listing only its other types would hide files it allows. Another `content_type` validator on the same attribute still sets `accept`, since every file must pass it
 - Conditional validators (`if:` / `unless:`) are not evaluated: their content types are always included in `accept`, even when the condition would skip the validator for that record. Backend validation is unchanged; use `infer_accept: false` (or a custom `accept:`) if the picker must match the active conditions
 
 #### Content type shorthands
 
-If you choose to use a content_type 'shorthand' (like `png`), note that it will be converted to a full content type using `Marcel::MimeType.for` under the hood. Therefore, you should check if the content_type is registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb). On Marcel 2 (Rails 8.2+), historical aliases such as `audio/x-aac` are still valid options and resolve to their canonical type (`audio/aac`). If the type is not registered, you can register it by adding the following code to your `config/initializers/mime_types.rb` file:
+If you choose to use a content_type 'shorthand' (like `png`), note that it will be converted to a full content type using `Marcel::MimeType.for` under the hood. Therefore, you should check if the content_type is registered by [`Marcel::EXTENSIONS`](https://github.com/rails/marcel/blob/main/lib/marcel/tables.rb). Aliases such as `audio/x-flac` or `application/x-msaccess` are valid options and match uploads of their canonical type (`audio/flac`, `application/vnd.ms-access`). If the type is not registered, you can register it by adding the following code to your `config/initializers/mime_types.rb` file:
 
 ```ruby
 Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files
@@ -448,6 +465,8 @@ The `size` validator has 6 possible options:
 - `between`: defines the allowed file size range
 - `equal_to`: defines the allowed file size
 
+Attachments marked for destruction are ignored, so they do not count against the bound.
+
 #### Examples
 
 Use it like this:
@@ -483,11 +502,11 @@ en:
       file_size_not_equal_to: "file size must be equal to %{exact} (current size is %{file_size})"
 ```
 
-The `size` validator error messages expose 4 values that you can use:
+The `size` validator error messages expose 5 values that you can use:
 - `file_size` containing the current file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed file size (e.g. `1KB`)
 - `exact` containing the allowed file size (e.g. `1MB`)
-- `max` containing the maximum allowed file size (e.g. `2MB`)
+- `max` containing the maximum allowed file size (e.g. `2MB`; for exclusive `between:` ranges, the last included value)
 - `filename` containing the current file name
 
 ---
@@ -505,6 +524,8 @@ The `total_size` validator has 6 possible options:
 - `greater_than_or_equal_to`: defines the minimum allowed total file size
 - `between`: defines the allowed total file size range
 - `equal_to`: defines the allowed total file size
+
+Attachments marked for destruction are ignored, so they do not count against the total.
 
 #### Examples
 
@@ -540,7 +561,7 @@ The `total_size` validator error messages expose 4 values that you can use:
 - `total_file_size` containing the current total file size (e.g. `1.5MB`)
 - `min` containing the minimum allowed total file size (e.g. `1KB`)
 - `exact` containing the allowed total file size (e.g. `1MB`)
-- `max` containing the maximum allowed total file size (e.g. `2MB`)
+- `max` containing the maximum allowed total file size (e.g. `2MB`; for exclusive `between:` ranges, the last included value)
 
 ---
 
@@ -565,6 +586,10 @@ The `dimension` validator has several possible options:
 - `max`: defines the maximum allowed width and height (range)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
+Static options are checked at boot and raise `ArgumentError` when malformed: a `width` / `height` Hash needs `:min`, `:max` or `:in` (and no other key, nor `:in` together with `:min` / `:max`), `:min` / `:max` values are Integers or Procs, a bare Range must be wrapped in `{ in: }`, and the top-level `min` / `max` cannot be combined with `width` / `height`.
+
+Width and height are the displayed ones: an image whose EXIF orientation turns it a quarter (5 to 8) is measured rotated, a video by its rotation and display aspect ratio, a PDF page by its `/Rotate`, and an animated GIF by its canvas.
+
 #### Examples
 
 Use it like this:
@@ -575,6 +600,7 @@ class User < ApplicationRecord
   validates :avatar, dimension: { width: 100 } # restricts the width to 100 pixels
   validates :avatar, dimension: { width: { min: 80, max: 100 } } # restricts the width to between 80 and 100 pixels
   validates :avatar, dimension: { width: { in: 80..100 } } # restricts the width to between 80 and 100 pixels
+  validates :avatar, dimension: { width: { in: 80...100 } } # same, but exclusive end (80–99), matching Ruby `Range`
   validates :avatar, dimension: { height: 100 } # restricts the height to 100 pixels
   validates :avatar, dimension: { height: { min: 600, max: 1800 } } # restricts the height to between 600 and 1800 pixels
   validates :avatar, dimension: { height: { in: 600..1800 } } # restricts the height to between 600 and 1800 pixels
@@ -603,9 +629,9 @@ en:
 
 The `dimension` validator error messages expose 6 values that you can use:
 - `min` containing the minimum width or height allowed
-- `max` containing the maximum width or height allowed
+- `max` containing the maximum width or height allowed (for exclusive `in:` ranges, the last included value: `400...600` reports `599`)
 - `width` containing the minimum or maximum width allowed
-- `height` containing the minimum or maximum width allowed
+- `height` containing the minimum or maximum height allowed
 - `length` containing the exact width or height allowed
 - `filename` containing the current filename in error
 
@@ -626,6 +652,9 @@ The `duration` validator has several possible options:
 - `between`: defines the allowed file duration range
 - `equal_to`: defines the allowed duration
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
+- `precision`: the number of decimal places of a second the duration is rounded to before it is compared and shown in messages, an Integer from `0` to `3` (default `3`, milliseconds)
+
+Duration is compared to the millisecond by default (the analyzer no longer rounds to 0.1s): a 1.96s file passes `less_than: 2.seconds`. Encoders pad audio and video, so a "5-second" file often lasts 5.029s and fails `equal_to: 5.seconds`: round it with `precision: 1` (tenths, as before 4.2) or `precision: 0` (whole seconds). A file lasts as long as its longest track (the container, its audio and its video).
 
 #### Examples
 
@@ -640,6 +669,7 @@ class User < ApplicationRecord
   validates :intro_song, duration: { greater_than_or_equal_to: 1.second } # restricts the file duration to >= 1 second
   validates :intro_song, duration: { between: 1.second..2.minutes } # restricts the file duration to between 1 second and 2 minutes
   validates :intro_song, duration: { equal_to: 1.minute } # restricts the duration to exactly 1 minute
+  validates :intro_song, duration: { equal_to: 5.seconds, precision: 1 } # a 5.029s file passes: compared as 5.0s
   validates :intro_song, duration: { less_than: 5.minutes, timeout: 5.seconds } # custom analyzer timeout
 end
 ```
@@ -658,12 +688,27 @@ en:
       duration_not_equal_to: "duration must be equal to %{exact} (current duration is %{duration})"
 ```
 
-The `duration` validator error messages expose 4 values that you can use:
-- `duration` containing the current duration size (e.g. `2 minutes`)
+The `duration` validator error messages expose 5 values that you can use:
+- `duration` containing the current duration size, to the millisecond (e.g. `2 minutes`, `5.029 seconds`)
 - `min` containing the minimum allowed duration size (e.g. `1 second`)
 - `exact` containing the allowed duration (e.g. `3 seconds`)
-- `max` containing the maximum allowed duration size (e.g. `2 minutes`)
+- `max` containing the maximum allowed duration (e.g. `2 minutes`; for exclusive `between:` ranges, the last included value, so `2.seconds...7.seconds` reports `6.999 seconds`)
 - `filename` containing the current file name
+
+Duration values are humanized in the current locale (e.g. `1 minute et 30 secondes` in French) through the `active_storage_validations.duration` keys shipped with every bundled locale: one `one` / `other` pair per unit (plus the `few` / `many` forms Russian, Ukrainian and Polish need with rails-i18n pluralization rules) (`years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`) plus the sentence `connectors`. Locales the gem does not ship fall back to the English wording. Override them in your application locales like any other key:
+
+```yml
+en:
+  active_storage_validations:
+    duration:
+      seconds:
+        one: "%{count} second"
+        other: "%{count} seconds"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " and "
+        last_word_connector: " and "
+```
 
 ---
 
@@ -688,6 +733,7 @@ class User < ApplicationRecord
 
   validates :video, with_audio: true
   validates :silent_video, with_audio: { with: false }
+  validates :video, with_audio: { with: ->(record) { record.needs_audio? } }
   validates :video, with_audio: { timeout: 5.seconds }
 end
 ```
@@ -719,14 +765,14 @@ It can also be used for pdf files, but it will only analyze the pdf first page.
 #### Options
 
 The `aspect_ratio` validator has several options:
-- `with`: defines the allowed aspect ratio (e.g. `:is_16/9`)
+- `with`: defines the allowed aspect ratio (e.g. `:is_16_9`)
 - `in`: defines the allowed aspect ratios (e.g. `%i[square landscape]`)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
 This validator can define aspect ratios in several ways:
 - Symbols:
   - prebuilt aspect ratios: `:square`, `:portrait`, `:landscape`
-  - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc.
+  - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc. A file matches a custom ratio when both ratios are equal once rounded to 3 decimals, or when one of its sides is within a pixel of the other one scaled to that ratio, so sizes such as 1366×768 (1366 × 9 / 16 = 768.375) match `:is_16_9`, while 1920×1082 does not. That pixel of slack only applies to images at least x×y pixels: a 4×3 or 1×1 image does not match `:is_16_9`.
 
 #### Examples
 
@@ -789,7 +835,11 @@ end
 
 #### Notes
 
-Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call `Vips.block_untrusted(true)`, so libvips refuses to load formats marked untrusted (e.g. SVG, BMP). Analysis then returns empty metadata by design. `processable_file` does **not** treat that as failure for those content types. `dimension` / `aspect_ratio` still need width/height — use MiniMagick for those formats, or skip those validators for them.
+Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call `Vips.block_untrusted(true)`, so libvips refuses to load formats marked untrusted (e.g. SVG, BMP). Analysis then returns empty metadata by design. `processable_file` does **not** treat that as failure for those formats (BMP, ICO, PSD, SVG, JPEG XL, JPEG 2000, Netpbm), as long as the file's leading bytes are one of them: a file merely declared as `image/bmp` or `image/svg+xml` is still `file_not_processable`. `dimension` / `aspect_ratio` still need width/height — use MiniMagick for those formats, or skip those validators for them.
+
+An empty but well-formed container (`ffprobe` exits 0 with no audio or video stream) is not processable. That is the same fail-closed miss as a corrupt file or a missing CLI.
+
+libvips reads the image header only, while ImageMagick decodes the image. A truncated image whose header is intact is therefore processable with libvips, which also renders its variants (filling the missing rows), and not with ImageMagick.
 
 #### Error messages (I18n)
 
@@ -855,7 +905,7 @@ The `pages` validator error messages expose 5 values that you can use:
 - `pages` containing the current file number of pages (e.g. `7`)
 - `min` containing the minimum allowed number of pages (e.g. `1`)
 - `exact` containing the allowed number of pages (e.g. `3`)
-- `max` containing the maximum allowed number of pages (e.g. `5`)
+- `max` containing the maximum allowed number of pages (e.g. `5`; for exclusive `between:` ranges, the last included value)
 - `filename` containing the current file name
 
 ---
@@ -873,6 +923,8 @@ Active Storage Validations uses I18n for error messages. The error messages are 
 Translation files are available [here](https://github.com/igorkasyanchuk/active_storage_validations/tree/master/config/locales). We currently have translations for `da`, `de`, `en`, `en-GB`, `es`, `fr`, `it`, `ja`, `nl`, `pl`, `pt-BR`, `ru`, `sv`, `tr`, `uk`, `vi` and `zh-CN`. Feel free to drop a PR to add your language ✌️.
 
 If you wish to customize the error messages, just copy, paste and update the translation files into your application locales.
+
+Each validator section above lists the values its messages expose (`%{min}`, `%{max}`, `%{filename}`, …). A custom `message:` is shared by all the errors of its validator: a value an error does not carry is left blank, such as `%{duration}` when the file cannot be analyzed (`media_metadata_missing`). Those errors carry the bounds of `duration`, `pages` (`%{min}`, `%{max}`, `%{exact}`) and `aspect_ratio` (`%{authorized_aspect_ratios}`).
 
 ## Test matchers
 
@@ -932,6 +984,7 @@ describe User do
   it { is_expected.to validate_dimensions_of(:avatar).width_max(500) }
   it { is_expected.to validate_dimensions_of(:avatar).height_max(300) }
   it { is_expected.to validate_dimensions_of(:avatar).width_between(200..500) }
+  it { is_expected.to validate_dimensions_of(:avatar).width_between(200...500) } # exclusive end (200–499)
   it { is_expected.to validate_dimensions_of(:avatar).height_between(100..300) }
 
   # size:
@@ -960,10 +1013,12 @@ describe User do
   it { is_expected.to validate_duration_of(:introduction).greater_than_or_equal_to(1.minute) }
   it { is_expected.to validate_duration_of(:introduction).between(100..500.seconds) }
   it { is_expected.to validate_duration_of(:avatar).equal_to(5.minutes) }
+  it { is_expected.to validate_duration_of(:avatar).equal_to(5.seconds).precision(1) } # probes follow the validator's precision even without #precision
 
   # with_audio
   it { is_expected.to validate_with_audio_of(:video) }
   it { is_expected.to validate_with_audio_of(:silent_video).without_audio }
+  it { is_expected.to validate_with_audio_of(:silent_video).without_audio.with_message("must not have an audio track") }
 
   # pages:
   # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
@@ -998,6 +1053,8 @@ describe User do
   it { is_expected.to validate_processable_file_of(:avatar).timeout(5.seconds) }
 end
 ```
+
+`validate_limits_of(...).with_message(...)` needs `#min` or `#max` to build a file count the validator rejects.
 
 ### Minitest
 

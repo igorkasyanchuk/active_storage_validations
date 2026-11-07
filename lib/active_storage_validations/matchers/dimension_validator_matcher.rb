@@ -64,7 +64,7 @@ module ActiveStorageValidations
       end
 
       def width_between(range)
-        @width_min, @width_max = range.first, range.last
+        @width_min, @width_max = range_bounds(range)
         self
       end
 
@@ -84,7 +84,7 @@ module ActiveStorageValidations
       end
 
       def height_between(range)
-        @height_min, @height_max = range.first, range.last
+        @height_min, @height_max = range_bounds(range)
         self
       end
 
@@ -121,24 +121,98 @@ module ActiveStorageValidations
         message << "  whereas it should have passed"
       end
 
+      # Exclusive ranges (`80...100`) reject the end bound. Probe the last
+      # included value so `#width_between(80...100)` does not match an inclusive
+      # `80..100`.
+      def range_bounds(range)
+        [ range.begin, last_included_dimension(range) ]
+      end
+
+      def last_included_dimension(range)
+        range.end && range.exclude_end? ? range.end - 1 : range.end
+      end
+
       def valid_width
-        ((@width_min || 0) + (@width_max || 2000)) / 2
+        neutral_dimension(*axis_bounds(:width, @width_min, @width_max))
       end
 
       def valid_height
-        ((@height_min || 0) + (@height_max || 2000)) / 2
+        neutral_dimension(*axis_bounds(:height, @height_min, @height_max))
+      end
+
+      # Bounds of the axis a probe does not test: the chained ones, else the
+      # validator's own. A fixed fallback (1000px) fell outside e.g.
+      # `height: { max: 300 }`, so `width_min(200)` failed on a validator that
+      # also bounds the height.
+      def axis_bounds(axis, chained_min, chained_max)
+        return [ chained_min, chained_max ] if chained_min || chained_max
+
+        bounds = attribute_validators.map { |validator| declared_axis_bounds(validator.options, axis) }
+        [ bounds.filter_map(&:first).max, bounds.filter_map(&:last).min ]
+      end
+
+      def declared_axis_bounds(options, axis)
+        option = resolve_option(options[axis])
+
+        case option
+        when Numeric then [ option, option ]
+        when Hash then declared_hash_bounds(option)
+        else [ range_side(options[:min], axis), range_side(options[:max], axis) ]
+        end
+      end
+
+      def declared_hash_bounds(option)
+        range = resolve_option(option[:in])
+        return [ range.begin, last_included_dimension(range) ] if range.is_a?(Range)
+
+        [ resolve_option(option[:min]), resolve_option(option[:max]) ]
+      end
+
+      # Top-level `min: width..height` / `max: width..height`.
+      def range_side(option, axis)
+        range = resolve_option(option)
+        return unless range.is_a?(Range)
+
+        axis == :width ? range.begin : range.end
+      end
+
+      def resolve_option(option)
+        return option unless option.is_a?(Proc)
+
+        option.arity.zero? ? option.call : option.call(@subject)
+      end
+
+      # A value satisfying the bounds of one axis, used while probing the
+      # other axis. A fixed ceiling (the former 2000px default) fell below any
+      # larger min and made e.g. `width_min(2048).height_min(100)` fail its
+      # height probes.
+      def neutral_dimension(min, max)
+        return (min + max) / 2 if min && max
+        return min + 1 if min
+        return [ max - 1, 1 ].max if max
+
+        1000
       end
 
       def width_not_smaller_than_min?
-        @width_min.nil? || !passes_validation_with_dimensions(@width_min - 1, valid_height)
+        @width_min.nil? || @width_min < 1 || !passes_validation_with_dimensions(@width_min - 1, valid_height)
       end
 
+      # Probe the inclusive bound itself *and* min+1. Checking only min+1 lets
+      # an exclusive min (`>` instead of `>=`) satisfy #width_min; checking only
+      # the bound lets an exact `width: n` satisfy #width_min(n). Skip a 0px
+      # bound probe (media_metadata_missing) and require the validator option.
       def width_larger_than_min?
-        @width_min.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_min + 1, valid_height)
+        return true if @width_min.nil? || @width_min == @width_max
+
+        passes_min_probes?(:width, @width_min, valid_height)
       end
 
       def width_smaller_than_max?
-        @width_max.nil? || @width_min == @width_max || passes_validation_with_dimensions(@width_max - 1, valid_height)
+        return true if @width_max.nil? || @width_min == @width_max
+
+        passes_validation_with_dimensions(@width_max, valid_height) &&
+          passes_interior_max?(@width_max, valid_height, :width)
       end
 
       def width_not_larger_than_max?
@@ -150,15 +224,20 @@ module ActiveStorageValidations
       end
 
       def height_not_smaller_than_min?
-        @height_min.nil? || !passes_validation_with_dimensions(valid_width, @height_min - 1)
+        @height_min.nil? || @height_min < 1 || !passes_validation_with_dimensions(valid_width, @height_min - 1)
       end
 
       def height_larger_than_min?
-        @height_min.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_min + 1)
+        return true if @height_min.nil? || @height_min == @height_max
+
+        passes_min_probes?(:height, @height_min, valid_width)
       end
 
       def height_smaller_than_max?
-        @height_max.nil? || @height_min == @height_max || passes_validation_with_dimensions(valid_width, @height_max - 1)
+        return true if @height_max.nil? || @height_min == @height_max
+
+        passes_validation_with_dimensions(valid_width, @height_max) &&
+          passes_interior_max?(@height_max, valid_width, :height)
       end
 
       def height_not_larger_than_max?
@@ -169,8 +248,42 @@ module ActiveStorageValidations
         @height_min.nil? || @height_min != @height_max || passes_validation_with_dimensions(valid_width, @height_min)
       end
 
+      def passes_min_probes?(axis, min, other)
+        if min < 1
+          passes_axis?(axis, 1, other) && dimension_min_zero?(axis)
+        else
+          passes_axis?(axis, min, other) && passes_axis?(axis, min + 1, other)
+        end
+      end
+
+      def passes_axis?(axis, value, other)
+        if axis == :width
+          passes_validation_with_dimensions(value, other)
+        else
+          passes_validation_with_dimensions(other, value)
+        end
+      end
+
+      def dimension_min_zero?(axis)
+        opt = attribute_validator&.options&.[](axis)
+        opt.is_a?(Hash) && opt[:min] == 0
+      end
+
+      # 0px probes are media_metadata_missing, not a bound miss. Skip max-1
+      # when it would be below 1px so #width_max(1) can match a correct validator.
+      def passes_interior_max?(max, other, axis)
+        interior = max - 1
+        return true unless interior.positive?
+
+        if axis == :width
+          passes_validation_with_dimensions(interior, other)
+        else
+          passes_validation_with_dimensions(other, interior)
+        end
+      end
+
       def passes_validation_with_dimensions(width, height)
-        mock_dimensions_for(attach_file, width, height) do
+        mock_dimensions_for(width, height) do
           validate
           detach_file
           is_valid? || add_failure_message_artefact(width, height)
@@ -185,15 +298,16 @@ module ActiveStorageValidations
       def is_custom_message_valid?
         return true unless @custom_message
 
-        mock_dimensions_for(attach_file, -1, -1) do
+        mock_dimensions_for(-1, -1) do
           validate
           detach_file
           has_an_error_message_which_is_custom_message?
         end
       end
 
-      def mock_dimensions_for(attachment, width, height)
-        Matchers.mock_metadata(attachment, { width: width, height: height }) do
+      def mock_dimensions_for(width, height)
+        Matchers.mock_metadata(io, { width: width, height: height }) do
+          attach_file
           yield
         end
       end

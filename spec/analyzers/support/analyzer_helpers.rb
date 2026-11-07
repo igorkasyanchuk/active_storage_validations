@@ -16,4 +16,13 @@ module AnalyzerHelpers
       timed_out: true
     )
   end
+
+  def successful_command_result(stdout)
+    ActiveStorageValidations::ASVCommandable::CommandResult.new(
+      stdout: stdout,
+      stderr: "",
+      status: instance_double(Process::Status, success?: true),
+      timed_out: false
+    )
+  end
 end

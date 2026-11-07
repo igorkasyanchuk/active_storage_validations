@@ -96,6 +96,34 @@ module ActiveStorageValidations
         yield tempfile.path
       end
 
+      # Hand +path+ to the analyzer commands only when it is a regular file
+      # holding +io+'s content. An unlinked Tempfile, an anonymous one (its
+      # #to_path is the tmp directory) or an IO with no file behind it (a
+      # Rack::Test::UploadedFile built on a StringIO) is copied instead.
+      #
+      # The path is made absolute so a relative one (`-image.png`, `clip:1.mp4`)
+      # is never read as a command-line option or an ffmpeg protocol.
+      # File.absolute_path, unlike File.expand_path, leaves a leading `~` alone
+      # (`~$lock.png`, an Office lock file, is not a home directory).
+      def with_path_or_copy(tempfile, path, io, &block)
+        if regular_file_of?(path, io)
+          yield File.absolute_path(path)
+        else
+          copy_to_tempfile(tempfile, io, &block)
+        end
+      end
+
+      # A closed IO (`File.open(path) { |f| record.avatar.attach(io: f, …) }`)
+      # can neither be compared nor copied: its path is all there is left.
+      def regular_file_of?(path, io)
+        return false unless path.present? && File.file?(path)
+        return true if io.respond_to?(:closed?) && io.closed?
+
+        File.identical?(io, path)
+      rescue SystemCallError, TypeError, IOError
+        false
+      end
+
       def marcel_content_type
         Marcel::MimeType.for(name: filename.to_s)
       end
@@ -142,8 +170,10 @@ module ActiveStorageValidations
         @attachable.rewind
       end
 
-      def with_media_path(_tempfile)
-        yield @attachable.path
+      def with_media_path(tempfile, &block)
+        io = @attachable.tempfile
+        path = io.path if io.respond_to?(:path)
+        with_path_or_copy(tempfile, path, io, &block)
       end
     end
 
@@ -164,13 +194,14 @@ module ActiveStorageValidations
         @attachable[:io].rewind
       end
 
+      # Rails only requires the io to respond to #read / #rewind / #size, so it
+      # may be a StringIO or any IO-like wrapper (streaming download, Zip entry,
+      # …) with no file behind it. Only path-backed IOs (File, Tempfile,
+      # uploaded files) can be handed to the analyzers' commands as they are.
       def with_media_path(tempfile, &block)
         io = @attachable[:io]
-        if io.is_a?(StringIO)
-          copy_to_tempfile(tempfile, io, &block)
-        else
-          File.open(io) { |file| yield file.path }
-        end
+        path = io.to_path if io.respond_to?(:to_path)
+        with_path_or_copy(tempfile, path, io, &block)
       end
     end
 
@@ -196,18 +227,20 @@ module ActiveStorageValidations
         @attachable.rewind
       end
 
-      def with_media_path(_tempfile)
-        yield @attachable.path
+      def with_media_path(tempfile, &block)
+        with_path_or_copy(tempfile, @attachable.path, @attachable, &block)
       end
     end
 
+    # Nothing to copy from: a missing file is left to the analyzer commands,
+    # which fail closed.
     class Path < FileLike
       def rewind
         File.open(@attachable) { |file| file.rewind }
       end
 
       def with_media_path(_tempfile)
-        yield @attachable.to_s
+        yield File.absolute_path(@attachable.to_s)
       end
     end
 

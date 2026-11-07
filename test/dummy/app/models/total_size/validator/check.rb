@@ -21,6 +21,8 @@ class TotalSize::Validator::Check < ApplicationRecord
   validates :greater_than, total_size: { greater_than: 7.kilobytes }
   validates :greater_than_or_equal_to, total_size: { greater_than_or_equal_to: 7.kilobytes }
   validates :between, total_size: { between: 2.kilobytes..7.kilobytes }
+  has_many_attached :between_exclusive
+  validates :between_exclusive, total_size: { between: 2.kilobytes...7.kilobytes }
   validates :equal_to, total_size: { equal_to: 5.kilobytes }
 
   has_many_attached :less_than_proc

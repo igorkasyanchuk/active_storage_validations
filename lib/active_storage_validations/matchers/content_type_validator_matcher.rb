@@ -68,6 +68,7 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
+        @allowed_content_types_not_allowed = @rejected_content_types_not_rejected = nil
 
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
@@ -107,12 +108,12 @@ module ActiveStorageValidations
       end
 
       def all_allowed_content_types_allowed?
-        @allowed_content_types_not_allowed ||= @allowed_content_types.reject { |type| type_allowed?(type) }
+        @allowed_content_types_not_allowed = @allowed_content_types.reject { |type| type_allowed?(type) }
         @allowed_content_types_not_allowed.empty?
       end
 
       def all_rejected_content_types_rejected?
-        @rejected_content_types_not_rejected ||= @rejected_content_types.select { |type| type_allowed?(type) }
+        @rejected_content_types_not_rejected = @rejected_content_types.select { |type| type_allowed?(type) }
         @rejected_content_types_not_rejected.empty?
       end
 
@@ -132,6 +133,7 @@ module ActiveStorageValidations
 
         attach_invalid_content_type_file
         validate
+        detach_file
         has_an_error_message_which_is_custom_message?
       end
 
@@ -145,7 +147,7 @@ module ActiveStorageValidations
         suffix = Marcel::TYPE_EXTS[type]&.first || "fake"
 
         {
-          io: Tempfile.new("."),
+          io: StringIO.new,
           filename: "test.#{suffix}",
           content_type: content_type
         }

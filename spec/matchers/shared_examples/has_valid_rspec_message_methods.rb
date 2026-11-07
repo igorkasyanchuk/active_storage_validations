@@ -9,7 +9,7 @@ RSpec.shared_examples "has valid rspec message methods" do
       when :aspect_ratio then matcher.rejecting(:square)
       when :attached then matcher
       when :processable_file then matcher
-      when :limit then matcher.min(0).max(6)
+      when :limit then matcher.max(6)
       when :content_type then matcher.rejecting("image/png")
       when :dimension then matcher.width(75).height(75)
       when :duration then matcher.less_than_or_equal_to(7.minutes)
@@ -34,7 +34,7 @@ RSpec.shared_examples "has valid rspec message methods" do
         FAILURE_MESSAGE
       when :processable_file
         <<~FAILURE_MESSAGE
-          is expected to validate the processable image of :#{model_attribute}
+          is expected to validate the processable file of :#{model_attribute}
         FAILURE_MESSAGE
       when :limit
         <<~FAILURE_MESSAGE
@@ -129,7 +129,7 @@ RSpec.shared_examples "has valid rspec message methods" do
         FAILURE_MESSAGE
       when :processable_file
         <<~FAILURE_MESSAGE
-          is expected not to validate the processable image of :#{model_attribute}
+          is expected not to validate the processable file of :#{model_attribute}
         FAILURE_MESSAGE
       when :limit
         <<~FAILURE_MESSAGE
@@ -157,7 +157,7 @@ RSpec.shared_examples "has valid rspec message methods" do
         <<~FAILURE_MESSAGE
           is expected not to validate file duration of :#{model_attribute}
             but there seem to have issues with the matcher methods you used, since:
-            validation failed when provided with a 301 seconds test file
+            validation failed when provided with a 300.001 seconds test file
             whereas it should have passed
         FAILURE_MESSAGE
       when :with_audio
