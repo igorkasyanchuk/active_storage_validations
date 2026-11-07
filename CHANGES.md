@@ -76,6 +76,7 @@
       - ♻️ Images swap width and height for the EXIF orientations that turn them a quarter (5 to 8), with both processors. Mirrored images (2, 4) were swapped and mirrored quarter turns (5, 7) were not, as in Rails' own analyzers. libvips also reads the Orientation tag of TIFF files
       - ♻️ ImageMagick reports the canvas size of a GIF, like libvips: a GIF whose first frame is smaller than its canvas reported the frame's size
       - ♻️ `VideoAnalyzer` rounds the height computed from the display aspect ratio instead of truncating it: a 854×480 video (427:240) was reported as 854×479, and about one size in twenty was a pixel short
+      - ♻️ `PdfAnalyzer` reads the page sizes `pdfinfo` prints in exponent form (1,000,000 pts or more, `2e+06 x 1.5e+06 pts`), which were read as 2×6 and passed a `dimension` maximum
       - ♻️ `PdfAnalyzer` applies the first page's `/Rotate`: a 200×300 pt page rotated by 90° is reported as 300×200, as displayed, like rotated images and videos
       - ♻️ `VideoAnalyzer` ignores cover art (`attached_pic` streams): an audio-only MP4 with an embedded cover no longer reports the cover's dimensions and `video: true`
       - `PdfAnalyzer` no longer caches `pages: 0` (or 0-pt width / height) when `pdfinfo` omits them, so the analysis can retry and `processable_file` no longer treats `{ pages: 0 }` as a decoded file

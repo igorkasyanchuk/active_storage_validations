@@ -44,7 +44,8 @@ RSpec.describe ActiveStorageValidations::Analyzer::PdfAnalyzer do
       [ "612 x 792 pts (letter)", 612, 792 ],
       [ "123.4 x 200.7 pts", 123, 200 ],
       [ "595.28 x 841.89 pts (A4)", 595, 841 ],
-      [ "595.276 x 841.89 pts (A4)", 595, 841 ]
+      [ "595.276 x 841.89 pts (A4)", 595, 841 ],
+      [ "2e+06 x 1.5e+06 pts", 2_000_000, 1_500_000 ]
     ].each do |reported_page_size, width, height|
       context "when pdfinfo reports #{reported_page_size}" do
         let(:page_size) { reported_page_size }

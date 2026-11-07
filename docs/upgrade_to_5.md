@@ -289,6 +289,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | `dimension` / `aspect_ratio` with libvips on a TIFF whose Orientation tag turns it a quarter | Stored size | Displayed size ♻️ |
 | `dimension` / `aspect_ratio` with ImageMagick on a GIF whose first frame is smaller than its canvas | First frame's size | Canvas size, like libvips ♻️ |
 | `dimension` on a video whose display aspect ratio is not a whole multiple (854×480 is 427:240) | Height computed then truncated: 854×479 | Rounded: 854×480 ♻️ |
+| `dimension` on a PDF page of 1,000,000 pts or more (`pdfinfo` prints `2e+06`) | Read as 2 pts | Read as 2,000,000 pts ♻️ |
 | Video metadata validators on an audio-only MP4 with cover art | Cover read as the video track (its dimensions, `video: true`) | No video track: `dimension` / `aspect_ratio` add `media_metadata_missing` ♻️ |
 | Metadata validators on a file declared as `application/octet-stream`, `IMAGE/PNG` or `""` | No analyzer picked, file rejected | Analyzed from the normalized declared type, or from the type Rails identified (or the filename) when it is blank or generic |
 
@@ -299,7 +300,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 Some analyzer fixes (♻️ above) change what is cached in `asv_*` blob metadata. They do not require a code change, but blobs already validated under 4.x keep the old metadata until you clear it:
 
 - `asv_duration` was rounded to 0.1s, empty for WebM / Matroska audio, and the video (or audio) track's duration when the file's other tracks are longer
-- `asv_width` / `asv_height` were swapped for mirrored EXIF orientations and not for mirrored quarter turns, missed the TIFF Orientation tag with libvips, held the first frame of a GIF with ImageMagick, or were a pixel short for some videos
+- `asv_width` / `asv_height` were swapped for mirrored EXIF orientations and not for mirrored quarter turns, missed the TIFF Orientation tag with libvips, held the first frame of a GIF with ImageMagick, a pixel short for some videos, or misread for PDF pages of 1,000,000 pts or more
 - Empty media containers were cached as `{ audio: false, video: false }`, which `processable_file` read as a successful analysis
 
 Call `blob.remove_active_storage_validations_metadata!` to re-analyze those blobs. On a persisted blob the method now `save!`s the cleared cache (it used to only mutate memory, so `reload` restored the old `asv_*` keys). Non-`asv_*` custom metadata is kept.
