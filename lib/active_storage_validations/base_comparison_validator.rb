@@ -77,7 +77,19 @@ module ActiveStorageValidations
     end
 
     def max(flat_options)
-      flat_options[:between]&.max || flat_options[:less_than] || flat_options[:less_than_or_equal_to]
+      if (range = flat_options[:between])
+        last_included_range_end(range)
+      else
+        flat_options[:less_than] || flat_options[:less_than_or_equal_to]
+      end
+    end
+
+    # Exclusive ranges (`1...5`) reject the end bound. Error messages must
+    # advertise the last included value, not the excluded endpoint.
+    def last_included_range_end(range)
+      return range.max unless range.exclude_end?
+
+      range.end - 1
     end
   end
 end

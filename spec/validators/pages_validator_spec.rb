@@ -143,6 +143,32 @@ RSpec.describe ActiveStorageValidations::PagesValidator do
       it_behaves_like "comparison between option"
     end
 
+    describe "exclusive :between (e.g. between: 2...7)" do
+      let(:attribute) { :between_exclusive }
+      let(:error_options) do
+        {
+          pages: "7",
+          filename: pdf_7_pages_file[:filename],
+          min: "2",
+          max: "6"
+        }
+      end
+
+      context "when provided with a file inside the exclusive range" do
+        subject(:record) { model.public_send(attribute).attach(pdf_5_pages_file) and model }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when provided with a file at the exclusive end bound" do
+        subject(:record) { model.public_send(attribute).attach(pdf_7_pages_file) and model }
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("pages_not_between", with_locales: [ "en" ], error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+    end
+
     describe ":equal_to" do
       let(:file_having_lower_than_equal_to_option) { pdf_1_page_file }
       let(:file_having_exact_equal_to_option) { pdf_5_pages_file }
