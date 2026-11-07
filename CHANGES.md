@@ -54,7 +54,6 @@
       - ♻️ An audio-only MP4 with cover art has no video track. The cover was read as one (its size, `video: true`)
     - `aspect_ratio` `is_x_y` also accepts a side one pixel away from the exact ratio, so 1366×768 and 854×480 match `:is_16_9`. This only applies to images at least x×y pixels: a 4×3 image does not match 16:9. Everything 4.1 accepted still passes
     - Files marked for destruction (nested attributes with `_destroy`) are ignored by `size`, `limit`, `total_size`, `content_type` and the metadata validators. They were counted and validated, so a form could not remove an invalid file. `attached` still fails when every file is marked
-    - A bound of `0` is applied: `equal_to: 0`, `greater_than_or_equal_to: 0`, `limit: { min: 0 }` / `{ max: 0 }`, `dimension` `{ max: 0 }` (or a Proc returning `0`). It was skipped: comparison validators rejected every file, `limit` rejected records without files, `dimension` accepted every file
     - ♻️ `processable_file` rejects an empty media container (`ffprobe` succeeds but finds no audio or video stream)
     - Files declared as `application/octet-stream`, `IMAGE/PNG` or `""` (some clients and direct uploads) are analyzed, from the type Rails detected or the filename. They got no analyzer and failed `dimension`, `duration`, `processable_file`, …
     - `content_type`
@@ -71,6 +70,7 @@
       - Exclusive `duration` ranges report the last allowed value with a 1ms step: `2.seconds...7.seconds` reports `6.999 seconds`, not `6 seconds`
       - `content_type` messages show a type Marcel knows no extension for as it is written (`authorized_human_content_types` was blank for it)
     - Options
+      - A bound of `0` is applied (`equal_to: 0`, `greater_than_or_equal_to: 0`, `limit: { min: 0 }` / `{ max: 0 }`, `dimension` `{ max: 0 }`). It was skipped, so those validators rejected or accepted every file
       - `with_audio: { with: -> { … } }` runs the Proc. It was always truthy, so every file failed
       - `limit: { min: 1, max: -> { … } }` (a Proc on one side only) loads instead of raising
       - A `dimension` `width:` / `height:` Proc returning a frozen Hash no longer raises `FrozenError`, and a non-frozen one is no longer modified
