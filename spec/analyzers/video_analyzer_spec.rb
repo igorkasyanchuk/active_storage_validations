@@ -195,6 +195,36 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
     end
   end
 
+  describe "display aspect ratio" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) { video_file }
+
+    before do
+      allow(analyzer).to receive(:media_from_path).and_return(
+        { "streams" => [ { "codec_type" => "video", "width" => width, "height" => height, "display_aspect_ratio" => ratio } ], "format" => {} }
+      )
+    end
+
+    context "with a 854x480 video (427:240)" do
+      let(:width) { 854 }
+      let(:height) { 480 }
+      let(:ratio) { "427:240" }
+
+      it "rounds the computed height instead of truncating it" do
+        expect(metadata).to include(width: 854, height: 480)
+      end
+    end
+
+    context "with a 828x1792 video (207:448)" do
+      let(:width) { 828 }
+      let(:height) { 1792 }
+      let(:ratio) { "207:448" }
+
+      it { expect(metadata).to include(width: 828, height: 1792) }
+    end
+  end
+
   describe "malformed ffprobe output" do
     let(:attachable) { video_file }
 

@@ -39,8 +39,8 @@ module ActiveStorageValidations
       return {} unless audio? || video?
 
       {
-        width: (Integer(width) if width),
-        height: (Integer(height) if height),
+        width: width&.round,
+        height: height&.round,
         duration: media_duration,
         angle: angle,
         audio: audio?,
@@ -100,6 +100,8 @@ module ActiveStorageValidations
       video_stream.present?
     end
 
+    # Rounded, not truncated, by #metadata_from_streams: 854 * 240 / 427.0 is
+    # 479.99999999999994 for a 854x480 video (display aspect ratio 427:240).
     def computed_height
       if encoded_width && display_height_scale
         encoded_width * display_height_scale
