@@ -588,6 +588,8 @@ The `dimension` validator has several possible options:
 - `max`: defines the maximum allowed width and height (range)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
+Static options are checked at boot and raise `ArgumentError` when malformed: a `width` / `height` Hash needs `:min`, `:max` or `:in` (and no other key, nor `:in` together with `:min` / `:max`), `:min` / `:max` values are Integers or Procs, a bare Range must be wrapped in `{ in: }`, and the top-level `min` / `max` cannot be combined with `width` / `height`.
+
 Width and height are the displayed ones: an image whose EXIF orientation turns it a quarter (5 to 8) is measured rotated, a video by its rotation and display aspect ratio, a PDF page by its `/Rotate`, and an animated GIF by its canvas.
 
 #### Examples
@@ -595,8 +597,6 @@ Width and height are the displayed ones: an image whose EXIF orientation turns i
 Use it like this:
 ```ruby
 class User < ApplicationRecord
-Static options are checked at boot and raise `ArgumentError` when malformed: a `width` / `height` Hash needs `:min`, `:max` or `:in` (and no other key, nor `:in` together with `:min` / `:max`), `:min` / `:max` values are Integers or Procs, a bare Range must be wrapped in `{ in: }`, and the top-level `min` / `max` cannot be combined with `width` / `height`.
-
   has_one_attached :avatar
 
   validates :avatar, dimension: { width: 100 } # restricts the width to 100 pixels
