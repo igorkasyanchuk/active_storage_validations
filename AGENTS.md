@@ -225,6 +225,7 @@ See [`benchmark/README.md`](benchmark/README.md). Update [`benchmark/BASELINE.md
 - `.cursor/rules/` — Cursor project rules (commit messages, spec conventions); referenced from this file
 - `.cursor/skills/` — Cursor Agent skills (e.g. `/commit`); not shipped in the gem
 - Do not invent an Appraisal setup; keep using `BUNDLE_GEMFILE=`
+- `gemfiles/rails_X_Y.gemfile` floor Rails at the latest patch (`'~> 7.2.0', '>= 7.2.4'`) so a lock refresh cannot fall back to an older release; raise the floor when bumping a lock to a new patch
 - Do not reintroduce a Minitest suite for the gem itself (consumer matchers may still support Minitest)
 
 ## Documentation
