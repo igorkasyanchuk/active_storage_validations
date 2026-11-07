@@ -112,11 +112,41 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
 
       metadata
 
-      expect(stdout.strip.split("\t")).to eq(%w[200 100 200 100 GIF Undefined])
+      expect(stdout.strip.split("\t")).to eq([ "200", "100", "200", "100", "GIF", "", "Undefined" ])
     end
 
     it "leaves an explicit frame selector untouched" do
       expect(analyzer.send(:first_frame, "/tmp/animated.gif[2]")).to eq("/tmp/animated.gif[2]")
+    end
+
+    # ImageMagick reads printf patterns in a filename followed by a frame
+    # selector: summer%20dress.png[0] was "summer<20 spaces>0ress.png".
+    context "when the filename contains a %" do
+      let(:dir) { Pathname.new(Dir.mktmpdir) }
+      # A Hash io on that file (File / Pathname attachables need Rails 7.1):
+      # its path is handed to ImageMagick as it is.
+      let(:path) { dir.join("summer%20dress.png").tap { |file| FileUtils.cp(Rails.root.join("public", "image_150x150.png"), file) } }
+      let(:attachable) { { io: open_fixture(path), filename: "summer%20dress.png", content_type: "image/png" } }
+
+      after { FileUtils.rm_rf(dir) }
+
+      it "reads that file" do
+        expect(metadata).to eq({ width: 150, height: 150 })
+      end
+    end
+  end
+
+  describe "instrumentation" do
+    let(:attachable) { fixture_file("image_150x150_truncated.png", filename: "image_150x150_truncated.png", content_type: "image/png") }
+
+    it "reports the duration of a failed identify" do
+      payloads = []
+      subscriber = ActiveSupport::Notifications.subscribe("analyze.active_storage_validations") { |*, payload| payloads << payload }
+
+      expect(analyzer.metadata).to eq({})
+      expect(payloads.last).to include(:duration)
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
     end
   end
 
@@ -146,7 +176,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
     end
 
     it "uses the first frame of multi-frame identify output" do
-      stdout = "150\t150\t150\t150\tPNG\tUndefined\n300\t200\t300\t200\tPNG\tRightTop\n"
+      stdout = "150\t150\t150\t150\tPNG\t\tUndefined\n300\t200\t300\t200\tPNG\t\tRightTop\n"
       info = analyzer.send(:parse_identify_output, stdout)
 
       expect(info.valid?).to be(true)

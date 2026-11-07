@@ -222,6 +222,37 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File do
     end
   end
 
+  # Linux libmagic does not follow symlinks unless asked (`file -h` is its
+  # default there, macOS follows them): emulate it with a wrapper.
+  describe "symlinked file" do
+    subject(:content_type) { analyzer.content_type }
+
+    let(:dir) { Pathname.new(Dir.mktmpdir) }
+    let(:link) { dir.join("avatar.png").tap { |path| File.symlink(Rails.root.join("public", "image_150x150.png"), path) } }
+    let(:linux_file) do
+      dir.join("file").tap do |path|
+        File.write(path, "#!/bin/sh\nexec #{`command -v file`.strip} -h \"$@\"\n")
+        File.chmod(0o755, path)
+      end
+    end
+    # A Hash io on the link (File / Pathname attachables need Rails 7.1): its
+    # path is handed to `file` as it is.
+    let(:attachable) { { io: open_fixture(link), filename: "avatar.png", content_type: "image/png" } }
+
+    around do |example|
+      file_path = ActiveStorage.paths[:file]
+      ActiveStorage.paths[:file] = linux_file.to_s
+      example.run
+    ensure
+      ActiveStorage.paths[:file] = file_path
+      FileUtils.rm_rf(dir)
+    end
+
+    it "sniffs the file the link points to" do
+      expect(content_type).to eq(content_type: "image/png", content_type_backend: "file")
+    end
+  end
+
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "image_150x150.png").to_s }
     let(:attachable) do

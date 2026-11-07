@@ -9,12 +9,20 @@ module ActiveStorageValidations
   module ASVFFProbable
     extend ActiveSupport::Concern
 
+    # Formats whose file only lists other media (a playlist, a concat list):
+    # ffprobe follows the entries, so an uploaded text file would be measured
+    # as a local file of the server it points to.
+    PLAYLIST_FORMATS = %w[hls dash concat].freeze
+
     private
 
     def read_media
       create_media_tempfile do |tempfile|
         begin
-          if media(tempfile).present?
+          if playlist?(media(tempfile))
+            logger.info "Skipping file metadata analysis because the file is a playlist (#{media(tempfile).dig("format", "format_name")})"
+            {}
+          elsif media(tempfile).present?
             yield media(tempfile)
           else
             logger.info "Skipping file metadata analysis because ffprobe doesn't support the file"
@@ -29,7 +37,14 @@ module ActiveStorageValidations
       {}
     end
 
+    def playlist?(media)
+      return false unless media.is_a?(Hash)
+
+      (media.dig("format", "format_name").to_s.split(",") & PLAYLIST_FORMATS).any?
+    end
+
     def media_from_path(path)
+      @media_path = path
       instrument(File.basename(ffprobe_path)) do |payload|
         result = run_command(
           ffprobe_path,
@@ -72,7 +87,27 @@ module ActiveStorageValidations
     # Round to milliseconds so 1.96s is not stored as 2.0 (which made
     # `less_than: 2.seconds` fail).
     def media_duration
-      [ container, audio_stream, video_stream ].filter_map { |source| parse_float(source["duration"]) }.max&.round(3)
+      [ container, audio_stream, video_stream ].filter_map { |source| parse_float(source["duration"]) }.max&.round(3) ||
+        packet_duration
+    end
+
+    # Browser MediaRecorder WebM files have no Duration element (nor Cues):
+    # ffprobe reports no duration at all and `duration` rejected every
+    # recording with media_metadata_missing. Measure the end of the last
+    # packet instead (demuxing only, under the same timeout).
+    def packet_duration
+      return unless @media_path
+
+      result = instrument(File.basename(ffprobe_path)) do |payload|
+        run_command(ffprobe_path, "-v", "error", "-show_entries", "packet=pts_time,duration_time", "-of", "csv=p=0", @media_path, payload: payload)
+      end
+      return unless result&.success?
+
+      result.stdout.each_line.filter_map do |line|
+        pts, duration = line.split(",", 3)
+        start = parse_float(pts)
+        start + (parse_float(duration) || 0) if start
+      end.max&.round(3)
     end
 
     def ffprobe_path

@@ -41,9 +41,8 @@ module ActiveStorageValidations
     def media_from_path(path)
       instrument("mini_magick") do |payload|
         result = run_command(*identify_command(path), payload: payload)
-        return nil unless result.success?
-
-        parse_identify_output(result.stdout)
+        # No early return: it would skip the instrumentation's :duration.
+        parse_identify_output(result.stdout) if result.success?
       end
     end
 
@@ -51,7 +50,7 @@ module ActiveStorageValidations
       require "mini_magick"
 
       tool = ::MiniMagick::Tool.new("identify")
-      tool.format("%w\t%h\t%W\t%H\t%m\t%[orientation]")
+      tool.format("%w\t%h\t%W\t%H\t%m\t%[EXIF:Orientation]\t%[orientation]")
       tool << first_frame(path)
       tool.command
     end
@@ -60,13 +59,18 @@ module ActiveStorageValidations
     # Without the frame selector ImageMagick decodes every frame of animated
     # GIFs / multi-page TIFFs (slow enough to hit command_timeout) and prints
     # one set of fields per frame.
+    #
+    # With a frame selector, ImageMagick expands printf patterns in the
+    # filename (`summer%20dress.png[0]` reads "summer<20 spaces>0ress.png"):
+    # `%%` keeps a literal `%`.
     def first_frame(path)
-      path.match?(/\[\d+\]\z/) ? path : "#{path}[0]"
+      path.match?(/\[\d+\]\z/) ? path : "#{path.gsub('%', '%%')}[0]"
     end
 
     def parse_identify_output(stdout)
-      width, height, page_width, page_height, format, orientation = stdout.to_s.strip.split("\t", 6)
+      width, height, page_width, page_height, format, exif_orientation, orientation = stdout.to_s.strip.split("\t", 7)
       width, height = page_width, page_height if gif_canvas?(format, page_width, page_height)
+      orientation = nil if private_png_orientation?(format, exif_orientation)
       ImageInfo.new(
         width: width.to_i,
         height: height.to_i,
@@ -80,6 +84,13 @@ module ActiveStorageValidations
     # by an ImageMagick crop) is a virtual canvas that libvips ignores.
     def gif_canvas?(format, page_width, page_height)
       format.to_s.start_with?("GIF") && page_width.to_i.positive? && page_height.to_i.positive?
+    end
+
+    # ImageMagick also reads an orientation from its own PNG chunk (orNT,
+    # written by older ImageMagick versions or without eXIf). libvips and
+    # browsers ignore it: a PNG is only turned by an EXIF orientation.
+    def private_png_orientation?(format, exif_orientation)
+      format.to_s.start_with?("PNG") && exif_orientation.to_s.strip.empty?
     end
 
     # EXIF orientations 5 to 8 turn the image a quarter; TopRight (2) and
