@@ -266,6 +266,7 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - Do not `File.open` dummy fixtures and leave the FD for GC. Use `open_fixture` / `register_fixture_io` (`FixtureFiles`); do not reintroduce an `ObjectSpace` sweep or a raised `NOFILE` rlimit to mask leaks
 - Blob `asv_*` metadata is forwarded to the storage service as object metadata (S3: 2 KB, ASCII). Analyzers must only return small scalar values — never free-form hashes such as audio stream tags. Enforced over every dummy fixture by `spec/analyzers/storage_metadata_constraints_spec.rb`
 - `ffprobe` reports Matroska / WebM audio duration on the container only: `AudioAnalyzer#duration` (like `VideoAnalyzer`) must fall back to `container["duration"]` (shared `ASVFFProbable#container`)
+- Image analyzers swap width / height for EXIF orientations 5 to 8 only (`Vips#rotated_image?` reads the `orientation` field, which also covers TIFF; `ImageMagick::QUARTER_TURN_ORIENTATIONS`). Rails' analyzers swap 2 and 4 (mirrors) and miss 5 and 7: do not copy them back. `image_700x500_rotated_90.jpg` is stored 500×700 with orientation 6; `"applies the exif orientation"` rewrites its tag to each value
 - ImageMagick `identify` must target the first frame (`path[0]`, see `ImageMagick#first_frame`); without it every frame of an animated GIF / multi-page TIFF is decoded
 - Keep `json` `< 3` on the Rails 8.1 Gemfile. json 3.0 made `JSON.parse` keyword-only; Rails 8.1.3.1 `ActiveSupport::JSON.decode` still passes a positional options hash (fixed on Rails 8.2 / main as rails/rails#58601)
 

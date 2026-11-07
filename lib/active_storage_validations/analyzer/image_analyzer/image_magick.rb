@@ -73,8 +73,11 @@ module ActiveStorageValidations
       )
     end
 
+    # EXIF orientations 5 to 8 turn the image a quarter; TopRight (2) and
+    # BottomLeft (4) only mirror it.
+    QUARTER_TURN_ORIENTATIONS = %w[ LeftTop RightTop RightBottom LeftBottom ].freeze
     def rotated_image?(image)
-      %w[ RightTop LeftBottom TopRight BottomLeft ].include?(image["%[orientation]"])
+      QUARTER_TURN_ORIENTATIONS.include?(image["%[orientation]"])
     end
 
     def supported?
