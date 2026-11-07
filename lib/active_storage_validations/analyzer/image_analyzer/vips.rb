@@ -64,9 +64,13 @@ module ActiveStorageValidations
       nil
     end
 
-    ROTATIONS = /Right-top|Left-bottom|Top-right|Bottom-left/
+    # EXIF orientations 5 to 8 (Left-top, Right-top, Right-bottom, Left-bottom)
+    # turn the image a quarter, 2 and 4 only mirror it. libvips sets
+    # "orientation" for every format, "exif-ifd0-Orientation" is JPEG / WebP only
+    # (a TIFF Orientation tag is not EXIF).
+    QUARTER_TURN_ORIENTATIONS = 5..8
     def rotated_image?(image)
-      ROTATIONS === image.get("exif-ifd0-Orientation")
+      QUARTER_TURN_ORIENTATIONS.cover?(image.get("orientation").to_i)
     rescue ::Vips::Error
       false
     end

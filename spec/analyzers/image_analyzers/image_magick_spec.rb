@@ -28,6 +28,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
   let(:expected_metadata_rotated) { { width: 700, height: 500 } }
 
   it_behaves_like "returns the right metadata for any attachable"
+  it_behaves_like "applies the exif orientation"
 
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "image_150x150.png").to_s }

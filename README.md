@@ -588,6 +588,8 @@ The `dimension` validator has several possible options:
 - `max`: defines the maximum allowed width and height (range)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
+Width and height are the displayed ones: an image whose EXIF orientation turns it a quarter (5 to 8) is measured rotated, a video by its rotation and display aspect ratio, and a PDF page by its `/Rotate`.
+
 #### Examples
 
 Use it like this:

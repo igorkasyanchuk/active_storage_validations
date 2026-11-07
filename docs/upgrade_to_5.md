@@ -284,6 +284,8 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | `content_type` `spoofing_protection` with a blank declared content type | Mismatch check skipped | Checked against the filename-resolved type |
 | `with_audio: { with: -> { … } }` | Proc treated as truthy, every file failed | Proc evaluated |
 | `dimension` / `aspect_ratio` on a PDF whose first page is rotated (`/Rotate 90`) | Stored page size (200×300) | Displayed page size (300×200) ♻️ |
+| `dimension` / `aspect_ratio` on an image with an EXIF orientation of 2, 4, 5 or 7 (mirrored) | Width and height swapped for 2 and 4, not for 5 and 7 | Swapped for 5 to 8 only, the orientations that turn the image a quarter ♻️ |
+| `dimension` / `aspect_ratio` with libvips on a TIFF whose Orientation tag turns it a quarter | Stored size | Displayed size ♻️ |
 | Video metadata validators on an audio-only MP4 with cover art | Cover read as the video track (its dimensions, `video: true`) | No video track: `dimension` / `aspect_ratio` add `media_metadata_missing` ♻️ |
 | Metadata validators on a file declared as `application/octet-stream`, `IMAGE/PNG` or `""` | No analyzer picked, file rejected | Analyzed from the normalized declared type, or from the type Rails identified (or the filename) when it is blank or generic |
 
@@ -291,10 +293,11 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 
 ### Already-analyzed blobs (optional)
 
-Three analyzer fixes change what is cached in `asv_*` blob metadata. They do not require a code change, but blobs already validated under 4.x keep the old metadata until you clear it:
+Some analyzer fixes (♻️ above) change what is cached in `asv_*` blob metadata. They do not require a code change, but blobs already validated under 4.x keep the old metadata until you clear it:
 
 - `asv_duration` was rounded to 0.1s
 - `asv_duration` was empty for WebM / Matroska audio
+- `asv_width` / `asv_height` were swapped for mirrored EXIF orientations and not for mirrored quarter turns, or missed the TIFF Orientation tag with libvips
 - Empty media containers were cached as `{ audio: false, video: false }`, which `processable_file` read as a successful analysis
 
 Call `blob.remove_active_storage_validations_metadata!` to re-analyze those blobs. On a persisted blob the method now `save!`s the cleared cache (it used to only mutate memory, so `reload` restored the old `asv_*` keys). Non-`asv_*` custom metadata is kept.
