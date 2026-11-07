@@ -94,7 +94,10 @@ RSpec.describe ActiveStorageValidations::ASVCommandable do
     end
 
     context "when the command exits with a non-zero status" do
-      let(:argv) { [ "ruby", "-e", "STDERR.print('nope'); exit 7" ] }
+      # Use the shell: a Ruby child inherits RUBYOPT=-rbundler/setup from
+      # `bundle exec`, and Bundler/RubyGems warnings on its stderr would break
+      # the exact stderr assertion.
+      let(:argv) { [ "sh", "-c", "printf nope >&2; exit 7" ] }
 
       it "is unsuccessful but not timed out" do
         expect(command_result.success?).to be(false)

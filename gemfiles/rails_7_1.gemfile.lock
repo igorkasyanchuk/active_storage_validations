@@ -228,10 +228,10 @@ PLATFORMS
 
 DEPENDENCIES
   active_storage_validations!
-  activejob (~> 7.1.0)
-  activemodel (~> 7.1.0)
-  activestorage (~> 7.1.0)
-  activesupport (~> 7.1.0)
+  activejob (~> 7.1.0, >= 7.1.6)
+  activemodel (~> 7.1.0, >= 7.1.6)
+  activestorage (~> 7.1.0, >= 7.1.6)
+  activesupport (~> 7.1.0, >= 7.1.6)
   combustion (~> 1.3)
   mini_magick (>= 4.9.5)
   nokogiri (>= 1.18)

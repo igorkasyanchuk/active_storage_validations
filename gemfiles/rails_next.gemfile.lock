@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 15e44ae0b33969b0ae26f4372f8ff60c358be6a3
+  revision: f4a33dbbd3e38d6def4f776cb6b60eb4070a9aff
   branch: main
   specs:
     actioncable (8.2.0.alpha)
@@ -47,7 +47,7 @@ GIT
       erubi (~> 1.11)
       herb (>= 0.10)
       rails-dom-testing (~> 2.2)
-      rails-html-sanitizer (~> 1.7)
+      rails-html-sanitizer (~> 1.7, >= 1.7.2)
     activejob (8.2.0.alpha)
       activesupport (= 8.2.0.alpha)
       globalid (>= 1.4.0)
@@ -74,7 +74,7 @@ GIT
       logger (>= 1.4.2)
       minitest (>= 5.1)
       psych (>= 4)
-      ractor-dispatch (>= 0.2.0)
+      ractor-dispatch (>= 0.3.0)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
       uri (>= 0.13.1)
@@ -168,9 +168,9 @@ GEM
       reline (>= 0.4.2)
     json (3.0.2)
     logger (1.7.0)
-    loofah (2.25.2)
+    loofah (2.25.3)
       crass (~> 1.0.2)
-      nokogiri (>= 1.12.0)
+      nokogiri (>= 1.19.5)
     mail (2.9.1)
       logger
       mini_mime (>= 0.1.1)
@@ -195,21 +195,21 @@ GEM
     net-smtp (0.5.1)
       net-protocol
     nio4r (2.7.5)
-    nokogiri (1.19.4-aarch64-linux-gnu)
+    nokogiri (1.19.7-aarch64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.4-aarch64-linux-musl)
+    nokogiri (1.19.7-aarch64-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.19.4-arm-linux-gnu)
+    nokogiri (1.19.7-arm-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.4-arm-linux-musl)
+    nokogiri (1.19.7-arm-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.19.4-arm64-darwin)
+    nokogiri (1.19.7-arm64-darwin)
       racc (~> 1.4)
-    nokogiri (1.19.4-x86_64-darwin)
+    nokogiri (1.19.7-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.19.4-x86_64-linux-gnu)
+    nokogiri (1.19.7-x86_64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.4-x86_64-linux-musl)
+    nokogiri (1.19.7-x86_64-linux-musl)
       racc (~> 1.4)
     pp (0.6.4)
       prettyprint
@@ -237,8 +237,8 @@ GEM
       activesupport (>= 5.0.0)
       minitest
       nokogiri (>= 1.6)
-    rails-html-sanitizer (1.7.1)
-      loofah (~> 2.25, >= 2.25.2)
+    rails-html-sanitizer (1.7.2)
+      loofah (~> 2.25, >= 2.25.3)
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
     rake (13.4.2)
     rbs (4.2.0)

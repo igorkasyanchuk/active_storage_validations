@@ -11,6 +11,8 @@
 
 class Integration::Validator::NestedErrorParent < ApplicationRecord
   has_one :child,
-          class_name: "Integration::Validator::NestedErrorChild"
+          class_name: "Integration::Validator::NestedErrorChild",
+          foreign_key: :nested_error_parent_id,
+          inverse_of: :parent
   accepts_nested_attributes_for :child, update_only: true
 end

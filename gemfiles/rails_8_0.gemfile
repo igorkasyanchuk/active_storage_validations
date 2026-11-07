@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
-%w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| gem rails_subcomponent, '~> 8.0.0' }
+# Floor at the latest patch so a lock refresh cannot fall back to an older release
+%w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| gem rails_subcomponent, '~> 8.0.0', '>= 8.0.5.2' }
 
 gemspec :path => '../'
 
