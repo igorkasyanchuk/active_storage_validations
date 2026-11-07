@@ -5,7 +5,7 @@
 - Same Ruby (`>= 3.3`) and Rails (`>= 7.0.1`) as 4.x. One new system requirement: `content_type` `spoofing_protection` with the default `:file` backend needs `file` 5.26 (2016) or later, see [below](#file-526-for-spoofing_protection)
 - No validator, option, matcher method, or I18n key was renamed or removed
 - The breaking changes are edge cases: custom messages interpolating undocumented options, options that already crashed at runtime or were silently ignored, empty authorized lists, and analysis failures that now fail closed
-- The changelog is long because of the **FIXED** list: hardening found in review, none of it requiring a code change. The few fixes that can change whether a real upload passes are listed in [Fixes that can change validation results](#fixes-that-can-change-validation-results)
+- Most fixes found while preparing 5.0 already shipped in 4.2.0. Coming from 4.2, only the breaking changes below and the few v5-only changes apply; coming from 4.1 or earlier, also read [Fixes that can change validation results](#fixes-that-can-change-validation-results)
 
 ## Do I need to change anything?
 
@@ -265,7 +265,7 @@ The same rules apply to a value returned by a Proc (`less_than: ->(record) { …
 
 ## Fixes that can change validation results
 
-These are bug fixes, not breaking changes, and none needs a code change. They are listed here because a file that passed under 4.x can now fail (or the reverse) if you hit that case. Everything else in the changelog's **FIXED** list only removes crashes or matcher false positives.
+These are bug fixes, not breaking changes, and none needs a code change. They all shipped in 4.2.0 too, so they only matter when upgrading from 4.1 or earlier: a file that passed there can now fail (or the reverse) if you hit that case. Everything else in the changelogs' **FIXED** lists only removes crashes or matcher false positives.
 
 | Validator | 4.x | 5.x |
 | --- | --- | --- |
