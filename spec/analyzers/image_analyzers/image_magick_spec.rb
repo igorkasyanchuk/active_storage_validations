@@ -29,6 +29,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
 
   it_behaves_like "returns the right metadata for any attachable"
   it_behaves_like "applies the exif orientation"
+  it_behaves_like "reports the displayed image size"
 
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "image_150x150.png").to_s }
@@ -101,7 +102,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
       expect(seen_argv.last).to end_with("[0]")
     end
 
-    it "does not print one dimension triplet per frame" do
+    it "does not print one set of fields per frame" do
       stdout = nil
       real_run = analyzer.method(:run_command)
 
@@ -111,7 +112,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
 
       metadata
 
-      expect(stdout.strip.split("\t")).to eq(%w[200 100 Undefined])
+      expect(stdout.strip.split("\t")).to eq(%w[200 100 200 100 GIF Undefined])
     end
 
     it "leaves an explicit frame selector untouched" do
@@ -145,7 +146,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
     end
 
     it "uses the first frame of multi-frame identify output" do
-      stdout = "150\t150\tUndefined\n300\t200\tRightTop\n"
+      stdout = "150\t150\t150\t150\tPNG\tUndefined\n300\t200\t300\t200\tPNG\tRightTop\n"
       info = analyzer.send(:parse_identify_output, stdout)
 
       expect(info.valid?).to be(true)

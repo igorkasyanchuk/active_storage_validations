@@ -29,6 +29,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips, image_pr
 
   it_behaves_like "returns the right metadata for any attachable"
   it_behaves_like "applies the exif orientation"
+  it_behaves_like "reports the displayed image size"
 
   describe "multi-frame images" do
     subject(:metadata) { analyzer.metadata }

@@ -581,7 +581,7 @@ The `dimension` validator has several possible options:
 - `max`: defines the maximum allowed width and height (range)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
-Width and height are the displayed ones: an image whose EXIF orientation turns it a quarter (5 to 8) is measured rotated, a video by its rotation and display aspect ratio, and a PDF page by its `/Rotate`.
+Width and height are the displayed ones: an image whose EXIF orientation turns it a quarter (5 to 8) is measured rotated, a video by its rotation and display aspect ratio, a PDF page by its `/Rotate`, and an animated GIF by its canvas.
 
 #### Examples
 
@@ -829,6 +829,8 @@ end
 Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call `Vips.block_untrusted(true)`, so libvips refuses to load formats marked untrusted (e.g. SVG, BMP). Analysis then returns empty metadata by design. `processable_file` does **not** treat that as failure for those formats (BMP, ICO, PSD, SVG, JPEG XL, JPEG 2000, Netpbm), as long as the file's leading bytes are one of them: a file merely declared as `image/bmp` or `image/svg+xml` is still `file_not_processable`. `dimension` / `aspect_ratio` still need width/height — use MiniMagick for those formats, or skip those validators for them.
 
 An empty but well-formed container (`ffprobe` exits 0 with no audio or video stream) is not processable. That is the same fail-closed miss as a corrupt file or a missing CLI.
+
+libvips reads the image header only, while ImageMagick decodes the image. A truncated image whose header is intact is therefore processable with libvips, which also renders its variants (filling the missing rows), and not with ImageMagick.
 
 #### Error messages (I18n)
 
