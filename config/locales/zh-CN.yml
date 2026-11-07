@@ -64,6 +64,13 @@ zh-CN:
       pages_not_between: "页数必须介于 %{min} 和 %{max} 之间（当前页数为 %{pages})"
       pages_not_equal_to: "页数必须等于 %{exact}（当前页数为%{pages})"
   active_storage_validations:
+    aspect_ratios:
+      square: "正方形"
+      portrait: "纵向"
+      landscape: "横向"
+      a_series: "A 系列 (1:√2)"
+      a_series_portrait: "A 系列纵向 (1:√2)"
+      a_series_landscape: "A 系列横向 (√2:1)"
     duration:
       years:
         one: "%{count}年"

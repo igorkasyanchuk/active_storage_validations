@@ -60,8 +60,8 @@ pl:
       dimension_width_not_equal_to: "szerokość musi wynosić %{length} pixeli"
       dimension_height_not_equal_to: "wysokość musi wynosić %{length} pixeli"
       aspect_ratio_not_square: "musi być kwadratowy (bieżący plik to %{width}x%{height}px)"
-      aspect_ratio_not_portrait: "musi być portret (bieżący plik to %{width}x%{height}px)"
-      aspect_ratio_not_landscape: "musi być krajobrazem (bieżący plik to %{width}x%{height}px)"
+      aspect_ratio_not_portrait: "musi być pionowy (bieżący plik to %{width}x%{height}px)"
+      aspect_ratio_not_landscape: "musi być poziomy (bieżący plik to %{width}x%{height}px)"
       aspect_ratio_not_x_y: "musi być %{authorized_aspect_ratios} (bieżący plik to %{width}x%{height}px)"
       aspect_ratio_invalid: "ma nieprawidłowy współczynnik kształtu (ważne współczynniki kształtu wynoszą %{authorized_aspect_ratios})"
       file_not_processable: "nie jest identyfikowany jako prawidłowy plik multimedialny"
@@ -74,6 +74,13 @@ pl:
       pages_not_between: "liczba stron musi być między %{min} a %{max} (bieżąca liczba stron to %{pages})"
       pages_not_equal_to: "liczba stron musi być równa %{exact} (bieżąca liczba stron to %{pages})"
   active_storage_validations:
+    aspect_ratios:
+      square: "kwadratowy"
+      portrait: "pionowy"
+      landscape: "poziomy"
+      a_series: "format A (1:√2)"
+      a_series_portrait: "pionowy format A (1:√2)"
+      a_series_landscape: "poziomy format A (√2:1)"
     duration:
       years:
         one: "%{count} rok"

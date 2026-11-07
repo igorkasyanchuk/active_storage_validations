@@ -30,13 +30,13 @@ en-GB:
         one: "only 1 file attached (must have between %{min} and %{max} files)"
         other: "total number of files must be between %{min} and %{max} files (there are %{count} files attached)"
       limit_min_not_reached:
-        zero: "no files attached (must have at least %{min} files)"
-        one: "only 1 file attached (must have at least %{min} files)"
-        other: "%{count} files attached (must have at least %{min} files)"
+        zero: "no files attached (minimum is %{min})"
+        one: "only 1 file attached (minimum is %{min})"
+        other: "%{count} files attached (minimum is %{min})"
       limit_max_exceeded:
-        zero: "no files attached (maximum is %{max} files)"
-        one: "too many files attached (maximum is %{max} files, got %{count})"
-        other: "too many files attached (maximum is %{max} files, got %{count})"
+        zero: "no files attached (maximum is %{max})"
+        one: "too many files attached (maximum is %{max}, got %{count})"
+        other: "too many files attached (maximum is %{max}, got %{count})"
       attachment_missing: "is missing its attachment"
       media_metadata_missing: "is not a valid media file"
       dimension_min_not_included_in: "must be greater than or equal to %{width} x %{height} pixels"
@@ -64,6 +64,13 @@ en-GB:
       pages_not_between: "page count must be between %{min} and %{max} (current page count is %{pages})"
       pages_not_equal_to: "page count must be equal to %{exact} (current page count is %{pages})"
   active_storage_validations:
+    aspect_ratios:
+      square: "square"
+      portrait: "portrait"
+      landscape: "landscape"
+      a_series: "A-series (1:√2)"
+      a_series_portrait: "A-series portrait (1:√2)"
+      a_series_landscape: "A-series landscape (√2:1)"
     duration:
       years:
         one: "%{count} year"

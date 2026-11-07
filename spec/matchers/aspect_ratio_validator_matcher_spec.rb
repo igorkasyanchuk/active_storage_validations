@@ -178,7 +178,7 @@ RSpec.describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher d
         context "when provided with any aspect ratio but the allowed aspect ratio" do
           subject(:configured_matcher) { matcher.rejecting(any_aspect_ratio) }
 
-          let(:any_aspect_ratio) { (ActiveStorageValidations::AspectRatioValidator::NAMED_ASPECT_RATIOS + [ :is_4_5 ]).sample }
+          let(:any_aspect_ratio) { %i[square portrait is_4_5].sample }
 
           it { is_expected_to_match_for(klass) }
         end
@@ -190,6 +190,25 @@ RSpec.describe ActiveStorageValidations::Matchers::AspectRatioValidatorMatcher d
 
           it { is_expected_not_to_match_for(klass) }
         end
+      end
+    end
+
+    # A named ratio covers many shapes: one probe per named ratio let these match.
+    describe "a named ratio against a custom one" do
+      context "when rejecting :landscape on a 16:9 validator" do
+        subject(:configured_matcher) { matcher.rejecting(:landscape) }
+
+        let(:model_attribute) { :allowing_one_is_x_y }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+
+      context "when allowing :portrait on a 1:2 validator" do
+        subject(:configured_matcher) { matcher.allowing(:portrait) }
+
+        let(:model_attribute) { :allowing_one_is_1_2 }
+
+        it { is_expected_not_to_match_for(klass) }
       end
     end
 

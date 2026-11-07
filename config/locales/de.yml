@@ -50,8 +50,8 @@ de:
       dimension_width_not_equal_to: "Bildbreite muss genau %{length} Pixel sein"
       dimension_height_not_equal_to: "Bildhöhe muss genau %{length} Pixel sein"
       aspect_ratio_not_square: "muss quadratisch sein (aktuelle Datei ist %{width}x%{height}px)"
-      aspect_ratio_not_portrait: "muss Porträt sein (aktuelle Datei ist %{width}x%{height}px)"
-      aspect_ratio_not_landscape: "muss landschaftlich sein (aktuelle Datei ist %{width}x%{height}px)"
+      aspect_ratio_not_portrait: "muss im Hochformat sein (aktuelle Datei ist %{width}x%{height}px)"
+      aspect_ratio_not_landscape: "muss im Querformat sein (aktuelle Datei ist %{width}x%{height}px)"
       aspect_ratio_not_x_y: "muss %{authorized_aspect_ratios} sein (aktuelle Datei ist %{width}x%{height}px)"
       aspect_ratio_invalid: "hat ein ungültiges Seitenverhältnis (gültige Seitenverhältnisse sind %{authorized_aspect_ratios})"
       file_not_processable: "wird nicht als gültige Mediendatei identifiziert"
@@ -64,6 +64,13 @@ de:
       pages_not_between: "Die Seitenanzahl muss zwischen %{min} und %{max} liegen (die aktuelle Seitenanzahl beträgt %{pages})."
       pages_not_equal_to: "Die Seitenanzahl muss gleich %{exact} sein (die aktuelle Seitenanzahl beträgt %{pages})."
   active_storage_validations:
+    aspect_ratios:
+      square: "quadratisch"
+      portrait: "Hochformat"
+      landscape: "Querformat"
+      a_series: "DIN-A-Format (1:√2)"
+      a_series_portrait: "DIN-A-Hochformat (1:√2)"
+      a_series_landscape: "DIN-A-Querformat (√2:1)"
     duration:
       years:
         one: "%{count} Jahr"

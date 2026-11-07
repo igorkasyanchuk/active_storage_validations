@@ -50,8 +50,8 @@ nl:
       dimension_width_not_equal_to: "breedte moet gelijk zijn aan %{length} pixels"
       dimension_height_not_equal_to: "hoogte moet gelijk zijn aan %{length} pixels"
       aspect_ratio_not_square: "moet vierkant zijn (huidig bestand is %{width}x%{height} px)"
-      aspect_ratio_not_portrait: "moet portret zijn (huidig bestand is %{width}x%{height}px)"
-      aspect_ratio_not_landscape: "moet landschap zijn (huidig bestand is %{width}x%{height}px)"
+      aspect_ratio_not_portrait: "moet staand zijn (huidig bestand is %{width}x%{height}px)"
+      aspect_ratio_not_landscape: "moet liggend zijn (huidig bestand is %{width}x%{height}px)"
       aspect_ratio_not_x_y: "moet %{authorized_aspect_ratios} zijn (huidig bestand is %{width}x%{height}px)"
       aspect_ratio_invalid: "heeft een ongeldige beeldverhouding (geldige beeldverhoudingen zijn %{authorized_aspect_ratios})"
       file_not_processable: "wordt niet geïdentificeerd als een geldig mediabestand"
@@ -64,6 +64,13 @@ nl:
       pages_not_between: "het aantal pagina's moet tussen %{min} en %{max} liggen (het huidige aantal pagina's is %{pages})"
       pages_not_equal_to: "het aantal pagina's moet gelijk zijn aan %{exact} (het huidige aantal pagina's is %{pages})"
   active_storage_validations:
+    aspect_ratios:
+      square: "vierkant"
+      portrait: "staand"
+      landscape: "liggend"
+      a_series: "A-formaat (1:√2)"
+      a_series_portrait: "staand A-formaat (1:√2)"
+      a_series_landscape: "liggend A-formaat (√2:1)"
     duration:
       years:
         one: "%{count} jaar"

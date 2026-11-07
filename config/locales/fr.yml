@@ -64,6 +64,13 @@ fr:
       pages_not_between: "le nombre de pages doit être compris entre %{min} et %{max} (le nombre actuel est de %{pages})"
       pages_not_equal_to: "le nombre de pages doit être égal à %{exact} (le nombre actuel est de %{pages})"
   active_storage_validations:
+    aspect_ratios:
+      square: "carré"
+      portrait: "portrait"
+      landscape: "paysage"
+      a_series: "format A (1:√2)"
+      a_series_portrait: "format A portrait (1:√2)"
+      a_series_landscape: "format A paysage (√2:1)"
     duration:
       years:
         one: "%{count} an"
