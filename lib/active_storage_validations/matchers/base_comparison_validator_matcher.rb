@@ -34,41 +34,39 @@ module ActiveStorageValidations
         initialize_rspecable
         @attribute_name = attribute_name
         @min = @max = @exact = nil
+        @bound_chains = []
       end
 
       def less_than(value)
-        @max = value - smallest_measurement
-        self
+        chain_bound { @max = value - smallest_measurement }
       end
 
       def less_than_or_equal_to(value)
-        @max = value
-        self
+        chain_bound { @max = value }
       end
 
       def greater_than(value)
-        @min = value + smallest_measurement
-        self
+        chain_bound { @min = value + smallest_measurement }
       end
 
       def greater_than_or_equal_to(value)
-        @min = value
-        self
+        chain_bound { @min = value }
       end
 
       def between(range)
-        @min = range.begin
-        @max = last_included_bound(range)
-        self
+        chain_bound do
+          @min = range.begin
+          @max = last_included_bound(range)
+        end
       end
 
       def equal_to(value)
-        @exact = value
-        self
+        chain_bound { @exact = value }
       end
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
+        resolve_bounds
 
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
@@ -102,6 +100,19 @@ module ActiveStorageValidations
 
       def failure_message_unit
         raise NotImplementedError
+      end
+
+      # Bounds are resolved once the subject is known: the probe step
+      # (#smallest_measurement) may depend on the validator (duration
+      # `precision:`).
+      def chain_bound(&block)
+        @bound_chains << block
+        self
+      end
+
+      def resolve_bounds
+        @min = @max = @exact = nil
+        @bound_chains.each(&:call)
       end
 
       def not_lower_than_min?

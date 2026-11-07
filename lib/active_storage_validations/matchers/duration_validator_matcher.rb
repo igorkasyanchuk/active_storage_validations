@@ -15,6 +15,16 @@ module ActiveStorageValidations
       def initialize(attribute_name)
         super
         initialize_timeoutable
+        @precision = nil
+      end
+
+      def precision(value)
+        @precision = value
+        self
+      end
+
+      def matches?(subject)
+        super && is_precision_valid?
       end
 
       def description
@@ -33,10 +43,24 @@ module ActiveStorageValidations
         "seconds"
       end
 
-      # Analyzers round to milliseconds. A 1-second step made `less_than(1.second)`
-      # probe duration 0, which DurationValidator treats as missing metadata.
+      # One unit of the validator's precision (1ms by default): with
+      # `precision: 1` a 1.999s probe is compared as 2.0. A 1-second step made
+      # `less_than(1.second)` probe duration 0, which DurationValidator treats
+      # as missing metadata.
       def smallest_measurement
-        0.001.seconds
+        (10.0**-validator_precision).seconds
+      end
+
+      def validator_precision
+        @precision || attribute_validator&.options&.fetch(:precision, nil) || DurationValidator::DEFAULT_PRECISION
+      end
+
+      def is_precision_valid?
+        return true if @precision.nil?
+
+        attribute_validators.any? do |validator|
+          validator.options.fetch(:precision, DurationValidator::DEFAULT_PRECISION) == @precision
+        end
       end
 
       def lowest_comparable_value

@@ -43,4 +43,12 @@ class Duration::Validator::Check < ApplicationRecord
   validates :with_invalid_media_file, duration: { less_than: 2.seconds }
   has_one_attached :less_than_or_equal_to_two
   validates :less_than_or_equal_to_two, duration: { less_than_or_equal_to: 2.seconds }
+
+  # precision:
+  has_one_attached :equal_to_with_precision
+  validates :equal_to_with_precision, duration: { equal_to: 5.seconds, precision: 1 }
+  has_one_attached :less_than_or_equal_to_with_precision
+  validates :less_than_or_equal_to_with_precision, duration: { less_than_or_equal_to: 5.seconds, precision: 0 }
+  has_one_attached :between_exclusive_with_precision
+  validates :between_exclusive_with_precision, duration: { between: 2.seconds...7.seconds, precision: 1 }
 end

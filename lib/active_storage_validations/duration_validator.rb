@@ -19,6 +19,10 @@ module ActiveStorageValidations
       attachment_missing
     ].freeze
     METADATA_KEYS = %i[duration].freeze
+    # Decimal places of a second durations are rounded to before they are
+    # compared and shown. Analyzers measure milliseconds (3); `precision: 1`
+    # compares tenths, so a 5.029s file passes `equal_to: 5.seconds`.
+    DEFAULT_PRECISION = 3
 
     # Durations are rendered like ActiveSupport::Duration#inspect
     # ("1 minute and 30 seconds") but through the active_storage_validations.duration
@@ -30,6 +34,11 @@ module ActiveStorageValidations
       two_words_connector: " and ",
       last_word_connector: ", and "
     }.freeze
+
+    def check_validity!
+      super
+      ensure_precision_validity
+    end
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
@@ -51,6 +60,7 @@ module ActiveStorageValidations
           next
         end
 
+        duration = duration.to_f.round(precision)
         is_valid?(duration, flat_options) || populate_error_options_and_add_error(record, attribute, attachable, flat_options, duration)
       end
     end
@@ -65,18 +75,30 @@ module ActiveStorageValidations
       add_error(record, attribute, error_type, **errors_options)
     end
 
-    # Analyzer precision is milliseconds. `end - 1` on a Duration is 1 second.
+    def precision
+      options.fetch(:precision, DEFAULT_PRECISION)
+    end
+
+    def ensure_precision_validity
+      return unless options.key?(:precision)
+      return if options[:precision].is_a?(Integer) && options[:precision].between?(0, DEFAULT_PRECISION)
+
+      raise ArgumentError, "You must pass an Integer from 0 to #{DEFAULT_PRECISION} to :precision (decimal places of a second, got #{options[:precision].inspect})"
+    end
+
+    # One unit of the precision (1ms by default). `end - 1` on a Duration is
+    # 1 second.
     def exclusive_range_step
-      0.001.seconds
+      (10.0**-precision).seconds
     end
 
     def format_bound_value(value)
       return nil unless value
 
-      # Milliseconds, the precision of the analyzer and of the comparison.
-      # Rounding to tenths read "must be less than or equal to 5 seconds
-      # (current duration is 5 seconds)" for a 5.029s file.
-      duration_in_words(ActiveSupport::Duration.build(value.to_f.round(3)))
+      # The precision of the comparison (milliseconds by default). Rounding to
+      # tenths while comparing milliseconds read "must be less than or equal
+      # to 5 seconds (current duration is 5 seconds)" for a 5.029s file.
+      duration_in_words(ActiveSupport::Duration.build(value.to_f.round(precision)))
     end
 
     def duration_in_words(duration)
