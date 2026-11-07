@@ -18,8 +18,10 @@ module ActiveStorageValidations
   class Analyzer::PdfAnalyzer < Analyzer
     # pdfinfo reports e.g. "595.276 x 841.89 pts (A4)". Capture the full
     # integer or decimal so extra fractional digits are not split into a
-    # second number (which would make height 8 for A4).
-    PAGE_SIZE_NUMBER = /\d+(?:\.\d+)?/
+    # second number (which would make height 8 for A4). Sizes of 1e6 pts or
+    # more are printed in exponent form ("2e+06 x 1.5e+06 pts"), which must not
+    # be read as 2 x 6.
+    PAGE_SIZE_NUMBER = /\d+(?:\.\d+)?(?:e[+-]?\d+)?/i
 
     def metadata
       read_media do |media|
@@ -89,7 +91,7 @@ module ActiveStorageValidations
     end
 
     def page_size_in_points
-      @media["page_size"].to_s.scan(PAGE_SIZE_NUMBER).map(&:to_i)
+      @media["page_size"].to_s.scan(PAGE_SIZE_NUMBER).map { |number| Float(number).to_i }
     end
 
     def pages
