@@ -78,7 +78,7 @@ gem 'mini_magick', '>= 4.9.5'
 
 Plus, you have to be sure to have the corresponding command-line tool installed on your system (`libvips` for `ruby-vips`, or ImageMagick for `mini_magick` — both locally and in CI / production).
 
-We recommend **libvips** (`ruby-vips` + `config.active_storage.variant_processor = :vips`) for these validators. Rails already defaults Active Storage variants to libvips ([`ActiveStorage::Variant`](https://api.rubyonrails.org/classes/ActiveStorage/Variant.html)), and our [image processor benchmarks](benchmark/BASELINE.md#image-processors--vips-vs-mini_magick) show cold metadata analysis is about **8× faster** than MiniMagick/ImageMagick on the same machine and fixtures. Warm validations (cached `asv_*` metadata) are similar for both.
+We recommend **libvips** (`ruby-vips` + `config.active_storage.variant_processor = :vips`) for these validators. Rails already defaults Active Storage variants to libvips ([`ActiveStorage::Variant`](https://api.rubyonrails.org/classes/ActiveStorage/Variant.html)), and our [image processor benchmarks](benchmark/BASELINE.md#image_processors--vips-vs-mini_magick) show cold metadata analysis is about **8× faster** than MiniMagick/ImageMagick on the same machine and fixtures. Warm validations (cached `asv_*` metadata) are similar for both.
 
 ### Using video and audio metadata validators
 
@@ -131,10 +131,12 @@ The gem emits two `ActiveSupport::Notifications` events:
 
 | Event | Payload | Emitted |
 |---|---|---|
-| `analyze.active_storage_validations` | `analyzer`, `command`, `timeout`, `timed_out`, `duration` | Every time an analyzer command runs (i.e. on a cache miss) |
-| `timeout.active_storage_validations` | `analyzer`, `command`, `timeout` | Only when a command exceeds its deadline |
+| `analyze.active_storage_validations` | `analyzer`, `command`, `timeout`, `timed_out`, `duration`, plus the file keys below | Every time an analyzer command runs (i.e. on a cache miss) |
+| `timeout.active_storage_validations` | `analyzer`, `command`, `timeout`, plus the file keys below | Only when a command exceeds its deadline |
 
-`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `with_audio`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection`). When a command times out, analysis fails closed and the validator adds its usual error (`file_not_processable` / `media_metadata_missing` / `audio_missing` / content-type errors) — there is no separate timeout error message.
+Both payloads name the analyzed file, so a slow or timed out analysis can be traced back to its upload: `filename`, `content_type` (as declared), `byte_size` (`nil` for an IO that cannot tell) and `blob_key` (`nil` until the file is an `ActiveStorage::Blob`).
+
+`command_timeout` bounds metadata analysis used by `dimension`, `aspect_ratio`, `duration`, `with_audio`, `pages`, `processable_file`, and `content_type` (with `spoofing_protection`). When a command times out, analysis fails closed and the validator adds its usual error (`file_not_processable` / `media_metadata_missing` / `audio_missing` / content-type errors) — there is no separate timeout error message. The exception is `with_audio: { with: false }`: a file that could not be analyzed has no audio track found, so it passes.
 
 The 10s default is enough for typical uploads. Raise it (or set `nil`) if you analyze very large videos/PDFs, especially on slow or network storage — otherwise those files can start failing validation after upgrade. See [upgrade to 4.x](docs/upgrade_to_4.md#analyzer-command-timeout).
 
@@ -184,6 +186,10 @@ end
 
 Static options are checked when the model class loads; a proc's result is only known at validation time, so an unsupported value returned by a proc (`"image/jpg"` for `content_type`, `:sqaure` for `aspect_ratio`) raises the same `ArgumentError` from `valid?` instead of silently rejecting every file.
 
+A proc is called once per validation, however many files are attached, so a proc that runs a query does not make one query per file.
+
+`timeout`, `precision` and `spoofing_protection` take static values only: they set how files are analyzed, not what is accepted.
+
 **Performance optimization**<br>
 Some validators rely on an expensive operation (metadata analysis and content type analysis). To mitigate the performance cost, the gem leverages the `ActiveStorage::Blob.metadata` method to store retrieved metadata. Therefore, once the file has been analyzed by our gem, the expensive analysis operation will not be triggered again for new validations.
 
@@ -194,6 +200,18 @@ This also covers metadata the analyzer cannot extract from a given file (e.g. a 
 Clients cannot pre-fill this cache to skip the analysis (e.g. through Rails' direct upload endpoint, which accepts `metadata: { custom: … }`): a new blob drops `asv_*` keys when it is initialized, so only the gem writes them.
 
 To force re-analysis of a persisted blob, call `blob.remove_active_storage_validations_metadata!`. That clears `asv_*` keys and, when the blob is already saved, writes the change so `reload` does not restore them. Non-`asv_*` custom metadata is kept.
+
+To clear the cache of many blobs at once (e.g. after an upgrade that teaches an analyzer to read files it could not before), run the rake task or its Ruby equivalent. Both skip the blob callbacks, so attached records are not touched:
+
+```sh
+bin/rails active_storage_validations:remove_metadata
+bin/rails active_storage_validations:remove_metadata CONTENT_TYPE=video/webm,audio/webm # only these content types
+```
+
+```ruby
+ActiveStorageValidations.remove_metadata! # every blob, returns the number of blobs cleared
+ActiveStorageValidations.remove_metadata!(ActiveStorage::Blob.where(content_type: "video/webm")) # any blob relation
+```
 
 ---
 
@@ -265,13 +283,13 @@ en:
         one: "only 1 file attached (must have between %{min} and %{max} files)"
         other: "total number of files must be between %{min} and %{max} files (there are %{count} files attached)"
       limit_min_not_reached:
-        zero: "no files attached (must have at least %{min} files)"
-        one: "only 1 file attached (must have at least %{min} files)"
-        other: "%{count} files attached (must have at least %{min} files)"
+        zero: "no files attached (minimum is %{min})"
+        one: "only 1 file attached (minimum is %{min})"
+        other: "%{count} files attached (minimum is %{min})"
       limit_max_exceeded:
-        zero: "no files attached (maximum is %{max} files)"
-        one: "too many files attached (maximum is %{max} files, got %{count})"
-        other: "too many files attached (maximum is %{max} files, got %{count})"
+        zero: "no files attached (maximum is %{max})"
+        one: "too many files attached (maximum is %{max}, got %{count})"
+        other: "too many files attached (maximum is %{max}, got %{count})"
 ```
 
 The `limit` validator error messages expose 3 values that you can use:
@@ -288,8 +306,8 @@ Validates if the attachment has an allowed content type.
 #### Options
 
 The `content_type` validator has several possible options:
-- `with`: defines the allowed content type (string, symbol or regex)
-- `in`: defines the allowed content types (array of strings, symbols or regexes)
+- `with`: defines the allowed content type (string, symbol, regex or media type wildcard)
+- `in`: defines the allowed content types (array of strings, symbols, regexes or media type wildcards)
 - `spoofing_protection`: enables content type spoofing protection (`false` by default). Allowed values: `true` / `:file` (UNIX `file` CLI), `:magika` (Google Magika CLI)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) when spoofing protection runs `file` or `magika`
 
@@ -297,6 +315,7 @@ As mentioned above, this validator can define content types in several ways:
 - String: `image/png` or `png`
 - Symbol: `:png`
 - Regex: `/\Avideo\/.*\z/`
+- Media type wildcard: `"image/*"`, as in the HTML `accept` attribute. It allows every image type, and error messages show it as `image/*` (a regex shows its source)
 
 #### Examples
 
@@ -308,6 +327,8 @@ class User < ApplicationRecord
   validates :avatar, content_type: 'image/png' # only allows PNG images
   validates :avatar, content_type: :png # only allows PNG images, same as { with: :png }
   validates :avatar, content_type: /\Avideo\/.*\z/ # only allows video files
+  validates :avatar, content_type: "image/*" # only allows images
+  validates :avatar, content_type: ["image/*", :pdf] # allows images and PDF files
   validates :avatar, content_type: ['image/png', 'image/jpeg'] # only allows PNG and JPEG images
   validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: true } # UNIX `file` backend (same as :file)
   validates :avatar, content_type: { in: [:png, :jpeg], spoofing_protection: :magika } # Google Magika CLI backend
@@ -354,11 +375,11 @@ ActiveStorageValidations.configure { |config| config.infer_file_field_accept = f
 ```
 
 Notes:
-- Only broad MIME-type regexes of the form `/\Aimage\/.*\z/` (or `video` / `audio` / etc.) are inferred, as `image/*`
+- Media type wildcards (`"image/*"`) are passed as they are, and broad MIME-type regexes of the form `/\Aimage\/.*\z/` (or `video` / `audio` / etc.) are inferred as `image/*`
 - Other regexes (e.g. `/\Aimage\/(png|gif)\z/`) cannot be reliably represented in `accept`
 - Proc / dynamic `content_type` options are not evaluated: they are not called while the form renders, because their result can depend on record state that is only set on submit, and a raising proc would break the whole view for what is merely a frontend hint. Backend validation is unchanged; pass a custom `accept:` on those fields if you want the picker filtered
 - A validator with such a regex or Proc in its list sets no `accept` at all: listing only its other types would hide files it allows. Another `content_type` validator on the same attribute still sets `accept`, since every file must pass it
-- Conditional validators (`if:` / `unless:`) are not evaluated: their content types are always included in `accept`, even when the condition would skip the validator for that record. Backend validation is unchanged; use `infer_accept: false` (or a custom `accept:`) if the picker must match the active conditions
+- Conditional validators (`if:` / `unless:`, `on:` / `except_on:`) are not evaluated: their content types are always included in `accept`, even when the condition or context would skip the validator for that record. Backend validation is unchanged; use `infer_accept: false` (or a custom `accept:`) if the picker must match the active conditions
 
 #### Content type shorthands
 
@@ -368,7 +389,7 @@ If you choose to use a content_type 'shorthand' (like `png`), note that it will 
 Marcel::MimeType.extend "application/ino", extensions: %w(ino), parents: "text/plain" # Registering arduino INO files
 ```
 
-Be sure to at least include one the `extensions`, `parents` or `magic` option, otherwise the content type will not be registered.
+Be sure to at least include one of the `extensions`, `parents` or `magic` options, otherwise the content type will not be registered.
 
 #### Content type spoofing protection
 
@@ -438,14 +459,17 @@ en:
       content_type_spoofed:
         one: "has a content type that is not equivalent to the one that is detected through its content (authorized content type is %{authorized_human_content_types})"
         other: "has a content type that is not equivalent to the one that is detected through its content (authorized content types are %{authorized_human_content_types})"
+      attachment_missing: "is missing its attachment"
 ```
+
+`attachment_missing` is added when the file of an attachment cannot be found on the storage service while spoofing protection reads it.
 
 The `content_type` validator error messages expose 7 values that you can use:
 - `content_type` containing the content type of the sent file (e.g. `image/png`)
 - `human_content_type` containing a more user-friendly version of the sent file content type (e.g. 'TXT' for 'text/plain')
 - `detected_content_type` containing the detected content type of the sent file using `spoofing_protection` option (e.g. `image/png`)
 - `detected_human_content_type` containing a more user-friendly version of the sent file detected content type using `spoofing_protection` option (e.g. 'TXT' for 'text/plain')
-- `authorized_human_content_types` containing the list of authorized content types (e.g. 'PNG, JPEG' for `['image/png', 'image/jpeg']`)
+- `authorized_human_content_types` containing the list of authorized content types (e.g. 'PNG, JPG' for `['image/png', 'image/jpeg']`, 'MP3, MOV' for `[:mp3, :mov]`, 'image/*' for `"image/*"`)
 - `count` containing the number of authorized content types (e.g. `2`)
 - `filename` containing the filename
 
@@ -464,6 +488,8 @@ The `size` validator has 6 possible options:
 - `greater_than_or_equal_to`: defines the minimum allowed file size
 - `between`: defines the allowed file size range
 - `equal_to`: defines the allowed file size
+
+Pass one comparison option per validator (`between` covers a range); add a second validator to combine others.
 
 Attachments marked for destruction are ignored, so they do not count against the bound.
 
@@ -524,6 +550,8 @@ The `total_size` validator has 6 possible options:
 - `greater_than_or_equal_to`: defines the minimum allowed total file size
 - `between`: defines the allowed total file size range
 - `equal_to`: defines the allowed total file size
+
+Pass one comparison option per validator (`between` covers a range); add a second validator to combine others.
 
 Attachments marked for destruction are ignored, so they do not count against the total.
 
@@ -586,7 +614,7 @@ The `dimension` validator has several possible options:
 - `max`: defines the maximum allowed width and height (range)
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
-Static options are checked at boot and raise `ArgumentError` when malformed: a `width` / `height` Hash needs `:min`, `:max` or `:in` (and no other key, nor `:in` together with `:min` / `:max`), `:min` / `:max` values are Integers or Procs, a bare Range must be wrapped in `{ in: }`, and the top-level `min` / `max` cannot be combined with `width` / `height`.
+At boot, the validator checks that at least one of `width`, `height`, `min` and `max` is given, and that `in:` and the top-level `min` / `max` are Ranges (or Procs). Other keys in a `width` / `height` Hash (a typo such as `{ minimum: 1000 }`) are ignored, so double-check them: such an option validates nothing.
 
 Width and height are the displayed ones: an image whose EXIF orientation turns it a quarter (5 to 8) is measured rotated, a video by its rotation and display aspect ratio, a PDF page by its `/Rotate`, and an animated GIF by its canvas.
 
@@ -625,6 +653,7 @@ en:
       dimension_width_not_equal_to: "width must be equal to %{length} pixels"
       dimension_height_not_equal_to: "height must be equal to %{length} pixels"
       media_metadata_missing: "is not a valid media file"
+      attachment_missing: "is missing its attachment"
 ```
 
 The `dimension` validator error messages expose 6 values that you can use:
@@ -654,7 +683,11 @@ The `duration` validator has several possible options:
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 - `precision`: the number of decimal places of a second the duration is rounded to before it is compared and shown in messages, an Integer from `0` to `3` (default `3`, milliseconds)
 
+Pass one comparison option per validator (`between` covers a range); add a second validator to combine others.
+
 Duration is compared to the millisecond by default (the analyzer no longer rounds to 0.1s): a 1.96s file passes `less_than: 2.seconds`. Encoders pad audio and video, so a "5-second" file often lasts 5.029s and fails `equal_to: 5.seconds`: round it with `precision: 1` (tenths, as before 4.2) or `precision: 0` (whole seconds). A file lasts as long as its longest track (the container, its audio and its video).
+
+Recordings made in the browser with the MediaRecorder API (WebM from Chrome / Firefox) carry no duration in their header: their duration is read from their last frame instead.
 
 #### Examples
 
@@ -686,7 +719,11 @@ en:
       duration_not_greater_than_or_equal_to: "duration must be greater than or equal to %{min} (current duration is %{duration})"
       duration_not_between: "duration must be between %{min} and %{max} (current duration is %{duration})"
       duration_not_equal_to: "duration must be equal to %{exact} (current duration is %{duration})"
+      media_metadata_missing: "is not a valid media file"
+      attachment_missing: "is missing its attachment"
 ```
+
+`media_metadata_missing` is added when the file's duration cannot be read (not an audio / video file, missing `ffprobe`, timed out analysis), and `attachment_missing` when the file of an attachment cannot be found on the storage service.
 
 The `duration` validator error messages expose 5 values that you can use:
 - `duration` containing the current duration size, to the millisecond (e.g. `2 minutes`, `5.029 seconds`)
@@ -740,7 +777,7 @@ end
 
 Rails treats a bare `with_audio: false` as a disabled validator. Use the hash form `with_audio: { with: false }` to reject files that contain audio.
 
-Files that cannot contain an audio stream at all (images, pdfs) are treated as having no audio track: they fail `with_audio: true` and pass `with_audio: { with: false }`.
+Files that cannot contain an audio stream at all (images, pdfs) are treated as having no audio track: they fail `with_audio: true` and pass `with_audio: { with: false }`. So does a file that could not be analyzed (missing `ffprobe`, [timed out](#configuration) analysis).
 
 #### Error messages (I18n)
 
@@ -750,6 +787,7 @@ en:
     messages:
       audio_missing: "must have an audio track"
       audio_present: "must not have an audio track"
+      attachment_missing: "is missing its attachment"
 ```
 
 The `with_audio` validator error message exposes the `filename` value containing the current file name.
@@ -772,6 +810,7 @@ The `aspect_ratio` validator has several options:
 This validator can define aspect ratios in several ways:
 - Symbols:
   - prebuilt aspect ratios: `:square`, `:portrait`, `:landscape`
+  - ISO 216 paper ratios (A4, A3, …, 1:√2): `:a_series` (either orientation), `:a_series_portrait`, `:a_series_landscape`. A scan or export of an A4 page (595×842, 2480×3508) matches, with the same rounding and pixel of slack as custom ratios
   - custom aspect ratios (it must be of type `is_xx_yy`): `:is_16_9`, `:is_4_3`, etc. A file matches a custom ratio when both ratios are equal once rounded to 3 decimals, or when one of its sides is within a pixel of the other one scaled to that ratio, so sizes such as 1366×768 (1366 × 9 / 16 = 768.375) match `:is_16_9`, while 1920×1082 does not. That pixel of slack only applies to images at least x×y pixels: a 4×3 or 1×1 image does not match `:is_16_9`.
 
 #### Examples
@@ -780,12 +819,14 @@ Use it like this:
 ```ruby
 class User < ApplicationRecord
   has_one_attached :avatar
+  has_one_attached :scan
 
   validates :avatar, aspect_ratio: :square # restricts the aspect ratio to 1:1
   validates :avatar, aspect_ratio: :portrait # restricts the aspect ratio to x:y where y > x
   validates :avatar, aspect_ratio: :landscape # restricts the aspect ratio to x:y where x > y
   validates :avatar, aspect_ratio: :is_16_9 # restricts the aspect ratio to 16:9
   validates :avatar, aspect_ratio: %i[square is_16_9] # restricts the aspect ratio to 1:1 and 16:9
+  validates :scan, aspect_ratio: :a_series_portrait # restricts the aspect ratio to an upright A4 / A3 / … page
 end
 ```
 
@@ -801,13 +842,30 @@ en:
       aspect_ratio_not_x_y: "must be %{authorized_aspect_ratios} (current file is %{width}x%{height}px)"
       aspect_ratio_invalid: "has an invalid aspect ratio (valid aspect ratios are %{authorized_aspect_ratios})"
       media_metadata_missing: "is not a valid media file"
+      attachment_missing: "is missing its attachment"
 ```
 
+The A-series ratios use `aspect_ratio_not_x_y`.
+
 The `aspect_ratio` validator error messages expose 4 values that you can use:
-- `authorized_aspect_ratios` containing the authorized aspect ratios
+- `authorized_aspect_ratios` containing the authorized aspect ratios, with the named ones in the current locale (e.g. `square, 16:9`, `carré, 16:9` in French)
 - `width` containing the current width of the image/video
 - `height` containing the current height of the image/video
 - `filename` containing the current filename in error
+
+The names come from the `active_storage_validations.aspect_ratios` keys shipped with every bundled locale. Override them in your application locales like any other key:
+
+```yml
+en:
+  active_storage_validations:
+    aspect_ratios:
+      square: "square"
+      portrait: "portrait"
+      landscape: "landscape"
+      a_series: "A-series (1:√2)"
+      a_series_portrait: "A-series portrait (1:√2)"
+      a_series_landscape: "A-series landscape (√2:1)"
+```
 
 ---
 
@@ -839,6 +897,8 @@ Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call `Vips.block_untrusted(true)`, so libvi
 
 An empty but well-formed container (`ffprobe` exits 0 with no audio or video stream) is not processable. That is the same fail-closed miss as a corrupt file or a missing CLI.
 
+An HLS / DASH playlist or an ffmpeg concat list (a text file naming other media files) is not processable, and has no dimension, duration or audio track, even when the files it names are valid: `ffprobe` would report the streams of those files, read from the server, instead of the upload's.
+
 libvips reads the image header only, while ImageMagick decodes the image. A truncated image whose header is intact is therefore processable with libvips, which also renders its variants (filling the missing rows), and not with ImageMagick.
 
 #### Error messages (I18n)
@@ -848,6 +908,7 @@ en:
   errors:
     messages:
       file_not_processable: "is not identified as a valid media file"
+      attachment_missing: "is missing its attachment"
 ```
 
 The `processable_file` validator error messages expose 1 value that you can use:
@@ -870,6 +931,8 @@ The `pages` validator has several possible options:
 - `between`: defines the allowed number of pages range
 - `equal_to`: defines the allowed number of pages
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
+
+Pass one comparison option per validator (`between` covers a range); add a second validator to combine others.
 
 #### Examples
 
@@ -899,7 +962,11 @@ en:
       pages_not_greater_than_or_equal_to: "page count must be greater than or equal to %{min} (current page count is %{pages})"
       pages_not_between: "page count must be between %{min} and %{max} (current page count is %{pages})"
       pages_not_equal_to: "page count must be equal to %{exact} (current page count is %{pages})"
+      media_metadata_missing: "is not a valid media file"
+      attachment_missing: "is missing its attachment"
 ```
+
+`media_metadata_missing` is added when the file's page count cannot be read (not a PDF, missing `pdfinfo`, timed out analysis), and `attachment_missing` when the file of an attachment cannot be found on the storage service.
 
 The `pages` validator error messages expose 5 values that you can use:
 - `pages` containing the current file number of pages (e.g. `7`)
@@ -956,6 +1023,7 @@ describe User do
   # #allowing, #rejecting
   it { is_expected.to validate_aspect_ratio_of(:avatar).allowing(:square, :portrait) } # possible to use an Array or *splatted array
   it { is_expected.to validate_aspect_ratio_of(:avatar).rejecting(:square, :landscape) } # possible to use an Array or *splatted array
+  it { is_expected.to validate_aspect_ratio_of(:scan).allowing(:a_series_portrait) }
 
   # attached
   it { is_expected.to validate_attached_of(:avatar) }
@@ -972,6 +1040,7 @@ describe User do
   # #allowing, #rejecting, #spoofing_protection
   it { is_expected.to validate_content_type_of(:avatar).allowing('image/png', 'image/gif') } # possible to use an Array or *splatted array
   it { is_expected.to validate_content_type_of(:avatar).rejecting('text/plain', 'text/xml') } # possible to use an Array or *splatted array
+  it { is_expected.to validate_content_type_of(:avatar).allowing('image/*').rejecting('video/*') } # every type Marcel knows of that media type
   it { is_expected.to validate_content_type_of(:avatar).allowing('image/png').spoofing_protection } # true / :file
   it { is_expected.to validate_content_type_of(:avatar).allowing('image/png').spoofing_protection(:magika) }
 
@@ -996,14 +1065,14 @@ describe User do
   it { is_expected.to validate_size_of(:avatar).between(100..500.kilobytes) }
   it { is_expected.to validate_size_of(:avatar).equal_to(5.megabytes) }
 
-  # total_size:
+  # total_size (has_many_attached only):
   # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
-  it { is_expected.to validate_total_size_of(:avatar).less_than(50.kilobytes) }
-  it { is_expected.to validate_total_size_of(:avatar).less_than_or_equal_to(50.kilobytes) }
-  it { is_expected.to validate_total_size_of(:avatar).greater_than(1.kilobyte) }
-  it { is_expected.to validate_total_size_of(:avatar).greater_than_or_equal_to(1.kilobyte) }
-  it { is_expected.to validate_total_size_of(:avatar).between(100..500.kilobytes) }
-  it { is_expected.to validate_total_size_of(:avatar).equal_to(5.megabytes) }
+  it { is_expected.to validate_total_size_of(:certificates).less_than(50.kilobytes) }
+  it { is_expected.to validate_total_size_of(:certificates).less_than_or_equal_to(50.kilobytes) }
+  it { is_expected.to validate_total_size_of(:certificates).greater_than(1.kilobyte) }
+  it { is_expected.to validate_total_size_of(:certificates).greater_than_or_equal_to(1.kilobyte) }
+  it { is_expected.to validate_total_size_of(:certificates).between(100..500.kilobytes) }
+  it { is_expected.to validate_total_size_of(:certificates).equal_to(5.megabytes) }
 
   # duration:
   # #less_than, #less_than_or_equal_to, #greater_than, #greater_than_or_equal_to, #between, #equal_to
@@ -1032,7 +1101,7 @@ end
 ```
 (Note that matcher methods are chainable)
 
-All matchers can currently be customized with these options:
+All matchers can be customized with `:on`, `:except_on` and `:message`. All matchers except `validate_attached_of` support `#allow_blank`, and `#timeout` is available on the metadata matchers (`aspect_ratio`, `dimension`, `duration`, `pages`, `processable_file`, `with_audio`) and `content_type`:
 
 ```ruby
 describe User do
@@ -1044,8 +1113,12 @@ describe User do
   it { is_expected.to validate_attached_of(:avatar).except_on(:update) }
   it { is_expected.to validate_attached_of(:avatar).except_on(%i[update custom]) }
 
-  # :message
+  # :message (the validator's `message:` option, or the message the error renders; a Regexp matches either)
   it { is_expected.to validate_dimensions_of(:avatar).width(250).with_message('Invalid dimensions.') }
+  it { is_expected.to validate_size_of(:avatar).less_than(50.kilobytes).with_message(/must be less than 50 KB/) }
+
+  # :allow_blank (for a validator declared with `allow_blank: true`; not available on validate_attached_of)
+  it { is_expected.to validate_size_of(:avatar).less_than(50.kilobytes).allow_blank }
 
   # :timeout (analyzer command timeout — metadata validators + content_type with spoofing)
   it { is_expected.to validate_duration_of(:video).less_than(5.minutes).timeout(30.seconds) }
@@ -1055,6 +1128,8 @@ end
 ```
 
 `validate_limits_of(...).with_message(...)` needs `#min` or `#max` to build a file count the validator rejects.
+
+Matchers also work on validators declared with `strict: true`: their probes collect the errors instead of raising `ActiveModel::StrictValidationFailed`.
 
 ### Minitest
 
@@ -1076,7 +1151,7 @@ end
 ```
 
 #### Matchers
-Then you can use the matchers with the syntax specified in the RSpec section, just use `should validate_method` instead of `it { is_expected_to validate_method }` as specified in the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem.
+Then you can use the matchers with the syntax specified in the RSpec section, just use `should validate_method` instead of `it { is_expected.to validate_method }` as specified in the [shoulda-context](https://github.com/thoughtbot/shoulda-context) gem.
 
 
 ## Contributing
