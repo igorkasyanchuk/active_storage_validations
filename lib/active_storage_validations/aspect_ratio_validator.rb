@@ -140,11 +140,14 @@ module ActiveStorageValidations
     #   floor or ceil, so common sizes such as 1366×768 (1366 × 9 / 16 =
     #   768.375) and 854×480 match 16:9.
     # Strictly under a pixel: a `<= 1` margin was far too loose on small
-    # images (2×2 matched 1:2, 100×2 matched 100:1).
+    # images (2×2 matched 1:2, 100×2 matched 100:1). And only for images at
+    # least x×y: below that, a pixel is coarser than the ratio (4×3, 2×1 and
+    # 1×1 all matched 16:9).
     def matching_ratio?(width, height, x, y)
-      (width.to_f / height).round(RATIO_PRECISION) == (x.to_f / y).round(RATIO_PRECISION) ||
-        (height - width * y / x.to_f).abs < 1 ||
-        (width - height * x / y.to_f).abs < 1
+      return true if (width.to_f / height).round(RATIO_PRECISION) == (x.to_f / y).round(RATIO_PRECISION)
+      return false if width < x || height < y
+
+      (height - width * y / x.to_f).abs < 1 || (width - height * x / y.to_f).abs < 1
     end
 
     def ensure_at_least_one_validator_option

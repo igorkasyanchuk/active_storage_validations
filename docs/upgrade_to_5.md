@@ -275,7 +275,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | `dimension` exclusive `in:` (`400...600`) | 600 accepted | 600 rejected |
 | `size`, `limit`, `total_size` with attachments marked for destruction | Doomed files counted | Ignored, like `attached:` |
 | Metadata validators and `content_type` with a persisted file marked for destruction (`has_one_attached`, or `has_many_attached` while attaching new files) | Doomed file still validated | Ignored |
-| `aspect_ratio` `is_x_y` | Exact to 3 decimals: 1366×768, 854×480 rejected as `:is_16_9` | Still exact to 3 decimals, and also accepted when one side is within a pixel of the other one scaled to `x:y` |
+| `aspect_ratio` `is_x_y` | Exact to 3 decimals: 1366×768, 854×480 rejected as `:is_16_9` | Still exact to 3 decimals, and also accepted when one side is within a pixel of the other one scaled to `x:y`, for images at least x×y pixels |
 | `duration` | Rounded to 0.1s before comparing: 1.96s failed `less_than: 2.seconds`, a 5.029s file passed `equal_to: 5.seconds` | Compared to the millisecond ♻️, see [below](#duration-is-compared-to-the-millisecond) |
 | `duration` of a file whose tracks differ (a 0.04s video track and a 30s audio track) | The video (or audio) track's duration: 0.04s | The longest of the container and its tracks: 30s ♻️ |
 | `duration` on WebM / Matroska audio (browser `MediaRecorder` Opus) | `media_metadata_missing` | Container duration used ♻️ |

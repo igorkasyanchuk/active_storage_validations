@@ -314,7 +314,13 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
         [ 4032, 3025, :is_4_3 ] => true,
         # one side is the floor or ceil of the other one scaled to x:y
         [ 1921, 1080, :is_16_9 ] => true,
-        [ 2, 1, :is_16_9 ] => true,
+        [ 16, 9, :is_16_9 ] => true,
+        # ...but only for an image at least x×y
+        [ 2, 1, :is_16_9 ] => false,
+        [ 4, 3, :is_16_9 ] => false,
+        [ 3, 2, :is_16_9 ] => false,
+        [ 8, 5, :is_16_9 ] => false,
+        [ 1, 1, :is_16_9 ] => false,
         # a whole pixel off is a large share of a small side
         [ 2, 2, :is_1_2 ] => false,
         [ 100, 2, :is_100_1 ] => false,
