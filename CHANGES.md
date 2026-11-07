@@ -73,6 +73,7 @@
       - `VideoAnalyzer` / `AudioAnalyzer` no longer raise from `valid?` on invalid ffprobe JSON, `N/A` numeric fields, a non-integer rotation (`"90.0"`) or a missing `side_data_list`; analysis fails closed
       - ImageMagick `identify` targets the first frame only (`path[0]`), so large animated GIFs / multi-page TIFFs no longer hit `command_timeout`
       - ♻️ Images swap width and height for the EXIF orientations that turn them a quarter (5 to 8), with both processors. Mirrored images (2, 4) were swapped and mirrored quarter turns (5, 7) were not, as in Rails' own analyzers. libvips also reads the Orientation tag of TIFF files
+      - ♻️ ImageMagick reports the canvas size of a GIF, like libvips: a GIF whose first frame is smaller than its canvas reported the frame's size
       - ♻️ `PdfAnalyzer` applies the first page's `/Rotate`: a 200×300 pt page rotated by 90° is reported as 300×200, as displayed, like rotated images and videos
       - ♻️ `VideoAnalyzer` ignores cover art (`attached_pic` streams): an audio-only MP4 with an embedded cover no longer reports the cover's dimensions and `video: true`
       - `PdfAnalyzer` no longer caches `pages: 0` (or 0-pt width / height) when `pdfinfo` omits them, so the analysis can retry and `processable_file` no longer treats `{ pages: 0 }` as a decoded file
