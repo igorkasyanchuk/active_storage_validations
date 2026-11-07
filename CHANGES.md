@@ -36,106 +36,72 @@
     - Tests & tooling
       - Run the Magika CLI once for the whole spoofing real-upload matrix (`magika_batch`) instead of once per example: the suite went from 8 minutes to under 1
 - 4.2.0
-  - Same Ruby (`>= 3.3`) / Rails (`>= 7.0.1`) as 4.1, and no breaking change: the bug fixes and the duration localization prepared for 5.0, without its stricter option checks and fail-closed defaults. ♻️ marks analyzer fixes: blobs analyzed by an earlier release keep their cached metadata until `blob.remove_active_storage_validations_metadata!`
+  - **In short**: a drop-in upgrade from 4.1. Same Ruby (`>= 3.3`) and Rails (`>= 7.0.1`), no breaking change, no code change needed. It ships the fixes found while preparing 5.0, without 5.0's stricter option checks. Read **CHANGED**: a few fixes can make a file that passed under 4.1 fail, or the reverse
+  - **Cached analyses (♻️)**: blobs analyzed before 4.2 keep their cached metadata (`asv_*` keys), so the analyzer fixes marked ♻️ apply to new uploads only. Call `blob.remove_active_storage_validations_metadata!` to have a blob analyzed again
+  - **SECURITY**
+    - Forged analysis results are ignored. A client could write `asv_*` keys into a new blob's metadata (Rails' direct upload endpoint accepts `metadata: {}`) and skip the analysis: an oversized image passed `dimension`, an undecodable file passed `processable_file`, a spoofed file passed `spoofing_protection`. New blobs now drop those keys, so only the gem writes them
+    - `processable_file` checks the file itself before excusing a libvips-untrusted format. With Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+, libvips refuses BMP, ICO, PSD, SVG, JPEG XL, JPEG 2000 and Netpbm, and the gem lets those formats through. It trusted the declared content type, so any file uploaded as `image/bmp` passed. It now reads the file's first bytes
+  - **CHANGED** (fixes you may notice: a file can pass or fail differently than under 4.1)
+    - `duration`
+      - ♻️ Durations are compared to the millisecond instead of being rounded to 0.1s: a 1.96s file now passes `less_than: 2.seconds`, a 2.04s file now fails `less_than_or_equal_to: 2.seconds`. **Check your `equal_to:` rules**: encoders pad files, so a "5-second" file often lasts 5.029s and now fails `equal_to: 5.seconds`. Use a range such as `between: 5.seconds..5.1.seconds`
+      - ♻️ A file lasts as long as its longest track. The video (or audio) track came first, so an MP4 with a 0.04s video track and a 30s audio track passed `less_than: 10.seconds`
+      - Error messages show durations to the millisecond (`5.029 seconds`) and in the user's language (see **ADDED**). Rounded to tenths, a 5.029s file failing `less_than_or_equal_to: 5.seconds` read "current duration is 5 seconds"
+    - Sizes are the displayed ones (`dimension`, `aspect_ratio`)
+      - ♻️ EXIF orientation: width and height are swapped for the quarter turns (orientations 5 to 8) only. Mirrored images (2, 4) were swapped by mistake and mirrored quarter turns (5, 7) were not. libvips also reads the TIFF Orientation tag
+      - ♻️ An animated GIF is measured by its canvas with ImageMagick too. It used the first frame, which can be smaller
+      - ♻️ A video height computed from the display aspect ratio is rounded, not truncated (854×480 was read as 854×479)
+      - ♻️ A PDF page rotated by 90° (`/Rotate`) reports its displayed size (300×200, not 200×300), and pages of 1,000,000 pts or more are read correctly (`pdfinfo` prints `2e+06`, which was read as 2)
+      - ♻️ An audio-only MP4 with cover art has no video track. The cover was read as one (its size, `video: true`)
+    - `aspect_ratio` `is_x_y` also accepts a side one pixel away from the exact ratio, so 1366×768 and 854×480 match `:is_16_9`. This only applies to images at least x×y pixels: a 4×3 image does not match 16:9. Everything 4.1 accepted still passes
+    - Files marked for destruction (nested attributes with `_destroy`) are ignored by `size`, `limit`, `total_size`, `content_type` and the metadata validators. They were counted and validated, so a form could not remove an invalid file. `attached` still fails when every file is marked
+    - A bound of `0` is applied: `equal_to: 0`, `greater_than_or_equal_to: 0`, `limit: { min: 0 }` / `{ max: 0 }`, `dimension` `{ max: 0 }` (or a Proc returning `0`). It was skipped: comparison validators rejected every file, `limit` rejected records without files, `dimension` accepted every file
+    - ♻️ `processable_file` rejects an empty media container (`ffprobe` succeeds but finds no audio or video stream)
+    - Files declared as `application/octet-stream`, `IMAGE/PNG` or `""` (some clients and direct uploads) are analyzed, from the type Rails detected or the filename. They got no analyzer and failed `dimension`, `duration`, `processable_file`, …
+    - `content_type`
+      - Rules written as an alias (`"audio/x-flac"`, `"application/x-msaccess"`) or with parameters (`"application/dita+xml;format=map"`) accept uploads of that type. They rejected every one. Types that only exist with parameters or capitals (`"application/vnd.ms-visio.drawing.macroEnabled.12"`) no longer raise at boot
+      - `spoofing_protection` accepts genuine RAR archives on recent libmagic (`application/vnd.rar`, Ubuntu 26.04), and `audio/aac`, `application/xml`, `audio/mp4` on Rails 8.2+ (Marcel 2). With a blank declared type, it checks the type resolved from the filename instead of skipping the check
+    - A Proc returning an invalid value raises `ArgumentError` from `valid?`, as the same static option does at boot: an unknown type for `content_type` (`"image/jpg"`), an unknown ratio for `aspect_ratio` (`:sqaure`). It rejected every file with a broken message ("must be 0:0"). A Proc nested in a list (`[:pdf, -> { … }]`) is checked too, and an Array it returns is flattened
   - **ADDED**
-    - Localize `duration` error values (`%{duration}`, `%{min}`, `%{max}`, `%{exact}`) through new `active_storage_validations.duration` I18n keys in every bundled locale (`1 minute et 30 secondes` in French) instead of the English-only `ActiveSupport::Duration#inspect`. Locales the gem does not ship fall back to English.
-  - **CHANGED**
-    - `duration` error values are shown to the millisecond (`5.029 seconds`), the precision of the comparison. They were rounded to tenths, so a 5.029s file failing `less_than_or_equal_to: 5.seconds` read "(current duration is 5 seconds)". Since the comparison is exact to the millisecond (see **FIXED**), `equal_to: 5.seconds` rejects a file encoded as 5.029s: prefer a range (`between: 5.seconds..5.1.seconds`).
-    - `content_type` Proc results are checked at validation time with the same `ArgumentError` static options get at boot. A Proc returning an unsupported type (e.g. `"image/jpg"`) used to reject every file with a blank message ("authorized content type is )"). Types Marcel knows no extension for are now rendered as-is in `*_human_content_type(s)`
-    - `aspect_ratio` Proc results (top-level or nested in an `in:` list) are checked the same way. A Proc returning an unknown ratio (`:sqaure`, `"16:9"`) used to reject every file with "must be 0:0"; an Array returned by a nested Proc is flattened
-  - **FIXED** (found in review, none reported as GitHub issues; none require a code change)
-    - **Security: forged `asv_*` metadata no longer skips the analysis**. Clients can write a new blob's custom metadata (Rails' direct upload endpoint permits `metadata: {}` and only strips `analyzed` / `identified` / `composed`, and the signed id it returns can be attached to any attachment param), so a forged `asv_width`, `asv_duration` or `asv_content_type` let an oversized image pass `dimension`, an undecodable file pass `processable_file` or a spoofed file pass `spoofing_protection`. A new blob now drops `asv_*` keys when it is initialized, so only the gem writes them. Caches already stored on persisted blobs (4.x included) are still trusted: nothing is re-analyzed.
-    - **Security: `processable_file` no longer accepts any file declared as a libvips-untrusted format**. When Rails blocks libvips' untrusted loaders (7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+), BMP, ICO, PSD, SVG, JPEG XL, JPEG 2000 and Netpbm files cannot be decoded and are let through by design. The exemption was granted on the client-declared content type, so any file uploaded as `image/bmp` or `image/svg+xml` passed. It is now granted only when the file's leading bytes are one of those formats.
-    - **Comparison bounds** (`size`, `total_size`, `duration`, `pages`, `limit`, `dimension`)
-      - A bound of `0` is a real bound: `equal_to: 0`, `greater_than_or_equal_to: 0`, `limit: { max: 0 }` / `{ min: 0 }`, `dimension` `width` / `height` `{ max: 0 }` (or a Proc returning `0`). Those checks used to be skipped: comparison validators rejected every file, `limit` rejected records with no files, `dimension` accepted every file
-      - Exclusive `duration` `between:` ranges report the last included value as error `:max` with a 1ms step: `2.seconds...7.seconds` reports `6.999 seconds` instead of `6 seconds`
-      - `size` / `limit` / `total_size` ignore attachments marked for destruction, so nested-attributes replace flows no longer count a doomed file. A `total_size` whose files are all marked for destruction is skipped like a record without files (`greater_than:` rejected it with "current size is 0 Bytes")
-      - `limit: { min: 1, max: -> { … } }` (a Proc on only one side) now loads instead of raising "You must pass integers"
-    - **Custom messages**
-      - A custom `message:` interpolating a value that an error does not carry no longer raises `I18n::MissingInterpolationArgument` from `errors.full_messages` (a 500 on an upload): `message: "must be under %{max}"` on a file `duration`, `pages` or `aspect_ratio` cannot analyze (`media_metadata_missing`, `attachment_missing`). Those errors now carry the bounds (`%{min}` / `%{max}` / `%{exact}`, `%{authorized_aspect_ratios}`), and any other value of the message is left blank (`%{duration}` of a file that has none).
-    - **`duration`**
-      - ♻️ A file lasts as long as its longest track: the analyzers read the video (or audio) stream duration first, so an MP4 with a 0.04s video track and a 30s audio track passed `less_than: 10.seconds`. The duration is now the longest of the container, the audio track and the video track
-      - ♻️ No longer rounds the analyzed duration to 0.1s before comparing: a 1.96s file passes `less_than: 2.seconds`, a 2.04s file fails `less_than_or_equal_to: 2.seconds`
-      - ♻️ WebM / Matroska audio (e.g. browser `MediaRecorder` Opus) is no longer rejected with `media_metadata_missing`: the audio analyzer falls back to the container duration, like the video analyzer
-    - **`aspect_ratio`**
-      - `is_x_y` ratios also accept a side within a pixel of the other one scaled to `x:y`, so common sizes such as 1366×768 and 854×480 pass `:is_16_9` (1366 × 9 / 16 = 768.375). That pixel of slack only applies to images at least x×y pixels: 4×3, 2×1 or 1×1 images do not match 16:9. Everything the 4.x rule (ratios equal to 3 decimals) accepted still passes
-    - **`content_type`**
-      - Marcel 2 / Rails main (8.2+): `spoofing_protection` no longer rejects `audio/aac`, `application/xml` or `audio/mp4` (`file` reports aliases such as `text/xml`, `audio/x-m4a`), and Marcel 1 canonical options such as `audio/x-aac` are still accepted
-      - `spoofing_protection` no longer rejects genuine RAR archives on recent libmagic (Ubuntu 26.04), which reports them as `application/vnd.rar` instead of `application/x-rar`
-      - `spoofing_protection` compares the Marcel-resolved type (filename fallback included) against the sniffer, so a blank declared `content_type` no longer skips the check
-      - A type Marcel resolves differently on upload matches it: an alias (`"audio/x-flac"`, `"audio/x-aac"` on Marcel 1, `"application/x-msaccess"`) or a type with parameters (`"application/dita+xml;format=map"`) rejected every upload of its own type, and types that only exist with their parameters or capitals (`"application/dita+xml;format=map"`, `"application/vnd.ms-visio.drawing.macroEnabled.12"`) raised at boot as unknown to Marcel
-      - A Proc nested in the list (`[:pdf, -> { … }]`) is checked at validation time like a top-level Proc, and an Array it returns is flattened. Unsupported types it returned were silently ignored, and a returned Array was dropped, so every file was rejected
-    - **`dimension`**
-      - Each error carries its own values only: with `width: { in: 100..200 }, height: { max: 300 }`, the height error also carried the width's `min` / `max` in `errors.details` (and to a custom `%{min}` message)
-      - `min:` and `max:` both report their error when a file violates both (only the `min:` one was added)
-      - A `width:` / `height:` Proc returning a frozen Hash no longer raises `FrozenError` from `valid?`, and a non-frozen one is no longer modified (the flattened `:min` / `:max` were written into it)
-    - **`with_audio`**
-      - `with: -> { … }` evaluates the Proc. It used to be treated as truthy, so every file failed
-    - **`processable_file`**
-      - ♻️ An empty media container (`ffprobe` exits 0 with zero streams) is no longer processable
-    - **All metadata validators** (`dimension`, `aspect_ratio`, `duration`, `pages`, `processable_file`, `with_audio`)
-      - Files marked for destruction are skipped, like `size` / `limit` / `total_size` (and `content_type`). A persisted `has_one_attached` file, or an existing `has_many_attached` file when new ones are attached, used to be validated even with `_destroy`, so a form could not remove an out-of-policy file
-      - No more `TypeError` when a Hash attachable's `io:` has no filesystem path (streaming wrapper, Zip entry, …): it is copied to a tempfile
-      - The same copy is used, here and for `content_type` `spoofing_protection`, when an attachable's path does not hold its content: a `Rack::Test::UploadedFile` built on a `StringIO` no longer raises `NoMethodError`, a Hash `io:` Tempfile that was unlinked no longer raises `Errno::ENOENT` (or reports `file` as not installed), and an anonymous Tempfile (Ruby 3.4) is no longer analyzed as its tmp directory (`inode/directory`)
-      - Relative `File` / `Pathname` attachables are expanded before reaching the analyzer commands, which read `-image.png` as an option and `clip:1.mp4` as an ffmpeg protocol and rejected valid files
-      - The analyzer is picked from the declared type (case and parameters ignored), then, when it is blank or `application/octet-stream`, from the type Rails identified for the blob (magic bytes), then from the filename. A valid file declared as `application/octet-stream`, `IMAGE/PNG` or `""` (common with some clients and direct uploads) used to get no analyzer and was rejected (`file_not_processable`, `media_metadata_missing`)
-      - Image validators fail closed (`media_metadata_missing`) instead of raising `NoMethodError` when `ActiveStorage.variant_processor` is `:disabled` or unknown
-      - Rails 8.2+ `config.active_storage.variant_processor = MyTransformer` (a transformer class) no longer fails every image with `media_metadata_missing` / `file_not_processable`: a subclass of Rails' ImageMagick transformer is analyzed with ImageMagick, any other class with libvips
-    - **Analyzers**
-      - Windows: analyzer commands (`ffprobe`, `pdfinfo`, `file`, `magika`, `identify`) no longer raise since 4.0 (`Process.spawn(pgroup: true)` is Unix-only). On timeout the child is killed directly
-      - An exception raised into the validating thread while an analyzer command runs (`Rack::Timeout`, job shutdown, …) kills the command. It used to keep running, and became a zombie process with `command_timeout = nil`
-      - Blobs and other copied attachables are analyzed from a tempfile named with their extension, like `ActiveStorage::Blob#open`, so ImageMagick identifies formats without a magic number (ICO, TGA) from a blob as it does from an upload
-      - `VideoAnalyzer` / `AudioAnalyzer` no longer raise from `valid?` on invalid ffprobe JSON, `N/A` numeric fields, a non-integer rotation (`"90.0"`) or a missing `side_data_list`; analysis fails closed
-      - ImageMagick `identify` targets the first frame only (`path[0]`), so large animated GIFs / multi-page TIFFs no longer hit `command_timeout`
-      - ♻️ Images swap width and height for the EXIF orientations that turn them a quarter (5 to 8), with both processors. Mirrored images (2, 4) were swapped and mirrored quarter turns (5, 7) were not, as in Rails' own analyzers. libvips also reads the Orientation tag of TIFF files
-      - ♻️ ImageMagick reports the canvas size of a GIF, like libvips: a GIF whose first frame is smaller than its canvas reported the frame's size
-      - ♻️ `VideoAnalyzer` rounds the height computed from the display aspect ratio instead of truncating it: a 854×480 video (427:240) was reported as 854×479, and about one size in twenty was a pixel short
-      - ♻️ `PdfAnalyzer` reads the page sizes `pdfinfo` prints in exponent form (1,000,000 pts or more, `2e+06 x 1.5e+06 pts`), which were read as 2×6 and passed a `dimension` maximum
-      - ♻️ `PdfAnalyzer` applies the first page's `/Rotate`: a 200×300 pt page rotated by 90° is reported as 300×200, as displayed, like rotated images and videos
-      - ♻️ `VideoAnalyzer` ignores cover art (`attached_pic` streams): an audio-only MP4 with an embedded cover no longer reports the cover's dimensions and `video: true`
-      - `PdfAnalyzer` no longer caches `pages: 0` (or 0-pt width / height) when `pdfinfo` omits them, so the analysis can retry and `processable_file` no longer treats `{ pages: 0 }` as a decoded file
-      - Audio stream tags (ID3 / Vorbis) are no longer cached as `asv_tags`. No validator read them, and a large or non-ASCII tag hash could exceed S3's 2 KB object-metadata limit and fail the upload
-      - `blob.remove_active_storage_validations_metadata!` persists the cleared cache on saved blobs (it only changed memory, so `reload` restored stale `asv_*`) and keeps non-`asv_*` custom metadata
-    - **Form builder**
-      - The inferred `accept` attribute no longer hides allowed files: a `content_type` list mixing a type with a Proc or a narrow Regexp (`[:pdf, ->(record) { … }]`) rendered `accept="application/pdf"`, so the picker hid the other types. Such a validator now sets no `accept`; another validator on the same attribute still does, since every file must pass it
-    - **Locales**
-      - `media_metadata_missing` no longer says "is not an image" for every unreadable video, audio or PDF in Ukrainian and Vietnamese
-      - Japanese `aspect_ratio_invalid` said the aspect ratio "cannot be detected" when it is merely not one of the allowed ones; Japanese `limit_out_of_range` and `total_file_size_not_greater_than_or_equal_to` wording fixed
-      - Russian, Ukrainian and Polish ship CLDR `few` / `many` plural forms for every pluralized key (duration units, `limit_*`, `content_type_*`), so apps using rails-i18n pluralization rules get "2 секунды" / "5 секунд" instead of always the `other` form. Russian and Ukrainian `limit_*` `one` messages interpolate `%{count}`, since that form also covers 21, 31, …
-      - Decimal `duration` values follow the locale's decimal separator (`1,5 secondes` with a French `number.format.separator`), like `size` values already did
-    - **Matchers**
-      - Exclusive ranges are honored by `#between`, `#width_between`, `#height_between` (`80...100` used to be read as inclusive)
-      - `validate_dimensions_of` `#width_min` / `#height_min` / `#width_max` / `#height_max` probe the inclusive bound itself, so an exclusive validator no longer satisfies them
-      - `validate_dimensions_of(...).width_min(n)` / `.height_min(n)` match when `n` is above 2000px and the other axis is bounded too (no more hard-coded 2000px neutral value)
-      - `validate_dimensions_of` single-axis chains (`#width_min(200)`, `#height_max(300)`, …) match a validator that also bounds the other axis: that axis is probed within the validator's own bounds instead of at 1000px
-      - Metadata matchers no longer write their mocked metadata into the record's other attachments: matchers validate the caller's record, so an unanalyzed blob on another attribute was analyzed under the mock, and the fake values were cached and saved on it. Only the probe file is mocked
-      - `#on` / `#except_on` no longer raise when only some of the attribute's validators have a context (and the chain has none), nor when several validators list the same context (`.on(%i[update custom])` against `on: :update` and `on: %i[update custom]`)
-      - `validate_limits_of(...).max(0)` no longer raises "negative array size", and `#with_message` combined with `#allow_blank` and `#min(1)` probes `max + 1` files instead of 0, which `allow_blank` skips
-      - `validate_content_type_of(...).spoofing_protection(false)` matches a validator without the option (it defaults to `false`)
-      - Zero and near-zero bounds match a correct validator: `validate_limits_of(...).min(0)` (no longer passes against `min: 1`), `validate_duration_of(...).less_than(1.second)` (1ms step), `validate_duration_of` / `validate_pages_of` `#greater_than_or_equal_to(0)` / `#equal_to(0)`, `validate_dimensions_of` `#width_min(0)` / `#height_min(0)` / `#width_max(1)` / `#height_max(1)`
-      - `validate_with_audio_of(...).without_audio.with_message(...)` probes a file with an audio track
-      - `duration`, `pages` and `content_type` `ERROR_TYPES` include `:media_metadata_missing` / `:attachment_missing`, so matchers recognize those errors
-      - `validate_processable_file_of` messages say "processable file" instead of "processable image"
-      - `validate_content_type_of(...).with_message(...)` detaches its probe file, which used to stay attached and corrupt the next `#allowing` / `#rejecting` probes on a `has_many_attached`
-      - `#with_message` matches when several validators on the attribute share the message
-      - `validate_limits_of(...).with_message(...)` without `#min` / `#max` raises an explicit `ArgumentError` instead of `NoMethodError`
-      - A matcher instance reused on another subject no longer returns the previous subject's `content_type` / `aspect_ratio` result nor repeats failure message lines
-      - `Matchers.mock_metadata` keeps its `Analyzer.new` mock per thread: concurrent probes (`parallelize(with: :threads)`) could restore each other's stub out of order and leave every analyzer mocked for good
+    - Duration values in error messages are translated: `%{duration}`, `%{min}`, `%{max}` and `%{exact}` read `1 minute et 30 secondes` in French, through new `active_storage_validations.duration` keys in all 17 bundled locales. Decimals follow the locale separator; other locales fall back to English. Non-English apps get new wording, so specs asserting the old English text need updating
+  - **FIXED** (no visible change besides removing crashes and wrong rejections)
+    - Error messages
+      - A custom `message:` no longer crashes when the error lacks one of its values: `message: "must be under %{max}"` raised `I18n::MissingInterpolationArgument` for a file `duration`, `pages` or `aspect_ratio` could not analyze, a 500 on upload. Those errors now carry the bounds; any other missing value is left blank
+      - `dimension` errors carry only their own values (a height error showed the width's `min` / `max`), and `min:` / `max:` both report when a file breaks both
+      - Exclusive `duration` ranges report the last allowed value with a 1ms step: `2.seconds...7.seconds` reports `6.999 seconds`, not `6 seconds`
+      - `content_type` messages show a type Marcel knows no extension for as it is written (`authorized_human_content_types` was blank for it)
+    - Options
+      - `with_audio: { with: -> { … } }` runs the Proc. It was always truthy, so every file failed
+      - `limit: { min: 1, max: -> { … } }` (a Proc on one side only) loads instead of raising
+      - A `dimension` `width:` / `height:` Proc returning a frozen Hash no longer raises `FrozenError`, and a non-frozen one is no longer modified
+      - `total_size` skips a record whose files are all marked for destruction, like a record without files (`greater_than:` failed with "current size is 0 Bytes")
+    - Analysis (metadata validators and `spoofing_protection`)
+      - Attachables whose path does not hold their content are copied first: a Hash `io:` without a path (streaming wrapper, Zip entry), a `Rack::Test::UploadedFile` on a `StringIO`, an unlinked or anonymous Tempfile. They raised `TypeError`, `NoMethodError` or `Errno::ENOENT`, or were analyzed as a directory
+      - Relative `File` / `Pathname` paths are made absolute, so `-image.png` is not read as a command option nor `clip:1.mp4` as an ffmpeg protocol. Closed IOs and names starting with `~` work too
+      - Copied files keep their extension, so ImageMagick reads ICO and TGA blobs like uploads
+      - ImageMagick reads only the first frame of animated GIFs and multi-page TIFFs, which could hit `command_timeout`
+      - ♻️ WebM / Matroska audio (browser `MediaRecorder` recordings) is measured from the container. It failed with `media_metadata_missing`
+      - Video and audio analysis no longer raises on unexpected ffprobe output (invalid JSON, `N/A`, a `"90.0"` rotation, no side data): it fails closed
+      - Windows: analyzer commands work again (they raised since 4.0)
+      - An exception raised while a command runs (`Rack::Timeout`, job shutdown) kills the command instead of leaving it running
+      - `variant_processor` set to `:disabled` or an unknown value fails closed (`media_metadata_missing`) instead of raising. A Rails 8.2+ transformer class is analyzed with ImageMagick when it extends Rails' ImageMagick transformer, with libvips otherwise
+      - Audio tags are no longer cached on the blob (they could exceed S3's 2 KB metadata limit and fail the upload), and PDFs missing their page count or size no longer cache zeros
+      - `blob.remove_active_storage_validations_metadata!` saves the cleared cache on persisted blobs and keeps their other custom metadata
+    - Form builder: the inferred `accept` no longer hides allowed files when a `content_type` list mixes a type with a Proc or a narrow Regexp. Such a validator sets no `accept`
+    - Locales: Ukrainian, Vietnamese and Japanese wording fixed; Russian, Ukrainian and Polish ship the `few` / `many` plural forms rails-i18n uses
+    - Matchers
+      - Exclusive ranges are honored by `#between`, `#width_between` and `#height_between`
+      - `validate_dimensions_of`: `#width_min` / `#height_min` / `#width_max` / `#height_max` probe the bound itself (an exclusive validator no longer matches), work above 2000px, and probe the other axis within the validator's bounds
+      - Zero bounds match correct validators: `validate_limits_of(...).min(0)` / `.max(0)`, `#greater_than_or_equal_to(0)` / `#equal_to(0)` on duration and pages, `validate_duration_of(...).less_than(1.second)`, `#width_min(0)` / `#width_max(1)` on dimensions
+      - `#with_message` matches when several validators share the message, probes the right file for `validate_with_audio_of(...).without_audio` and `validate_limits_of` with `#allow_blank`, detaches the `content_type` probe file, and raises a clear error for `validate_limits_of` without `#min` / `#max`
+      - `#on` / `#except_on` no longer raise with mixed or shared contexts
+      - `validate_content_type_of(...).spoofing_protection(false)` matches a validator without the option
+      - The `media_metadata_missing` / `attachment_missing` errors of `duration`, `pages` and `content_type` are recognized
+      - Metadata matchers mock only their probe file (they cached fake metadata on the record's other attachments), keep their mock per thread, and keep no state from a previous subject
+      - `validate_processable_file_of` messages say "processable file", not "processable image"
   - **MISC**
-    - Internals
-      - Replace the `define_method` block generating the `DimensionValidator` min / max helpers with plain methods
-      - Matchers build probe attachments on in-memory `StringIO`s instead of never-closed `Tempfile`s, and `validate_total_size_of` no longer uploads a real blob per probe
-    - Tests & tooling
-      - Bump the local Rails pin to 8.1.4.1, and the CI gemfiles to the latest Rails patches (7.2.4, 8.0.5.2, 8.1.4.1, main)
-      - Add a storage-metadata contract spec: every analyzer runs over every dummy fixture and must return ASCII scalars that fit S3's 2 KB metadata limit (`spec/analyzers/storage_metadata_constraints_spec.rb`)
-      - Raise SimpleCov `minimum_coverage` to 90 when `CI=true` (50 for local single-file runs); upgrade simplecov to 1.2
-      - Install Magika CLI in CI from the checksummed `cli/v1.1.0` tarball instead of piping the installer script
-      - Remove the unused dummy `Document` model and its `documents` table
-    - Docs & packaging
-      - Ship `CHANGES.md` and `docs/upgrade_to_*.md` in the gem package
-      - Declare the `railties` runtime dependency the gem already needed (Railtie / Engine, `Rails.logger`, `Rails.gem_version`)
-      - Requiring the gem before Rails (a script, or a `Bundler.require` order that loads it first) no longer raises `NameError: uninitialized constant Rails`: the engine and railtie require `rails/engine` / `rails/railtie` themselves
-      - Document that `Matchers.mock_metadata` mocks `Analyzer.new` in the current thread only while a probe runs
+    - Gem: declares its `railties` dependency, can be required before Rails, and ships `CHANGES.md` and the upgrade guides
+    - Internals: plain methods instead of `define_method` in `DimensionValidator`; matcher probe files are in-memory `StringIO`s
+    - Tests & tooling: Rails pin 8.1.4.1 and the latest Rails patches in CI (7.2.4, 8.0.5.2, 8.1.4.1, main); json `< 3` pin removed; a storage-metadata contract spec (every analyzer output fits S3's 2 KB limit); SimpleCov 90% on CI (simplecov 1.2); Magika CLI installed from a checksummed tarball; unused dummy `Document` model removed
 - 4.1.1
   - **FIXED**
     - Fix size / metadata matchers raising on Minitest 6 after `Minitest::Mock` was extracted (https://github.com/igorkasyanchuk/active_storage_validations/issues/430). Matchers now stub via a singleton method and do not need `minitest-mock`
