@@ -57,6 +57,7 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
+        @failure_message_artefacts = [] # a reused matcher listed earlier runs' probes too
 
         is_a_valid_active_storage_attribute? &&
           is_context_valid? &&
@@ -123,11 +124,13 @@ module ActiveStorageValidations
       end
 
       def is_custom_message_valid?
-        return true if !@custom_message || (@min&.zero? && @max.nil?)
+        return true unless @custom_message
         raise ArgumentError, "#with_message needs #min or #max to build a file count the validator rejects" if @min.nil? && @max.nil?
 
+        # No file count the validator rejects (`min(0)`, or `min(1)` under
+        # `allow_blank`): check the declared message rather than pass unchecked.
         count = custom_message_probe_count
-        return true unless count
+        return validator_declares_custom_message? unless count
 
         attach_files(count)
         validate
@@ -138,6 +141,10 @@ module ActiveStorageValidations
       def add_failure_message_artefact(count)
         @failure_message_artefacts << { count: count }
         false
+      end
+
+      def validator_declares_custom_message?
+        attribute_validators.any? { |validator| custom_message_matches?(validator.options[:message]) }
       end
 
       # A file count the validator rejects: below min, else above max. 0 files

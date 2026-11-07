@@ -188,6 +188,16 @@ RSpec.describe ActiveStorageValidations::Matchers::DurationValidatorMatcher do
       end
     end
 
+    context "when only one of the attribute's validators sets a precision" do
+      subject(:configured_matcher) { matcher.greater_than(1.second).less_than(1.minute) }
+
+      let(:model_attribute) { :two_validators_with_precision }
+
+      it "probes at the coarsest precision" do
+        is_expected_to_match_for(klass)
+      end
+    end
+
     context "when the validator keeps the default precision (milliseconds)" do
       subject(:configured_matcher) { matcher.equal_to(5.seconds).precision(1) }
 

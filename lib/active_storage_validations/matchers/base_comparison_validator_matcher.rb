@@ -66,6 +66,7 @@ module ActiveStorageValidations
 
       def matches?(subject)
         @subject = subject.is_a?(Class) ? subject.new : subject
+        @failure_message_artefacts = [] # a reused matcher listed earlier runs' probes too
         resolve_bounds
 
         is_a_valid_active_storage_attribute? &&

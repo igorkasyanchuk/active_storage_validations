@@ -7,10 +7,28 @@ module ActiveStorageValidations
     module ASVValidatable
       extend ActiveSupport::Concern
 
+      # Matchers read the errors of each probe, but a `strict: true` validator
+      # (on this attribute or any other) raises ActiveModel::StrictValidationFailed
+      # instead of adding its error. During a probe, strict errors are added as
+      # plain ones; validations outside the matcher still raise.
+      module NonStrictProbeErrors
+        KEY = :active_storage_validations_matcher_probe
+
+        def add(attribute, type = :invalid, **options)
+          options = options.except(:strict) if ActiveSupport::IsolatedExecutionState[KEY]
+          super
+        end
+      end
+
       private
 
       def validate
+        ActiveModel::Errors.prepend(NonStrictProbeErrors) unless ActiveModel::Errors.include?(NonStrictProbeErrors)
+        previous = ActiveSupport::IsolatedExecutionState[NonStrictProbeErrors::KEY]
+        ActiveSupport::IsolatedExecutionState[NonStrictProbeErrors::KEY] = true
         @subject.validate(@context)
+      ensure
+        ActiveSupport::IsolatedExecutionState[NonStrictProbeErrors::KEY] = previous
       end
 
       def validator_errors_for_attribute

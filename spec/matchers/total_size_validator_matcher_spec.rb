@@ -17,6 +17,24 @@ RSpec.describe ActiveStorageValidations::Matchers::TotalSizeValidatorMatcher do
     it_behaves_like "has custom matcher"
   end
 
+  describe "on a has_one_attached" do
+    subject(:configured_matcher) { matcher.less_than(2.kilobytes) }
+
+    let(:has_one_class) do
+      Class.new(ApplicationRecord) do
+        self.table_name = "total_size_matchers"
+        def self.name = "TotalSizeMatcherHasOne"
+        has_one_attached :avatar
+      end
+    end
+    let(:model_attribute) { :avatar }
+
+    it "raises a clear error" do
+      expect { configured_matcher.matches?(has_one_class) }
+        .to raise_error(ArgumentError, "validate_total_size_of is only available for has_many_attached relations (:avatar is a has_one_attached)")
+    end
+  end
+
   describe "#less_than" do
     let(:matcher_method) { :less_than }
     let(:model_attribute) { matcher_method }

@@ -28,8 +28,9 @@ module ActiveStorageValidations
         ensure_context_valid!
 
         if @context.is_a?(Array)
-          # Several validators may list the same context.
-          (validator_contexts.uniq & @context.map(&:to_s)) == validator_contexts.uniq || raise_context_not_listed_error
+          # Like a Symbol: each provided context must be listed by a validator
+          # (`on([:update])` against `on: %i[update custom]`).
+          (@context.map(&:to_s) - validator_contexts).empty? || raise_context_not_listed_error
         elsif @context.is_a?(Symbol)
           validator_contexts.include?(@context.to_s) || raise_context_not_listed_error
         end
