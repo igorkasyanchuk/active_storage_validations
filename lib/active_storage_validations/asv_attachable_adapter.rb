@@ -64,6 +64,14 @@ module ActiveStorageValidations
         raise NotImplementedError
       end
 
+      # Size and storage key, for the notification payloads only: nil when the
+      # attachable cannot tell.
+      def byte_size
+      end
+
+      def blob_key
+      end
+
       def rewind
       end
 
@@ -142,6 +150,14 @@ module ActiveStorageValidations
         max_byte_size ? @attachable.download_chunk(0...max_byte_size) : @attachable.download
       end
 
+      def byte_size
+        @attachable.byte_size
+      end
+
+      def blob_key
+        @attachable.key
+      end
+
       def with_media_path(tempfile, &block)
         copy_to_tempfile(tempfile, @attachable, &block)
       end
@@ -166,6 +182,10 @@ module ActiveStorageValidations
         read_from(@attachable, max_byte_size)
       end
 
+      def byte_size
+        @attachable.size
+      end
+
       def rewind
         @attachable.rewind
       end
@@ -188,6 +208,11 @@ module ActiveStorageValidations
 
       def read(max_byte_size: nil)
         read_from(@attachable[:io], max_byte_size)
+      end
+
+      def byte_size
+        io = @attachable[:io]
+        io.size if io.respond_to?(:size)
       end
 
       def rewind
@@ -219,6 +244,11 @@ module ActiveStorageValidations
         File.basename(@attachable)
       end
 
+      # Also known once the File is closed.
+      def byte_size
+        File.size?(@attachable.to_path)
+      end
+
       def read(max_byte_size: nil)
         read_from(@attachable, max_byte_size)
       end
@@ -235,6 +265,10 @@ module ActiveStorageValidations
     # Nothing to copy from: a missing file is left to the analyzer commands,
     # which fail closed.
     class Path < FileLike
+      def byte_size
+        File.size?(@attachable.to_s)
+      end
+
       def rewind
         File.open(@attachable) { |file| file.rewind }
       end

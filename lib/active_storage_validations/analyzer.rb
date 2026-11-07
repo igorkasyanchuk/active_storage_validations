@@ -79,7 +79,8 @@ module ActiveStorageValidations
         analyzer: analyzer,
         command: analyzer,
         timeout: timeout_in_seconds,
-        timed_out: false
+        timed_out: false,
+        **file_payload
       }
 
       ActiveSupport::Notifications.instrument("analyze.active_storage_validations", payload) do
@@ -96,9 +97,22 @@ module ActiveStorageValidations
         "timeout.active_storage_validations",
         analyzer: payload&.[](:analyzer) || command,
         command: command,
-        timeout: timeout_in_seconds
+        timeout: timeout_in_seconds,
+        **file_payload
       )
       logger.info "Skipping file analysis because #{command} timed out after #{timeout_in_seconds} seconds"
+    end
+
+    # The analyzed file, so a slow or timed out analysis can be traced back to
+    # its upload. +blob_key+ is only known for a blob (+byte_size+ may be nil
+    # for an IO that cannot tell). Instrumentation never fails the analysis.
+    def file_payload
+      @file_payload ||= begin
+        file = media_attachable
+        { filename: file.filename&.to_s, content_type: file.content_type, byte_size: file.byte_size, blob_key: file.blob_key }
+      rescue StandardError
+        { filename: nil, content_type: nil, byte_size: nil, blob_key: nil }
+      end
     end
   end
 end
