@@ -276,6 +276,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 | Metadata validators and `content_type` with a persisted file marked for destruction (`has_one_attached`, or `has_many_attached` while attaching new files) | Doomed file still validated | Ignored |
 | `aspect_ratio` `is_x_y` | Exact to 3 decimals: 1366×768, 854×480 rejected as `:is_16_9` | Still exact to 3 decimals, and also accepted when one side is within a pixel of the other one scaled to `x:y` |
 | `duration` | Rounded to 0.1s before comparing: 1.96s failed `less_than: 2.seconds` | Exact value compared ♻️ |
+| `duration` of a file whose tracks differ (a 0.04s video track and a 30s audio track) | The video (or audio) track's duration: 0.04s | The longest of the container and its tracks: 30s ♻️ |
 | `duration` on WebM / Matroska audio (browser `MediaRecorder` Opus) | `media_metadata_missing` | Container duration used ♻️ |
 | `processable_file` on an empty media container (zero streams) | Accepted (also by `with_audio: { with: false }`) | Rejected ♻️ |
 | `processable_file` with libvips' untrusted loaders blocked (Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+) on a file declared as BMP, ICO, PSD, SVG, JPEG XL, JPEG 2000 or Netpbm | Accepted whatever its content | Accepted only when its leading bytes are one of those formats |
@@ -296,8 +297,7 @@ These are bug fixes, not breaking changes, and none needs a code change. They ar
 
 Some analyzer fixes (♻️ above) change what is cached in `asv_*` blob metadata. They do not require a code change, but blobs already validated under 4.x keep the old metadata until you clear it:
 
-- `asv_duration` was rounded to 0.1s
-- `asv_duration` was empty for WebM / Matroska audio
+- `asv_duration` was rounded to 0.1s, empty for WebM / Matroska audio, and the video (or audio) track's duration when the file's other tracks are longer
 - `asv_width` / `asv_height` were swapped for mirrored EXIF orientations and not for mirrored quarter turns, missed the TIFF Orientation tag with libvips, or held the first frame of a GIF with ImageMagick
 - Empty media containers were cached as `{ audio: false, video: false }`, which `processable_file` read as a successful analysis
 

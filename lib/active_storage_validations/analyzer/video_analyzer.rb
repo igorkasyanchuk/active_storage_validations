@@ -41,7 +41,7 @@ module ActiveStorageValidations
       {
         width: (Integer(width) if width),
         height: (Integer(height) if height),
-        duration: duration,
+        duration: media_duration,
         angle: angle,
         audio: audio?,
         video: video?
@@ -62,12 +62,6 @@ module ActiveStorageValidations
       else
         computed_height || encoded_height
       end
-    end
-
-    # Round to milliseconds so 1.96s is not stored as 2.0 (which made
-    # `less_than: 2.seconds` fail).
-    def duration
-      parse_float(video_stream["duration"] || container["duration"])&.round(3)
     end
 
     # ffprobe reports the rotation either as a stream tag (older encoders) or as

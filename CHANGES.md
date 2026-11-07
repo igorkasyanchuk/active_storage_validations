@@ -40,6 +40,7 @@
       - `size` / `limit` / `total_size` ignore attachments marked for destruction, so nested-attributes replace flows no longer count a doomed file
       - `limit: { min: 1, max: -> { … } }` (a Proc on only one side) now loads instead of raising "You must pass integers"
     - **`duration`**
+      - ♻️ A file lasts as long as its longest track: the analyzers read the video (or audio) stream duration first, so an MP4 with a 0.04s video track and a 30s audio track passed `less_than: 10.seconds`. The duration is now the longest of the container, the audio track and the video track
       - ♻️ No longer rounds the analyzed duration to 0.1s before comparing: a 1.96s file passes `less_than: 2.seconds`, a 2.04s file fails `less_than_or_equal_to: 2.seconds`
       - ♻️ WebM / Matroska audio (e.g. browser `MediaRecorder` Opus) is no longer rejected with `media_metadata_missing`: the audio analyzer falls back to the container duration, like the video analyzer
     - **`aspect_ratio`**
