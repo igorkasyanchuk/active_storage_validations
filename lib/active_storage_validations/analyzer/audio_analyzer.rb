@@ -40,7 +40,7 @@ module ActiveStorageValidations
       return {} unless audio?
 
       {
-        duration: duration,
+        duration: media_duration,
         bit_rate: bit_rate,
         sample_rate: sample_rate,
         audio: audio?
@@ -49,13 +49,6 @@ module ActiveStorageValidations
 
     def audio?
       audio_stream.present?
-    end
-
-    # Matroska / WebM (e.g. browser MediaRecorder output) report the duration
-    # on the container only, not on the audio stream. Round to milliseconds so
-    # 1.96s is not stored as 2.0 (which made `less_than: 2.seconds` fail).
-    def duration
-      parse_float(audio_stream["duration"] || container["duration"])&.round(3)
     end
 
     def bit_rate

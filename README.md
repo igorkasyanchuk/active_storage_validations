@@ -646,7 +646,7 @@ The `duration` validator has several possible options:
 - `equal_to`: defines the allowed duration
 - `timeout`: overrides the global analyzer [command timeout](#configuration) for this validation
 
-Duration is compared at sub-second precision (the analyzer no longer rounds to 0.1s). A 1.96s file passes `less_than: 2.seconds`.
+Duration is compared at sub-second precision (the analyzer no longer rounds to 0.1s). A 1.96s file passes `less_than: 2.seconds`. A file lasts as long as its longest track (the container, its audio and its video).
 
 #### Examples
 

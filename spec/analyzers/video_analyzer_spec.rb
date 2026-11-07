@@ -163,6 +163,38 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
     end
   end
 
+  describe "duration of a file whose tracks differ" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) { video_file }
+    let(:video_track) { { "codec_type" => "video", "width" => 64, "height" => 64, "duration" => "0.040000" } }
+
+    before { allow(analyzer).to receive(:media_from_path).and_return({ "streams" => streams, "format" => format }) }
+
+    context "with a short video track and a long audio track" do
+      let(:streams) { [ video_track, { "codec_type" => "audio", "duration" => "30.000000" } ] }
+      let(:format) { { "duration" => "30.000000" } }
+
+      it "reports how long the file plays" do
+        expect(metadata[:duration]).to eq(30.0)
+      end
+    end
+
+    context "when only the container carries the full length" do
+      let(:streams) { [ video_track ] }
+      let(:format) { { "duration" => "30.000000" } }
+
+      it { expect(metadata[:duration]).to eq(30.0) }
+    end
+
+    context "when the container is shorter than a track" do
+      let(:streams) { [ video_track, { "codec_type" => "audio", "duration" => "30.000000" } ] }
+      let(:format) { { "duration" => "0.040000" } }
+
+      it { expect(metadata[:duration]).to eq(30.0) }
+    end
+  end
+
   describe "malformed ffprobe output" do
     let(:attachable) { video_file }
 

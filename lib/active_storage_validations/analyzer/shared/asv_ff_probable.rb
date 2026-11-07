@@ -65,6 +65,16 @@ module ActiveStorageValidations
       nil
     end
 
+    # The longest of the container, the audio track and the video track. A
+    # file plays until its last track ends: a 0.04s video track next to a 30s
+    # audio track must not pass `less_than: 10.seconds`. Matroska / WebM (e.g.
+    # browser MediaRecorder output) report the duration on the container only.
+    # Round to milliseconds so 1.96s is not stored as 2.0 (which made
+    # `less_than: 2.seconds` fail).
+    def media_duration
+      [ container, audio_stream, video_stream ].filter_map { |source| parse_float(source["duration"]) }.max&.round(3)
+    end
+
     def ffprobe_path
       ActiveStorage.paths[:ffprobe] || "ffprobe"
     end

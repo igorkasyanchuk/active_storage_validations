@@ -86,6 +86,25 @@ RSpec.describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
     end
   end
 
+  describe "duration of a file whose tracks differ" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:attachable) { audio_1s_tagged }
+
+    before do
+      allow(analyzer).to receive(:media_from_path).and_return(
+        {
+          "streams" => [ { "codec_type" => "audio", "duration" => "1.000000", "sample_rate" => "44100" } ],
+          "format" => { "duration" => "30.000000" }
+        }
+      )
+    end
+
+    it "reports how long the file plays" do
+      expect(metadata[:duration]).to eq(30.0)
+    end
+  end
+
   describe "malformed ffprobe output" do
     let(:attachable) { audio_1s_tagged }
 
