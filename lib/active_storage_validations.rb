@@ -19,6 +19,27 @@ module ActiveStorageValidations
   def self.configure
     yield self
   end
+
+  # Clears the metadata the gem cached on saved blobs (their +asv_*+ custom
+  # metadata keys) so their next validation analyzes the files again. A cached
+  # value is trusted as is, including a value an analyzer could not extract:
+  # run this after an upgrade that improves an analyzer. +blobs+ narrows the
+  # blobs to clear (any ActiveStorage::Blob relation). Returns the number of
+  # blobs updated. Other custom metadata is kept.
+  #
+  # The +metadata+ column is written directly, skipping the blob callbacks:
+  # clearing a cache must not touch every attachment and attached record.
+  #
+  #   ActiveStorageValidations.remove_metadata!
+  #   ActiveStorageValidations.remove_metadata!(ActiveStorage::Blob.where(content_type: "video/webm"))
+  def self.remove_metadata!(blobs = ActiveStorage::Blob.all)
+    blobs.find_each.count do |blob|
+      next false if blob.active_storage_validations_metadata.empty?
+
+      blob.update_column(:metadata, blob.metadata.merge("custom" => blob.custom_metadata.reject { |key, _| key.to_s.start_with?("asv_") }))
+      true
+    end
+  end
 end
 
 require "active_storage_validations/analyzer"
