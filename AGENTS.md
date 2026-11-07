@@ -305,7 +305,6 @@ Use [`.cursor/rules/git.mdc`](.cursor/rules/git.mdc) for commit and PR title for
 - `ASVErrorable#add_error` interpolates the placeholders of a custom String `message:` that an error does not carry as blank (`#blank_custom_message_values`): `%{max}` on `media_metadata_missing` raised `I18n::MissingInterpolationArgument` on upload. Rails' `attribute` / `model` / `value` are left to Rails. `duration` / `pages` / `aspect_ratio` pass their bounds on unanalyzable-file errors
 - `ASVAnalyzable#image_processor_for_transformer` (Rails 8.2+ transformer class `variant_processor`): a subclass of Rails' ImageMagick transformer is analyzed with ImageMagick, any other class with libvips
 - ImageMagick `identify` must target the first frame (`path[0]`, see `ImageMagick#first_frame`); without it every frame of an animated GIF / multi-page TIFF is decoded
-- Keep `json` `< 3` on the Rails 8.1 Gemfile. json 3.0 made `JSON.parse` keyword-only; Rails 8.1.3.1 `ActiveSupport::JSON.decode` still passes a positional options hash (fixed on Rails 8.2 / main as rails/rails#58601)
 
 ## Read First When Contributing
 
