@@ -26,13 +26,12 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
+      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS, set_flat_options(record))
     end
 
     private
 
-    def is_valid?(record, attribute, file, metadata)
-      flat_options = set_flat_options(record)
+    def is_valid?(record, attribute, file, metadata, flat_options)
       errors_options = initialize_error_options(options, file)
       # Also for a file that cannot be analyzed: a custom message may show the
       # bounds (`message: "must have at most %{max} pages"`).

@@ -43,6 +43,10 @@ class ContentType::Matcher < ApplicationRecord
   validates :with_spoofing_protection, content_type: { in: [ "image/png" ], spoofing_protection: true }
   has_one_attached :without_spoofing_protection
   validates :without_spoofing_protection, content_type: { in: [ "image/png" ] }
+  has_one_attached :parameterized_type
+  validates :parameterized_type, content_type: "application/dita+xml;format=map"
+  has_one_attached :wildcard
+  validates :wildcard, content_type: "image/*"
   has_one_attached :with_spoofing_protection_magika
   validates :with_spoofing_protection_magika, content_type: { in: [ "image/png" ], spoofing_protection: :magika }
 

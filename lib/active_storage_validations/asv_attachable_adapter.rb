@@ -65,6 +65,14 @@ module ActiveStorageValidations
         raise NotImplementedError
       end
 
+      # Size and storage key, for the notification payloads only: nil when the
+      # attachable cannot tell.
+      def byte_size
+      end
+
+      def blob_key
+      end
+
       def with_media_path(_tempfile, max_bytes: nil)
         raise NotImplementedError
       end
@@ -140,6 +148,14 @@ module ActiveStorageValidations
         @attachable.filename
       end
 
+      def byte_size
+        @attachable.byte_size
+      end
+
+      def blob_key
+        @attachable.key
+      end
+
       def with_media_path(tempfile, max_bytes: nil, &block)
         copy_to_tempfile(tempfile, @attachable, max_bytes: max_bytes, &block)
       end
@@ -160,6 +176,10 @@ module ActiveStorageValidations
         @attachable.original_filename
       end
 
+      def byte_size
+        @attachable.size
+      end
+
       def with_media_path(tempfile, max_bytes: nil, &block)
         io = @attachable.tempfile
         path = io.path if io.respond_to?(:path)
@@ -176,6 +196,10 @@ module ActiveStorageValidations
         @attachable[:filename]
       end
 
+      def byte_size
+        io = @attachable[:io]
+        io.size if io.respond_to?(:size)
+      end
       # Rails only requires the io to respond to #read / #rewind / #size, so it
       # may be a StringIO or any IO-like wrapper (streaming download, Zip entry,
       # …) with no file behind it. Only path-backed IOs (File, Tempfile,
@@ -201,6 +225,11 @@ module ActiveStorageValidations
         File.basename(@attachable)
       end
 
+      # Also known once the File is closed.
+      def byte_size
+        File.size?(@attachable.to_path)
+      end
+
       def with_media_path(tempfile, max_bytes: nil, &block)
         with_path_or_copy(tempfile, @attachable.path, @attachable, max_bytes: max_bytes, &block)
       end
@@ -209,6 +238,10 @@ module ActiveStorageValidations
     # Nothing to copy from: a missing file is left to the analyzer commands,
     # which fail closed.
     class Path < FileLike
+      def byte_size
+        File.size?(@attachable.to_s)
+      end
+
       def with_media_path(_tempfile, max_bytes: nil)
         yield File.absolute_path(@attachable.to_s)
       end

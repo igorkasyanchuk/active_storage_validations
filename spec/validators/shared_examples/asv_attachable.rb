@@ -41,6 +41,25 @@ RSpec.shared_examples "ASVAttachable" do
     )
   end
 
+  # Rails 7.1+ hands the files of an earlier, unsaved #attach back as new
+  # blobs that are not uploaded yet. Rails 7.0 keeps the first file twice,
+  # once as a blob it never uploads: attachment_missing is right there.
+  context "when #attach is called twice before validation", if: Rails.gem_version >= Gem::Version.new("7.1.0.rc1") do
+    let(:second_file) do
+      file_matching_requirements.merge(
+        io: open_fixture(file_matching_requirements[:io].path),
+        filename: "second_#{file_matching_requirements[:filename]}"
+      )
+    end
+
+    it "validates the files of both calls" do
+      subject.asv_attachables.attach(file_matching_requirements)
+      subject.asv_attachables.attach(second_file)
+
+      expect(subject.valid?).to be(true), subject.errors.full_messages.inspect
+    end
+  end
+
   context "when the same blob is present both as an ActiveStorage::Blob object (existing attachment) and as a String signed_id (new attachable)" do
     before do
       subject.save!

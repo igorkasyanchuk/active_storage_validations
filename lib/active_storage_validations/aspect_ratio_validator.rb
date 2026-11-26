@@ -18,6 +18,9 @@ module ActiveStorageValidations
 
     AVAILABLE_CHECKS = %i[with in].freeze
     NAMED_ASPECT_RATIOS = %i[square portrait landscape].freeze
+    # ISO 216 paper sizes (A4, A3, …) share a 1:√2 ratio, which no `is_x_y`
+    # can express exactly.
+    A_SERIES_ASPECT_RATIOS = %i[a_series a_series_portrait a_series_landscape].freeze
     ASPECT_RATIO_REGEX = /\Ais_([1-9]\d*)_([1-9]\d*)\z/
     ERROR_TYPES = %i[
       aspect_ratio_not_square
@@ -26,6 +29,7 @@ module ActiveStorageValidations
       aspect_ratio_not_x_y
       aspect_ratio_invalid
       media_metadata_missing
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[width height].freeze
     RATIO_PRECISION = 3
@@ -38,7 +42,8 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
+      # An empty list fails closed (aspect_ratio_invalid) rather than skipping.
+      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS, authorized_aspect_ratios(record))
     end
 
     private
@@ -56,9 +61,7 @@ module ActiveStorageValidations
       aspect_ratios
     end
 
-    def is_valid?(record, attribute, attachable, metadata)
-      aspect_ratios = authorized_aspect_ratios(record)
-
+    def is_valid?(record, attribute, attachable, metadata, aspect_ratios)
       media_metadata_present?(record, attribute, attachable, metadata, aspect_ratios) &&
         authorized_aspect_ratio?(record, attribute, attachable, metadata, aspect_ratios)
     end
@@ -69,6 +72,7 @@ module ActiveStorageValidations
         when :square then valid_square_aspect_ratio?(metadata)
         when :portrait then valid_portrait_aspect_ratio?(metadata)
         when :landscape then valid_landscape_aspect_ratio?(metadata)
+        when *A_SERIES_ASPECT_RATIOS then valid_a_series_aspect_ratio?(authorized_aspect_ratio, metadata)
         when ASPECT_RATIO_REGEX then valid_regex_aspect_ratio?(authorized_aspect_ratio, metadata)
         end
       end
@@ -116,6 +120,20 @@ module ActiveStorageValidations
 
     def valid_landscape_aspect_ratio?(metadata)
       metadata[:width] > metadata[:height]
+    end
+
+    def valid_a_series_aspect_ratio?(aspect_ratio, metadata)
+      width = metadata[:width].to_i
+      height = metadata[:height].to_i
+      return false unless width.positive? && height.positive?
+
+      portrait = matching_ratio?(width, height, 1, Math.sqrt(2))
+      landscape = matching_ratio?(width, height, Math.sqrt(2), 1)
+      case aspect_ratio
+      when :a_series_portrait then portrait
+      when :a_series_landscape then landscape
+      else portrait || landscape
+      end
     end
 
     def valid_regex_aspect_ratio?(aspect_ratio, metadata)
@@ -172,7 +190,7 @@ module ActiveStorageValidations
     end
 
     def valid_aspect_ratio?(aspect_ratio)
-      NAMED_ASPECT_RATIOS.include?(aspect_ratio) ||
+      NAMED_ASPECT_RATIOS.include?(aspect_ratio) || A_SERIES_ASPECT_RATIOS.include?(aspect_ratio) ||
         ((aspect_ratio.is_a?(Symbol) || aspect_ratio.is_a?(String)) && aspect_ratio.match?(ASPECT_RATIO_REGEX))
     end
 
@@ -183,7 +201,7 @@ module ActiveStorageValidations
     def invalid_aspect_ratio_message(aspect_ratio)
       <<~ERROR_MESSAGE
         You must pass a valid aspect ratio to the validator (got #{aspect_ratio.inspect})
-        It should either be a named aspect ratio (#{NAMED_ASPECT_RATIOS.join(', ')})
+        It should either be a named aspect ratio (#{(NAMED_ASPECT_RATIOS + A_SERIES_ASPECT_RATIOS).join(', ')})
         Or an aspect ratio like 'is_16_9' (matching /#{ASPECT_RATIO_REGEX.source}/)
       ERROR_MESSAGE
     end
@@ -192,10 +210,12 @@ module ActiveStorageValidations
       (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in]))
     end
 
+    # Named ratios are translated (`active_storage_validations.aspect_ratios.*`):
+    # "les rapports d'aspect valides sont carré, 16:9", not "square, 16:9".
     def string_aspect_ratios(aspect_ratios)
       aspect_ratios.map do |aspect_ratio|
-        if NAMED_ASPECT_RATIOS.include?(aspect_ratio)
-          aspect_ratio
+        if NAMED_ASPECT_RATIOS.include?(aspect_ratio) || A_SERIES_ASPECT_RATIOS.include?(aspect_ratio)
+          I18n.t("active_storage_validations.aspect_ratios.#{aspect_ratio}", default: aspect_ratio.to_s)
         else
           x, y = ratio_components(aspect_ratio)
           "#{x}:#{y}"

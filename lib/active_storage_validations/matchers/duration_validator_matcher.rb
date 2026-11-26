@@ -55,8 +55,12 @@ module ActiveStorageValidations
         (10.0**-validator_precision).seconds
       end
 
+      # The coarsest precision of the attribute's duration validators: under
+      # `precision: 0`, a probe 1ms off a bound is compared as the bound itself.
       def validator_precision
-        @precision || attribute_validator&.options&.fetch(:precision, nil) || DurationValidator::DEFAULT_PRECISION
+        @precision ||
+          attribute_validators.map { |validator| validator.options.fetch(:precision, DurationValidator::DEFAULT_PRECISION) }.min ||
+          DurationValidator::DEFAULT_PRECISION
       end
 
       def precision_description

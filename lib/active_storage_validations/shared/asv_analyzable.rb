@@ -107,8 +107,14 @@ module ActiveStorageValidations
     # In-memory +asv_*+ on the unsaved blob is persisted by Rails when the
     # record is saved. Already-persisted blobs (re-validation, attach after
     # save, pre-v2 blobs) still need +save!+ so the cache survives +reload+.
+    #
+    # In a reading role (automatic role switching on GET requests,
+    # +connected_to(role: :reading)+) the blob cannot be written: keep the
+    # analysis in memory for this validation instead of raising from +valid?+.
     def persist_asv_metadata(blob)
       blob.save! if blob.persisted?
+    rescue ActiveRecord::ReadOnlyError, ActiveRecord::ReadOnlyRecord
+      nil
     end
 
     def content_type_analysis_failed?(new_metadata)

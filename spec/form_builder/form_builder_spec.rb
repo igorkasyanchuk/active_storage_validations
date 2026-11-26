@@ -41,6 +41,14 @@ RSpec.describe ActiveStorageValidations::FormBuilder do
         end
       end
 
+      context "with a media type wildcard ([\"image/*\", :pdf])" do
+        subject(:html) { builder.file_field(:with_wildcard) }
+
+        it "auto-sets accept" do
+          expect(html).to include('accept="image/*,application/pdf"')
+        end
+      end
+
       context "with a non-matching Regexp option" do
         subject(:html) { builder.file_field(:with_non_matching_regex) }
 

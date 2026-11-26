@@ -29,6 +29,7 @@ module ActiveStorageValidations
       dimension_width_not_equal_to
       dimension_height_not_equal_to
       media_metadata_missing
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[width height].freeze
     DIMENSION_HASH_KEYS = %i[min max in].freeze
@@ -42,7 +43,7 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
+      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS, process_options(record))
     end
 
     private
@@ -175,8 +176,7 @@ module ActiveStorageValidations
       raise ArgumentError, message
     end
 
-    def is_valid?(record, attribute, file, metadata)
-      flat_options = process_options(record)
+    def is_valid?(record, attribute, file, metadata, flat_options)
       errors_options = initialize_error_options(options, file)
 
       return add_media_metadata_missing_error(record, attribute, file, errors_options) unless valid_metadata?(metadata)

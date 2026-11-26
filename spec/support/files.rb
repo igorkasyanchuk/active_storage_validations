@@ -246,6 +246,11 @@ module FixtureFiles
     fixture_file("audio_3s.webm", filename: "audio_3s.webm", content_type: "audio/webm")
   end
 
+  # Written like a browser MediaRecorder recording: no Duration element.
+  def audio_4s_no_duration_webm
+    fixture_file("audio_4s_no_duration.webm", filename: "audio_4s_no_duration.webm", content_type: "audio/webm")
+  end
+
   # Ogg/Opus with ~4 KB of non-ASCII Vorbis comments (title, artist, comment)
   # reported by ffprobe as audio stream tags.
   def audio_1s_tagged

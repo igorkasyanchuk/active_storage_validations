@@ -65,8 +65,8 @@ uk:
       dimension_width_not_equal_to: "ширина мусить дорівнювати %{length} пікселям"
       dimension_height_not_equal_to: "висота мусить дорівнювати %{length} пікселям"
       aspect_ratio_not_square: "повинен бути квадратним (поточний файл %{width}x%{height} пікселям)"
-      aspect_ratio_not_portrait: "повинен бути портретним (поточний файл %{width}x%{height} пікселям)"
-      aspect_ratio_not_landscape: "повинен бути пейзажним (поточний файл %{width}x%{height} пікселям)"
+      aspect_ratio_not_portrait: "повинен бути вертикальним (поточний файл %{width}x%{height} пікселям)"
+      aspect_ratio_not_landscape: "повинен бути горизонтальним (поточний файл %{width}x%{height} пікселям)"
       aspect_ratio_not_x_y: "повинен бути %{authorized_aspect_ratios} (поточний файл становить %{width}x%{height} пікселям)"
       aspect_ratio_invalid: "має недійсне співвідношення сторін (дійсні співвідношення сторін %{authorized_aspect_ratios})"
       file_not_processable: "не ідентифікується як дійсний медіа-файл"
@@ -79,6 +79,13 @@ uk:
       pages_not_between: "кількість сторінок має бути від %{min} до %{max} (поточна кількість сторінок становить %{pages})"
       pages_not_equal_to: "кількість сторінок має дорівнювати %{exact} (поточна кількість сторінок - %{pages})"
   active_storage_validations:
+    aspect_ratios:
+      square: "квадратний"
+      portrait: "вертикальний"
+      landscape: "горизонтальний"
+      a_series: "формат A (1:√2)"
+      a_series_portrait: "вертикальний формат A (1:√2)"
+      a_series_landscape: "горизонтальний формат A (√2:1)"
     duration:
       years:
         one: "%{count} рік"

@@ -43,6 +43,14 @@ RSpec.shared_examples "works with except_on" do
 
           it { is_expected_to_match_for(klass) }
         end
+
+        context "which is an array listing only some of the validator contexts" do
+          subject(:configured_matcher) { matcher.except_on([ :update ]) }
+
+          let(:model_attribute) { :with_except_on_array }
+
+          it { is_expected_to_match_for(klass) }
+        end
       end
 
       context "and the matcher is provided with a different context than the model attribute validator except_on context" do

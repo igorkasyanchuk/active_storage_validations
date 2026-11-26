@@ -17,7 +17,7 @@ module ActiveStorageValidations
     include ASVSymbolizable
 
     AVAILABLE_CHECKS = %i[with].freeze
-    ERROR_TYPES = %i[audio_missing audio_present media_metadata_missing].freeze
+    ERROR_TYPES = %i[audio_missing audio_present media_metadata_missing attachment_missing].freeze
     METADATA_KEYS = %i[audio].freeze
 
     def check_validity!
@@ -29,15 +29,13 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
+      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS, expected_audio(record))
     end
 
     private
 
-    def is_valid?(record, attribute, attachable, metadata)
+    def is_valid?(record, attribute, attachable, metadata, expected_audio)
       return add_media_metadata_missing_error(record, attribute, attachable) unless media_analyzed?(metadata)
-
-      expected_audio = expected_audio(record)
       return if audio_track?(metadata) == expected_audio
 
       errors_options = initialize_error_options(options, attachable)

@@ -32,6 +32,18 @@ RSpec.shared_examples "works with custom message" do
       it { is_expected_not_to_match_for(klass) }
     end
 
+    context "and when provided with a Regexp matching the model validation message" do
+      subject(:configured_matcher) { matcher.with_message(/custom/i) }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    context "and when provided with a Regexp not matching the model validation message" do
+      subject(:configured_matcher) { matcher.with_message(/wrong/) }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+
     context "and when not provided with the #with_message matcher method" do
       subject(:configured_matcher) { matcher }
 

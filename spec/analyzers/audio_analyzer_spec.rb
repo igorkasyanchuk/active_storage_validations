@@ -36,6 +36,14 @@ RSpec.describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
       end
     end
 
+    context "when neither the container nor the stream carries a duration (browser MediaRecorder WebM)" do
+      let(:attachable) { audio_4s_no_duration_webm }
+
+      it "measures the end of the last packet" do
+        expect(metadata).to eq({ duration: 4.001, sample_rate: 48000, audio: true })
+      end
+    end
+
     context "when the audio stream has tags (ID3 / Vorbis comments)" do
       let(:attachable) { audio_1s_tagged }
 

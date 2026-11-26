@@ -259,6 +259,37 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
     end
   end
 
+  describe "playlists" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:local_video) { Rails.root.join("public", "video_150x150.mp4").to_s }
+    let(:attachable) { { io: StringIO.new(content), filename: filename, content_type: "video/mp4" } }
+
+    context "with an HLS playlist pointing to a local file" do
+      let(:filename) { "clip.m3u8" }
+      let(:content) { "#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\n#{local_video}\n#EXT-X-ENDLIST\n" }
+
+      it "does not measure the file it points to" do
+        expect(metadata).to eq({})
+      end
+    end
+
+    # ffprobe refuses absolute paths in a concat list, not names relative to
+    # the analyzed copy, which lives in the tmp directory.
+    context "with an ffconcat list named like a video" do
+      let(:target) { File.join(Dir.tmpdir, "asv_concat_target_#{SecureRandom.hex(4)}.mp4") }
+      let(:filename) { "clip.mp4" }
+      let(:content) { "ffconcat version 1.0\nfile '#{File.basename(target)}'\n" }
+
+      before { FileUtils.cp(local_video, target) }
+      after { FileUtils.rm_f(target) }
+
+      it "does not measure the file it points to" do
+        expect(metadata).to eq({})
+      end
+    end
+  end
+
   describe "empty container" do
     subject(:metadata) { analyzer.metadata }
 

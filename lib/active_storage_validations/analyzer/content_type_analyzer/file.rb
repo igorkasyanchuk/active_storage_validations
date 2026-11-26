@@ -34,8 +34,10 @@ module ActiveStorageValidations
     # -E: exit non-zero on filesystem errors. Without it +file+ prints
     # "cannot open `…'" on stdout with status 0, which would be cached as the
     # detected content type. -P needs file >= 5.26, -E file >= 5.18.
+    # -L: Linux libmagic does not follow symlinks by default, so a symlinked
+    # File / Pathname attachable was sniffed as "inode/symlink" (spoofed).
     def file_command(path)
-      [ file_path, "-E", "-P", "bytes=#{LIBMAGIC_BYTES_LIMIT}", "-b", "--mime-type", path ]
+      [ file_path, "-E", "-P", "bytes=#{LIBMAGIC_BYTES_LIMIT}", "-b", "-L", "--mime-type", path ]
     end
 
     def file_path

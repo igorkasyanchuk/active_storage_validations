@@ -56,6 +56,30 @@ RSpec.describe ActiveStorageValidations::Matchers::WithAudioValidatorMatcher do
         it { is_expected_not_to_match_for(klass) }
       end
     end
+
+    # Without a `message:` option, #with_message matches the message the error
+    # renders: the gem's translation.
+    describe "#without_audio + #with_message on the default message" do
+      let(:model_attribute) { :silent_video }
+
+      context "when provided with the rendered message" do
+        subject(:configured_matcher) { matcher.without_audio.with_message("must not have an audio track") }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      context "when provided with a Regexp matching the rendered message" do
+        subject(:configured_matcher) { matcher.without_audio.with_message(/audio track/) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      context "when provided with another message" do
+        subject(:configured_matcher) { matcher.without_audio.with_message("must have an audio track") }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
   end
 
   describe "#on" do

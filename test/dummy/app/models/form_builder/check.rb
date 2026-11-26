@@ -25,6 +25,9 @@ class FormBuilder::Check < ApplicationRecord
   has_one_attached :with_regex
   validates :with_regex, content_type: /\Aimage\/.*\z/
 
+  has_one_attached :with_wildcard
+  validates :with_wildcard, content_type: [ "image/*", :pdf ]
+
   has_one_attached :with_non_matching_regex
   validates :with_non_matching_regex, content_type: /\Aimage\/(png|gif)\z/
 

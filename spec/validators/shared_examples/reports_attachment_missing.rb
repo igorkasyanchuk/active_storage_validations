@@ -22,5 +22,8 @@ RSpec.shared_examples "reports attachment_missing" do
     it { is_expected_not_to_be_valid }
     it { is_expected_to_include_error_message("attachment_missing", error_options: error_options) }
     it { is_expected_to_have_error_options(error_options) }
+
+    # Matchers only count the errors listed in ERROR_TYPES.
+    it { expect(described_class::ERROR_TYPES).to include(:attachment_missing) }
   end
 end

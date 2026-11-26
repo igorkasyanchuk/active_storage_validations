@@ -82,6 +82,22 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
             end
           end
 
+          context "when the passed option is a media type wildcard (e.g. 'image/*')" do
+            subject(:validator) { described_class.new(attributes: :dummy, with: "image/*") }
+
+            it "does not raise an error at initialization" do
+              expect { validator }.not_to raise_error
+            end
+          end
+
+          context "when the passed option is a wildcard of an unknown media type (e.g. 'imag/*')" do
+            subject(:validator) { described_class.new(attributes: :dummy, in: [ :png, "imag/*" ]) }
+
+            it "raises an error at initialization" do
+              expect { validator }.to raise_error(ArgumentError, /'imag\/\*' is not found in Marcel content types/)
+            end
+          end
+
           context "when the passed option is a historical type Marcel 2 stores as an alias (e.g. 'audio/x-aac')" do
             # See: https://github.com/rails/marcel/releases#release-v2.0.0
             subject(:validator) { described_class.new(attributes: :dummy, with: "audio/x-aac") }
@@ -289,6 +305,56 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
         let(:file_having_content_type_with_parameter) { rar_file } # 'application/x-rar-compressed;version=5'
 
         it { is_expected_to_be_valid }
+      end
+
+      describe "authorized types in error messages" do
+        subject(:record) { model.public_send(attribute).attach(png_file) and model }
+
+        context "when several rules name the same type ([:jpg, :jpeg, \"image/jpeg\"])" do
+          let(:attribute) { :duplicate_types }
+
+          it { is_expected_to_have_error_options({ authorized_human_content_types: "JPG", count: 1 }) }
+        end
+
+        context "when Marcel lists a rarer extension first ([:mp3, :m4a, :mov, :mpg])" do
+          let(:attribute) { :media_types }
+
+          it { is_expected_to_have_error_options({ authorized_human_content_types: "MP3, M4A, MOV, MPG" }) }
+        end
+      end
+
+      describe "media type wildcards (\"image/*\", as in the accept attribute)" do
+        subject(:record) { model.public_send(attribute).attach(file) and model }
+
+        context "with an image on \"image/*\"" do
+          let(:attribute) { :wildcard }
+          let(:file) { image_150x150_file }
+
+          it { is_expected_to_be_valid }
+        end
+
+        context "with a PDF on \"image/*\"" do
+          let(:attribute) { :wildcard }
+          let(:file) { pdf_file }
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_options({ authorized_human_content_types: "image/*", count: 1 }) }
+        end
+
+        context "with a PDF on [\"image/*\", :pdf]" do
+          let(:attribute) { :wildcard_and_type }
+          let(:file) { pdf_file }
+
+          it { is_expected_to_be_valid }
+        end
+
+        context "with a video on [\"image/*\", :pdf]" do
+          let(:attribute) { :wildcard_and_type }
+          let(:file) { video_file }
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_options({ authorized_human_content_types: "image/*, PDF", count: 2 }) }
+        end
       end
 
       describe "types Marcel resolves differently on upload" do

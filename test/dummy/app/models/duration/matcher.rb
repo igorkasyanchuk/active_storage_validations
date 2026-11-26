@@ -42,6 +42,9 @@ class Duration::Matcher < ApplicationRecord
   validates :equal_to_zero, duration: { equal_to: 0.seconds }
   has_one_attached :equal_to_with_precision
   validates :equal_to_with_precision, duration: { equal_to: 5.seconds, precision: 1 }
+  has_one_attached :two_validators_with_precision
+  validates :two_validators_with_precision, duration: { greater_than: 1.second }
+  validates :two_validators_with_precision, duration: { less_than: 1.minute, precision: 0 }
   has_one_attached :less_than_with_precision
   validates :less_than_with_precision, duration: { less_than: 2.seconds, precision: 1 }
 

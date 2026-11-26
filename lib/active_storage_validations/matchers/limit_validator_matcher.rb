@@ -133,11 +133,13 @@ module ActiveStorageValidations
       end
 
       def is_custom_message_valid?
-        return true if !@custom_message || (@min&.zero? && @max.nil?)
+        return true unless @custom_message
         raise ArgumentError, "#with_message needs #min or #max to build a file count the validator rejects" if @min.nil? && @max.nil?
 
+        # No file count the validator rejects (`min(0)`, or `min(1)` under
+        # `allow_blank`): check the declared message rather than pass unchecked.
         count = custom_message_probe_count
-        return true unless count
+        return validator_declares_custom_message? unless count
 
         attach_files(count)
         validate
@@ -145,6 +147,9 @@ module ActiveStorageValidations
         has_an_error_message_which_is_custom_message?
       end
 
+      def validator_declares_custom_message?
+        attribute_validators.any? { |validator| custom_message_matches?(validator.options[:message]) }
+      end
       # A file count the validator rejects: below min, else above max. 0 files
       # is not a rejected count under allow_blank (the validator is skipped).
       def custom_message_probe_count

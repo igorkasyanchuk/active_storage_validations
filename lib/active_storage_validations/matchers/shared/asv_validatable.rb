@@ -25,6 +25,19 @@ module ActiveStorageValidations
         end
       end
 
+      # Matchers read the errors of each probe, but a `strict: true` validator
+      # (on this attribute or any other) raises ActiveModel::StrictValidationFailed
+      # instead of adding its error. During a probe, strict errors are added as
+      # plain ones; validations outside the matcher still raise.
+      module NonStrictProbeErrors
+        KEY = :active_storage_validations_non_strict_probe
+
+        def add(attribute, type = :invalid, **options)
+          options = options.except(:strict) if ActiveSupport::IsolatedExecutionState[KEY]
+          super
+        end
+      end
+
       private
 
       # Probes assign, validate and unassign files over and over on the record
@@ -64,7 +77,12 @@ module ActiveStorageValidations
       end
 
       def validate
+        ActiveModel::Errors.prepend(NonStrictProbeErrors) unless ActiveModel::Errors.include?(NonStrictProbeErrors)
+        previous = ActiveSupport::IsolatedExecutionState[NonStrictProbeErrors::KEY]
+        ActiveSupport::IsolatedExecutionState[NonStrictProbeErrors::KEY] = true
         @subject.validate(validation_context)
+      ensure
+        ActiveSupport::IsolatedExecutionState[NonStrictProbeErrors::KEY] = previous
       end
 
       # Without #on, validate in the record default context, unless the

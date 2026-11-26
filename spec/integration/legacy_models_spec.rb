@@ -262,14 +262,14 @@ RSpec.describe "Legacy multi-validator integration" do
         expect(limit_attachment.files_blobs.count).to eq(0)
         expect(limit_attachment.proc_files_blobs.count).to eq(0)
         expect(limit_attachment.errors.full_messages).to eq([
-          "Files too many files attached (maximum is 4 files, got 6)",
-          "Proc files too many files attached (maximum is 4 files, got 6)"
+          "Files too many files attached (maximum is 4, got 6)",
+          "Proc files too many files attached (maximum is 4, got 6)"
         ])
 
         expect(limit_attachment).not_to be_valid
         expect(limit_attachment.errors.full_messages).to eq([
-          "Files too many files attached (maximum is 4 files, got 6)",
-          "Proc files too many files attached (maximum is 4 files, got 6)"
+          "Files too many files attached (maximum is 4, got 6)",
+          "Proc files too many files attached (maximum is 4, got 6)"
         ])
       end
     end

@@ -123,6 +123,33 @@ RSpec.describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
       it { is_expected_to_match_for(klass) }
     end
 
+    # No file count the validator rejects: the declared message is compared.
+    describe "#with_message without a count to probe" do
+      context "with #min(0) (validates :min_zero_with_message, limit: { min: 0, max: 2, message: \"Invalid limits.\" })" do
+        let(:model_attribute) { :min_zero_with_message }
+
+        context "when the message is the declared one" do
+          subject(:configured_matcher) { matcher.min(0).with_message("Invalid limits.") }
+
+          it { is_expected_to_match_for(klass) }
+        end
+
+        context "when the message is another one" do
+          subject(:configured_matcher) { matcher.min(0).with_message("Wrong message") }
+
+          it { is_expected_not_to_match_for(klass) }
+        end
+      end
+
+      context "with #min(1) and #allow_blank (0 files is skipped)" do
+        subject(:configured_matcher) { matcher.min(1).allow_blank.with_message("Wrong message") }
+
+        let(:model_attribute) { :allow_blank_with_message }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
+
     describe "#max(0)" do
       # validates :max_zero, limit: { max: 0 }
       let(:model_attribute) { :max_zero }
