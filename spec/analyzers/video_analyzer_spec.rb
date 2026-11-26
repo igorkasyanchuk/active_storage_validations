@@ -272,6 +272,24 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
       it "does not measure the file it points to" do
         expect(metadata).to eq({})
       end
+
+      # ffprobe opens the entries while it probes (a FIFO entry hung it).
+      it "never runs ffprobe on it" do
+        allow(analyzer).to receive(:run_command).and_call_original
+        metadata
+        expect(analyzer).not_to have_received(:run_command)
+      end
+    end
+
+    context "with a DASH manifest" do
+      let(:filename) { "clip.mpd" }
+      let(:content) { %(<?xml version="1.0"?>\n<MPD xmlns="urn:mpeg:dash:schema:mpd:2011"><Period><AdaptationSet><Representation><BaseURL>#{local_video}</BaseURL></Representation></AdaptationSet></Period></MPD>\n) }
+
+      it "never runs ffprobe on it" do
+        allow(analyzer).to receive(:run_command).and_call_original
+        expect(metadata).to eq({})
+        expect(analyzer).not_to have_received(:run_command)
+      end
     end
 
     # ffprobe refuses absolute paths in a concat list, not names relative to
@@ -286,6 +304,12 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
 
       it "does not measure the file it points to" do
         expect(metadata).to eq({})
+      end
+
+      it "never runs ffprobe on it" do
+        allow(analyzer).to receive(:run_command).and_call_original
+        metadata
+        expect(analyzer).not_to have_received(:run_command)
       end
     end
   end
