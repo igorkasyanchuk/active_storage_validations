@@ -25,6 +25,14 @@ RSpec.describe ActiveStorageValidations::FormBuilder do
         end
       end
 
+      context "with a nested list ([%i[png gif], :pdf])" do
+        subject(:html) { builder.file_field(:with_nested_list) }
+
+        it "auto-sets accept" do
+          expect(html).to include('accept="image/png,image/gif,application/pdf"')
+        end
+      end
+
       context "with a string MIME type" do
         subject(:html) { builder.file_field(:with_string_mime) }
 
@@ -41,6 +49,14 @@ RSpec.describe ActiveStorageValidations::FormBuilder do
         end
       end
 
+      context "with a media type wildcard ([\"image/*\", :pdf])" do
+        subject(:html) { builder.file_field(:with_wildcard) }
+
+        it "auto-sets accept" do
+          expect(html).to include('accept="image/*,application/pdf"')
+        end
+      end
+
       context "with a non-matching Regexp option" do
         subject(:html) { builder.file_field(:with_non_matching_regex) }
 
@@ -54,6 +70,30 @@ RSpec.describe ActiveStorageValidations::FormBuilder do
 
         it "skips accept gracefully" do
           expect(html).not_to include("accept=")
+        end
+      end
+
+      context "with a type and a Proc in the same list" do
+        subject(:html) { builder.file_field(:with_type_and_proc) }
+
+        it "skips accept rather than hiding the Proc's types" do
+          expect(html).not_to include("accept=")
+        end
+      end
+
+      context "with a type and a non-matching Regexp in the same list" do
+        subject(:html) { builder.file_field(:with_type_and_non_matching_regex) }
+
+        it "skips accept rather than hiding the Regexp's types" do
+          expect(html).not_to include("accept=")
+        end
+      end
+
+      context "with a static validator and a Proc validator" do
+        subject(:html) { builder.file_field(:with_type_validator_and_proc_validator) }
+
+        it "sets accept from the static validator, which every file must pass" do
+          expect(html).to include('accept="application/pdf"')
         end
       end
 

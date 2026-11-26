@@ -12,4 +12,6 @@
 class AspectRatio::Validator::WithMessage < ApplicationRecord
   has_one_attached :with_message
   validates :with_message, aspect_ratio: { with: :square, message: "Custom message" }
+  has_one_attached :with_message_placeholders
+  validates :with_message_placeholders, aspect_ratio: { with: :square, message: "must be %{authorized_aspect_ratios} (got %{width}x%{height})" }
 end

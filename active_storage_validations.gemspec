@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.description = 'Validations for Active Storage (presence, size, content type, ...)'
   s.license     = 'MIT'
 
-  s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md']
+  s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md', 'CHANGES.md', 'docs/upgrade_to_*.md']
 
   s.metadata['rubygems_mfa_required'] = 'true'
   s.metadata['changelog_uri'] = 'https://github.com/igorkasyanchuk/active_storage_validations/blob/master/CHANGES.md'
@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 3.3.0' # We support Rails >= 7.0.1
 
-  %w[activejob activemodel activestorage activesupport].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 7.0.1' }
+  %w[activejob activemodel activestorage activesupport railties].each { |rails_subcomponent| s.add_dependency rails_subcomponent, '>= 7.0.1' }
   s.add_dependency 'marcel', ">= 1.0.3" # necessary for mime type spoofing features, required for Rails >= 7.0.1 anyway
 
   s.add_development_dependency 'combustion', "~> 1.3"

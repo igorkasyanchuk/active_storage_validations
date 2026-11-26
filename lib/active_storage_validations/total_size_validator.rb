@@ -20,7 +20,13 @@ module ActiveStorageValidations
 
       return if no_attachments?(record, attribute)
 
-      total_file_size = attached_files(record, attribute).sum { |file| file.blob.byte_size }
+      # Files marked for destruction do not count. When none remains, there is
+      # nothing to validate, as for a record without files: `greater_than`
+      # used to fail it with "current size is 0 Bytes".
+      files = attached_files(record, attribute)
+      return if files.empty?
+
+      total_file_size = files.sum { |file| file.blob.byte_size }
       flat_options = set_flat_options(record)
 
       return if is_valid?(total_file_size, flat_options)

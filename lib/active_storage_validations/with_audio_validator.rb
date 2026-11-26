@@ -4,6 +4,7 @@ require_relative "shared/asv_active_storageable"
 require_relative "shared/asv_analyzable"
 require_relative "shared/asv_attachable"
 require_relative "shared/asv_errorable"
+require_relative "shared/asv_optionable"
 require_relative "shared/asv_symbolizable"
 
 module ActiveStorageValidations
@@ -12,21 +13,22 @@ module ActiveStorageValidations
     include ASVAnalyzable
     include ASVAttachable
     include ASVErrorable
+    include ASVOptionable
     include ASVSymbolizable
 
-    ERROR_TYPES = %i[audio_missing audio_present].freeze
+    AVAILABLE_CHECKS = %i[with].freeze
+    ERROR_TYPES = %i[audio_missing audio_present attachment_missing].freeze
     METADATA_KEYS = %i[audio].freeze
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
+      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS, set_flat_options(record).fetch(:with, true))
     end
 
     private
 
-    def is_valid?(record, attribute, attachable, metadata)
-      expected_audio = options.fetch(:with, true)
+    def is_valid?(record, attribute, attachable, metadata, expected_audio)
       return if audio_track?(metadata) == expected_audio
 
       errors_options = initialize_error_options(options, attachable)

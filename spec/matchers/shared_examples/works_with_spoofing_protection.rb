@@ -31,6 +31,24 @@ RSpec.shared_examples "works with spoofing protection" do
     end
   end
 
+  context "when the model validation has no spoofing_protection option" do
+    let(:model_attribute) { :without_spoofing_protection }
+
+    before { matcher.allowing("image/png") }
+
+    context "and when provided with spoofing_protection(false)" do
+      subject(:configured_matcher) { matcher.spoofing_protection(false) }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    context "and when provided with spoofing_protection" do
+      subject(:configured_matcher) { matcher.spoofing_protection }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+  end
+
   # Option-only checks: do not call #allowing here, so Magika CLI is not required locally.
   context "when the model uses spoofing_protection: :magika" do
     let(:model_attribute) { :with_spoofing_protection_magika }

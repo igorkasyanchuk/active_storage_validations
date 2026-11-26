@@ -81,7 +81,7 @@ module ActiveStorageValidations
       def is_custom_message_valid?
         return true unless @custom_message
 
-        with_audio_metadata(false) do
+        with_audio_metadata(!@expected_audio) do
           attach_file(video_file)
           validate
           detach_file

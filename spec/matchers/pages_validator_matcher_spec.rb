@@ -58,6 +58,22 @@ RSpec.describe ActiveStorageValidations::Matchers::PagesValidatorMatcher do
 
     it_behaves_like "base comparison validator matcher only match when exact value"
     it_behaves_like "base comparison validator matcher greater_than_or_equal_to rejects greater_than"
+
+    context "when the bound is 0" do
+      subject(:configured_matcher) { matcher.greater_than_or_equal_to(0) }
+
+      let(:model_attribute) { :greater_than_or_equal_to_zero }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    context "when matching greater_than_or_equal_to(0) against a less_than validator" do
+      subject(:configured_matcher) { matcher.greater_than_or_equal_to(0) }
+
+      let(:model_attribute) { :less_than }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
   end
 
   describe "#between" do
@@ -102,6 +118,8 @@ RSpec.describe ActiveStorageValidations::Matchers::PagesValidatorMatcher do
 
       it { is_expected_not_to_match_for(klass) }
     end
+
+    it_behaves_like "base comparison validator matcher between honors exclusive range"
   end
 
   describe "#equal_to" do
@@ -111,6 +129,14 @@ RSpec.describe ActiveStorageValidations::Matchers::PagesValidatorMatcher do
 
     it_behaves_like "base comparison validator matcher only match when exact value"
     it_behaves_like "base comparison validator matcher equal_to rejects looser comparisons"
+
+    context "when the bound is 0" do
+      subject(:configured_matcher) { matcher.equal_to(0) }
+
+      let(:model_attribute) { :equal_to_zero }
+
+      it { is_expected_to_match_for(klass) }
+    end
   end
 
   describe "#allow_blank" do

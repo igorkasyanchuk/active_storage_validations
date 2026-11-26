@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "delegate"
 require_relative "base_comparison_validator"
 
 module ActiveStorageValidations
@@ -14,8 +15,30 @@ module ActiveStorageValidations
       duration_not_greater_than_or_equal_to
       duration_not_between
       duration_not_equal_to
+      media_metadata_missing
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[duration].freeze
+    # Decimal places of a second durations are rounded to before they are
+    # compared and shown. Analyzers measure milliseconds (3); `precision: 1`
+    # compares tenths, so a 5.029s file passes `equal_to: 5.seconds`.
+    DEFAULT_PRECISION = 3
+
+    # Durations are rendered like ActiveSupport::Duration#inspect
+    # ("1 minute and 30 seconds") but through the active_storage_validations.duration
+    # I18n keys (units + sentence connectors) shipped in every bundled locale.
+    # The English wording is the fallback for locales the gem does not ship.
+    DURATION_UNITS = ActiveSupport::Duration::PARTS
+    DEFAULT_DURATION_CONNECTORS = {
+      words_connector: ", ",
+      two_words_connector: " and ",
+      last_word_connector: ", and "
+    }.freeze
+
+    def check_validity!
+      super
+      ensure_precision_validity
+    end
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
@@ -26,17 +49,18 @@ module ActiveStorageValidations
         duration = begin
           metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:duration, nil)
         rescue ActiveStorage::FileNotFoundError
-          add_attachment_missing_error(record, attribute, attachable)
+          add_attachment_missing_error(record, attribute, attachable, bound_error_options(attachable, flat_options))
           next
         end
 
         # to_f, not to_i: durations are floats, and truncating would treat any
         # file shorter than a second as unanalyzable.
         if duration.to_f <= 0
-          add_media_metadata_missing_error(record, attribute, attachable)
+          add_media_metadata_missing_error(record, attribute, attachable, bound_error_options(attachable, flat_options))
           next
         end
 
+        duration = duration.to_f.round(precision)
         is_valid?(duration, flat_options) || populate_error_options_and_add_error(record, attribute, attachable, flat_options, duration)
       end
     end
@@ -44,19 +68,91 @@ module ActiveStorageValidations
     private
 
     def populate_error_options_and_add_error(record, attribute, attachable, flat_options, duration)
-      errors_options = initialize_error_options(options, attachable)
-      populate_error_options(errors_options, flat_options, duration)
+      errors_options = bound_error_options(attachable, flat_options, duration)
 
       error_type = set_error_type(flat_options)
 
       add_error(record, attribute, error_type, **errors_options)
     end
 
+    def precision
+      options.fetch(:precision, DEFAULT_PRECISION)
+    end
+
+    def ensure_precision_validity
+      return unless options.key?(:precision)
+      return if options[:precision].is_a?(Integer) && options[:precision].between?(0, DEFAULT_PRECISION)
+
+      raise ArgumentError, "You must pass an Integer from 0 to #{DEFAULT_PRECISION} to :precision (decimal places of a second, got #{options[:precision].inspect})"
+    end
+
+    # One unit of the precision (1ms by default). `end - 1` on a Duration is
+    # 1 second.
+    def exclusive_range_step
+      (10.0**-precision).seconds
+    end
+
     def format_bound_value(value)
       return nil unless value
 
-      custom_value = value == value.to_i ? value.to_i : value
-      ActiveSupport::Duration.build(custom_value).inspect
+      # The precision of the comparison (milliseconds by default). Rounding to
+      # tenths while comparing milliseconds read "must be less than or equal
+      # to 5 seconds (current duration is 5 seconds)" for a 5.029s file.
+      duration_in_words(ActiveSupport::Duration.build(value.to_f.round(precision)))
+    end
+
+    def duration_in_words(duration)
+      parts = duration.parts.presence || { seconds: duration.value.to_i }
+
+      words = parts.sort_by { |unit, _count| DURATION_UNITS.index(unit) }.map do |unit, count|
+        count = whole_or_milliseconds(count)
+        count = LocalizedCount.new(count) unless count.is_a?(Integer)
+        I18n.t("active_storage_validations.duration.#{unit}", count: count, default: default_unit_translation(unit))
+      end
+
+      words.to_sentence(locale: false, **duration_connectors)
+    end
+
+    # Duration#parts leaves float noise in the seconds (61.234 is 1 minute and
+    # 1.2339999999999236 seconds) and keeps whole floats (5.0).
+    def whole_or_milliseconds(count)
+      return count if count.is_a?(Integer)
+
+      rounded = count.to_f.round(3)
+      rounded == rounded.to_i ? rounded.to_i : rounded
+    end
+
+    # A decimal count (1.5 seconds) must still pick the plural form as a
+    # number, but its text follows the locale's decimal separator ("1,5" in
+    # French), like number_to_human_size does for sizes. I18n interpolates
+    # %{count} with #to_s.
+    class LocalizedCount < SimpleDelegator
+      def to_s
+        ActiveSupport::NumberHelper.number_to_delimited(__getobj__)
+      end
+
+      # Plural rules (rails-i18n) may check `count.is_a?(Numeric)`.
+      def is_a?(klass)
+        super || __getobj__.is_a?(klass)
+      end
+      alias_method :kind_of?, :is_a?
+    end
+    private_constant :LocalizedCount
+
+    def default_unit_translation(unit)
+      { one: "%{count} #{unit.to_s.singularize}", other: "%{count} #{unit}" }
+    end
+
+    def duration_connectors
+      I18n.t("active_storage_validations.duration.connectors", default: DEFAULT_DURATION_CONNECTORS)
+    end
+
+    # A file that cannot be analyzed has no duration, but a custom message
+    # may still show the bounds (`message: "must be under %{max}"`).
+    def bound_error_options(attachable, flat_options, duration = nil)
+      errors_options = initialize_error_options(options, attachable)
+      populate_error_options(errors_options, flat_options, duration)
+      errors_options
     end
 
     def populate_error_options(errors_options, flat_options, duration)

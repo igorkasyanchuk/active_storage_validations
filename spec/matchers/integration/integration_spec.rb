@@ -89,4 +89,28 @@ RSpec.describe "Integration tests" do
       end
     end
   end
+
+  describe "example_3" do
+    # validates :example_3, dimension: { width: { min: 100 } }
+    # validates :example_4, dimension: { width: { min: 120 } }
+    let(:model_attribute) { :example_3 }
+    let(:matcher_type) { :dimension }
+
+    context "when another attachment of the record has no cached metadata yet" do
+      subject(:configured_matcher) { matcher.width_min(100) }
+
+      let(:record) do
+        klass.create!(example_4: image_150x150_file).tap do |record|
+          # Fixtures and uploads made before the validator existed have no asv_* keys.
+          record.example_4.blob.remove_active_storage_validations_metadata!
+        end
+      end
+
+      it "only mocks the analysis of the probe file" do
+        expect(configured_matcher.matches?(record)).to be(true)
+        expect(record.example_4.blob.reload.active_storage_validations_metadata).not_to include(width: 99)
+        expect(klass.find(record.id)).to be_valid
+      end
+    end
+  end
 end

@@ -90,3 +90,29 @@ RSpec.shared_examples "base comparison validator matcher greater_than_or_equal_t
     it { is_expected_not_to_match_for(klass) }
   end
 end
+
+RSpec.shared_examples "base comparison validator matcher between honors exclusive range" do
+  let(:exclusive_range) do
+    case described_class.name
+    when /Duration/ then 2.seconds...7.seconds
+    when /Pages/ then 2...7
+    when /Size/ then 2.kilobytes...7.kilobytes
+    end
+  end
+
+  context "when the validator uses an exclusive range" do
+    subject(:configured_matcher) { matcher.between(exclusive_range) }
+
+    let(:model_attribute) { :between_exclusive }
+
+    it { is_expected_to_match_for(klass) }
+  end
+
+  context "when the validator uses an inclusive range rather than an exclusive range" do
+    subject(:configured_matcher) { matcher.between(exclusive_range) }
+
+    let(:model_attribute) { :between }
+
+    it { is_expected_not_to_match_for(klass) }
+  end
+end

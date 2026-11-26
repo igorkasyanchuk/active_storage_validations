@@ -50,7 +50,7 @@ it:
       dimension_width_not_equal_to: "la larghezza deve essere pari a %{length} pixel"
       dimension_height_not_equal_to: "l’altezza deve essere pari a %{length} pixel"
       aspect_ratio_not_square: "deve essere quadrato (il file corrente è %{width}x%{height}px)"
-      aspect_ratio_not_portrait: "deve essere ritratto (il file corrente è %{width}x%{height}px)"
+      aspect_ratio_not_portrait: "deve essere verticale (il file corrente è %{width}x%{height}px)"
       aspect_ratio_not_landscape: "deve essere orizzontale (il file corrente è %{width}x%{height}px)"
       aspect_ratio_not_x_y: "deve essere %{authorized_aspect_ratios} (il file corrente è %{width}x%{height}px)"
       aspect_ratio_invalid: "ha un formato non valido (i rapporti di aspetto validi sono %{authorized_aspect_ratios})"
@@ -63,3 +63,37 @@ it:
       pages_not_greater_than_or_equal_to: "il numero di pagine deve essere maggiore o uguale a %{min} (il numero di pagine corrente è %{pages})"
       pages_not_between: "il numero di pagine deve essere compreso tra %{min} e %{max} (il numero di pagine corrente è %{pages})"
       pages_not_equal_to: "il numero di pagine deve essere uguale a %{exact} (il numero di pagine corrente è %{pages})"
+  active_storage_validations:
+    aspect_ratios:
+      square: "quadrato"
+      portrait: "verticale"
+      landscape: "orizzontale"
+      a_series: "formato A (1:√2)"
+      a_series_portrait: "formato A verticale (1:√2)"
+      a_series_landscape: "formato A orizzontale (√2:1)"
+    duration:
+      years:
+        one: "%{count} anno"
+        other: "%{count} anni"
+      months:
+        one: "%{count} mese"
+        other: "%{count} mesi"
+      weeks:
+        one: "%{count} settimana"
+        other: "%{count} settimane"
+      days:
+        one: "%{count} giorno"
+        other: "%{count} giorni"
+      hours:
+        one: "%{count} ora"
+        other: "%{count} ore"
+      minutes:
+        one: "%{count} minuto"
+        other: "%{count} minuti"
+      seconds:
+        one: "%{count} secondo"
+        other: "%{count} secondi"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " e "
+        last_word_connector: " e "

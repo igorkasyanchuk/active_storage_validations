@@ -22,10 +22,17 @@ module ActiveStorageValidations
         return true if !@context && attribute_validators.none? { |validator| validator.options[:on] }
 
         ensure_context_present!
+        # Some validators have no :on: they run in the default context.
+        return true unless @context
+
         ensure_context_valid!
 
         if @context.is_a?(Array)
-          (validator_contexts & @context.map(&:to_s)) == validator_contexts || raise_context_not_listed_error
+          # The Array covers the validator contexts (as in 4.1), or each of its
+          # contexts is listed by a validator, like a Symbol (`on([:update])`
+          # against `on: %i[update custom]`).
+          contexts = @context.map(&:to_s)
+          (validator_contexts - contexts).empty? || (contexts - validator_contexts).empty? || raise_context_not_listed_error
         elsif @context.is_a?(Symbol)
           validator_contexts.include?(@context.to_s) || raise_context_not_listed_error
         end

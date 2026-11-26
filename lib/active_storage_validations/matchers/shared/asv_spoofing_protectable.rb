@@ -24,10 +24,9 @@ module ActiveStorageValidations
         return true if @spoofing_protection.equal?(UNSET)
 
         expected = normalize_spoofing_protection(@spoofing_protection)
+        # The validator option defaults to false.
         attribute_validators.any? do |validator|
-          next false unless validator.options.key?(:spoofing_protection)
-
-          normalize_spoofing_protection(validator.options[:spoofing_protection]) == expected
+          normalize_spoofing_protection(validator.options.fetch(:spoofing_protection, false)) == expected
         end
       end
 

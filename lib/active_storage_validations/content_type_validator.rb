@@ -21,28 +21,43 @@ module ActiveStorageValidations
     ERROR_TYPES = %i[
       content_type_invalid
       content_type_spoofed
+      attachment_missing
     ].freeze
     METADATA_KEYS = %i[content_type].freeze
 
+    # Marcel lists a rarer extension first for some common types: messages
+    # read "MPGA" for an MP3, "QT" for a MOV, "MP4A" for an M4A.
+    HUMAN_EXTENSIONS = {
+      "audio/mpeg" => "mp3",
+      "audio/mp4" => "m4a",
+      "video/quicktime" => "mov",
+      "video/mpeg" => "mpg"
+    }.freeze
     # State for a single attachable check. Active Model builds one validator per
     # class and reuses it for every record and every thread, so this must travel
     # through arguments rather than instance variables.
-    Context = Struct.new(:authorized_content_types, :content_type, :filename)
+    # +written_content_types+: the MIME rules as written, also accepted as is
+    # (see #authorized_content_type?).
+    Context = Struct.new(:authorized_content_types, :content_type, :filename, :written_content_types)
+    # "image/*", as in the HTML accept attribute: any type of that media type.
+    WILDCARD_CONTENT_TYPE = %r{\A[a-z][a-z-]*/\*\z}
 
     def check_validity!
       ensure_exactly_one_validator_option
-      ensure_content_types_validity
+      unless options[:with].is_a?(Proc) || options[:in].is_a?(Proc)
+        ensure_content_types_validity(static_content_types.grep_v(Proc))
+      end
       ensure_spoofing_protection_validity
     end
 
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      authorized_content_types = authorized_content_types_from_options(record)
+      authorized_content_types, written_content_types = authorized_content_types_from_options(record)
       return if authorized_content_types.empty?
 
       attachables_and_blobs(record, attribute).each do |attachable, blob|
-        context = Context.new(authorized_content_types, blob.content_type, blob.filename.to_s)
+        context = Context.new(authorized_content_types, blob.content_type, blob.filename.to_s, written_content_types)
         is_valid?(record, attribute, attachable, blob, context)
       end
     end
@@ -51,13 +66,51 @@ module ActiveStorageValidations
 
     def authorized_content_types_from_options(record)
       flat_options = set_flat_options(record)
+      # A Proc nested in the list may return an Array of its own.
+      content_types = (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).flatten.compact
 
-      (Array.wrap(flat_options[:with]) + Array.wrap(flat_options[:in])).compact.map do |type|
+      # Procs escape check_validity!, nested ones included; an unknown type they
+      # return (e.g. "image/jpg") would otherwise reject every file with a blank
+      # message.
+      ensure_content_types_validity(content_types) if proc_content_types?
+
+      # `[:jpg, :jpeg]` is one type: the message listed it twice ("JPG, JPG"),
+      # and counted two, so it read "types are".
+      authorized = content_types.map do |type|
         case type
-        when String, Symbol then Marcel::MimeType.for(declared_type: type.to_s, extension: type.to_s)
+        when WILDCARD_CONTENT_TYPE then type.to_s
+        when String, Symbol then authorized_marcel_content_type(type.to_s)
         when Regexp then type
         end
-      end
+      end.uniq
+
+      [ authorized, written_mime_content_types(content_types) ]
+    end
+
+    # An alias rule ("audio/x-aac") resolves to its canonical type
+    # ("audio/aac"), which an upload declared with the alias and no extension
+    # (JS FormData, MediaRecorder) still does not resolve to: 4.1 compared the
+    # rule as written, so it is accepted as written too.
+    def written_mime_content_types(content_types)
+      content_types.filter_map do |type|
+        next unless type.is_a?(String) || type.is_a?(Symbol)
+
+        type = type.to_s
+        type if type.include?("/") && !type.match?(WILDCARD_CONTENT_TYPE)
+      end.uniq
+    end
+
+    # Resolve a type as Marcel resolves an upload of it (declared type +
+    # extension), or the two never compare equal: a .flac file declared as
+    # the "audio/x-flac" alias resolves to "audio/flac", and the declared type
+    # alone drops the parameters of "application/dita+xml;format=map".
+    def authorized_marcel_content_type(type)
+      extension = type.include?("/") ? marcel_extension(type) : type
+      Marcel::MimeType.for(declared_type: type, extension: extension)
+    end
+
+    def marcel_extension(content_type)
+      (Marcel::TYPE_EXTS[content_type] || Marcel::TYPE_EXTS[canonical_marcel_content_type(content_type)])&.first
     end
 
     # Check if the provided content_type is authorized and not spoofed against
@@ -70,10 +123,13 @@ module ActiveStorageValidations
     def authorized_content_type?(record, attribute, attachable, context)
       attachable_content_type_is_authorized = context.authorized_content_types.any? do |authorized_content_type|
         case authorized_content_type
+        when WILDCARD_CONTENT_TYPE
+          marcel_attachable_content_type(context).to_s.start_with?(authorized_content_type.delete_suffix("*"))
         when String then authorized_content_type == marcel_attachable_content_type(context)
         when Regexp then authorized_content_type.match?(marcel_attachable_content_type(context).to_s)
         end
       end
+      attachable_content_type_is_authorized ||= Array(context.written_content_types).include?(marcel_attachable_content_type(context))
 
       return true if attachable_content_type_is_authorized
 
@@ -94,7 +150,7 @@ module ActiveStorageValidations
         return false
       end
 
-      if content_type_mismatch?(context.content_type, detected_content_type)
+      if content_type_mismatch?(marcel_attachable_content_type(context), detected_content_type)
         add_content_type_spoofed_error(record, attribute, attachable, context, detected_content_type)
       else
         true
@@ -123,6 +179,10 @@ module ActiveStorageValidations
       ERROR_MESSAGE
     end
 
+    # Compare the Marcel-resolved type (declared type + filename fallback), not
+    # the raw blob content_type. A blank declared type still authorizes via
+    # filename; spoofing must use the same resolved type or it would skip the
+    # sniffer comparison.
     def content_type_mismatch?(attachable_content_type, detected_content_type)
       attachable_content_type.present? &&
         !content_types_intersect?(attachable_content_type, detected_content_type)
@@ -194,15 +254,25 @@ module ActiveStorageValidations
       Array(content_type)
         .map do |content_type|
           case content_type
-          when String, Symbol
-            content_type.to_s.match?(/\//) ? Marcel::TYPE_EXTS[canonical_marcel_content_type(content_type.to_s)]&.first&.upcase : content_type.upcase
-          when Regexp
-            content_type.source
+          when String, Symbol then human_content_type(content_type.to_s)
+          when Regexp then content_type.source
           end
         end
         .flatten
         .compact
+        .uniq
         .join(", ")
+    end
+
+    # "image/png" => "PNG", "png" => "PNG". Types Marcel knows no extension for
+    # (e.g. "inode/x-empty" detected on an empty file) fall back to the type
+    # itself rather than disappearing from the message.
+    def human_content_type(content_type)
+      return content_type if content_type.match?(WILDCARD_CONTENT_TYPE)
+      return content_type.upcase unless content_type.match?(/\//)
+
+      canonical = canonical_marcel_content_type(content_type)
+      (HUMAN_EXTENSIONS[canonical] || Marcel::TYPE_EXTS[canonical]&.first)&.upcase || content_type
     end
 
     def ensure_exactly_one_validator_option
@@ -211,10 +281,18 @@ module ActiveStorageValidations
       end
     end
 
-    def ensure_content_types_validity
-      return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
+    # Procs are resolved per record, so their result is checked at validation
+    # time (see #authorized_content_types_from_options) instead of at boot.
+    def proc_content_types?
+      static_content_types.any?(Proc)
+    end
 
-      (Array(options[:with]) + Array(options[:in])).each do |content_type|
+    def static_content_types
+      Array(options[:with]) + Array(options[:in])
+    end
+
+    def ensure_content_types_validity(content_types)
+      content_types.each do |content_type|
         raise ArgumentError, invalid_content_type_option_message(content_type) if invalid_option?(content_type)
       end
     end
@@ -243,12 +321,23 @@ module ActiveStorageValidations
     end
 
     def invalid_content_type?(content_type)
+      return invalid_media_type?(content_type) if content_type.to_s.match?(WILDCARD_CONTENT_TYPE)
+
       type = content_type_without_parameters(content_type.to_s)
       if type == "image/jpg"
         raise ArgumentError, "'image/jpg' is not a valid content type, you should use 'image/jpeg' instead"
       end
 
-      all_available_marcel_content_types.exclude?(type)
+      # Some Marcel types only exist with their parameters or capitals
+      # ("application/dita+xml;format=map", "…macroEnabled.12").
+      all_available_marcel_content_types.exclude?(type) &&
+        all_available_marcel_content_types.none? { |marcel_type| marcel_type.casecmp?(content_type.to_s) }
+    end
+
+    # "imag/*" would reject every file.
+    def invalid_media_type?(content_type)
+      media_type = content_type.to_s.delete_suffix("*")
+      all_available_marcel_content_types.none? { |marcel_type| marcel_type.start_with?(media_type) }
     end
 
     def all_available_marcel_content_types

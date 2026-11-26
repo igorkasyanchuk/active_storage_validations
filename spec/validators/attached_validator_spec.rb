@@ -39,6 +39,31 @@ RSpec.describe ActiveStorageValidations::AttachedValidator do
     end
   end
 
+  describe "has_many_attached marked for destruction" do
+    let(:model) { validator_test_class::CheckMany.new(params) }
+
+    context "when another file remains" do
+      subject(:record) do
+        model.has_to_be_attached_many.attach([ image_1920x1080_file, image_150x150_file ])
+        model.has_to_be_attached_many.attachments.first.mark_for_destruction
+        model
+      end
+
+      it { is_expected_to_be_valid }
+    end
+
+    context "when every file is marked for destruction" do
+      subject(:record) do
+        model.has_to_be_attached_many.attach(image_1920x1080_file)
+        model.has_to_be_attached_many.attachments.each(&:mark_for_destruction)
+        model
+      end
+
+      it { is_expected_not_to_be_valid }
+      it { is_expected_to_include_error_message("blank", with_locales: [ "en" ], error_options: {}) }
+    end
+  end
+
   describe "Rails options" do
     %i[allow_nil allow_blank].each do |unsupported_validation_option|
       describe ":#{unsupported_validation_option}" do

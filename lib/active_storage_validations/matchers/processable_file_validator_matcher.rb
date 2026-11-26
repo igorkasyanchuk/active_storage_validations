@@ -38,11 +38,11 @@ module ActiveStorageValidations
       end
 
       def description
-        "validate that :#{@attribute_name} is a processable image"
+        "validate that :#{@attribute_name} is a processable file"
       end
 
       def failure_message
-        "is expected to validate the processable image of :#{@attribute_name}"
+        "is expected to validate the processable file of :#{@attribute_name}"
       end
 
       def matches?(subject)

@@ -3,6 +3,10 @@
 require "rails_helper"
 
 RSpec.describe ActiveStorageValidations::AspectRatioValidator do
+  def aspect_ratio_name(aspect_ratio)
+    I18n.t("active_storage_validations.aspect_ratios.#{aspect_ratio}")
+  end
+
   let(:validator_test_class) { AspectRatio::Validator }
   let(:params) { {} }
 
@@ -21,14 +25,16 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
       context "when the passed option is an invalid" do
         let(:error_message) do
           <<~ERROR_MESSAGE
-            You must pass a valid aspect ratio to the validator
-            It should either be a named aspect ratio (#{ActiveStorageValidations::AspectRatioValidator::NAMED_ASPECT_RATIOS.join(', ')})
+            You must pass a valid aspect ratio to the validator (got #{invalid_value.inspect})
+            It should either be a named aspect ratio (#{(ActiveStorageValidations::AspectRatioValidator::NAMED_ASPECT_RATIOS + ActiveStorageValidations::AspectRatioValidator::A_SERIES_ASPECT_RATIOS).join(', ')})
             Or an aspect ratio like 'is_16_9' (matching /#{ActiveStorageValidations::AspectRatioValidator::ASPECT_RATIO_REGEX.source}/)
           ERROR_MESSAGE
         end
 
         describe "named aspect ratio" do
           subject(:model) { validator_test_class::CheckValidityInvalidNamedArgument.new(params) }
+
+          let(:invalid_value) { :television }
 
           it "raises an error at model initialization" do
             expect { model }.to raise_error(ArgumentError, error_message)
@@ -37,6 +43,8 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
 
         describe "is_x_y aspect ratio" do
           subject(:model) { validator_test_class::CheckValidityInvalidIsXyArgument.new(params) }
+
+          let(:invalid_value) { :is_0_1 }
 
           it "raises an error at model initialization" do
             expect { model }.to raise_error(ArgumentError, error_message)
@@ -49,6 +57,27 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
 
         it "does not perform a check, and therefore is valid" do
           expect { model }.not_to raise_error
+        end
+
+        # validates :invalid, aspect_ratio: ->(record) { :invalid }
+        it "checks the aspect ratios returned by the Proc at validation time" do
+          model.invalid.attach(image_150x150_file)
+
+          expect { model.valid? }.to raise_error(ArgumentError, /You must pass a valid aspect ratio to the validator \(got :invalid\)/)
+        end
+
+        # validates :nested_invalid, aspect_ratio: { in: [ :square, ->(record) { "16:9" } ] }
+        it "checks the aspect ratios returned by a Proc nested in the list at validation time" do
+          model.nested_invalid.attach(image_150x150_file)
+
+          expect { model.valid? }.to raise_error(ArgumentError, /You must pass a valid aspect ratio to the validator \(got "16:9"\)/)
+        end
+
+        # validates :nested_list, aspect_ratio: { in: [ :portrait, ->(record) { [ :square, :landscape ] } ] }
+        it "authorizes the aspect ratios of a list returned by a nested Proc" do
+          model.nested_list.attach(image_150x150_file)
+
+          expect(model).to be_valid
         end
       end
     end
@@ -86,7 +115,6 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
     let(:model) { validator_test_class::Check.new(params) }
 
     it_behaves_like "works fine with attachables"
-
 
     describe ":with" do
       # validates :with_named_square, aspect_ratio: :square
@@ -208,7 +236,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
 
             let(:error_options) do
               {
-                authorized_aspect_ratios: "square, portrait, 16:9",
+                authorized_aspect_ratios: localized { [ aspect_ratio_name(:square), aspect_ratio_name(:portrait), "16:9" ].join(", ") },
                 width: 1200,
                 height: 900,
                 filename: not_allowed_file[:filename]
@@ -219,6 +247,126 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
             it { is_expected_to_include_error_message("aspect_ratio_invalid", error_options: error_options) }
             it { is_expected_to_have_error_options(error_options) }
           end
+        end
+      end
+    end
+
+    describe "A-series ratios (ISO 216, 1:√2)" do
+      {
+        [ 595, 842, :a_series_portrait ] => true, # A4 at 72 dpi
+        [ 2480, 3508, :a_series_portrait ] => true, # A4 at 300 dpi
+        [ 210, 297, :a_series_portrait ] => true,
+        [ 842, 595, :a_series_portrait ] => false,
+        [ 842, 595, :a_series_landscape ] => true,
+        [ 595, 842, :a_series_landscape ] => false,
+        [ 3508, 2480, :a_series ] => true,
+        [ 2480, 3508, :a_series ] => true,
+        [ 300, 400, :a_series ] => false, # 3:4
+        [ 1000, 1000, :a_series ] => false
+      }.each do |(width, height, aspect_ratio), expected|
+        context "when a #{width}x#{height} image is validated as #{aspect_ratio}" do
+          subject(:valid) { validator.send(:valid_a_series_aspect_ratio?, aspect_ratio, { width: width, height: height }) }
+
+          let(:validator) { described_class.new(attributes: [ :file ], with: aspect_ratio) }
+
+          it { is_expected.to be(expected) }
+        end
+      end
+
+      context "when the file does not match" do
+        # validates :with_a_series_portrait, aspect_ratio: :a_series_portrait
+        subject(:record) { model.with_a_series_portrait.attach(image_700x500_file) and model }
+
+        let(:error_options) do
+          { authorized_aspect_ratios: "A-series portrait (1:√2)", width: 700, height: 500, filename: image_700x500_file[:filename] }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("aspect_ratio_not_x_y", with_locales: [ "en" ], error_options: error_options) }
+      end
+    end
+
+    describe "named ratios in a list" do
+      # validates :in_aspect_ratios, aspect_ratio: %i[square portrait is_16_9]
+      subject(:record) { model.in_aspect_ratios.attach(image_700x500_file) and model }
+
+      it "translates them" do
+        I18n.with_locale(:fr) do
+          record.valid?
+
+          expect(record.errors.first.options[:authorized_aspect_ratios]).to eq("carré, portrait, 16:9")
+        end
+      end
+    end
+
+    describe "custom ratio pixel rounding" do
+      let(:attribute) { :with_regex }
+
+      # rubocop:disable RSpec/AnyInstance -- validator instantiated by Active Model
+      def stub_dimensions(width, height)
+        allow_any_instance_of(described_class).to receive(:metadata_for).and_return({ width: width, height: height })
+      end
+      # rubocop:enable RSpec/AnyInstance
+
+      context "when the image is 16:9 rounded to the nearest pixel (1366x768)" do
+        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+        before { stub_dimensions(1366, 768) }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when the image is 16:9 rounded to the nearest pixel (854x480)" do
+        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+        before { stub_dimensions(854, 480) }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when the image is 2 pixels off 16:9 (1920x1082)" do
+        subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+        before { stub_dimensions(1920, 1082) }
+
+        let(:error_options) do
+          {
+            authorized_aspect_ratios: "16:9",
+            width: 1920,
+            height: 1082,
+            filename: square_image_file[:filename]
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("aspect_ratio_not_x_y", error_options: error_options) }
+      end
+
+      {
+        # 4.x rule (ratios equal to 3 decimals): a few pixels of slack on large images
+        [ 2200, 1237, :is_16_9 ] => true,
+        [ 6000, 3374, :is_16_9 ] => true,
+        [ 4032, 3025, :is_4_3 ] => true,
+        # one side is the floor or ceil of the other one scaled to x:y
+        [ 1921, 1080, :is_16_9 ] => true,
+        [ 16, 9, :is_16_9 ] => true,
+        # ...but only for an image at least x×y
+        [ 2, 1, :is_16_9 ] => false,
+        [ 4, 3, :is_16_9 ] => false,
+        [ 3, 2, :is_16_9 ] => false,
+        [ 8, 5, :is_16_9 ] => false,
+        [ 1, 1, :is_16_9 ] => false,
+        # a whole pixel off is a large share of a small side
+        [ 2, 2, :is_1_2 ] => false,
+        [ 100, 2, :is_100_1 ] => false,
+        [ 1001, 1000, :is_1_1 ] => false
+      }.each do |(width, height, aspect_ratio), expected|
+        context "when a #{width}x#{height} image is validated as #{aspect_ratio}" do
+          subject(:valid) { validator.send(:valid_regex_aspect_ratio?, aspect_ratio, { width: width, height: height }) }
+
+          let(:validator) { described_class.new(attributes: [ :file ], with: aspect_ratio) }
+
+          it { is_expected.to be(expected) }
         end
       end
     end
@@ -266,7 +414,7 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
           let(:attribute) { :with_pdf_file }
           let(:error_options) do
             {
-              authorized_aspect_ratios: "square",
+              authorized_aspect_ratios: localized { aspect_ratio_name(:square) },
               width: 200,
               height: 300,
               filename: pdf_200x300_file[:filename]
@@ -295,5 +443,11 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
 
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
+
+    it_behaves_like "interpolates custom message placeholders" do
+      let(:file_not_matching_placeholders) { image_700x500_file }
+      let(:message_for_unanalyzable_file) { "must be square (got x)" }
+      let(:message_for_file_not_matching) { "must be square (got 700x500)" }
+    end
   end
 end

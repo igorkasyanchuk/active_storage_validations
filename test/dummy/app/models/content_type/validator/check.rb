@@ -50,6 +50,26 @@ class ContentType::Validator::Check < ApplicationRecord
   has_one_attached :content_type_with_parameter
   validates :content_type_with_parameter, content_type: :rar
 
+  # Marcel resolves an upload of these to another type (canonical type, kept
+  # parameters, lowercase): the rule must be resolved the same way. The last
+  # two are also only Marcel types with their parameters / capitals
+  has_one_attached :alias_flac
+  validates :alias_flac, content_type: "audio/x-flac"
+  has_one_attached :alias_msaccess
+  validates :alias_msaccess, content_type: "application/x-msaccess"
+  has_one_attached :format_parameter
+  validates :format_parameter, content_type: "application/dita+xml;format=map"
+  has_one_attached :capitalized_type
+  validates :capitalized_type, content_type: "application/vnd.ms-visio.drawing.macroEnabled.12"
+  has_one_attached :duplicate_types
+  validates :duplicate_types, content_type: [ :jpg, :jpeg, "image/jpeg" ]
+  has_one_attached :media_types
+  validates :media_types, content_type: [ :mp3, :m4a, :mov, :mpg ]
+  has_one_attached :wildcard
+  validates :wildcard, content_type: "image/*"
+  has_one_attached :wildcard_and_type
+  validates :wildcard_and_type, content_type: [ "image/*", :pdf ]
+
   has_one_attached :spoofing_protection
   has_one_attached :spoofing_protection_file
   has_one_attached :spoofing_protection_magika

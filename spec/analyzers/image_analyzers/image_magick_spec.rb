@@ -28,6 +28,9 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
   let(:expected_metadata_rotated) { { width: 700, height: 500 } }
 
   it_behaves_like "returns the right metadata for any attachable"
+  it_behaves_like "applies the exif orientation"
+  it_behaves_like "reports the displayed image size"
+  it_behaves_like "reads a bracketed path as itself"
 
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "image_150x150.png").to_s }
@@ -70,6 +73,84 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
     end
   end
 
+  describe "multi-frame images" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:path) { Rails.root.join("public", "image_200x100_animated.gif").to_s }
+    let(:attachable) do
+      {
+        io: open_fixture(path),
+        filename: "image_200x100_animated.gif",
+        content_type: "image/gif"
+      }
+    end
+
+    it "returns the dimensions of the first frame" do
+      expect(metadata).to eq({ width: 200, height: 100 })
+    end
+
+    it "asks identify for the first frame only" do
+      seen_argv = nil
+      real_run = analyzer.method(:run_command)
+
+      allow(analyzer).to receive(:run_command) do |*args, **kwargs|
+        seen_argv = args
+        real_run.call(*args, **kwargs)
+      end
+
+      metadata
+
+      expect(seen_argv.last).to end_with("[0]")
+    end
+
+    it "does not print one set of fields per frame" do
+      stdout = nil
+      real_run = analyzer.method(:run_command)
+
+      allow(analyzer).to receive(:run_command) do |*args, **kwargs|
+        real_run.call(*args, **kwargs).tap { |result| stdout = result.stdout }
+      end
+
+      metadata
+
+      expect(stdout.strip.split("\t")).to eq([ "200", "100", "200", "100", "GIF", "", "Undefined" ])
+    end
+
+    it "leaves an explicit frame selector untouched" do
+      expect(analyzer.send(:first_frame, "/tmp/animated.gif[2]")).to eq("/tmp/animated.gif[2]")
+    end
+
+    # ImageMagick reads printf patterns in a filename followed by a frame
+    # selector: summer%20dress.png[0] was "summer<20 spaces>0ress.png".
+    context "when the filename contains a %" do
+      let(:dir) { Pathname.new(Dir.mktmpdir) }
+      # A Hash io on that file (File / Pathname attachables need Rails 7.1):
+      # its path is handed to ImageMagick as it is.
+      let(:path) { dir.join("summer%20dress.png").tap { |file| FileUtils.cp(Rails.root.join("public", "image_150x150.png"), file) } }
+      let(:attachable) { { io: open_fixture(path), filename: "summer%20dress.png", content_type: "image/png" } }
+
+      after { FileUtils.rm_rf(dir) }
+
+      it "reads that file" do
+        expect(metadata).to eq({ width: 150, height: 150 })
+      end
+    end
+  end
+
+  describe "instrumentation" do
+    let(:attachable) { fixture_file("image_150x150_truncated.png", filename: "image_150x150_truncated.png", content_type: "image/png") }
+
+    it "reports the duration of a failed identify" do
+      payloads = []
+      subscriber = ActiveSupport::Notifications.subscribe("analyze.active_storage_validations") { |*, payload| payloads << payload }
+
+      expect(analyzer.metadata).to eq({})
+      expect(payloads.last).to include(:duration)
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+    end
+  end
+
   describe "#parse_identify_output" do
     let(:path) { Rails.root.join("public", "image_150x150.png").to_s }
     let(:attachable) do
@@ -96,7 +177,7 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::ImageMagick, i
     end
 
     it "uses the first frame of multi-frame identify output" do
-      stdout = "150\t150\tUndefined\n300\t200\tRightTop\n"
+      stdout = "150\t150\t150\t150\tPNG\t\tUndefined\n300\t200\t300\t200\tPNG\t\tRightTop\n"
       info = analyzer.send(:parse_identify_output, stdout)
 
       expect(info.valid?).to be(true)

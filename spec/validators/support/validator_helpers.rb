@@ -4,6 +4,18 @@
 # subject (`:model`, `:record`, …). RSpec/NamedSubject only scans examples/hooks,
 # not helper methods — no RuboCop disable needed here.
 module ValidatorHelpers
+  # Expected error option whose value depends on I18n.locale (e.g. a humanized
+  # duration). Resolved by the helpers below once the locale is set.
+  LocalizedValue = Struct.new(:resolver) do
+    def resolve
+      resolver.call
+    end
+  end
+
+  def localized(&block)
+    LocalizedValue.new(block)
+  end
+
   def is_expected_to_be_valid(**kwargs)
     expect(subject.valid?(kwargs[:context])).to be(true)
   end
@@ -13,6 +25,7 @@ module ValidatorHelpers
   end
 
   def is_expected_to_have_error_options(error_options, **kwargs)
+    error_options = resolve_localized(error_options)
     subject.valid?(kwargs[:context])
 
     validator_error_options =
@@ -36,7 +49,8 @@ module ValidatorHelpers
         validator_error_messages =
           subject.errors.select { |error| matching_validator_type?(error, **kwargs) }.map(&:message)
 
-        message = kwargs[:error_options][:custom_message] || I18n.t("errors.messages.#{message_key}", **kwargs[:error_options])
+        error_options = resolve_localized(kwargs[:error_options])
+        message = error_options[:custom_message] || I18n.t("errors.messages.#{message_key}", **error_options)
 
         expect(validator_error_messages).to include(message),
                                             "Expected error messages to include '#{message.inspect}'\nbut got #{validator_error_messages.inspect}"
@@ -61,6 +75,10 @@ module ValidatorHelpers
   end
 
   private
+
+  def resolve_localized(error_options)
+    error_options.transform_values { |value| value.is_a?(LocalizedValue) ? value.resolve : value }
+  end
 
   def matching_validator_type?(error, **kwargs)
     error.options[:validator_type] == (kwargs[:validator] || validator_sym)

@@ -10,9 +10,11 @@ module ActiveStorageValidations
     private
 
     # Retrieve either an `ActiveStorage::Attached::One` or an
-    # `ActiveStorage::Attached::Many` instance depending on attribute definition
+    # `ActiveStorage::Attached::Many` instance depending on attribute definition.
+    # Attachments marked for destruction are omitted so size / limit / total_size
+    # match what will remain after save (AttachedValidator already special-cases this).
     def attached_files(record, attribute)
-      Array.wrap(record.send(attribute))
+      Array.wrap(record.send(attribute)).reject { |file| file.try(:marked_for_destruction?) }
     end
 
     def attachments_present?(record, attribute)

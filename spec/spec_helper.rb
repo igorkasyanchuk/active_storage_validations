@@ -6,7 +6,7 @@ unless ENV["NO_COVERAGE"]
   SimpleCov.start do
     command_name "RSpec"
     skip %w[/spec/ /test/ /vendor/]
-    minimum_coverage 50
+    minimum_coverage(ENV["CI"] ? 90 : 50)
   end
 end
 

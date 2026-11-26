@@ -33,6 +33,54 @@ RSpec.describe ActiveStorageValidations::ASVBlobMetadatable do
     end
   end
 
+  describe "blob initialization" do
+    let(:custom_metadata) { { "asv_width" => "100", "asv_content_type" => "image/png", "other" => "keep" } }
+
+    # e.g. sent by a client through Rails' direct upload endpoint, or app code
+    # passing user input to attach(io:, metadata:)
+    context "when a new blob is given asv_* custom metadata" do
+      subject(:new_blob) { ActiveStorage::Blob.new(metadata: { custom: custom_metadata }) }
+
+      it "drops the asv_* keys and keeps the others" do
+        expect(new_blob.custom_metadata).to eq({ "other" => "keep" })
+        expect(new_blob.active_storage_validations_metadata).to be_empty
+      end
+    end
+
+    context "when a blob is created with asv_* custom metadata" do
+      subject(:created_blob) do
+        ActiveStorage::Blob.create_and_upload!(
+          io: open_fixture(Rails.root.join("public", "image_150x150.png")),
+          filename: "image_150x150.png",
+          content_type: "image/png",
+          metadata: { custom: custom_metadata }
+        )
+      end
+
+      it "does not persist them" do
+        expect(created_blob.reload.custom_metadata).to eq({ "other" => "keep" })
+      end
+    end
+
+    # Written by the gem (4.x included) after the blob was built
+    context "when a persisted blob already has asv_* custom metadata" do
+      let(:persisted_blob) do
+        ActiveStorage::Blob.create_and_upload!(
+          io: open_fixture(Rails.root.join("public", "image_150x150.png")),
+          filename: "image_150x150.png",
+          content_type: "image/png"
+        ).tap do |created|
+          created.merge_into_active_storage_validations_metadata({ "width" => 150 })
+          created.save!
+        end
+      end
+
+      it "keeps them when the blob is loaded" do
+        expect(ActiveStorage::Blob.find(persisted_blob.id).active_storage_validations_metadata).to eq({ "width" => 150 })
+      end
+    end
+  end
+
   describe "#remove_active_storage_validations_metadata!" do
     context "when the blob has our gem's metadata" do
       before do
@@ -53,6 +101,29 @@ RSpec.describe ActiveStorageValidations::ASVBlobMetadatable do
       it "does not raise an error and works fine" do
         blob.remove_active_storage_validations_metadata!
         expect(blob.active_storage_validations_metadata).to be_empty
+      end
+    end
+
+    context "when the blob is persisted" do
+      let(:blob) do
+        ActiveStorage::Blob.create_and_upload!(
+          io: open_fixture(Rails.root.join("public", "image_150x150.png")),
+          filename: "image_150x150.png",
+          content_type: "image/png"
+        )
+      end
+
+      before do
+        blob.custom_metadata = { "asv_duration" => "1.0", "asv_width" => "100", "other" => "keep" }
+        blob.save!
+      end
+
+      it "persists the cleared cache so reload does not restore asv_* keys" do
+        blob.remove_active_storage_validations_metadata!
+
+        expect(blob.active_storage_validations_metadata).to be_empty
+        expect(blob.reload.active_storage_validations_metadata).to be_empty
+        expect(blob.custom_metadata).to eq({ "other" => "keep" })
       end
     end
   end

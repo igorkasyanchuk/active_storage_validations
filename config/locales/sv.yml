@@ -50,8 +50,8 @@ sv:
       dimension_width_not_equal_to: "bredden måste vara %{length} pixlar"
       dimension_height_not_equal_to: "höjden måste vara %{length} pixlar"
       aspect_ratio_not_square: "måste vara kvadratisk (nuvarande fil är %{width}x%{height} pixlar)"
-      aspect_ratio_not_portrait: "måste vara porträtt (nuvarande fil är %{width}x%{height} pixlar)"
-      aspect_ratio_not_landscape: "måste vara landskap (nuvarande fil är %{width}x%{height} pixlar)"
+      aspect_ratio_not_portrait: "måste vara stående (nuvarande fil är %{width}x%{height} pixlar)"
+      aspect_ratio_not_landscape: "måste vara liggande (nuvarande fil är %{width}x%{height} pixlar)"
       aspect_ratio_not_x_y: "måste vara %{authorized_aspect_ratios} (nuvarande fil är %{width}x%{height} pixlar)"
       aspect_ratio_invalid: "har ett ogiltigt bildförhållande (giltiga bildförhållanden är %{authorized_aspect_ratios})"
       file_not_processable: "identifieras inte som en giltig mediefil"
@@ -63,3 +63,37 @@ sv:
       pages_not_greater_than_or_equal_to: "sidantal måste vara större än eller lika med %{min} (nuvarande antal sidor är %{pages})"
       pages_not_between: "sidantal måste vara mellan %{min} och %{max} (nuvarande antal sidor är %{pages})"
       pages_not_equal_to: "sidantal måste vara lika med %{exact} (nuvarande sidantal är %{pages})"
+  active_storage_validations:
+    aspect_ratios:
+      square: "kvadratisk"
+      portrait: "stående"
+      landscape: "liggande"
+      a_series: "A-format (1:√2)"
+      a_series_portrait: "stående A-format (1:√2)"
+      a_series_landscape: "liggande A-format (√2:1)"
+    duration:
+      years:
+        one: "%{count} år"
+        other: "%{count} år"
+      months:
+        one: "%{count} månad"
+        other: "%{count} månader"
+      weeks:
+        one: "%{count} vecka"
+        other: "%{count} veckor"
+      days:
+        one: "%{count} dag"
+        other: "%{count} dagar"
+      hours:
+        one: "%{count} timme"
+        other: "%{count} timmar"
+      minutes:
+        one: "%{count} minut"
+        other: "%{count} minuter"
+      seconds:
+        one: "%{count} sekund"
+        other: "%{count} sekunder"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " och "
+        last_word_connector: " och "

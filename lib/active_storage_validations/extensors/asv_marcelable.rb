@@ -2,8 +2,9 @@
 
 require "marcel"
 
-Marcel::MimeType.extend "application/x-rar-compressed", parents: %w[application/x-rar]
-# libmagic (`file`) name; not a Marcel alias, so the parent link is needed on 1.x and 2.x.
+Marcel::MimeType.extend "application/x-rar-compressed", parents: %w[application/x-rar application/vnd.rar]
+# libmagic (`file`) names: `application/x-rar` on older releases, `application/vnd.rar` on newer ones (Ubuntu 26.04).
+# Neither is a Marcel 1 alias and Marcel 2 only aliases `x-rar`, so the parent links are needed.
 Marcel::MimeType.extend "audio/x-hx-aac-adts", parents: %w[audio/aac audio/x-aac]
 Marcel::MimeType.extend "video/theora", parents: %w[video/ogg]
 

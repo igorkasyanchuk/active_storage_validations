@@ -35,8 +35,8 @@ es:
         other: "%{count} archivos adjuntos (debe tener al menos %{min} archivos)"
       limit_max_exceeded:
         zero: "no hay archivos adjuntos (máximo es %{max} archivos)"
-        one: "demasiados archivos adjuntos (máximo es %{max} archivos, got %{count})"
-        other: "demasiados archivos adjuntos (máximo es %{max} archivos, got %{count})"
+        one: "demasiados archivos adjuntos (máximo es %{max} archivos, hay %{count})"
+        other: "demasiados archivos adjuntos (máximo es %{max} archivos, hay %{count})"
       attachment_missing: "no tiene archivo adjunto"
       media_metadata_missing: "no es un archivo multimedia válido"
       dimension_min_not_included_in: "debe ser mayor o igual a %{width} x %{height} pixel"
@@ -63,3 +63,37 @@ es:
       pages_not_greater_than_or_equal_to: "el número de páginas debe ser mayor o igual que %{min} (el número actual de páginas es %{pages})"
       pages_not_between: "el número de páginas debe estar entre %{min} y %{max} (el número actual de páginas es %{pages})"
       pages_not_equal_to: "el número de páginas debe ser igual a %{exact} (el número actual de páginas es %{pages})"
+  active_storage_validations:
+    aspect_ratios:
+      square: "cuadrado"
+      portrait: "vertical"
+      landscape: "horizontal"
+      a_series: "formato A (1:√2)"
+      a_series_portrait: "formato A vertical (1:√2)"
+      a_series_landscape: "formato A horizontal (√2:1)"
+    duration:
+      years:
+        one: "%{count} año"
+        other: "%{count} años"
+      months:
+        one: "%{count} mes"
+        other: "%{count} meses"
+      weeks:
+        one: "%{count} semana"
+        other: "%{count} semanas"
+      days:
+        one: "%{count} día"
+        other: "%{count} días"
+      hours:
+        one: "%{count} hora"
+        other: "%{count} horas"
+      minutes:
+        one: "%{count} minuto"
+        other: "%{count} minutos"
+      seconds:
+        one: "%{count} segundo"
+        other: "%{count} segundos"
+      connectors:
+        words_connector: ", "
+        two_words_connector: " y "
+        last_word_connector: " y "

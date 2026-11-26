@@ -41,6 +41,25 @@ RSpec.shared_examples "ASVAttachable" do
     )
   end
 
+  # Rails 7.1+ hands the files of an earlier, unsaved #attach back as new
+  # blobs that are not uploaded yet. Rails 7.0 keeps the first file twice,
+  # once as a blob it never uploads: attachment_missing is right there.
+  context "when #attach is called twice before validation", if: Rails.gem_version >= Gem::Version.new("7.1.0.rc1") do
+    let(:second_file) do
+      file_matching_requirements.merge(
+        io: open_fixture(file_matching_requirements[:io].path),
+        filename: "second_#{file_matching_requirements[:filename]}"
+      )
+    end
+
+    it "validates the files of both calls" do
+      subject.asv_attachables.attach(file_matching_requirements)
+      subject.asv_attachables.attach(second_file)
+
+      expect(subject.valid?).to be(true), subject.errors.full_messages.inspect
+    end
+  end
+
   context "when the same blob is present both as an ActiveStorage::Blob object (existing attachment) and as a String signed_id (new attachable)" do
     before do
       subject.save!
@@ -84,6 +103,45 @@ RSpec.shared_examples "ASVAttachable" do
       subject.asv_attachables.attach([ valid_blob.signed_id, invalid_blob ])
 
       expect(subject.invalid?).to be(true)
+    end
+  end
+
+  describe "attachments marked for destruction" do
+    before do
+      skip if file_not_matching_requirements.nil? # validators like :limit or :attached don't apply here
+    end
+
+    describe "one" do
+      before do
+        skip if validator_sym == :total_size # has_many_attached only
+
+        subject.asv_attachable.attach(file_not_matching_requirements)
+        subject.save!(validate: false)
+      end
+
+      it "still reports errors for the persisted invalid file" do
+        expect(subject.invalid?).to be(true)
+      end
+
+      it "ignores the persisted invalid file once marked for destruction" do
+        subject.asv_attachable.mark_for_destruction
+
+        expect(subject.valid?).to be(true)
+      end
+    end
+
+    describe "many" do
+      before do
+        subject.asv_attachables.attach(file_not_matching_requirements)
+        subject.save!(validate: false)
+      end
+
+      it "ignores the persisted invalid file once marked for destruction when a new file is attached" do
+        subject.asv_attachables.first.mark_for_destruction
+        subject.asv_attachables.attach(file_matching_requirements)
+
+        expect(subject.valid?).to be(true)
+      end
     end
   end
 

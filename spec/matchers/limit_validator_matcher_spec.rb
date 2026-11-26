@@ -50,6 +50,33 @@ RSpec.describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
     end
   end
 
+  describe "#min" do
+    context "when the bound is 0" do
+      subject(:configured_matcher) { matcher.min(0) }
+
+      let(:model_attribute) { :min_zero }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    context "when matching min(0) against a min: 3 validator" do
+      subject(:configured_matcher) { matcher.min(0) }
+
+      let(:model_attribute) { :min }
+
+      it { is_expected_not_to_match_for(klass) }
+    end
+
+    # No lower bound accepts 0 files, as 4.1 matched.
+    context "when matching min(0) against a max-only validator" do
+      subject(:configured_matcher) { matcher.min(0) }
+
+      let(:model_attribute) { :max }
+
+      it { is_expected_to_match_for(klass) }
+    end
+  end
+
   describe "#allow_blank" do
     it_behaves_like "works with allow_blank"
   end
@@ -76,6 +103,62 @@ RSpec.describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
         end
 
         it { is_expected_to_match_for(klass) }
+      end
+    end
+
+    describe "#min + #max + #allow_blank + #with_message" do
+      # validates :allow_blank_with_message, limit: { min: 1, max: 3, message: "Invalid limits." }, allow_blank: true
+      # 0 files is skipped by allow_blank: the message is probed with max + 1 files
+      subject(:configured_matcher) { matcher.min(1).max(3).allow_blank.with_message("Invalid limits.") }
+
+      let(:model_attribute) { :allow_blank_with_message }
+
+      it { is_expected_to_match_for(klass) }
+    end
+
+    # No file count the validator rejects: the declared message is compared.
+    describe "#with_message without a count to probe" do
+      context "with #min(0) (validates :min_zero_with_message, limit: { min: 0, max: 2, message: \"Invalid limits.\" })" do
+        let(:model_attribute) { :min_zero_with_message }
+
+        context "when the message is the declared one" do
+          subject(:configured_matcher) { matcher.min(0).with_message("Invalid limits.") }
+
+          it { is_expected_to_match_for(klass) }
+        end
+
+        context "when the message is another one" do
+          subject(:configured_matcher) { matcher.min(0).with_message("Wrong message") }
+
+          it { is_expected_not_to_match_for(klass) }
+        end
+      end
+
+      context "with #min(1) and #allow_blank (0 files is skipped)" do
+        subject(:configured_matcher) { matcher.min(1).allow_blank.with_message("Wrong message") }
+
+        let(:model_attribute) { :allow_blank_with_message }
+
+        it { is_expected_not_to_match_for(klass) }
+      end
+    end
+
+    describe "#max(0)" do
+      # validates :max_zero, limit: { max: 0 }
+      let(:model_attribute) { :max_zero }
+
+      context "when used on a limit validator with max: 0" do
+        subject(:configured_matcher) { matcher.max(0) }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
+      context "when used on a limit validator with a higher max" do
+        subject(:configured_matcher) { matcher.max(0) }
+
+        let(:model_attribute) { :min_max }
+
+        it { is_expected_not_to_match_for(klass) }
       end
     end
 

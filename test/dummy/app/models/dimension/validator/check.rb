@@ -21,6 +21,8 @@ class Dimension::Validator::Check < ApplicationRecord
     validates :"#{dimension}_max", dimension: { "#{dimension}": { max: 500 } }
     validates :"#{dimension}_min_max", dimension: { "#{dimension}": { min: 400, max: 600 } }
     validates :"#{dimension}_in", dimension: { "#{dimension}": { in: 400..600 } }
+    has_one_attached :"#{dimension}_in_exclusive"
+    validates :"#{dimension}_in_exclusive", dimension: { "#{dimension}": { in: 400...600 } }
 
     has_one_attached :"#{dimension}_proc"
     has_one_attached :"#{dimension}_min_proc"
@@ -52,10 +54,19 @@ class Dimension::Validator::Check < ApplicationRecord
   validates :width_height_exact, dimension: { width: 600, height: 600 }
   has_one_attached :width_height_in
   validates :width_height_in, dimension: { width: { in: 550..750 }, height: { in: 550..750 } }
+  has_one_attached :width_in_height_max
+  validates :width_in_height_max, dimension: { width: { in: 100..200 }, height: { max: 300 } }
+  has_one_attached :min_max_both_violable
+  validates :min_max_both_violable, dimension: { min: 600..100, max: 650..300 }
 
   # Edge cases
   has_one_attached :with_invalid_media_file
   validates :with_invalid_media_file, dimension: { width: 150, height: 150 }
   has_one_attached :with_pdf_file
   validates :with_pdf_file, dimension: { width: 150, height: 150 }
+
+  has_one_attached :width_max_zero
+  validates :width_max_zero, dimension: { width: { max: 0 } }
+  has_one_attached :width_max_zero_proc
+  validates :width_max_zero_proc, dimension: { width: { max: ->(_record) { 0 } } }
 end

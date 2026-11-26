@@ -72,6 +72,22 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
             end
           end
 
+          context "when the passed option is a media type wildcard (e.g. 'image/*')" do
+            subject(:validator) { described_class.new(attributes: :dummy, with: "image/*") }
+
+            it "does not raise an error at initialization" do
+              expect { validator }.not_to raise_error
+            end
+          end
+
+          context "when the passed option is a wildcard of an unknown media type (e.g. 'imag/*')" do
+            subject(:validator) { described_class.new(attributes: :dummy, in: [ :png, "imag/*" ]) }
+
+            it "raises an error at initialization" do
+              expect { validator }.to raise_error(ArgumentError, /'imag\/\*' is not found in Marcel content types/)
+            end
+          end
+
           context "when the passed option is a historical type Marcel 2 stores as an alias (e.g. 'audio/x-aac')" do
             # See: https://github.com/rails/marcel/releases#release-v2.0.0
             subject(:validator) { described_class.new(attributes: :dummy, with: "audio/x-aac") }
@@ -112,6 +128,27 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
 
         it "does not perform a check, and therefore is valid" do
           expect { model }.not_to raise_error
+        end
+
+        # validates :invalid, content_type: ->(record) { :invalid }
+        it "checks the content types returned by the Proc at validation time" do
+          model.invalid.attach(image_150x150_file)
+
+          expect { model.valid? }.to raise_error(ArgumentError, /'invalid' is not found in Marcel::EXTENSIONS/)
+        end
+
+        # validates :nested_invalid, content_type: [ :pdf, ->(record) { :invalid } ]
+        it "checks the content types returned by a Proc nested in the list at validation time" do
+          model.nested_invalid.attach(image_150x150_file)
+
+          expect { model.valid? }.to raise_error(ArgumentError, /'invalid' is not found in Marcel::EXTENSIONS/)
+        end
+
+        # validates :nested_list, content_type: [ :pdf, ->(record) { [ :png, :gif ] } ]
+        it "authorizes the content types of a list returned by a nested Proc" do
+          model.nested_list.attach(image_150x150_file)
+
+          expect(model).to be_valid
         end
       end
     end
@@ -251,6 +288,97 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
 
         it { is_expected_to_be_valid }
       end
+
+      describe "authorized types in error messages" do
+        subject(:record) { model.public_send(attribute).attach(png_file) and model }
+
+        context "when several rules name the same type ([:jpg, :jpeg, \"image/jpeg\"])" do
+          let(:attribute) { :duplicate_types }
+
+          it { is_expected_to_have_error_options({ authorized_human_content_types: "JPG", count: 1 }) }
+        end
+
+        context "when Marcel lists a rarer extension first ([:mp3, :m4a, :mov, :mpg])" do
+          let(:attribute) { :media_types }
+
+          it { is_expected_to_have_error_options({ authorized_human_content_types: "MP3, M4A, MOV, MPG" }) }
+        end
+      end
+
+      describe "media type wildcards (\"image/*\", as in the accept attribute)" do
+        subject(:record) { model.public_send(attribute).attach(file) and model }
+
+        context "with an image on \"image/*\"" do
+          let(:attribute) { :wildcard }
+          let(:file) { image_150x150_file }
+
+          it { is_expected_to_be_valid }
+        end
+
+        context "with a PDF on \"image/*\"" do
+          let(:attribute) { :wildcard }
+          let(:file) { pdf_file }
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_options({ authorized_human_content_types: "image/*", count: 1 }) }
+        end
+
+        context "with a PDF on [\"image/*\", :pdf]" do
+          let(:attribute) { :wildcard_and_type }
+          let(:file) { pdf_file }
+
+          it { is_expected_to_be_valid }
+        end
+
+        context "with a video on [\"image/*\", :pdf]" do
+          let(:attribute) { :wildcard_and_type }
+          let(:file) { video_file }
+
+          it { is_expected_not_to_be_valid }
+          it { is_expected_to_have_error_options({ authorized_human_content_types: "image/*, PDF", count: 2 }) }
+        end
+      end
+
+      describe "types Marcel resolves differently on upload" do
+        subject(:record) { model.public_send(attribute).attach(io: StringIO.new("file"), filename: filename, content_type: declared_type) and model }
+
+        {
+          alias_flac: [ "x.flac", %w[audio/flac audio/x-flac] ], # validates :alias_flac, content_type: "audio/x-flac"
+          alias_msaccess: [ "x.mdb", %w[application/x-msaccess application/vnd.ms-access] ], # "application/x-msaccess"
+          format_parameter: [ "x.ditamap", %w[application/dita+xml] ], # "application/dita+xml;format=map"
+          capitalized_type: [ "x.vsdm", %w[application/vnd.ms-visio.drawing.macroEnabled.12] ] # same type
+        }.each do |rule_attribute, (rule_filename, declared_types)|
+          declared_types.each do |rule_declared_type|
+            context "with a #{rule_filename} file declared as #{rule_declared_type} on #{rule_attribute}" do
+              let(:attribute) { rule_attribute }
+              let(:filename) { rule_filename }
+              let(:declared_type) { rule_declared_type }
+
+              it { is_expected_to_be_valid }
+            end
+          end
+
+          # JS FormData / MediaRecorder uploads often have no extension: the
+          # declared alias is all Marcel has, and 4.1 accepted it as written.
+          if rule_attribute.start_with?("alias_")
+            context "with an extensionless file declared as the rule's own type on #{rule_attribute}" do
+              let(:attribute) { rule_attribute }
+              let(:filename) { "blob" }
+              let(:declared_type) { model.class.validators_on(rule_attribute).first.options[:with] }
+
+              it { is_expected_to_be_valid }
+            end
+          end
+
+          context "with a PNG file on #{rule_attribute}" do
+            let(:attribute) { rule_attribute }
+            let(:filename) { "x.png" }
+            let(:declared_type) { "image/png" }
+
+            it { is_expected_not_to_be_valid }
+          end
+        end
+      end
     end
 
     describe ":spoofing_protection" do
@@ -334,6 +462,37 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
           it { is_expected_not_to_be_valid }
           it { is_expected_to_include_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
           it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+        end
+
+        context "when the declared content_type is blank (identify: false)" do
+          context "and the filename extension is authorized but the file is spoofed" do
+            subject(:record) { model.public_send(attribute).attach(blank_type_spoofed) and model }
+
+            let(:blank_type_spoofed) { spoofed_jpeg.merge(content_type: "", identify: false) }
+            let(:error_options) do
+              {
+                authorized_human_content_types: "JPG",
+                content_type: "",
+                human_content_type: "",
+                count: 1,
+                detected_content_type: "text/plain",
+                detected_human_content_type: "TXT",
+                filename: spoofed_jpeg[:filename]
+              }
+            end
+
+            it { is_expected_not_to_be_valid }
+            it { is_expected_to_include_error_message("content_type_spoofed", error_options: error_options, validator: :content_type) }
+            it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+          end
+
+          context "and the file matches the filename-inferred type" do
+            subject(:record) { model.public_send(attribute).attach(blank_type_genuine) and model }
+
+            let(:blank_type_genuine) { jpeg_file.merge(content_type: "", identify: false) }
+
+            it { is_expected_to_be_valid }
+          end
         end
 
         describe "working with most common mime types" do

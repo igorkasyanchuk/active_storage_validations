@@ -11,9 +11,11 @@ module ActiveStorageValidations
       :file
     end
 
+    # -L: Linux libmagic does not follow symlinks by default, so a symlinked
+    # File / Pathname attachable was sniffed as "inode/symlink" (spoofed).
     def media_from_path(path)
       instrument("file") do |payload|
-        result = run_command(file_path, "-b", "--mime-type", path, payload: payload)
+        result = run_command(file_path, "-b", "-L", "--mime-type", path, payload: payload)
         result.success? ? result.stdout.strip : nil
       end
     end

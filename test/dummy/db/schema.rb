@@ -164,7 +164,7 @@ ActiveRecord::Schema.define do
     end
   end
 
-  %w[min min_proc max max_proc range range_proc].each do |check|
+  %w[min min_proc max max_proc range range_proc range_min_proc range_max_proc].each do |check|
     create_table :"limit_validator_check_#{check.pluralize}", force: :cascade do |t|
       t.datetime :created_at, null: false
       t.datetime :updated_at, null: false
@@ -172,11 +172,6 @@ ActiveRecord::Schema.define do
   end
 
   create_table :total_size_validator_check_validity_has_many_attached_onlies, force: :cascade do |t|
-    t.datetime :created_at, precision: 6, null: false
-    t.datetime :updated_at, precision: 6, null: false
-  end
-
-  create_table :documents, force: :cascade do |t|
     t.datetime :created_at, precision: 6, null: false
     t.datetime :updated_at, precision: 6, null: false
   end

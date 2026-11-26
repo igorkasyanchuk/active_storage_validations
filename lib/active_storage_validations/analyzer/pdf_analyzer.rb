@@ -5,8 +5,8 @@ module ActiveStorageValidations
   #
   # Extracts the following from a pdf attachable:
   #
-  # * Width (pts) => for the first page only
-  # * Height (pts) => for the first page only
+  # * Width (pts) => for the first page only, as displayed (/Rotate applied)
+  # * Height (pts) => for the first page only, as displayed (/Rotate applied)
   # * Pages (integer) => number of pages in the pdf
   #
   # Example:
@@ -18,14 +18,16 @@ module ActiveStorageValidations
   class Analyzer::PdfAnalyzer < Analyzer
     # pdfinfo reports e.g. "595.276 x 841.89 pts (A4)". Capture the full
     # integer or decimal so extra fractional digits are not split into a
-    # second number (which would make height 8 for A4).
-    PAGE_SIZE_NUMBER = /\d+(?:\.\d+)?/
+    # second number (which would make height 8 for A4). Sizes of 1e6 pts or
+    # more are printed in exponent form ("2e+06 x 1.5e+06 pts"), which must not
+    # be read as 2 x 6.
+    PAGE_SIZE_NUMBER = /\d+(?:\.\d+)?(?:e[+-]?\d+)?/i
 
     def metadata
       read_media do |media|
         {
-          width: width,
-          height: height,
+          width: positive_measurement(width),
+          height: positive_measurement(height),
           pages: pages
         }.compact
       end
@@ -34,7 +36,7 @@ module ActiveStorageValidations
     private
 
     def read_media
-      Tempfile.create(binmode: true) do |tempfile|
+      create_media_tempfile do |tempfile|
         begin
           if media(tempfile).present?
             yield media(tempfile)
@@ -74,19 +76,34 @@ module ActiveStorageValidations
     end
 
     def width
-      page_size_in_points[0]
+      page_size_in_points[rotated? ? 1 : 0]
     end
 
     def height
-      page_size_in_points[1]
+      page_size_in_points[rotated? ? 0 : 1]
+    end
+
+    # pdfinfo reports the MediaBox as stored, plus the page /Rotate ("Page rot:
+    # 90"). Swap the sides of quarter-turned pages so width / height describe
+    # the page as displayed, like the image and video analyzers do.
+    def rotated?
+      @media["page_rot"].to_i % 180 == 90
     end
 
     def page_size_in_points
-      @media["page_size"].to_s.scan(PAGE_SIZE_NUMBER).map(&:to_i)
+      @media["page_size"].to_s.scan(PAGE_SIZE_NUMBER).map { |number| Float(number).to_i }
     end
 
     def pages
-      @media["pages"].to_i
+      return unless @media.key?("pages")
+
+      positive_measurement(@media["pages"].to_i)
+    end
+
+    # 0 is not a usable measurement (PagesValidator / processable_file treat
+    # it as a miss). Omit it so Hash#compact does not cache a fake success.
+    def positive_measurement(value)
+      value if value.to_i.positive?
     end
   end
 end

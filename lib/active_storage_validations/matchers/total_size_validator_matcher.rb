@@ -19,11 +19,23 @@ module ActiveStorageValidations
         message.join("\n")
       end
 
+      # Attaching the probe files to a has_one_attached raised Rails' unclear
+      # "Could not find or build blob: expected attachable, got [...]".
+      def matches?(subject)
+        record = subject.is_a?(Class) ? subject.new : subject
+        if record.respond_to?(@attribute_name) && record.public_send(@attribute_name).is_a?(ActiveStorage::Attached::One)
+          raise ArgumentError, "validate_total_size_of is only available for has_many_attached relations (:#{@attribute_name} is a has_one_attached)"
+        end
+
+        super
+      end
+
       protected
 
+      # has_many_attached relation. The Hash attachable is unfurled in memory
+      # (byte_size comes from the stubbed io.size), no blob is uploaded.
       def attach_file
-        # has_many_attached relation
-        @subject.public_send(@attribute_name).attach([ dummy_blob ])
+        @subject.public_send(@attribute_name).attach([ dummy_file ])
         @subject.public_send(@attribute_name)
       end
 
