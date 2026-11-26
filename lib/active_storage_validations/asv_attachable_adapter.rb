@@ -115,10 +115,26 @@ module ActiveStorageValidations
       # (`~$lock.png`, an Office lock file, is not a home directory).
       def with_path_or_copy(tempfile, path, io, &block)
         if regular_file_of?(path, io)
+          return copy_file_to_tempfile(tempfile, path, &block) if selector_suffix?(path)
+
           yield File.absolute_path(path)
         else
           copy_to_tempfile(tempfile, io, &block)
         end
+      end
+
+      # libvips reads `photo.jpg[shrink=8]` as photo.jpg loaded with options,
+      # and ImageMagick reads `photo.jpg[0]` as frame 0 of photo.jpg: a file
+      # named like that (an app saving uploads under the client's name) was
+      # measured as its sibling file, or not at all. Its copy is read under the
+      # tempfile's name instead. Uploads never get there: Ruby's Tempfile drops
+      # brackets from the suffix Rack takes from the client's filename.
+      def selector_suffix?(path)
+        File.basename(path.to_s).include?("[")
+      end
+
+      def copy_file_to_tempfile(tempfile, path, &block)
+        File.open(path, "rb") { |file| copy_to_tempfile(tempfile, file, &block) }
       end
 
       # A closed IO (`File.open(path) { |f| record.avatar.attach(io: f, …) }`)
@@ -273,8 +289,11 @@ module ActiveStorageValidations
         File.open(@attachable) { |file| file.rewind }
       end
 
-      def with_media_path(_tempfile)
-        yield File.absolute_path(@attachable.to_s)
+      def with_media_path(tempfile, &block)
+        path = File.absolute_path(@attachable.to_s)
+        return copy_file_to_tempfile(tempfile, path, &block) if selector_suffix?(path) && File.file?(path)
+
+        yield path
       end
     end
 
