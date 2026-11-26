@@ -10,28 +10,16 @@ require "active_storage_validations/matchers"
 RSpec.describe ActiveStorageValidations::Matchers::ASVAttachable do
   include ActiveStorageValidations::Matchers
 
-  let(:klass) do
-    Class.new(ApplicationRecord) do
-      self.table_name = "size_matchers"
-      def self.name = "ProbeAnalysisMatcherProbe"
-
-      has_one_attached :avatar
-      has_one_attached :video
-      has_many_attached :photos
-      validates :avatar, content_type: :png, dimension: { width: { max: 800 } }, processable_file: true
-      validates :video, with_audio: true
-      validates :photos, limit: { max: 2 }, total_size: { less_than: 2.kilobytes }
-    end
-  end
+  let(:klass) { Integration::Matcher }
 
   let(:matchers) do
     [
-      validate_content_type_of(:avatar).allowing(:png).rejecting(:gif),
-      validate_dimensions_of(:avatar).width_max(800),
-      validate_processable_file_of(:avatar),
-      validate_with_audio_of(:video),
-      validate_limits_of(:photos).max(2),
-      validate_total_size_of(:photos).less_than(2.kilobytes)
+      validate_content_type_of(:probe_image).allowing(:png).rejecting(:gif),
+      validate_dimensions_of(:probe_image).width_max(800),
+      validate_processable_file_of(:probe_image),
+      validate_with_audio_of(:probe_video),
+      validate_limits_of(:probe_photos).max(2),
+      validate_total_size_of(:probe_photos).less_than(2.kilobytes)
     ]
   end
 

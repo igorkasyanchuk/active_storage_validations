@@ -27,4 +27,15 @@ class Integration::Matcher < ApplicationRecord
   # its persisted blob must keep its real metadata.
   has_one_attached :example_4
   validates :example_4, dimension: { width: { min: 120 } }
+
+  # Every matcher probe builder (ASVAttachable#probe_attachable): Active
+  # Storage must not analyze the probe files (spec/matchers/integration/probe_analysis_spec.rb).
+  has_one_attached :probe_image
+  validates :probe_image, content_type: :png, dimension: { width: { max: 800 } }, processable_file: true
+
+  has_one_attached :probe_video
+  validates :probe_video, with_audio: true
+
+  has_many_attached :probe_photos
+  validates :probe_photos, limit: { max: 2 }, total_size: { less_than: 2.kilobytes }
 end
