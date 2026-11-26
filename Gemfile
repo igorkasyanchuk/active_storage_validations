@@ -36,6 +36,8 @@ end
 # Install with: bundle config set --local with benchmark && bundle install
 # (or omit BUNDLE_WITHOUT=benchmark). See benchmark/README.md.
 group :benchmark do
+  gem "benchmark", require: false # benchmark/require.rb; not a default gem since Ruby 4.0
   gem "benchmark-ips"
+  gem "pg", require: false # DATABASE_URL=postgres://… runs: see benchmark/README.md
   gem "vernier", require: false
 end

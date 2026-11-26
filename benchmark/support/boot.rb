@@ -106,6 +106,7 @@ module ASVBenchmark
     puts "ruby:            #{RUBY_DESCRIPTION}"
     puts "rails:           #{Rails.version}"
     puts "IMAGE_PROCESSOR: #{ActiveStorage.variant_processor || :mini_magick}"
+    puts "database:        #{database_description}"
     puts "BUNDLE_GEMFILE:  #{ENV.fetch('BUNDLE_GEMFILE', '(default Gemfile)')}"
     puts "host:            #{`uname -nms`.strip}"
     puts "vips:            #{tool_version('vips', '-v')}"
@@ -116,6 +117,13 @@ module ASVBenchmark
     puts "time:            #{Time.now.utc.iso8601}"
     puts "=" * 72
     puts
+  end
+
+  # SQLite runs in process; PostgreSQL adds a round trip per query.
+  def database_description
+    connection = ActiveRecord::Base.connection
+    version = connection.select_value(connection.adapter_name == "SQLite" ? "SELECT sqlite_version()" : "SHOW server_version")
+    "#{connection.adapter_name} #{version}"
   end
 
   def tool_version(bin, flag)

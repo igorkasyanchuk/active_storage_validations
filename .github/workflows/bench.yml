@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   benchmarks:
-    name: Benchmarks (${{ matrix.image_processor }})
+    name: Benchmarks (${{ matrix.image_processor }}, ${{ matrix.database }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -22,6 +22,24 @@ jobs:
         image_processor:
           - vips
           - mini_magick
+        # The dummy app runs on SQLite (in process). Apps mostly run
+        # PostgreSQL, where every query the validators make is a round trip.
+        database:
+          - sqlite
+          - postgres
+    services:
+      postgres:
+        # An empty image skips the service on the SQLite jobs.
+        image: ${{ matrix.database == 'postgres' && 'postgres:17' || '' }}
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       IMAGE_PROCESSOR: ${{ matrix.image_processor }}
       BENCH_TIME: "3"
@@ -60,27 +78,31 @@ jobs:
           bundle config set --local with benchmark
           bundle install
 
+      - name: Use PostgreSQL
+        if: matrix.database == 'postgres'
+        run: echo 'DATABASE_URL=postgres://postgres:postgres@localhost:5432/asv_benchmark' >> $GITHUB_ENV
+
       - name: Run require benchmark
-        run: bundle exec ruby benchmark/require.rb | tee require-${{ matrix.image_processor }}.txt
+        run: bundle exec ruby benchmark/require.rb | tee require-${{ matrix.image_processor }}-${{ matrix.database }}.txt
 
       - name: Run metadata validator benchmarks
-        run: bundle exec ruby benchmark/metadata_validators.rb | tee metadata-${{ matrix.image_processor }}.txt
+        run: bundle exec ruby benchmark/metadata_validators.rb | tee metadata-${{ matrix.image_processor }}-${{ matrix.database }}.txt
 
       - name: Run image processor comparison
-        if: matrix.image_processor == 'vips'
+        if: matrix.image_processor == 'vips' && matrix.database == 'sqlite'
         run: bundle exec ruby benchmark/image_processors.rb | tee image-processors.txt
 
       - name: Upload benchmark report
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: benchmark-report-${{ matrix.image_processor }}
+          name: benchmark-report-${{ matrix.image_processor }}-${{ matrix.database }}
           path: |
-            require-${{ matrix.image_processor }}.txt
-            metadata-${{ matrix.image_processor }}.txt
+            require-${{ matrix.image_processor }}-${{ matrix.database }}.txt
+            metadata-${{ matrix.image_processor }}-${{ matrix.database }}.txt
 
       - name: Upload image processor comparison
-        if: matrix.image_processor == 'vips'
+        if: matrix.image_processor == 'vips' && matrix.database == 'sqlite'
         uses: actions/upload-artifact@v7
         with:
           name: benchmark-report-image-processors

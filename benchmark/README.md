@@ -40,6 +40,17 @@ Tune duration:
 BENCH_TIME=5 BENCH_WARMUP=2 IMAGE_PROCESSOR=vips bundle exec ruby benchmark/metadata_validators.rb
 ```
 
+### PostgreSQL
+
+The dummy app runs on SQLite, in process: queries look almost free there. Most apps run PostgreSQL, where every query is a round trip, so also run the suite against it when a change touches what the validators load or query. Point `DATABASE_URL` at an empty database (Combustion creates the schema in it):
+
+```bash
+DATABASE_URL=postgres://localhost/asv_benchmark IMAGE_PROCESSOR=vips bundle exec ruby benchmark/metadata_validators.rb
+DATABASE_URL=postgres://localhost/asv_benchmark IMAGE_PROCESSOR=mini_magick bundle exec ruby benchmark/metadata_validators.rb
+```
+
+The `pg` gem is in the `:benchmark` group. Table names must stay within PostgreSQL's 63 characters: shorten a long dummy table with `self.table_name` (see `test/dummy/db/schema.rb`).
+
 ## What is measured
 
 | Report | Meaning |
@@ -55,7 +66,7 @@ Fixtures are the same files under `test/dummy/public/` used by the test suite.
 
 ## Updating the baseline
 
-1. Run `metadata_validators.rb` for both processors and `image_processors.rb`.
+1. Run `metadata_validators.rb` for both processors, on SQLite and on PostgreSQL, and `image_processors.rb`.
 2. Paste the full stdout (including the environment header) into [`BASELINE.md`](BASELINE.md).
 3. If the vips vs mini_magick ratio changes meaningfully, update the recommendation in the root [`README.md`](../README.md#using-image-metadata-validators).
 4. Note machine / OS package versions already printed by the script.
@@ -73,4 +84,4 @@ Vernier is for investigation, not CI gating.
 
 ## CI
 
-[`.github/workflows/bench.yml`](../.github/workflows/bench.yml) runs the suite on push/PR and uploads a `benchmark-report` artifact. Numbers are informational only.
+[`.github/workflows/bench.yml`](../.github/workflows/bench.yml) runs the suite on push/PR for each image processor, on SQLite and on a PostgreSQL service, and uploads a `benchmark-report-<processor>-<database>` artifact per job. Numbers are informational only.
