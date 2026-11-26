@@ -1,0 +1,45 @@
+# Upstreams this gem copies practices from, and the last release whose changes
+# were reviewed for it. /upstream-watch updates `version`, `reviewed_on` and
+# `notes` after each review. `baseline` means the version was taken from
+# Gemfile.lock when the watch started, not from a changelog review.
+image_processing:
+  gem: image_processing
+  repo: janko/image_processing
+  areas: libvips / ImageMagick loading and validity checks, untrusted loaders, option and path injection
+  ours: lib/active_storage_validations/analyzer/image_analyzer/, processable_file_validator.rb, asv_attachable_adapter.rb
+  version: "2.2.2"
+  reviewed_on: "2026-11-26"
+  notes: Reviewed up to d7cd300 (HEAD after 2.2.2). 4.2 copies the bracketed-path fix; skipping untrusted libvips loaders on older Rails goes to v5 (it rejects SVG / BMP / … files those apps accept). Truncated-image detection (fail_on + decode) left as a possible processable_file option.
+activestorage:
+  gem: activestorage
+  repo: rails/rails
+  changelog: activestorage/CHANGELOG.md
+  areas: blob analyzers (ffprobe, vips, ImageMagick, pdfinfo), Vips.block_untrusted, blob metadata, attachment changes
+  ours: lib/active_storage_validations/analyzer/, shared/asv_attachable.rb, extensors/asv_blob_metadatable.rb
+  version: "8.1.4.1"
+  reviewed_on: "2026-11-26"
+  notes: baseline
+marcel:
+  gem: marcel
+  repo: rails/marcel
+  areas: content type detection, aliases, extensions, magic bytes
+  ours: content_type_validator.rb, extensors/asv_marcelable.rb, matchers/content_type_validator_matcher.rb
+  version: "2.1.0"
+  reviewed_on: "2026-11-26"
+  notes: baseline (rails_next locks 2.1.0, the other gemfiles 1.2.1, and the suite passes on both)
+ruby-vips:
+  gem: ruby-vips
+  repo: libvips/ruby-vips
+  areas: loader API, operation flags, block_untrusted
+  ours: lib/active_storage_validations/analyzer/image_analyzer/vips.rb
+  version: "2.3.0"
+  reviewed_on: "2026-11-26"
+  notes: baseline
+mini_magick:
+  gem: mini_magick
+  repo: minimagick/minimagick
+  areas: identify argv building, shell / tool execution
+  ours: lib/active_storage_validations/analyzer/image_analyzer/image_magick.rb
+  version: "5.4.0"
+  reviewed_on: "2026-11-26"
+  notes: baseline

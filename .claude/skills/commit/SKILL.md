@@ -40,4 +40,4 @@ Two points worth repeating because they override general habits:
 - **Do not push, amend, or `--no-verify`** unless the user asks in the same message. If a
   hook fails, fix it and create a new commit.
 
-Reply with the short hash + subject only.
+Reply with the short hash + subject only, plus the upstream check's lines when it prints any (step 8 of the Cursor skill).

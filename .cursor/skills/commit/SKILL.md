@@ -40,6 +40,13 @@ EOF
 
 6. If a hook fails, fix and create a **new** commit (do not amend).
 7. Run `git status` and reply with the short hash + subject only.
+8. Check the upstreams the gem copies from (it takes a few seconds and never fails the commit):
+
+```bash
+ruby .cursor/skills/upstream-watch/scripts/check_upstreams.rb --quiet
+```
+
+   It prints nothing when every upstream is up to date. Otherwise add its lines after the hash + subject and suggest `/upstream-watch`; do not start the review unasked.
 
 ## Out of scope
 
