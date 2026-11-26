@@ -71,6 +71,7 @@ GEM
     crass (1.0.7)
     diff-lcs (1.6.2)
     drb (2.2.3)
+    erb (6.0.7)
     erubi (1.13.1)
     ffi (1.17.4)
     ffi (1.17.4-arm64-darwin)
@@ -124,6 +125,15 @@ GEM
       thor (~> 1.0)
       zeitwerk (~> 2.5)
     rake (13.4.2)
+    rbs (4.2.0)
+      logger
+      prism (>= 1.6.0)
+      tsort
+    rdoc (8.1.0)
+      erb
+      prism (>= 1.6.0)
+      rbs (>= 4.0.0)
+      tsort
     reline (0.7.0)
       io-console (~> 0.5)
     rexml (3.4.4)
@@ -152,6 +162,7 @@ GEM
     sqlite3 (1.7.3)
       mini_portile2 (~> 2.8.0)
     thor (1.5.0)
+    tsort (0.2.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     webmock (3.41.0)
@@ -174,6 +185,7 @@ DEPENDENCIES
   mini_magick (>= 4.9.5)
   nokogiri (>= 1.18)
   pry
+  rdoc
   rspec-rails (~> 7.0)
   ruby-vips (>= 2.1.0)
   simplecov

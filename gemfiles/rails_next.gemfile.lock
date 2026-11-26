@@ -318,6 +318,7 @@ DEPENDENCIES
   nokogiri (>= 1.18)
   pry
   rails!
+  rdoc
   rspec-rails
   ruby-vips (>= 2.1.0)
   simplecov

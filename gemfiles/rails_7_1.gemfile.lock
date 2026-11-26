@@ -236,6 +236,7 @@ DEPENDENCIES
   mini_magick (>= 4.9.5)
   nokogiri (>= 1.18)
   pry
+  rdoc
   rspec-rails (~> 7.0)
   ruby-vips (>= 2.1.0)
   simplecov

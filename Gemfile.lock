@@ -345,6 +345,7 @@ DEPENDENCIES
   mini_magick (>= 4.9.5)
   pry
   rails (= 8.1.4.1)
+  rdoc
   rspec-rails
   rubocop (~> 1.92)
   rubocop-performance (~> 1.27)

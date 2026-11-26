@@ -233,6 +233,7 @@ DEPENDENCIES
   combustion (~> 1.3)
   mini_magick (>= 4.9.5)
   pry
+  rdoc
   rspec-rails
   ruby-vips (>= 2.1.0)
   simplecov
