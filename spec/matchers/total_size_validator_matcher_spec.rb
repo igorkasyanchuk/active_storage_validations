@@ -226,12 +226,17 @@ RSpec.describe ActiveStorageValidations::Matchers::TotalSizeValidatorMatcher do
       expect { configured_matcher.matches?(klass) }.not_to change(ActiveStorage::Blob, :count)
     end
 
-    it "does not open tempfiles" do
-      allow(Tempfile).to receive(:new).and_call_original
+    # Analyzers may copy a probe to a block-scoped tempfile of their own
+    # (Rails 8.2 analyzes on attach by default); none may be left open.
+    it "does not leave tempfiles open" do
+      tempfiles = []
+      allow(Tempfile).to receive(:new).and_wrap_original do |original, *args, **kwargs, &block|
+        original.call(*args, **kwargs, &block).tap { |tempfile| tempfiles << tempfile }
+      end
 
       configured_matcher.matches?(klass)
 
-      expect(Tempfile).not_to have_received(:new)
+      expect(tempfiles).to all(be_closed)
     end
   end
 end

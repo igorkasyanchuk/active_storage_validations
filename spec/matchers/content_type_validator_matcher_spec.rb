@@ -322,12 +322,17 @@ RSpec.describe ActiveStorageValidations::Matchers::ContentTypeValidatorMatcher d
 
     let(:model_attribute) { :with_spoofing_protection }
 
+    # Analyzers may copy a probe to a block-scoped tempfile of their own
+    # (Rails 8.2 analyzes on attach by default); none may be left open.
     it "does not open tempfiles that would outlive the matcher" do
-      allow(Tempfile).to receive(:new).and_call_original
+      tempfiles = []
+      allow(Tempfile).to receive(:new).and_wrap_original do |original, *args, **kwargs, &block|
+        original.call(*args, **kwargs, &block).tap { |tempfile| tempfiles << tempfile }
+      end
 
       configured_matcher.matches?(klass)
 
-      expect(Tempfile).not_to have_received(:new)
+      expect(tempfiles).to all(be_closed)
     end
   end
 
