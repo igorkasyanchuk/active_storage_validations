@@ -9,6 +9,11 @@ module ActiveStorageValidations
   #
   # Supported representations: ActiveStorage::Blob, ActionDispatch::Http::UploadedFile,
   # Rack::Test::UploadedFile, Hash, File, Pathname, and a signed blob id (String).
+  #
+  # Every handler exposes the same three methods: +content_type+, +filename+
+  # and +with_media_path+ (a filesystem path the analyzer commands can read).
+  # +with_media_path(tempfile, max_bytes:)+ lets an analyzer that only inspects
+  # the beginning of a file (libmagic) avoid downloading / copying all of it.
   class ASVAttachableAdapter
     def self.wrap(attachable, file_supported:)
       handler_class_for(attachable).new(attachable, file_supported: file_supported)
@@ -60,10 +65,6 @@ module ActiveStorageValidations
         raise NotImplementedError
       end
 
-      def read(max_byte_size: nil)
-        raise NotImplementedError
-      end
-
       # Size and storage key, for the notification payloads only: nil when the
       # attachable cannot tell.
       def byte_size
@@ -72,10 +73,7 @@ module ActiveStorageValidations
       def blob_key
       end
 
-      def rewind
-      end
-
-      def with_media_path(_tempfile)
+      def with_media_path(_tempfile, max_bytes: nil)
         raise NotImplementedError
       end
 
@@ -87,15 +85,11 @@ module ActiveStorageValidations
             "got #{@attachable.inspect}"
       end
 
-      def read_from(io, max_byte_size)
-        max_byte_size ? io.read(max_byte_size) : io.read
-      end
-
-      def copy_to_tempfile(tempfile, source)
+      def copy_to_tempfile(tempfile, source, max_bytes: nil)
         if source.is_a?(ActiveStorage::Blob)
-          source.download { |chunk| tempfile.write(chunk) }
+          download_blob(tempfile, source, max_bytes)
         else
-          IO.copy_stream(source, tempfile)
+          IO.copy_stream(source, tempfile, max_bytes)
           source.rewind
         end
 
@@ -113,13 +107,13 @@ module ActiveStorageValidations
       # is never read as a command-line option or an ffmpeg protocol.
       # File.absolute_path, unlike File.expand_path, leaves a leading `~` alone
       # (`~$lock.png`, an Office lock file, is not a home directory).
-      def with_path_or_copy(tempfile, path, io, &block)
+      def with_path_or_copy(tempfile, path, io, max_bytes:, &block)
         if regular_file_of?(path, io)
-          return copy_file_to_tempfile(tempfile, path, &block) if selector_suffix?(path)
+          return copy_file_to_tempfile(tempfile, path, max_bytes: max_bytes, &block) if selector_suffix?(path)
 
           yield File.absolute_path(path)
         else
-          copy_to_tempfile(tempfile, io, &block)
+          copy_to_tempfile(tempfile, io, max_bytes: max_bytes, &block)
         end
       end
 
@@ -133,8 +127,8 @@ module ActiveStorageValidations
         File.basename(path.to_s).include?("[")
       end
 
-      def copy_file_to_tempfile(tempfile, path, &block)
-        File.open(path, "rb") { |file| copy_to_tempfile(tempfile, file, &block) }
+      def copy_file_to_tempfile(tempfile, path, max_bytes: nil, &block)
+        File.open(path, "rb") { |file| copy_to_tempfile(tempfile, file, max_bytes: max_bytes, &block) }
       end
 
       # A closed IO (`File.open(path) { |f| record.avatar.attach(io: f, …) }`)
@@ -146,6 +140,14 @@ module ActiveStorageValidations
         File.identical?(io, path)
       rescue SystemCallError, TypeError, IOError
         false
+      end
+
+      def download_blob(tempfile, blob, max_bytes)
+        if max_bytes && blob.byte_size.to_i > max_bytes
+          tempfile.write(blob.download_chunk(0...max_bytes))
+        else
+          blob.download { |chunk| tempfile.write(chunk) }
+        end
       end
 
       def marcel_content_type
@@ -162,10 +164,6 @@ module ActiveStorageValidations
         @attachable.filename
       end
 
-      def read(max_byte_size: nil)
-        max_byte_size ? @attachable.download_chunk(0...max_byte_size) : @attachable.download
-      end
-
       def byte_size
         @attachable.byte_size
       end
@@ -174,8 +172,8 @@ module ActiveStorageValidations
         @attachable.key
       end
 
-      def with_media_path(tempfile, &block)
-        copy_to_tempfile(tempfile, @attachable, &block)
+      def with_media_path(tempfile, max_bytes: nil, &block)
+        copy_to_tempfile(tempfile, @attachable, max_bytes: max_bytes, &block)
       end
     end
 
@@ -194,22 +192,14 @@ module ActiveStorageValidations
         @attachable.original_filename
       end
 
-      def read(max_byte_size: nil)
-        read_from(@attachable, max_byte_size)
-      end
-
       def byte_size
         @attachable.size
       end
 
-      def rewind
-        @attachable.rewind
-      end
-
-      def with_media_path(tempfile, &block)
+      def with_media_path(tempfile, max_bytes: nil, &block)
         io = @attachable.tempfile
         path = io.path if io.respond_to?(:path)
-        with_path_or_copy(tempfile, path, io, &block)
+        with_path_or_copy(tempfile, path, io, max_bytes: max_bytes, &block)
       end
     end
 
@@ -222,27 +212,18 @@ module ActiveStorageValidations
         @attachable[:filename]
       end
 
-      def read(max_byte_size: nil)
-        read_from(@attachable[:io], max_byte_size)
-      end
-
       def byte_size
         io = @attachable[:io]
         io.size if io.respond_to?(:size)
       end
-
-      def rewind
-        @attachable[:io].rewind
-      end
-
       # Rails only requires the io to respond to #read / #rewind / #size, so it
       # may be a StringIO or any IO-like wrapper (streaming download, Zip entry,
       # …) with no file behind it. Only path-backed IOs (File, Tempfile,
       # uploaded files) can be handed to the analyzers' commands as they are.
-      def with_media_path(tempfile, &block)
+      def with_media_path(tempfile, max_bytes: nil, &block)
         io = @attachable[:io]
         path = io.to_path if io.respond_to?(:to_path)
-        with_path_or_copy(tempfile, path, io, &block)
+        with_path_or_copy(tempfile, path, io, max_bytes: max_bytes, &block)
       end
     end
 
@@ -265,16 +246,8 @@ module ActiveStorageValidations
         File.size?(@attachable.to_path)
       end
 
-      def read(max_byte_size: nil)
-        read_from(@attachable, max_byte_size)
-      end
-
-      def rewind
-        @attachable.rewind
-      end
-
-      def with_media_path(tempfile, &block)
-        with_path_or_copy(tempfile, @attachable.path, @attachable, &block)
+      def with_media_path(tempfile, max_bytes: nil, &block)
+        with_path_or_copy(tempfile, @attachable.path, @attachable, max_bytes: max_bytes, &block)
       end
     end
 
@@ -285,13 +258,9 @@ module ActiveStorageValidations
         File.size?(@attachable.to_s)
       end
 
-      def rewind
-        File.open(@attachable) { |file| file.rewind }
-      end
-
-      def with_media_path(tempfile, &block)
+      def with_media_path(tempfile, max_bytes: nil, &block)
         path = File.absolute_path(@attachable.to_s)
-        return copy_file_to_tempfile(tempfile, path, &block) if selector_suffix?(path) && File.file?(path)
+        return copy_file_to_tempfile(tempfile, path, max_bytes: max_bytes, &block) if selector_suffix?(path) && File.file?(path)
 
         yield path
       end

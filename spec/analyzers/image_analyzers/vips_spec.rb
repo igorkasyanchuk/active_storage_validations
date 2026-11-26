@@ -49,6 +49,54 @@ RSpec.describe ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips, image_pr
     end
   end
 
+  # Older Rails do not call Vips.block_untrusted(true): the analyzer skips the
+  # unfuzzed loaders itself, unless the app turned the blocking on.
+  describe "untrusted (unfuzzed) loaders" do
+    subject(:metadata) { analyzer.metadata }
+
+    let(:was_blocked) { {} }
+    let(:app_reenables_svg) { false }
+
+    before do
+      require "vips"
+      skip "requires libvips 8.13+ and ruby-vips 2.2.1+" unless ::Vips.respond_to?(:block_untrusted) && ::Vips.at_least_libvips?(8, 13)
+
+      was_blocked[:value] = described_class.untrusted_operations_blocked?
+      ::Vips.block_untrusted(app_blocks_untrusted)
+      ::Vips.block("VipsForeignLoadSvg", false) if app_reenables_svg
+    end
+
+    after do
+      ::Vips.block_untrusted(was_blocked[:value]) if was_blocked.key?(:value)
+      ActiveStorageValidations::ProcessableFileValidator.reset_vips_untrusted_operations_blocked_cache!
+    end
+
+
+    context "when the app does not block them" do
+      let(:app_blocks_untrusted) { false }
+
+      context "with an SVG (svgload)" do
+        let(:attachable) { svg_file }
+
+        it { expect(metadata).to eq({}) }
+      end
+
+      context "with a PNG (pngload)" do
+        let(:attachable) { png_file }
+
+        it { expect(metadata).to eq({ width: 150, height: 150 }) }
+      end
+    end
+
+    context "when the app blocks them but re-enables svgload" do
+      let(:app_blocks_untrusted) { true }
+      let(:app_reenables_svg) { true }
+      let(:attachable) { svg_file }
+
+      it { expect(metadata).to eq({ width: 150, height: 150 }) }
+    end
+  end
+
   describe "timeouts" do
     let(:path) { Rails.root.join("public", "image_150x150.png").to_s }
     let(:attachable) do

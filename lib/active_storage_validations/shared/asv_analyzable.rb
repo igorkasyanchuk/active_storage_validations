@@ -8,7 +8,7 @@ module ActiveStorageValidations
   module ASVAnalyzable
     extend ActiveSupport::Concern
 
-    DEFAULT_IMAGE_PROCESSOR = :mini_magick
+    DEFAULT_IMAGE_PROCESSOR = :vips
     # Keys written by the content-type sniffers. They record what the file
     # claims to be, not whether an analyzer could decode it, so they must never
     # count as evidence that a media analysis happened.
@@ -16,7 +16,21 @@ module ActiveStorageValidations
     # What browsers and clients send when they do not know the type.
     GENERIC_CONTENT_TYPE = "application/octet-stream"
 
+    # Every validator that runs analyzers accepts +timeout:+. Checked here, after
+    # the validator's own check_validity!, rather than in each of them.
+    def initialize(*)
+      super
+      ensure_timeout_validity
+    end
+
     private
+
+    def ensure_timeout_validity
+      return unless options.key?(:timeout)
+      return if ActiveStorageValidations.valid_command_timeout?(options[:timeout])
+
+      raise ArgumentError, "You must pass a positive number of seconds, or nil to disable it, to :timeout (got #{options[:timeout].inspect})"
+    end
 
     # Retrieve the ASV metadata from the blob.
     # If the blob has not been analyzed by our gem yet, the gem will analyze the
@@ -187,12 +201,13 @@ module ActiveStorageValidations
     end
 
     def image_processor
-      # Rails returns nil for default image processor, because it is set in an after initialize callback
-      # https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/engine.rb
-      # `:disabled` (Rails 8.1) only turns variants off, and Rails tells apps
-      # without the image_processing gem to set it: their images are analyzed
-      # with the default processor, as when none is set. An unknown processor
-      # fails closed (#image_analyzer_for).
+      # Rails may still return nil before its after-initialize callback sets the
+      # processor (https://github.com/rails/rails/blob/main/activestorage/lib/active_storage/engine.rb).
+      # Fall back to libvips, which Rails 7.1+ uses for variants and which the
+      # README recommends. `:disabled` (Rails 8.1) only turns variants off, and
+      # Rails tells apps without the image_processing gem to set it: their
+      # images are analyzed with the default processor too. An unknown
+      # processor fails closed (#image_analyzer_for).
       processor = ActiveStorage.variant_processor
       processor = DEFAULT_IMAGE_PROCESSOR if processor.nil? || processor == :disabled
       processor.is_a?(Class) ? image_processor_for_transformer(processor) : processor
@@ -200,14 +215,18 @@ module ActiveStorageValidations
 
     # Rails 8.2+ also accepts a transformer class
     # (`config.active_storage.variant_processor = MyTransformer`). It names the
-    # image library only when it extends Rails' ImageMagick transformer; any
-    # other class is analyzed with libvips, Rails' default transformer, instead
-    # of failing every image. Ancestors are compared by name: referencing the
-    # constants would autoload them, and they require the image_processing gem.
+    # image library only when it extends Rails' ImageMagick / Vips transformer;
+    # any other class gets the default analyzer instead of failing every image.
+    # Ancestors are compared by name: referencing the constants would autoload
+    # them, and they require the image_processing gem.
     def image_processor_for_transformer(transformer)
       ancestor_names = transformer.ancestors.map(&:name)
 
-      ancestor_names.include?("ActiveStorage::Transformers::ImageMagick") ? :mini_magick : :vips
+      if ancestor_names.include?("ActiveStorage::Transformers::ImageMagick")
+        :mini_magick
+      else
+        DEFAULT_IMAGE_PROCESSOR
+      end
     end
 
     def video_analyzer_for(attachable)

@@ -18,6 +18,10 @@ module ActiveStorageValidations
 
       private
 
+      def except_on_description
+        "except on #{@except_on.inspect}" if @except_on
+      end
+
       def is_except_on_valid?
         return true if !@except_on && attribute_validators.none? { |validator| validator.options[:except_on] }
 

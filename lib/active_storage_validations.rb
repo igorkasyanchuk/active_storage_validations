@@ -14,7 +14,21 @@ module ActiveStorageValidations
   # Maximum time allowed for external analyzer commands (ffprobe, pdfinfo, file,
   # magika, MiniMagick, libvips). Set to +nil+ to disable. Per-validator +timeout:+
   # overrides this value for the analysis that validator triggers.
-  mattr_accessor :command_timeout, instance_accessor: false, default: 10.seconds
+  mattr_reader :command_timeout, instance_accessor: false, default: 10.seconds
+
+  def self.command_timeout=(value)
+    unless valid_command_timeout?(value)
+      raise ArgumentError, "command_timeout must be a positive number of seconds, or nil to disable it (got #{value.inspect})"
+    end
+
+    @@command_timeout = value
+  end
+
+  # A deadline of 0 (or less) fails every analysis; a Proc cannot be resolved
+  # since analyzers do not see the record.
+  def self.valid_command_timeout?(value) # :nodoc:
+    value.nil? || (value.is_a?(Numeric) && value.positive?)
+  end
 
   def self.configure
     yield self

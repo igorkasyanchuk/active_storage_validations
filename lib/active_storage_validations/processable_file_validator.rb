@@ -80,17 +80,22 @@ module ActiveStorageValidations
         head.match?(NETPBM_HEADER)
     end
 
-    # Only the leading bytes are read (a ranged download for a blob).
     def file_head(attachable)
-      attachable_io(attachable, max_byte_size: FILE_HEAD_BYTES).to_s.b
+      Tempfile.create([ "ActiveStorageValidations-", ".head" ], binmode: true) do |tempfile|
+        wrap_attachable(attachable).with_media_path(tempfile, max_bytes: FILE_HEAD_BYTES) do |path|
+          File.binread(path, FILE_HEAD_BYTES) || "".b
+        end
+      end
     rescue SystemCallError, IOError
       "".b
     end
 
     class << self
-      # Detect whether libvips is currently blocking untrusted operations.
+      # Detect whether the gem's libvips analysis can use untrusted loaders.
       # There is no public getter for `Vips.block_untrusted`, so we probe whether
       # an untrusted loader (svgload) is available via `vips_foreign_find_load`.
+      # When the app has not blocked them, the Vips analyzer skips them itself
+      # (Analyzer::ImageAnalyzer::Vips.skips_untrusted_loaders?): same outcome.
       def vips_untrusted_operations_blocked?
         return @vips_untrusted_operations_blocked if defined?(@vips_untrusted_operations_blocked)
 
@@ -110,7 +115,8 @@ module ActiveStorageValidations
         Tempfile.create([ "asv_vips_untrusted_probe", ".svg" ]) do |file|
           file.write('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>')
           file.flush
-          ::Vips.vips_foreign_find_load(file.path).nil?
+          ::Vips.vips_foreign_find_load(file.path).nil? ||
+            ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips.skips_untrusted_loaders?
         end
       rescue LoadError, StandardError
         false

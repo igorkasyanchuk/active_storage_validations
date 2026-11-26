@@ -60,6 +60,7 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
 
     it_behaves_like "works fine with attachables"
 
+
     describe ":less_than" do
       let(:file_having_lower_than_less_than_option) { audio_1s }
       let(:file_having_exact_less_than_option) { audio_2s }
@@ -238,6 +239,17 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
         end
       end
 
+      context "when the file breaks the bound" do
+        # validates :less_than_or_equal_to_with_precision, duration: { less_than_or_equal_to: 5.seconds, precision: 0 }
+        subject(:record) { model.less_than_or_equal_to_with_precision.attach(audio_7s) and model }
+
+        it "does not forward the option to errors.add, like timeout" do
+          record.valid?
+
+          expect(record.errors.details[:less_than_or_equal_to_with_precision].first).not_to have_key(:precision)
+        end
+      end
+
       context "with less_than_or_equal_to: 5.seconds, precision: 0" do
         # validates :less_than_or_equal_to_with_precision, duration: { less_than_or_equal_to: 5.seconds, precision: 0 }
         let(:attribute) { :less_than_or_equal_to_with_precision }
@@ -401,6 +413,19 @@ RSpec.describe ActiveStorageValidations::DurationValidator do
       let(:file_not_matching_placeholders) { audio_5s }
       let(:message_for_unanalyzable_file) { "With message placeholders must be under 2 seconds (got )" }
       let(:message_for_file_not_matching) { "With message placeholders must be under 2 seconds (got 5.029 seconds)" }
+    end
+
+    # Raw options are no longer message values since 5.0 (upgrade guide).
+    describe "custom message interpolating a raw option" do
+      subject(:model) { validator_test_class::WithMessage.new(params) }
+
+      before { model.with_message_raw_option.attach(audio_5s) }
+
+      it "still raises" do
+        model.valid?
+
+        expect { model.errors.full_messages }.to raise_error(I18n::MissingInterpolationArgument, /less_than/)
+      end
     end
   end
 

@@ -21,7 +21,7 @@ class RatioModel < ApplicationRecord
   validates :portrait_image, aspect_ratio: :portrait
   validates :landscape_image, aspect_ratio: :landscape
   validates :squared_image, aspect_ratio: :square
-  validates :widescreen_image, aspect_ratio: :is_16_9square
+  validates :widescreen_image, aspect_ratio: :is_16_9
 
   # validates :ratio_many, attached: true, aspect_ratio: :landscape
   # validates :ratio_many, attached: true, aspect_ratio: :portrait # portrait

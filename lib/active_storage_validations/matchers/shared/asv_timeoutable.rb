@@ -20,6 +20,10 @@ module ActiveStorageValidations
 
       private
 
+      def timeout_description
+        "with timeout #{@timeout.inspect}" unless @timeout.equal?(UNSET)
+      end
+
       def is_timeout_valid?
         return true if @timeout.equal?(UNSET)
 

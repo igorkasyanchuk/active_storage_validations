@@ -41,9 +41,6 @@ class FormBuilder::Check < ApplicationRecord
   validates :with_type_validator_and_proc_validator, content_type: :pdf
   validates :with_type_validator_and_proc_validator, content_type: ->(record) { [ :pdf, :png ] }
 
-  has_one_attached :with_nested_list
-  validates :with_nested_list, content_type: [ %i[png gif], :pdf ]
-
   has_one_attached :no_content_type_validator
   validates :no_content_type_validator, attached: true
 

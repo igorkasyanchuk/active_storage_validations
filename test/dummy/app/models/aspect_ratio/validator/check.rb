@@ -29,8 +29,10 @@ class AspectRatio::Validator::Check < ApplicationRecord
 
   has_one_attached :in_aspect_ratios
   has_one_attached :in_aspect_ratios_proc
+  has_one_attached :with_empty_proc
   validates :in_aspect_ratios, aspect_ratio: %i[square portrait is_16_9]
   validates :in_aspect_ratios_proc, aspect_ratio: ->(record) { %i[square portrait is_16_9] }
+  validates :with_empty_proc, aspect_ratio: ->(_record) { [] }
 
   # ISO 216 A-series (1:√2)
   %i[a_series a_series_portrait a_series_landscape].each do |a_series_ratio|

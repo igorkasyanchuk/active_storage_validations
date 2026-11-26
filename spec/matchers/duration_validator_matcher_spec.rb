@@ -163,6 +163,10 @@ RSpec.describe ActiveStorageValidations::Matchers::DurationValidatorMatcher do
         subject(:configured_matcher) { matcher.equal_to(5.seconds).precision(1) }
 
         it { is_expected_to_match_for(klass) }
+
+        it "describes the precision" do
+          expect(configured_matcher.description).to end_with("with precision 1")
+        end
       end
 
       context "when the matcher chains another precision" do

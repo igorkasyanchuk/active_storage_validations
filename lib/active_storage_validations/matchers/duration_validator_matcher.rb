@@ -27,7 +27,7 @@ module ActiveStorageValidations
         super && is_precision_valid?
       end
 
-      def description
+      def base_description
         "validate file duration of :#{@attribute_name}"
       end
 
@@ -38,6 +38,10 @@ module ActiveStorageValidations
       end
 
       private
+
+      def describe_value(value)
+        value.is_a?(ActiveSupport::Duration) ? value.inspect : "#{value} seconds"
+      end
 
       def failure_message_unit
         "seconds"
@@ -57,6 +61,10 @@ module ActiveStorageValidations
         @precision ||
           attribute_validators.map { |validator| validator.options.fetch(:precision, DurationValidator::DEFAULT_PRECISION) }.min ||
           DurationValidator::DEFAULT_PRECISION
+      end
+
+      def precision_description
+        "with precision #{@precision}" if @precision
       end
 
       def is_precision_valid?

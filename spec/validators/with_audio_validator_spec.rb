@@ -14,6 +14,39 @@ RSpec.describe ActiveStorageValidations::WithAudioValidator do
     it_behaves_like "ASVErrorable"
   end
 
+  describe "#check_validity!" do
+    subject(:validator) { described_class.new(attributes: [ :video ], **validator_options) }
+
+    [ {}, { with: true }, { with: false }, { with: ->(_record) { true } } ].each do |valid_options|
+      context "with #{valid_options.inspect}" do
+        let(:validator_options) { valid_options }
+
+        it { expect { validator }.not_to raise_error }
+      end
+    end
+
+    [ "no", nil, 0 ].each do |invalid_value|
+      context "with :with set to #{invalid_value.inspect}" do
+        let(:validator_options) { { with: invalid_value } }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, "You must pass true, false or a Proc returning true or false to :with (got #{invalid_value.inspect})")
+        end
+      end
+    end
+
+    # validates :nil_proc_video, with_audio: { with: ->(_record) { nil } }
+    context "when a Proc returns anything but true or false" do
+      subject(:model) { validator_test_class::Check.new(params) }
+
+      it "raises the same error at validation time" do
+        model.nil_proc_video.attach(video_file)
+
+        expect { model.valid? }.to raise_error(ArgumentError, "You must pass true, false or a Proc returning true or false to :with (got nil)")
+      end
+    end
+  end
+
   describe "Validator checks" do
     let(:model) { validator_test_class::Check.new(params) }
 
@@ -121,6 +154,55 @@ RSpec.describe ActiveStorageValidations::WithAudioValidator do
       subject(:record) { model }
 
       it { is_expected_to_be_valid }
+    end
+
+    context "when ffprobe succeeds with no audio or video streams" do
+      before do
+        allow_any_instance_of(ActiveStorageValidations::Analyzer::VideoAnalyzer).to receive(:media_from_path).and_return( # rubocop:disable RSpec/AnyInstance
+          { "streams" => [], "format" => { "nb_streams" => 0, "format_name" => "mov,mp4,m4a,3gp,3g2,mj2" } }
+        )
+      end
+
+      context "when an audio track is required" do
+        subject(:record) { model.video.attach(video_file) and model }
+
+        let(:error_options) { { filename: "video" } }
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
+      end
+
+      context "when audio is forbidden" do
+        subject(:record) { model.silent_video.attach(video_file) and model }
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: { filename: "video" }) }
+      end
+    end
+
+    context "when the file could not be analyzed (ffprobe missing or timed out, unreadable file)" do
+      let(:error_options) { { filename: "audio_5s" } }
+
+      before do
+        analyzer = instance_double(ActiveStorageValidations::Analyzer::AudioAnalyzer, metadata: {})
+        allow(ActiveStorageValidations::Analyzer::AudioAnalyzer).to receive(:new).and_return(analyzer)
+      end
+
+      context "when an audio track is required" do
+        subject(:record) { model.video.attach(audio_5s) and model }
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
+
+      context "when audio is forbidden" do
+        subject(:record) { model.silent_video.attach(audio_5s) and model }
+
+        # Fails closed: an uninspected file is not evidence of a silent file
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
+      end
     end
 
     describe "when the attached file is missing from storage" do

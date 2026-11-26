@@ -18,6 +18,10 @@ module ActiveStorageValidations
 
       private
 
+      def custom_message_description
+        "with message #{@custom_message.inspect}" if @custom_message
+      end
+
       # Several validators may share the message and all reject the probe.
       # The expected message is the validator's +message:+ option as declared
       # (a String, a Symbol) or the message the error renders (the gem's

@@ -134,6 +134,42 @@ RSpec.describe ActiveStorageValidations::ProcessableFileValidator do
       it_behaves_like "reports attachment_missing"
     end
 
+    # Older Rails do not block them: the Vips analyzer skips them itself, so
+    # the same formats are excused, from their bytes.
+    context "when using Vips without untrusted loaders blocked by the app", image_processor: :vips do
+      let(:vips_block_state) { {} }
+
+      before do
+        require "vips"
+        skip "requires libvips 8.13+ and ruby-vips 2.2.1+" unless Vips.respond_to?(:block_untrusted) && Vips.at_least_libvips?(8, 13)
+
+        vips_block_state[:was_blocked] = ActiveStorageValidations::Analyzer::ImageAnalyzer::Vips.untrusted_operations_blocked?
+        Vips.block_untrusted(false)
+        described_class.reset_vips_untrusted_operations_blocked_cache!
+      end
+
+      after do
+        Vips.block_untrusted(vips_block_state[:was_blocked]) if vips_block_state.key?(:was_blocked)
+        described_class.reset_vips_untrusted_operations_blocked_cache!
+      end
+
+      context "when provided with an SVG" do
+        # validates :has_to_be_processable, processable_file: true
+        subject(:record) { model.has_to_be_processable.attach(svg_file) and model }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when provided with a non-image declared as image/svg+xml" do
+        # validates :has_to_be_processable, processable_file: true
+        subject(:record) { model.has_to_be_processable.attach(not_an_image) and model }
+
+        let(:not_an_image) { { io: StringIO.new("not an image at all\n" * 10), filename: "image.svg", content_type: "image/svg+xml" } }
+
+        it { is_expected_not_to_be_valid }
+      end
+    end
+
     context "when using Vips with untrusted loaders blocked", image_processor: :vips do
       # Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ call Vips.block_untrusted(true), so
       # analysis of formats with untrusted loaders returns empty metadata by design.

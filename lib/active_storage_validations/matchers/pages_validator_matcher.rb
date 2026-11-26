@@ -17,7 +17,7 @@ module ActiveStorageValidations
         initialize_timeoutable
       end
 
-      def description
+      def base_description
         "validate file number of pages of :#{@attribute_name}"
       end
 
@@ -28,6 +28,10 @@ module ActiveStorageValidations
       end
 
       private
+
+      def describe_value(value)
+        "#{value} #{"page".pluralize(value)}"
+      end
 
       def failure_message_unit
         "pages"

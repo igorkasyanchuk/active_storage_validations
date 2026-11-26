@@ -13,10 +13,39 @@ RSpec.describe ActiveStorageValidations::LimitValidator do
       context "when the passed argument to min or max is not an integer" do
         subject(:model) { validator_test_class::CheckValidityInvalidArgument.new(params) }
 
-        let(:error_message) { "You must pass integers to :min and :max" }
+        let(:error_message) { "You must pass non-negative integers to :min and :max" }
 
         it "raises an error at model initialization" do
           expect { model }.to raise_error(ArgumentError, error_message)
+        end
+      end
+
+      context "when the passed argument to min or max is negative" do
+        subject(:validator) { described_class.new(attributes: [ :files ], max: -1) }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, "You must pass non-negative integers to :min and :max")
+        end
+      end
+
+      context "when a Proc returns anything but a number" do
+        subject(:validator) { described_class.new(attributes: [ :files ], max: ->(_record) { "3" }) }
+
+        it "raises an error when the Proc is evaluated" do
+          expect { validator.send(:ensure_proc_bounds_validity, validator.send(:set_flat_options, nil)) }
+            .to raise_error(ArgumentError, 'You must pass numbers to :min and :max (got "3" from a Proc for :max)')
+        end
+      end
+
+      # Data, not configuration: a decimal plan column, or a quota the record
+      # is already over.
+      [ -1, 2.0, BigDecimal("2") ].each do |value|
+        context "when a Proc returns #{value.inspect}" do
+          subject(:validator) { described_class.new(attributes: [ :files ], max: ->(_record) { value }) }
+
+          it "does not raise" do
+            expect { validator.send(:ensure_proc_bounds_validity, validator.send(:set_flat_options, nil)) }.not_to raise_error
+          end
         end
       end
 

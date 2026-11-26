@@ -80,6 +80,14 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
           expect(model).to be_valid
         end
       end
+
+      context "when the authorized list is empty" do
+        subject(:validator) { described_class.new(attributes: [ :file ], with: []) }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, "You must pass at least one aspect ratio to the validator")
+        end
+      end
     end
   end
 
@@ -102,6 +110,9 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
         is_1_0
         is_0_0
         is_01_2
+        is_16_9_extra
+        not_is_16_9
+        is_16_9x
       ]
     end
 
@@ -109,12 +120,18 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
       expect(accepted_is_x_y_strings).to all(match(aspect_ratio_regex))
       expect(not_accepted_is_x_y_strings).to all(satisfy { |value| !value.match?(aspect_ratio_regex) })
     end
+
+    it "rejects ratios with surrounding characters at boot" do
+      expect { described_class.new(attributes: [ :file ], with: :is_16_9_extra) }
+        .to raise_error(ArgumentError, /You must pass a valid aspect ratio to the validator/)
+    end
   end
 
   describe "Validator checks" do
     let(:model) { validator_test_class::Check.new(params) }
 
     it_behaves_like "works fine with attachables"
+
 
     describe ":with" do
       # validates :with_named_square, aspect_ratio: :square
@@ -369,6 +386,24 @@ RSpec.describe ActiveStorageValidations::AspectRatioValidator do
           it { is_expected.to be(expected) }
         end
       end
+    end
+
+    context "when the Proc returns an empty list" do
+      subject(:record) { model.public_send(attribute).attach(square_image_file) and model }
+
+      let(:attribute) { :with_empty_proc }
+      let(:error_options) do
+        {
+          authorized_aspect_ratios: "",
+          width: 150,
+          height: 150,
+          filename: square_image_file[:filename]
+        }
+      end
+
+      it { is_expected_not_to_be_valid }
+      it { is_expected_to_include_error_message("aspect_ratio_invalid", error_options: error_options) }
+      it { is_expected_to_have_error_options(error_options) }
     end
 
     describe "Edge cases" do

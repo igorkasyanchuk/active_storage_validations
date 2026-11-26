@@ -59,6 +59,20 @@ class Dimension::Validator::Check < ApplicationRecord
   has_one_attached :min_max_both_violable
   validates :min_max_both_violable, dimension: { min: 600..100, max: 650..300 }
 
+  # Proc results are checked like static options
+  has_one_attached :width_proc_misspelled_hash
+  validates :width_proc_misspelled_hash, dimension: { width: ->(_record) { { minimum: 1000 } } }
+  has_one_attached :width_proc_range
+  validates :width_proc_range, dimension: { width: ->(_record) { 100..1000 } }
+  has_one_attached :width_in_proc_integer
+  validates :width_in_proc_integer, dimension: { width: { in: ->(_record) { 500 } } }
+  has_one_attached :min_proc_integer
+  validates :min_proc_integer, dimension: { min: ->(_record) { 100 } }
+  has_one_attached :width_proc_nil
+  validates :width_proc_nil, dimension: { width: ->(_record) { nil } }
+  has_one_attached :width_min_proc_nil
+  validates :width_min_proc_nil, dimension: { width: { min: ->(_record) { nil }, max: 100 } }
+
   # Edge cases
   has_one_attached :with_invalid_media_file
   validates :with_invalid_media_file, dimension: { width: 150, height: 150 }

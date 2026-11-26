@@ -9,7 +9,7 @@ module ActiveStorageValidations
     end
 
     class TotalSizeValidatorMatcher < BaseComparisonValidatorMatcher
-      def description
+      def base_description
         "validate total file size of :#{@attribute_name}"
       end
 
@@ -29,17 +29,11 @@ module ActiveStorageValidations
 
         super
       end
-
-      protected
-
-      # has_many_attached relation. The Hash attachable is unfurled in memory
-      # (byte_size comes from the stubbed io.size), no blob is uploaded.
-      def attach_file
-        @subject.public_send(@attribute_name).attach([ dummy_file ])
-        @subject.public_send(@attribute_name)
-      end
-
       private
+
+      def describe_value(value)
+        ActiveSupport::NumberHelper.number_to_human_size(value)
+      end
 
       def failure_message_unit
         "bytes"

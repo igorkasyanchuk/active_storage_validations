@@ -72,6 +72,16 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
             end
           end
 
+          [ Mime[:png], 123 ].each do |content_type|
+            context "when the passed option is neither a String, a Symbol nor a Regexp (e.g. #{content_type.inspect})" do
+              subject(:validator) { described_class.new(attributes: :dummy, in: [ :pdf, content_type ]) }
+
+              it "raises an error at initialization" do
+                expect { validator }.to raise_error(ArgumentError, /You must pass content types as Strings, Symbols or Regexps \(got #{Regexp.escape(content_type.inspect)}/)
+              end
+            end
+          end
+
           context "when the passed option is a media type wildcard (e.g. 'image/*')" do
             subject(:validator) { described_class.new(attributes: :dummy, with: "image/*") }
 
@@ -149,6 +159,14 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
           model.nested_list.attach(image_150x150_file)
 
           expect(model).to be_valid
+        end
+      end
+
+      context "when the authorized list is empty" do
+        subject(:validator) { described_class.new(attributes: [ :file ], with: []) }
+
+        it "raises an error at validator initialization" do
+          expect { validator }.to raise_error(ArgumentError, "You must pass at least one content type to the validator")
         end
       end
     end
@@ -379,6 +397,24 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
           end
         end
       end
+
+      context "when the Proc returns an empty list" do
+        subject(:record) { model.public_send(attribute).attach(png_file) and model }
+
+        let(:attribute) { :with_empty_proc }
+        let(:error_options) do
+          {
+            authorized_human_content_types: "",
+            content_type: png_file[:content_type],
+            count: 0,
+            filename: png_file[:filename]
+          }
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("content_type_invalid", error_options: error_options) }
+        it { is_expected_to_have_error_options(error_options) }
+      end
     end
 
     describe ":spoofing_protection" do
@@ -386,9 +422,47 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
         subject(:validator) { described_class.new(attributes: :dummy, with: :png, spoofing_protection: true) }
 
         it "accepts libmagic names that Marcel considers the same type" do
-          expect(validator.send(:content_types_intersect?, "application/xml", "text/xml")).to be(true)
-          expect(validator.send(:content_types_intersect?, "audio/mp4", "audio/x-m4a")).to be(true)
-          expect(validator.send(:content_types_intersect?, "audio/aac", "audio/x-hx-aac-adts")).to be(true)
+          expect(validator.send(:content_types_related?, "application/xml", "text/xml")).to be(true)
+          expect(validator.send(:content_types_related?, "audio/mp4", "audio/x-m4a")).to be(true)
+          expect(validator.send(:content_types_related?, "audio/aac", "audio/x-hx-aac-adts")).to be(true)
+        end
+
+        # See spec/support/spoofing.rb for where each pair comes from.
+        describe "genuine uploads (same type, alias, or a less specific detected type)" do
+          FixtureFiles::SPOOFING_GENUINE_PAIRS.each do |declared, detected|
+            it "accepts #{detected} for a declared #{declared}" do
+              expect(validator.send(:content_types_related?, declared, detected)).to be(true)
+            end
+          end
+        end
+
+        describe "more specific detected types (accepted on purpose)" do
+          FixtureFiles::SPOOFING_DESCENDANT_PAIRS.each do |declared, detected|
+            it "accepts #{detected} for a declared #{declared}" do
+              expect(validator.send(:content_types_related?, declared, detected)).to be(true)
+            end
+          end
+        end
+
+        describe "siblings sharing a Marcel parent (accepted by 4.x)" do
+          FixtureFiles::SPOOFING_SIBLING_PAIRS.each do |declared, detected|
+            it "rejects #{detected} for a declared #{declared}" do
+              expect(validator.send(:content_types_related?, declared, detected)).to be(false)
+            end
+          end
+        end
+
+        describe "unrelated types" do
+          FixtureFiles::SPOOFING_UNRELATED_PAIRS.each do |declared, detected|
+            it "rejects #{detected} for a declared #{declared}" do
+              expect(validator.send(:content_types_related?, declared, detected)).to be(false)
+            end
+          end
+        end
+
+        it "ignores content type parameters" do
+          expect(validator.send(:content_types_related?, "text/csv; charset=utf-8", "text/plain; charset=us-ascii")).to be(true)
+          expect(validator.send(:content_types_related?, "text/csv; charset=utf-8", "text/x-php; charset=us-ascii")).to be(false)
         end
 
         it "resolves Marcel aliases when formatting human content types" do
@@ -495,6 +569,22 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
           end
         end
 
+        # validates :text_csv_spoof, content_type: { with: :csv, spoofing_protection: true }
+        context "when a file is a sibling of the declared type (a PHP script uploaded as CSV)" do
+          subject(:record) { model.text_csv_spoof.attach(php_as_csv) and model }
+
+          # identify: false keeps the declared type, like a direct upload.
+          let(:php_as_csv) do
+            { io: StringIO.new("<?php echo 'pwned'; ?>\n"), filename: "data.csv", content_type: "text/csv", identify: false }
+          end
+
+          it "reports the file as spoofed" do
+            record.valid?
+
+            expect(record.errors.details[:text_csv_spoof]).to include(a_hash_including(error: :content_type_spoofed, detected_content_type: "text/x-php"))
+          end
+        end
+
         describe "working with most common mime types" do
           most_common_mime_types.each do |common_mime_type|
             describe "'#{common_mime_type[:mime_type]}' file (.#{common_mime_type[:extension]})" do
@@ -562,6 +652,114 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
         let(:file_for_attachment_missing) { file_7ko_and_jpg }
 
         it_behaves_like "reports attachment_missing"
+      end
+
+      context "when the spoofing analysis fails (command timed out or produced no content type)" do
+        subject(:record) { model.public_send(attribute).attach(jpeg_file) and model }
+
+        let(:attribute) { :spoofing_protection }
+        let(:error_options) do
+          {
+            authorized_human_content_types: "JPG",
+            content_type: "image/jpeg",
+            human_content_type: "JPG",
+            count: 1,
+            filename: jpeg_file[:filename]
+          }
+        end
+
+        before do
+          allow_any_instance_of(ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File).to receive(:run_command).and_return( # rubocop:disable RSpec/AnyInstance
+            ActiveStorageValidations::ASVCommandable::CommandResult.new(stdout: "", stderr: "", status: nil, timed_out: true)
+          )
+        end
+
+        it { is_expected_not_to_be_valid }
+        it { is_expected_to_include_error_message("content_type_analysis_failed", error_options: error_options, validator: :content_type) }
+        it { is_expected_to_have_error_options(error_options, validator: :content_type) }
+
+        it "does not report the file as spoofed" do
+          record.valid?
+
+          expect(record.errors.details[attribute].pluck(:error)).to eq([ :content_type_analysis_failed ])
+        end
+      end
+
+      # End to end, with the real `file` / `magika` CLIs on real fixtures. See
+      # spec/support/spoofing.rb for the expectations.
+      describe "real uploads through each backend" do
+        def self.media_for(type)
+          ApplicationRecord.most_common_mime_types.find { |content_type| content_type[:type] == type.to_sym }.fetch(:media)
+        end
+
+        { file: "spoof", magika: "spoof_magika" }.each do |backend, suffix|
+          describe "#{backend} backend", if: backend == :file || magika_cli_available? do
+            magika_batch(Dir[Rails.root.join("public", "{most_common_mime_types,spoofed}", "*")]) if backend == :magika
+
+            # validates :image_jpg_spoof(_magika), content_type: { with: :jpg, spoofing_protection: true / :magika }, …
+            describe "genuine files of the most common formats" do
+              most_common_mime_types.each do |common_mime_type|
+                context "when uploading a .#{common_mime_type[:extension]} declared as #{common_mime_type[:mime_type]}" do
+                  subject(:record) { model.public_send(attribute).attach(public_send(:"#{extension}_file")) and model }
+
+                  let(:extension) { common_mime_type[:extension] }
+                  let(:attribute) { :"#{self.class.media_for(extension)}_#{extension}_#{suffix}" }
+
+                  if backend == :magika && FixtureFiles::MAGIKA_MISDETECTED_FIXTURES.include?(common_mime_type[:extension].to_sym)
+                    # Magika 1.0 misidentifies it (prefer :file); newer models may not.
+                    it "is valid or rejected as spoofed, never another error" do
+                      record.valid?
+
+                      expect(record.errors.details[attribute].pluck(:error)).to eq([]).or eq([ :content_type_spoofed ])
+                    end
+                  else
+                    it { is_expected_to_be_valid }
+                  end
+                end
+              end
+            end
+
+            describe "genuine files declared with another browser / OS content type" do
+              FixtureFiles::BROWSER_DECLARED_CONTENT_TYPES.each do |extension, declared_types|
+                declared_types.each do |declared_type|
+                  context "when uploading a .#{extension} declared as #{declared_type}" do
+                    subject(:record) { model.public_send(attribute).attach(public_send(:"#{extension}_file").merge(content_type: declared_type)) and model }
+
+                    let(:attribute) { :"#{self.class.media_for(extension)}_#{extension}_#{suffix}" }
+
+                    it { is_expected_to_be_valid }
+                  end
+                end
+              end
+            end
+
+            # identify: false keeps the declared type, like a direct upload
+            # (the blob is created from the client's content type).
+            describe "spoofed files" do
+              FixtureFiles::SPOOFED_FIXTURES.each do |fixture, rejected_claims|
+                FixtureFiles::ALL_SPOOFING_CLAIMS.each do |claim|
+                  context "when uploading #{fixture} as .#{claim}" do
+                    subject(:record) { model.public_send(attribute).attach(spoofed_fixture(fixture, claim).merge(identify: false)) and model }
+
+                    let(:attribute) { :"#{self.class.media_for(claim)}_#{claim}_#{suffix}" }
+
+                    if rejected_claims.fetch(backend).include?(claim)
+                      it "is rejected as spoofed" do
+                        record.valid?
+
+                        expect(record.errors.details[attribute].pluck(:error)).to eq([ :content_type_spoofed ])
+                      end
+                    else
+                      it "is accepted (it really is that format, or a more specific kind of it)" do
+                        is_expected_to_be_valid
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
       end
 
       context "when the protection is enabled (spoofing_protection: :file option)" do

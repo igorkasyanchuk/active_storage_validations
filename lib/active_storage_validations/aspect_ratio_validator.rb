@@ -21,7 +21,7 @@ module ActiveStorageValidations
     # ISO 216 paper sizes (A4, A3, …) share a 1:√2 ratio, which no `is_x_y`
     # can express exactly.
     A_SERIES_ASPECT_RATIOS = %i[a_series a_series_portrait a_series_landscape].freeze
-    ASPECT_RATIO_REGEX = /is_([1-9]\d*)_([1-9]\d*)/
+    ASPECT_RATIO_REGEX = /\Ais_([1-9]\d*)_([1-9]\d*)\z/
     ERROR_TYPES = %i[
       aspect_ratio_not_square
       aspect_ratio_not_portrait
@@ -43,10 +43,8 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      aspect_ratios = authorized_aspect_ratios(record)
-      return if aspect_ratios.empty?
-
-      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS, aspect_ratios)
+      # An empty list fails closed (aspect_ratio_invalid) rather than skipping.
+      validate_changed_files_from_metadata(record, attribute, METADATA_KEYS, authorized_aspect_ratios(record))
     end
 
     private
@@ -91,7 +89,7 @@ module ActiveStorageValidations
     end
 
     def aspect_ratio_error_mapping(aspect_ratios)
-      return :aspect_ratio_invalid if aspect_ratios.many?
+      return :aspect_ratio_invalid if aspect_ratios.empty? || aspect_ratios.many?
 
       aspect_ratio = aspect_ratios.first
       NAMED_ASPECT_RATIOS.include?(aspect_ratio) ? :"aspect_ratio_not_#{aspect_ratio}" : :aspect_ratio_not_x_y
@@ -180,9 +178,10 @@ module ActiveStorageValidations
     # Procs (top-level or nested in the list) are checked when they are
     # evaluated, see #authorized_aspect_ratios.
     def ensure_aspect_ratio_validity
-      return true if options[:with]&.is_a?(Proc) || options[:in]&.is_a?(Proc)
+      ratios = authorized_aspect_ratios_from_options(options).compact
+      raise ArgumentError, "You must pass at least one aspect ratio to the validator" if ratios.empty?
 
-      ensure_aspect_ratios_validity(authorized_aspect_ratios_from_options(options).compact.grep_v(Proc))
+      ensure_aspect_ratios_validity(ratios.grep_v(Proc))
     end
 
     def ensure_aspect_ratios_validity(aspect_ratios)

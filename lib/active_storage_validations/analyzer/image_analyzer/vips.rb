@@ -59,9 +59,57 @@ module ActiveStorageValidations
     # Vips raises on unreadable input (e.g. 0-byte files) rather than returning
     # a falsy image — see https://github.com/janko/image_processing/issues/97
     def open_vips_image(path)
+      if self.class.skips_untrusted_loaders? && self.class.untrusted_loader?(path)
+        logger.info "Skipping image analysis because its libvips loader is untrusted (unfuzzed)"
+        return nil
+      end
+
       ::Vips::Image.new_from_file(path, access: :sequential)
     rescue ::Vips::Error
       nil
+    end
+
+    # libvips' VipsOperationFlags values ruby-vips does not export.
+    OPERATION_UNTRUSTED = 16
+    OPERATION_BLOCKED = 32
+    # Untrusted and built into every libvips 8.13+, so Vips.block_untrusted
+    # always blocks them (several, in case a build leaves one out).
+    UNTRUSTED_PROBE_OPERATIONS = %w[csvload rawload vipsload].freeze
+
+    class << self
+      # libvips flags some loaders (SVG, BMP, JPEG 2000, Netpbm, …) as unfuzzed:
+      # only safe on trusted content. Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ and
+      # image_processing 2.0+ call Vips.block_untrusted(true); older Rails do
+      # not, and validation analyzes the raw upload before anything else does.
+      # The gem then skips those loaders itself, file by file, without changing
+      # the app's global setting. Once blocking is on, libvips enforces it, and
+      # a loader the app re-enabled (`Vips.block(…, false)`) is used.
+      def skips_untrusted_loaders?
+        untrusted_flags_supported? && !untrusted_operations_blocked?
+      end
+
+      def untrusted_operations_blocked?
+        UNTRUSTED_PROBE_OPERATIONS.any? { |nickname| operation_flags(nickname).anybits?(OPERATION_BLOCKED) }
+      end
+
+      def untrusted_loader?(path)
+        loader = ::Vips.vips_foreign_find_load(path.to_s)
+        return false unless loader
+
+        operation_flags(::Vips.nickname_find(::GObject.g_type_from_name(loader))).anybits?(OPERATION_UNTRUSTED)
+      end
+
+      private
+
+      def untrusted_flags_supported?
+        ::Vips.respond_to?(:block_untrusted) && ::Vips.at_least_libvips?(8, 13)
+      end
+
+      def operation_flags(nickname)
+        ::Vips.vips_operation_get_flags(::Vips::Operation.new(nickname))
+      rescue ::Vips::Error, FFI::NotFoundError, TypeError, ArgumentError
+        0
+      end
     end
 
     # EXIF orientations 5 to 8 (Left-top, Right-top, Right-bottom, Left-bottom)

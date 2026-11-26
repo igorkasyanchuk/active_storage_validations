@@ -17,6 +17,90 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
   describe "#check_validity!" do
     it_behaves_like "checks validator validity"
 
+    describe "#ensure_dimension_option_validity" do
+      subject(:validator) { described_class.new(attributes: [ :file ], **validator_options) }
+
+      %i[width height].each do |dimension|
+        describe ":#{dimension}" do
+          context "when the value is an Integer, a Proc or a valid Hash" do
+            [ 150, ->(_record) { 150 }, { min: 100 }, { max: 0 }, { min: 100, max: ->(_record) { 200 } }, { in: 100..200 }, { min: 100 }.with_indifferent_access ].each do |value|
+              context "with #{value.inspect}" do
+                let(:validator_options) { { dimension => value } }
+
+                it { expect { validator }.not_to raise_error }
+              end
+            end
+          end
+
+          context "when the value is a Range (e.g. #{dimension}: 100..200)" do
+            let(:validator_options) { { dimension => 100..200 } }
+            let(:error_message) do
+              "{ #{dimension}: value } value must be an Integer, a Proc or a Hash with :min, :max or :in (e.g. #{dimension}: { in: 100..200 })"
+            end
+
+            it { expect { validator }.to raise_error(ArgumentError, error_message) }
+          end
+
+          context "when the value is nil" do
+            let(:validator_options) { { dimension => nil } }
+
+            it { expect { validator }.to raise_error(ArgumentError, /\{ #{dimension}: value \} value must be an Integer/) }
+          end
+
+          [ {}, { minimum: 1000 }, { min: 100, maximum: 200 }, { "min" => 100 } ].each do |value|
+            context "when the Hash has no known key (e.g. #{dimension}: #{value.inspect})" do
+              let(:validator_options) { { dimension => value } }
+              let(:error_message) { "{ #{dimension}: { … } } only accepts :min, :max and :in (got #{value.keys.inspect})" }
+
+              it { expect { validator }.to raise_error(ArgumentError, error_message) }
+            end
+          end
+
+          context "when :in is combined with :min / :max" do
+            let(:validator_options) { { dimension => { in: 100..200, max: 300 } } }
+            let(:error_message) { "{ #{dimension}: { in: } } cannot be combined with :min / :max" }
+
+            it { expect { validator }.to raise_error(ArgumentError, error_message) }
+          end
+
+          %i[min max].each do |bound|
+            context "when :#{bound} is a Range (e.g. #{dimension}: { #{bound}: 100..200 })" do
+              let(:validator_options) { { dimension => { bound => 100..200 } } }
+              let(:error_message) { "{ #{dimension}: { #{bound}: value } } value must be an Integer or a Proc" }
+
+              it { expect { validator }.to raise_error(ArgumentError, error_message) }
+            end
+          end
+        end
+      end
+    end
+
+    describe "#ensure_min_max_not_combined_with_dimension" do
+      subject(:validator) { described_class.new(attributes: [ :file ], **validator_options) }
+
+      let(:error_message) do
+        "{ min: } / { max: } cannot be combined with :width / :height (use width: { min:, max: } and height: { min:, max: } instead)"
+      end
+
+      context "when :min is combined with an Integer :width" do
+        let(:validator_options) { { min: 100..100, width: 150 } }
+
+        it { expect { validator }.to raise_error(ArgumentError, error_message) }
+      end
+
+      context "when :max is combined with a :height Hash" do
+        let(:validator_options) { { max: 800..600, height: { min: 100 } } }
+
+        it { expect { validator }.to raise_error(ArgumentError, error_message) }
+      end
+
+      context "when :min and :max are used alone" do
+        let(:validator_options) { { min: 100..100, max: 800..600 } }
+
+        it { expect { validator }.not_to raise_error }
+      end
+    end
+
     describe "#ensure_dimension_in_option_validity" do
       context "when the passed option is a Range" do
         subject(:model) { validator_test_class::CheckValidityDimensionInRange.new(params) }
@@ -41,6 +125,45 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
         it "raises an error at model initialization" do
           expect { model }.to raise_error(ArgumentError, error_message)
+        end
+      end
+
+      context "when the range is missing a bound" do
+        subject(:validator) { described_class.new(attributes: [ :file ], width: { in: range }) }
+
+        let(:bounded_range_error_message) do
+          "{ width: { in: } } value must be a Range with both bounds (use width: { min: } or width: { max: } for a single bound)"
+        end
+
+        context "when the range is endless (e.g. width: { in: 100.. })" do
+          let(:range) { 100.. }
+
+          it "raises an error at validator initialization" do
+            expect { validator }.to raise_error(ArgumentError, bounded_range_error_message)
+          end
+        end
+
+        context "when the range is beginless (e.g. width: { in: ..800 })" do
+          let(:range) { ..800 }
+
+          it "raises an error at validator initialization" do
+            expect { validator }.to raise_error(ArgumentError, bounded_range_error_message)
+          end
+        end
+
+        context "when the range is returned by a Proc" do
+          let(:range) { ->(_record) { 100.. } }
+
+          it "cannot be checked at validator initialization" do
+            expect { validator }.not_to raise_error
+          end
+
+          it "still resolves the error bounds without raising" do
+            flat_options = validator.send(:process_options, nil)
+
+            expect(flat_options[:width][:min]).to eq(100)
+            expect(flat_options[:width][:max]).to be_nil
+          end
         end
       end
 
@@ -85,6 +208,30 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
             expect { model }.to raise_error(ArgumentError, error_message)
           end
         end
+
+        context "when the range is missing a bound" do
+          subject(:validator) { described_class.new(attributes: [ :file ], bound => range) }
+
+          let(:bounded_range_error_message) do
+            "{ #{bound}: } value must be a Range with both bounds (#{bound}_width..#{bound}_height)"
+          end
+
+          context "when the range is endless" do
+            let(:range) { 100.. }
+
+            it "raises an error at validator initialization" do
+              expect { validator }.to raise_error(ArgumentError, bounded_range_error_message)
+            end
+          end
+
+          context "when the range is returned by a Proc" do
+            let(:range) { ->(_record) { 100.. } }
+
+            it "cannot be checked at validator initialization" do
+              expect { validator }.not_to raise_error
+            end
+          end
+        end
       end
     end
   end
@@ -112,7 +259,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": value_type == "value" ? 500 : ->(record) { 500 },
                     filename: "image_150x150_file.png"
                   }
                 end
@@ -134,7 +280,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": value_type == "value" ? 500 : ->(record) { 500 },
                     filename: "image_600x800_file.png"
                   }
                 end
@@ -158,7 +303,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": { min: value_type == "value" ? 500 : ->(record) { 500 } },
                     filename: "image_150x150_file.png"
                   }
                 end
@@ -206,7 +350,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 500,
-                    "#{dimension}": { max: value_type == "value" ? 500 : ->(record) { 500 } },
                     filename: "image_600x800_file.png"
                   }
                 end
@@ -230,7 +373,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 400,
-                    "#{dimension}": { min: value_type == "value" ? 400 : ->(record) { 400 }, max: value_type == "value" ? 600 : ->(record) { 600 } },
                     filename: "image_150x150_file.png"
                   }
                 end
@@ -252,7 +394,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
                 let(:error_options) do
                   {
                     length: 600,
-                    "#{dimension}": { min: value_type == "value" ? 400 : ->(record) { 400 }, max: value_type == "value" ? 600 : ->(record) { 600 } },
                     filename: "image_1200x900_file.png"
                   }
                 end
@@ -275,7 +416,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
                 let(:error_options) do
                   {
-                    "#{dimension}": { in: value_type == "value" ? 400..600 : ->(record) { 400..600 } },
                     min: 400,
                     max: 600,
                     filename: "image_150x150_file.png"
@@ -298,7 +438,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
                 let(:error_options) do
                   {
-                    "#{dimension}": { in: value_type == "value" ? 400..600 : ->(record) { 400..600 } },
                     min: 400,
                     max: 600,
                     filename: "image_1200x900_file.png"
@@ -489,8 +628,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: 600,
-              height: 600,
               length: 600,
               filename: "image_800x600_file.png"
             }
@@ -506,8 +643,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: 600,
-              height: 600,
               length: 600,
               filename: "image_600x800_file.png"
             }
@@ -523,8 +658,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: 600,
-              height: 600,
               length: 600,
               filename: "image_1200x900_file.png"
             }
@@ -551,8 +684,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: { in: 550..750 },
-              height: { in: 550..750 },
               min: 550,
               max: 750,
               filename: "image_500x700_file.png"
@@ -569,8 +700,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: { in: 550..750 },
-              height: { in: 550..750 },
               min: 550,
               max: 750,
               filename: "image_700x500_file.png"
@@ -587,8 +716,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
           let(:error_options) do
             {
-              width: { in: 550..750 },
-              height: { in: 550..750 },
               min: 550,
               max: 750,
               filename: "image_500x500_file.png"
@@ -613,10 +740,8 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
         it "gives each error its own values only" do
           expect(error_details).to contain_exactly(
             a_hash_including(error: :dimension_width_not_included_in, min: 100, max: 200),
-            a_hash_including(error: :dimension_height_not_less_than_or_equal_to, filename: "image_500x700_file.png", length: 300)
+            { error: :dimension_height_not_less_than_or_equal_to, validator_type: :dimension, filename: "image_500x700_file.png", length: 300 }
           )
-          height_error = error_details.find { |details| details[:error] == :dimension_height_not_less_than_or_equal_to }
-          expect(height_error.keys).not_to include(:min, :max)
         end
       end
 
@@ -627,6 +752,37 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
         it { is_expected_to_include_error_message("dimension_min_not_included_in", error_options: { width: 600, height: 100, filename: "image_500x700_file.png" }) }
         it { is_expected_to_include_error_message("dimension_max_not_included_in", error_options: { width: 650, height: 300, filename: "image_500x700_file.png" }) }
+      end
+    end
+
+    describe "Proc results" do
+      {
+        width_proc_misspelled_hash: "only accepts :min, :max and :in",
+        width_proc_range: "value must be an Integer, a Proc or a Hash",
+        width_in_proc_integer: "{ width: { in: value } } value must be a Range",
+        min_proc_integer: "{ min: value } value must be a Range"
+      }.each do |attribute, message|
+        context "with #{attribute}" do
+          subject(:record) { model.public_send(attribute).attach(image_500x700_file) and model }
+
+          it "raises like the static option" do
+            expect { record.valid? }.to raise_error(ArgumentError, /#{Regexp.escape(message)}/)
+          end
+        end
+      end
+
+      context "when the Proc returns nil" do
+        # validates :width_proc_nil, dimension: { width: ->(_record) { nil } }
+        subject(:record) { model.width_proc_nil.attach(image_500x700_file) and model }
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when a nested Proc returns nil" do
+        # validates :width_min_proc_nil, dimension: { width: { min: ->(_record) { nil }, max: 100 } }
+        subject(:record) { model.width_min_proc_nil.attach(image_500x700_file) and model }
+
+        it { is_expected_to_include_error_message("dimension_width_not_less_than_or_equal_to", error_options: { length: 100, filename: "image_500x700_file.png" }) }
       end
     end
 
@@ -666,8 +822,8 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
 
         # Rails 8.1 tells apps without the image_processing gem to set it: it
         # only turns variants off, images are still analyzed.
-        it "analyzes images with the default image processor (ImageMagick)" do
-          expect(described_class.new(attributes: [ :file ], width: 500).send(:image_processor)).to eq(:mini_magick)
+        it "analyzes images with the default image processor" do
+          expect(described_class.new(attributes: [ :file ], width: 500).send(:image_processor)).to eq(ActiveStorageValidations::ASVAnalyzable::DEFAULT_IMAGE_PROCESSOR)
         end
 
         it { is_expected_to_be_valid }
@@ -776,8 +932,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
           let(:error_options) do
             {
               length: 150,
-              width: 150,
-              height: 150,
               filename: "pdf_200x300_file.pdf"
             }
           end
@@ -806,11 +960,11 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
 
-    # %{width} is the validator option, forwarded to every error.
+    # %{width} is a check option, and also the value of the min / max errors.
     it_behaves_like "interpolates custom message placeholders" do
       let(:file_not_matching_placeholders) { image_700x500_file }
-      let(:message_for_unanalyzable_file) { "must be px wide (150)" }
-      let(:message_for_file_not_matching) { "must be 150px wide (150)" }
+      let(:message_for_unanalyzable_file) { "must be px wide ()" }
+      let(:message_for_file_not_matching) { "must be 150px wide ()" }
     end
   end
 end

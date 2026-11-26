@@ -3,7 +3,10 @@
 module ActiveStorageValidations
   # ActiveStorageValidations::ASVOptionable
   #
-  # Helper method to flatten the validator options.
+  # Helper method to flatten the validator options: keeps the validator's
+  # check options (AVAILABLE_CHECKS) and resolves the Procs they may hold.
+  # Rails options (:message, :if, …) and gem configuration (:timeout, …) are
+  # left out since they are never part of the comparison.
   module ASVOptionable
     extend ActiveSupport::Concern
 
@@ -16,9 +19,8 @@ module ActiveStorageValidations
     def flatten_options(record, options, available_checks = self.class::AVAILABLE_CHECKS)
       case options
       when Hash
-        options.merge(options) do |key, value|
-          available_checks&.exclude?(key) ? {} : flatten_options(record, value, nil)
-        end
+        checks = available_checks ? options.slice(*available_checks) : options
+        checks.transform_values { |value| flatten_options(record, value, nil) }
       when Array
         options.map { |option| flatten_options(record, option, available_checks) }
       else

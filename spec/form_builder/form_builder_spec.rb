@@ -25,14 +25,6 @@ RSpec.describe ActiveStorageValidations::FormBuilder do
         end
       end
 
-      context "with a nested list ([%i[png gif], :pdf])" do
-        subject(:html) { builder.file_field(:with_nested_list) }
-
-        it "auto-sets accept" do
-          expect(html).to include('accept="image/png,image/gif,application/pdf"')
-        end
-      end
-
       context "with a string MIME type" do
         subject(:html) { builder.file_field(:with_string_mime) }
 

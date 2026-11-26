@@ -7,6 +7,9 @@ sv:
       content_type_spoofed:
         one: "har en innehållstyp som inte motsvarar den som upptäcks genom dess innehåll (auktoriserad innehållstyp är %{authorized_human_content_types})"
         other: "har en innehållstyp som inte motsvarar den som upptäcks genom dess innehåll (auktoriserade innehållstyper är %{authorized_human_content_types})"
+      content_type_analysis_failed:
+        one: "har en innehållstyp som inte kunde verifieras genom dess innehåll (auktoriserad innehållstyp är %{authorized_human_content_types})"
+        other: "har en innehållstyp som inte kunde verifieras genom dess innehåll (auktoriserade innehållstyper är %{authorized_human_content_types})"
       file_size_not_less_than: "filstorleken måste vara mindre än %{max} (nuvarande storlek är %{file_size})"
       file_size_not_less_than_or_equal_to: "filstorleken måste vara mindre än eller lika med %{max} (nuvarande storlek är %{file_size})"
       file_size_not_greater_than: "filstorleken måste vara större än %{min} (nuvarande storlek är %{file_size})"
