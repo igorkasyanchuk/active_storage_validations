@@ -34,28 +34,25 @@ module ActiveStorageValidations
       # Probe attachments are built on in-memory IOs: nothing to close or
       # unlink, and analyzers that need a path copy the IO to their own
       # tempfile (ASVAttachableAdapter::HashIo#with_media_path).
+      #
+      # The blob is marked analyzed so Active Storage does not run its own
+      # analyzers on it when the record is validated (Rails 8.2 analyzes on
+      # attach by default, as does an attachment with immediate variants).
+      # Validators only read the gem's asv_* metadata, never Rails' analysis.
+      def probe_attachable(io:, filename:, content_type:)
+        { io: io, filename: filename, content_type: content_type, metadata: { analyzed: true } }
+      end
+
       def dummy_file
-        {
-          io: io,
-          filename: "test.png",
-          content_type: "image/png"
-        }
+        probe_attachable(io: io, filename: "test.png", content_type: "image/png")
       end
 
       def processable_image
-        {
-          io: StringIO.new(image_data),
-          filename: "processable_image.png",
-          content_type: "image/png"
-        }
+        probe_attachable(io: StringIO.new(image_data), filename: "processable_image.png", content_type: "image/png")
       end
 
       def not_processable_image
-        {
-          io: StringIO.new,
-          filename: "not_processable_image.txt",
-          content_type: "text/plain"
-        }
+        probe_attachable(io: StringIO.new, filename: "not_processable_image.txt", content_type: "text/plain")
       end
 
       def io

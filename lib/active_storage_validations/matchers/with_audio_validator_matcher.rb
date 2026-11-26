@@ -103,11 +103,7 @@ module ActiveStorageValidations
       end
 
       def video_file
-        {
-          io: io,
-          filename: "test.mp4",
-          content_type: "video/mp4"
-        }
+        probe_attachable(io: io, filename: "test.mp4", content_type: "video/mp4")
       end
     end
   end

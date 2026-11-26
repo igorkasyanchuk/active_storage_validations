@@ -170,11 +170,7 @@ module ActiveStorageValidations
         type = Marcel::TYPE_ALIASES.fetch(type, type) if defined?(Marcel::TYPE_ALIASES)
         suffix = Marcel::TYPE_EXTS[type]&.first || "fake"
 
-        {
-          io: StringIO.new,
-          filename: "test.#{suffix}",
-          content_type: content_type
-        }
+        probe_attachable(io: StringIO.new, filename: "test.#{suffix}", content_type: content_type)
       end
 
       # Due to the way we build test attachments in #attachment_for

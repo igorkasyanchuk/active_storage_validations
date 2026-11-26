@@ -1,5 +1,6 @@
 # Unreleased
 - **MISC**
+  - Matchers no longer have Active Storage analyze their probe files. Rails 8.2 analyzes attachments on attach by default (`config.active_storage.analyze = :immediately`, as do attachments with immediate variants), so every probe ran ImageMagick / libvips or ffprobe for nothing: the gem's validators only read their own `asv_*` metadata. The gem's matcher specs ran about 8× slower on Rails 8.2 (25s instead of 3s)
   - Test Ruby 4.0 with Rails 7.0 in CI: the combination was excluded, though the gemspec allows it
 
 # Released
