@@ -90,6 +90,7 @@
       - Procs of the validators that analyze each file (`dimension`, `aspect_ratio`, `pages`, `with_audio`) are called once per validation, not once per attached file: a Proc running a query made one query per file
     - Analysis (metadata validators and `spoofing_protection`)
       - Attachables whose path does not hold their content are copied first: a Hash `io:` without a path (streaming wrapper, Zip entry), a `Rack::Test::UploadedFile` on a `StringIO`, an unlinked or anonymous Tempfile. They raised `TypeError`, `NoMethodError` or `Errno::ENOENT`, or were analyzed as a directory
+      - A `File` / `Pathname` whose name ends with brackets (`photo.png[0]`, an app saving uploads under the client's name) is copied before analysis: libvips and ImageMagick read the brackets as options or a frame, and measured a sibling `photo.png` instead
       - Relative `File` / `Pathname` paths are made absolute, so `-image.png` is not read as a command option nor `clip:1.mp4` as an ffmpeg protocol. Closed IOs and names starting with `~` work too
       - Copied files keep their extension, so ImageMagick reads ICO and TGA blobs like uploads
       - ImageMagick reads only the first frame of animated GIFs and multi-page TIFFs, which could hit `command_timeout`

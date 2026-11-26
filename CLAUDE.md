@@ -39,7 +39,9 @@ Several rows can match at once (`spec/validators/integration/…` reads `spec.md
 
 ## Slash commands
 
-`/commit` → `.claude/skills/commit/` delegates to `.cursor/skills/commit/SKILL.md` + `.cursor/rules/git.mdc`. Same behaviour as Cursor.
+`/commit` → `.claude/skills/commit/` delegates to `.cursor/skills/commit/SKILL.md` + `.cursor/rules/git.mdc`. Same behaviour as Cursor. Its last step runs the upstream check below.
+
+`/upstream-watch` → `.claude/skills/upstream-watch/` delegates to `.cursor/skills/upstream-watch/SKILL.md`: new releases and advisories of image_processing, Active Storage, Marcel, ruby-vips and mini_magick since the last review (`reviewed.yml`), and what this gem should copy.
 
 ## Keeping both tools in sync
 
