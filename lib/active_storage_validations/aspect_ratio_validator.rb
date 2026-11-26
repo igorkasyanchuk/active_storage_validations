@@ -33,6 +33,7 @@ module ActiveStorageValidations
     ].freeze
     METADATA_KEYS = %i[width height].freeze
     RATIO_PRECISION = 3
+    PRECISION = RATIO_PRECISION # 4.1 name, kept for compatibility
 
     def check_validity!
       ensure_at_least_one_validator_option

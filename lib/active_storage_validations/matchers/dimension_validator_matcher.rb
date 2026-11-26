@@ -265,9 +265,13 @@ module ActiveStorageValidations
         end
       end
 
+      # The 1px probe passed: a `width` / `height` without a declared lower
+      # bound accepts the smallest size too (as in 4.1), `min: 1` must not match.
       def dimension_min_zero?(axis)
         opt = attribute_validator&.options&.[](axis)
-        opt.is_a?(Hash) && opt[:min] == 0
+        return true unless opt.is_a?(Hash) && opt.key?(:min)
+
+        opt[:min] == 0
       end
 
       # 0px probes are media_metadata_missing, not a bound miss. Skip max-1

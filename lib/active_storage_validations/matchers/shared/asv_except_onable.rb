@@ -28,8 +28,10 @@ module ActiveStorageValidations
         ensure_except_on_valid!
 
         if @except_on.is_a?(Array)
-          # Like a Symbol: each provided context must be listed by a validator.
-          (@except_on.map(&:to_s) - validator_except_on_contexts).empty? || raise_except_on_not_listed_error
+          # The Array covers the validator contexts (as in 4.1), or each of its
+          # contexts is listed by a validator, like a Symbol.
+          contexts = @except_on.map(&:to_s)
+          (validator_except_on_contexts - contexts).empty? || (contexts - validator_except_on_contexts).empty? || raise_except_on_not_listed_error
         elsif @except_on.is_a?(Symbol)
           validator_except_on_contexts.include?(@except_on.to_s) || raise_except_on_not_listed_error
         end

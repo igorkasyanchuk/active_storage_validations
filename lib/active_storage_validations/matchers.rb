@@ -59,8 +59,10 @@ module ActiveStorageValidations
     end
 
     MockedAnalyzer = Struct.new(:io, :metadata, :content_type) do
+      # Without an IO to target (an app calling mock_metadata with an
+      # Attached, or nil, as 4.1 allowed), every analyzer is mocked, as in 4.1.
       def mocks?(attachable)
-        attachable.equal?(io) || (attachable.is_a?(Hash) && attachable[:io].equal?(io))
+        io.nil? || attachable.equal?(io) || (attachable.is_a?(Hash) && attachable[:io].equal?(io))
       end
     end
     private_constant :MockedAnalyzer
@@ -68,7 +70,7 @@ module ActiveStorageValidations
     # Makes Analyzer.new return mocked metadata for the duration of the block
     # so metadata matchers can probe bounds without real media files. Only the
     # analyzers of +attachment+ (a probe attachable Hash, or the IO it wraps)
-    # are mocked.
+    # are mocked; anything else (nil, an Attached) mocks every analyzer.
     def self.mock_metadata(attachment, metadata = {})
       asv_metadata_available_keys = { width: nil, height: nil, duration: nil, content_type: nil }
       merged = asv_metadata_available_keys.merge(metadata)
@@ -76,8 +78,9 @@ module ActiveStorageValidations
       # which call #content_type — not #metadata. Default to the dummy file type
       # so stacked validators with spoofing_protection still pass under the mock.
       detected_content_type = merged[:content_type].presence || "image/png"
+      target = attachment.is_a?(Hash) ? attachment[:io] : attachment
       mock = MockedAnalyzer.new(
-        attachment.is_a?(Hash) ? attachment[:io] : attachment,
+        (target if target.respond_to?(:read)),
         merged,
         { content_type: detected_content_type, content_type_backend: "file" }
       )
