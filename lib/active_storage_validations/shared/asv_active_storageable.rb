@@ -7,6 +7,21 @@ module ActiveStorageValidations
   module ASVActiveStorageable
     extend ActiveSupport::Concern
 
+    # ActiveModel::EachValidator#validate evaluates `value.blank?` before it
+    # checks :allow_blank, and ActiveStorage::Attached::Many#blank? runs an
+    # EXISTS query: one per validator on every validation of the record, even
+    # when nothing was attached. Without :allow_nil / :allow_blank that check
+    # can never skip the attribute, so leave it out. With either option, keep
+    # Rails' own logic (Rails 8.2 also accepts a Proc for both).
+    def validate(record)
+      return super if options.key?(:allow_nil) || options.key?(:allow_blank)
+
+      attributes.each do |attribute|
+        value = record.read_attribute_for_validation(attribute)
+        validate_each(record, attribute, prepare_value_for_validation(value, record, attribute))
+      end
+    end
+
     private
 
     # Retrieve either an `ActiveStorage::Attached::One` or an

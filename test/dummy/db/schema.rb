@@ -171,6 +171,12 @@ ActiveRecord::Schema.define do
     end
   end
 
+  create_table :limit_validator_check_min_rails_options, force: :cascade do |t|
+    t.string :title
+    t.datetime :created_at, null: false
+    t.datetime :updated_at, null: false
+  end
+
   create_table :total_size_validator_check_validity_has_many_attached_onlies, force: :cascade do |t|
     t.datetime :created_at, precision: 6, null: false
     t.datetime :updated_at, precision: 6, null: false
@@ -186,6 +192,8 @@ ActiveRecord::Schema.define do
     performance
     nested_error_parent
     spoofing_protection_and_processable_file
+    without_new_file
+    without_new_file_allow_blank
     zero_byte_image
   ].each do |integration_test|
     create_table :"integration_validator_#{integration_test.pluralize}", force: :cascade do |t|

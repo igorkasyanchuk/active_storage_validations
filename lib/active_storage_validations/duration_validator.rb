@@ -41,7 +41,7 @@ module ActiveStorageValidations
     end
 
     def validate_each(record, attribute, _value)
-      return if no_attachments?(record, attribute)
+      return if no_attachments_to_validate?(record, attribute)
 
       flat_options = set_flat_options(record)
 

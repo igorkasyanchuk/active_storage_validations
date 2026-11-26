@@ -51,7 +51,7 @@ module ActiveStorageValidations
     end
 
     def validate_each(record, attribute, _value)
-      return if no_attachments?(record, attribute)
+      return if no_attachments_to_validate?(record, attribute)
 
       authorized_content_types, written_content_types = authorized_content_types_from_options(record)
       return if authorized_content_types.empty?

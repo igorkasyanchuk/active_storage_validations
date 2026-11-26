@@ -41,7 +41,7 @@ module ActiveStorageValidations
     end
 
     def validate_each(record, attribute, _value)
-      return if no_attachments?(record, attribute)
+      return if no_attachments_to_validate?(record, attribute)
 
       aspect_ratios = authorized_aspect_ratios(record)
       return if aspect_ratios.empty?

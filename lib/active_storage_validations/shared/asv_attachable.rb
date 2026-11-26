@@ -15,6 +15,14 @@ module ActiveStorageValidations
 
     private
 
+    # Metadata validators only check the files attached since the last save
+    # (#attachables_and_blobs). A has_many_attached without attachment change
+    # has none, and #attached? would run an EXISTS query on every validation
+    # of the record (one per validator), for nothing.
+    def no_attachments_to_validate?(record, attribute)
+      changes_for(record, attribute).nil? || no_attachments?(record, attribute)
+    end
+
     # Loop through the newly submitted attachables to validate them. Using
     # attachables is the only way to get the attached file io that is necessary
     # to perform file analyses.

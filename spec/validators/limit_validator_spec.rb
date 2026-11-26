@@ -241,5 +241,45 @@ RSpec.describe ActiveStorageValidations::LimitValidator do
 
   describe "Rails options" do
     it_behaves_like "works with all rails common validation options"
+
+    # ASVActiveStorageable#validate hands :allow_blank / :allow_nil to Active
+    # Model only when they are set: they must still skip an attribute without
+    # files (`min:` is the one check that fails without files).
+    describe ":allow_blank and :allow_nil on an attribute without files" do
+      subject(:record) { validator_test_class::CheckMinRailsOptions.new(title: "Title") }
+
+      let(:failing_attributes) { record.tap(&:validate).errors.attribute_names }
+      # allow_nil does not skip: the attribute reads an ActiveStorage::Attached, never nil.
+      let(:validated_without_files) do
+        %i[without_option not_allow_blank allow_nil].flat_map { |name| [ :"#{name}_many", :"#{name}_one" ] }
+      end
+      let(:validated_with_proc) { record.respond_to?(:allow_blank_proc_many) ? [ :allow_blank_proc_many ] : [] }
+
+      it { expect(failing_attributes).to match_array(validated_without_files + validated_with_proc) }
+
+      context "when the record is saved and loaded again" do
+        subject(:record) do
+          saved = validator_test_class::CheckMinRailsOptions.new(title: "Title")
+          saved.save!(validate: false)
+          validator_test_class::CheckMinRailsOptions.find(saved.id)
+        end
+
+        it { expect(failing_attributes).to match_array(validated_without_files + validated_with_proc) }
+      end
+
+      context "with a file attached to an attribute validated without files" do
+        before { record.not_allow_blank_many.attach(png_file) }
+
+        it { expect(failing_attributes).to match_array(validated_without_files + validated_with_proc - [ :not_allow_blank_many ]) }
+      end
+
+      if ActiveModel::EachValidator.private_method_defined?(:allow_blank?)
+        context "with a Proc allow_blank (Rails 8.2+) returning true" do
+          subject(:record) { validator_test_class::CheckMinRailsOptions.new(title: "Draft") }
+
+          it { expect(failing_attributes).to match_array(validated_without_files) }
+        end
+      end
+    end
   end
 end

@@ -24,7 +24,7 @@ module ActiveStorageValidations
     delegate :number_to_delimited, to: ActiveSupport::NumberHelper
 
     def validate_each(record, attribute, _value)
-      return if no_attachments?(record, attribute)
+      return if no_attachments_to_validate?(record, attribute)
 
       validate_changed_files_from_metadata(record, attribute, METADATA_KEYS, set_flat_options(record))
     end

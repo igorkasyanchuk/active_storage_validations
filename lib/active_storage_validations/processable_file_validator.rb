@@ -49,7 +49,7 @@ module ActiveStorageValidations
     NETPBM_HEADER = /\AP[1-6]\s+(?:#[^\n]*\n\s*)*\d+\s+\d+/n
 
     def validate_each(record, attribute, _value)
-      return if no_attachments?(record, attribute)
+      return if no_attachments_to_validate?(record, attribute)
 
       validate_changed_files_from_metadata(record, attribute, METADATA_KEYS)
     end
