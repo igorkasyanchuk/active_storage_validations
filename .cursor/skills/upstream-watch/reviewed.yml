@@ -9,7 +9,7 @@ image_processing:
   ours: lib/active_storage_validations/analyzer/image_analyzer/, processable_file_validator.rb, asv_attachable_adapter.rb
   version: "2.2.2"
   reviewed_on: "2026-11-26"
-  notes: Reviewed up to d7cd300 (HEAD after 2.2.2). 4.2 copies the bracketed-path fix; skipping untrusted libvips loaders on older Rails goes to v5 (it rejects SVG / BMP / … files those apps accept). Truncated-image detection (fail_on + decode) left as a possible processable_file option.
+  notes: Reviewed up to d7cd300 (HEAD after 2.2.2). 4.2 copies the bracketed-path fix; skipping untrusted libvips loaders on older Rails is in 5.0 only (it rejects SVG / BMP / … files those apps accept). Truncated-image detection (fail_on + decode) left as a possible processable_file option.
 activestorage:
   gem: activestorage
   repo: rails/rails

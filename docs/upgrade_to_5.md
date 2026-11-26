@@ -21,6 +21,7 @@ Go through this table. If no row matches, you are done.
 | Uses an `aspect_ratio` value that is not an exact `is_x_y` (`:is_16_9square`) | Fix the typo | [Strict `aspect_ratio`](#aspect_ratio-options-are-validated-strictly) |
 | Passes a non-numeric or negative comparison / `limit` bound, a reversed `between:` range, `with_audio: { with: "no" }`, or a `timeout:` of `0` or a Proc (statically or from a Proc) | Fix the option | [Invalid options raise](#invalid-options-raise) |
 | Has a `size` / `total_size` / `duration` / `pages` Proc that can return `nil` | Nothing if `nil` means "no bound"; otherwise return a real bound | [Comparison Procs returning `nil`](#comparison-procs-returning-nil-set-no-bound) |
+| Runs Rails older than 7.2.3.2 / 8.0.5.1 / 8.1.3.1 with libvips (`variant_processor = :vips`) and validates `dimension` / `aspect_ratio` of SVG, BMP, ICO, PSD, JPEG 2000, JPEG XL, Netpbm or camera RAW files | Upgrade Rails, or block untrusted loaders and re-enable the ones you need | [Untrusted libvips loaders](#untrusted-libvips-loaders-are-skipped) |
 | Uses `with_audio: { with: false }` where `ffprobe` may be missing | Install `ffmpeg` wherever validations run | [`with_audio` fails closed](#with_audio--with-false--fails-closed) |
 | Uses `spoofing_protection: true` (or `:file`) on a system whose `file` is older than 5.26 (CentOS 7, Amazon Linux 2; check `file --version`) | Upgrade `file`, point `ActiveStorage.paths[:file]` at a newer one, or use `:magika` | [`file` 5.26+](#file-526-for-spoofing_protection) |
 | Uses `content_type` `spoofing_protection` | Nothing, unless real uploads start failing as `content_type_spoofed` | [Sibling types rejected](#spoofing_protection-rejects-sibling-types) |
@@ -170,11 +171,24 @@ validates :avatar, aspect_ratio: :is_16_9
 
 ### `with_audio: { with: false }` fails closed
 
-**Who is affected?** Environments where `ffprobe` is missing (CI, development machines, slim production images) with a model using `with_audio: { with: false }`. This is the only breaking case that can turn a passing upload into a rejection without a misconfigured option.
+**Who is affected?** Environments where `ffprobe` is missing (CI, development machines, slim production images) with a model using `with_audio: { with: false }`. With [untrusted libvips loaders](#untrusted-libvips-loaders-are-skipped), one of the two breaking cases that can turn a passing upload into a rejection without a misconfigured option.
 
 **What changed.** Empty analyzer metadata means the file could not be analyzed at all: `ffprobe` is not installed or [timed out](../README.md#configuration), the file is unreadable, or its media type is unsupported. In 4.x that empty result was read as "no audio track", so `with_audio: { with: false }` accepted every such file (and `with: true` reported `audio_missing`). Both now add `media_metadata_missing`, like `dimension`, `duration`, `aspect_ratio`, `pages` and `processable_file` do. Images and PDFs are still treated as having no audio track.
 
 **How to fix.** Install `ffmpeg` (which ships `ffprobe`) wherever validations run, raise the per-validator `timeout:` if large videos time out, and update specs that expected `audio_missing` for unanalyzable files. The `validate_with_audio_of` matcher is unchanged.
+
+### Untrusted libvips loaders are skipped
+
+**Who is affected?** Apps on Rails older than 7.2.3.2, 8.0.5.1 or 8.1.3.1, analyzing images with libvips (`config.active_storage.variant_processor = :vips`), whose `dimension` / `aspect_ratio` validators get files only an untrusted loader opens: SVG, BMP / ICO / PSD and anything else libvips hands to ImageMagick, JPEG 2000, JPEG XL, Netpbm, camera RAW, FITS. JPEG, PNG, GIF, WebP, TIFF, HEIF and AVIF are not affected.
+
+**What changed.** libvips flags those loaders as unfuzzed: only safe on trusted content. Rails 7.2.3.2+ / 8.0.5.1+ / 8.1.3.1+ and image_processing 2.0+ call `Vips.block_untrusted(true)`; older Rails do not, and validation analyzes the raw upload before anything else reads it. The gem now skips those loaders itself, file by file, without changing your app's setting. Those files get no metadata, as on a recent Rails: `dimension` / `aspect_ratio` add `media_metadata_missing`, and `processable_file` excuses them from their leading bytes (a broken BMP with a valid header passes it, as on a recent Rails).
+
+**How to fix.** Upgrade Rails to a patch that blocks these loaders itself. To keep validating one of these formats, block them all and re-enable that loader in an initializer, as on a recent Rails; once blocking is on, the gem uses the loaders your app allows:
+
+```ruby
+Vips.block_untrusted(true)
+Vips.block("VipsForeignLoadSvg", false) # keep SVG
+```
 
 ### `spoofing_protection` rejects sibling types
 
