@@ -46,9 +46,6 @@ jobs:
         image_processor:
           - vips
           - mini_magick
-        exclude:
-          - ruby: '4.0'
-            gemfile: rails_7_0_1
     steps:
       # mfinelli/setup-imagemagick gets a 404 from ImageMagick's releases since
       # 7.1.2-36, so install that release's AppImage directly: pinned version,

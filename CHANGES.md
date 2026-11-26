@@ -1,4 +1,6 @@
 # Unreleased
+- **MISC**
+  - Test Ruby 4.0 with Rails 7.0 in CI: the combination was excluded, though the gemspec allows it
 
 # Released
 - 4.2.0

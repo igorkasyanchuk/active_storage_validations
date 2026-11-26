@@ -104,7 +104,7 @@ In `.github/workflows/main.yml`:
 
 - `matrix.ruby`: every non-EOL stable Ruby series at or above the gemspec floor. Quote them (`'4.0'`): YAML reads an unquoted `4.0` as a number, and setup-ruby then gets `4`, which resolves to the newest 4.x.
 - `matrix.gemfile`: one entry per file in `gemfiles/`.
-- `exclude`: combinations below a Rails series' minimum Ruby (the assess grid shows them), plus empirical incompatibilities such as Ruby 4.0 × rails_7_0_1. Keep an existing exclude unless you verified the combination. When adding a new Ruby series, run the oldest gemfile on it locally if that Ruby is installed, to decide whether it needs an exclude.
+- `exclude`: combinations below a Rails series' minimum Ruby (the assess grid shows them), plus empirical incompatibilities. Keep an existing exclude unless you verified the combination, and record why next to each one you add. Ruby 4.0 × rails_7_0_1 was excluded with no reason given; it only failed because the Rakefile's `rdoc/task` was missing, and is tested since rdoc became a development dependency. When adding a new Ruby series, run the oldest gemfile on it locally if that Ruby is installed, to decide whether it needs an exclude.
 - `linters` job `ruby-version`: same exact version as `.ruby-version`. Its comment calls it the recommended Ruby for the root Gemfile.
 - The coverage upload `if:` and the AGENTS.md sentence about it stay in sync.
 - `.github/workflows/bench.yml` (`ruby-version: "3.4"`) also uses the root Gemfile. Change it only if asked, since `benchmark/BASELINE.md` was recorded on it.
