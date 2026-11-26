@@ -298,7 +298,9 @@ RSpec.describe ActiveStorageValidations::Analyzer::ContentTypeAnalyzer::File do
     let(:link) { dir.join("avatar.png").tap { |path| File.symlink(Rails.root.join("public", "image_150x150.png"), path) } }
     let(:linux_file) do
       dir.join("file").tap do |path|
-        File.write(path, "#!/bin/sh\nexec #{`command -v file`.strip} -h \"$@\"\n")
+        # `command -v` is a shell builtin: Ubuntu has no `command` executable.
+        file_cli = ENV.fetch("PATH", "").split(File::PATH_SEPARATOR).map { |dir| File.join(dir, "file") }.find { |cli| File.executable?(cli) }
+        File.write(path, "#!/bin/sh\nexec #{file_cli} -h \"$@\"\n")
         File.chmod(0o755, path)
       end
     end

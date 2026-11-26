@@ -40,7 +40,10 @@ RSpec.describe ActiveStorageValidations::Analyzer::AudioAnalyzer do
       let(:attachable) { audio_4s_no_duration_webm }
 
       it "measures the end of the last packet" do
-        expect(metadata).to eq({ duration: 4.001, sample_rate: 48000, audio: true })
+        # The last packet ends at 4.001s with ffmpeg 8 (macOS), 4.014s with
+        # Ubuntu's ffmpeg: the fixture lasts 4 seconds either way.
+        expect(metadata).to include(sample_rate: 48000, audio: true)
+        expect(metadata[:duration]).to be_within(0.05).of(4.0)
       end
     end
 
