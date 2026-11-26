@@ -358,6 +358,18 @@ RSpec.describe ActiveStorageValidations::ContentTypeValidator do
             end
           end
 
+          # JS FormData / MediaRecorder uploads often have no extension: the
+          # declared alias is all Marcel has, and 4.1 accepted it as written.
+          if rule_attribute.start_with?("alias_")
+            context "with an extensionless file declared as the rule's own type on #{rule_attribute}" do
+              let(:attribute) { rule_attribute }
+              let(:filename) { "blob" }
+              let(:declared_type) { model.class.validators_on(rule_attribute).first.options[:with] }
+
+              it { is_expected_to_be_valid }
+            end
+          end
+
           context "with a PNG file on #{rule_attribute}" do
             let(:attribute) { rule_attribute }
             let(:filename) { "x.png" }
