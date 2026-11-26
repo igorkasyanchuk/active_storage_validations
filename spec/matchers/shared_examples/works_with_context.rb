@@ -19,6 +19,14 @@ RSpec.shared_examples "works with context" do
         it { is_expected_to_match_for(klass) }
       end
 
+      context "which is an array covering more contexts than the validator lists" do
+        subject(:configured_matcher) { matcher.on(%i[update custom other]) }
+
+        let(:model_attribute) { :with_context_array }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
       context "which is an array listing only some of the validator contexts" do
         subject(:configured_matcher) { matcher.on([ :update ]) }
 

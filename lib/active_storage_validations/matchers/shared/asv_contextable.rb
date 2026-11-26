@@ -32,9 +32,11 @@ module ActiveStorageValidations
         ensure_context_valid!
 
         if @context.is_a?(Array)
-          # Like a Symbol: each provided context must be listed by a validator
-          # (`on([:update])` against `on: %i[update custom]`).
-          (@context.map(&:to_s) - validator_contexts).empty? || raise_context_not_listed_error
+          # The Array covers the validator contexts (as in 4.1), or each of its
+          # contexts is listed by a validator, like a Symbol (`on([:update])`
+          # against `on: %i[update custom]`).
+          contexts = @context.map(&:to_s)
+          (validator_contexts - contexts).empty? || (contexts - validator_contexts).empty? || raise_context_not_listed_error
         elsif @context.is_a?(Symbol)
           validator_contexts.include?(@context.to_s) || raise_context_not_listed_error
         end

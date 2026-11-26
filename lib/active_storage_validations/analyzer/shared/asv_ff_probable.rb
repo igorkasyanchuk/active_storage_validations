@@ -13,6 +13,15 @@ module ActiveStorageValidations
     # ffprobe follows the entries, so an uploaded text file would be measured
     # as a local file of the server it points to.
     PLAYLIST_FORMATS = %w[hls dash concat].freeze
+    # ffprobe opens the entries while it probes, so the playlist check on its
+    # output came too late (a FIFO entry held the analysis until the timeout).
+    # These files are recognized from their first bytes before it runs.
+    PLAYLIST_HEADS = {
+      "hls" => /\A(?:\xEF\xBB\xBF)?\s*#EXTM3U/n,
+      "concat" => /\A(?:\xEF\xBB\xBF)?\s*ffconcat\s+version/n,
+      "dash" => /\A(?:\xEF\xBB\xBF)?\s*(?:<\?xml[^>]*>\s*)?(?:<!--.*?-->\s*)*<MPD[\s>]/mn
+    }.freeze
+    PLAYLIST_HEAD_BYTES = 4096
 
     private
 
@@ -45,6 +54,9 @@ module ActiveStorageValidations
 
     def media_from_path(path)
       @media_path = path
+      playlist_format = playlist_format_from_head(path)
+      return { "format" => { "format_name" => playlist_format } } if playlist_format
+
       instrument(File.basename(ffprobe_path)) do |payload|
         result = run_command(
           ffprobe_path,
@@ -58,6 +70,13 @@ module ActiveStorageValidations
 
         parse_ffprobe_json(result)
       end
+    end
+
+    def playlist_format_from_head(path)
+      head = File.open(path, "rb") { |file| file.read(PLAYLIST_HEAD_BYTES) }.to_s
+      PLAYLIST_HEADS.find { |_format, pattern| head.match?(pattern) }&.first
+    rescue SystemCallError, IOError
+      nil
     end
 
     def parse_ffprobe_json(result)

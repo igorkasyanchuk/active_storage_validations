@@ -292,6 +292,15 @@ RSpec.describe ActiveStorageValidations::Matchers::DimensionValidatorMatcher do
         it { is_expected_not_to_match_for(klass) }
       end
 
+      # No lower bound accepts the smallest size, as 4.1 matched.
+      context "when matching #{dimension}_min(0) against a #{dimension} max-only validator" do
+        subject(:configured_matcher) { matcher.public_send(matcher_method, 0) }
+
+        let(:model_attribute) { :"#{dimension}_max" }
+
+        it { is_expected_to_match_for(klass) }
+      end
+
       context "when used on a #{dimension} max validator (e.g. dimension: { #{dimension}: { max: 1200 } })" do
         let(:model_attribute) { :"#{dimension}_max" }
 

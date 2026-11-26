@@ -100,8 +100,11 @@ module ActiveStorageValidations
         @min.nil? || @min == @max || accepts_count?(@min + 1)
       end
 
+      # A validator without a lower bound accepts 0 files too (as in 4.1);
+      # `min: 1` under `allow_blank` passes the 0-file probe and must not match.
       def validator_min_zero?
-        attribute_validator&.options&.[](:min) == 0
+        options = attribute_validator&.options || {}
+        !options.key?(:min) || options[:min] == 0
       end
 
       # No count below `max(0)` to probe.

@@ -67,12 +67,13 @@ RSpec.describe ActiveStorageValidations::Matchers::LimitValidatorMatcher do
       it { is_expected_not_to_match_for(klass) }
     end
 
+    # No lower bound accepts 0 files, as 4.1 matched.
     context "when matching min(0) against a max-only validator" do
       subject(:configured_matcher) { matcher.min(0) }
 
       let(:model_attribute) { :max }
 
-      it { is_expected_not_to_match_for(klass) }
+      it { is_expected_to_match_for(klass) }
     end
   end
 

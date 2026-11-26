@@ -199,9 +199,9 @@ This also covers metadata the analyzer cannot extract from a given file (e.g. a 
 
 Clients cannot pre-fill this cache to skip the analysis (e.g. through Rails' direct upload endpoint, which accepts `metadata: { custom: … }`): a new blob drops `asv_*` keys when it is initialized, so only the gem writes them.
 
-To force re-analysis of a persisted blob, call `blob.remove_active_storage_validations_metadata!`. That clears `asv_*` keys and, when the blob is already saved, writes the change so `reload` does not restore them. Non-`asv_*` custom metadata is kept.
+To force re-analysis of a persisted blob, call `blob.remove_active_storage_validations_metadata!`. That clears `asv_*` keys and, when the blob is already saved, writes the change with `save!` (the blob callbacks run) so `reload` does not restore them. Non-`asv_*` custom metadata is kept.
 
-To clear the cache of many blobs at once (e.g. after an upgrade that teaches an analyzer to read files it could not before), run the rake task or its Ruby equivalent. Both skip the blob callbacks, so attached records are not touched:
+To clear the cache of many blobs at once (e.g. after an upgrade that teaches an analyzer to read files it could not before), run the rake task or its Ruby equivalent. A cleared blob is analyzed again the next time it is validated (attached again, or another file added to its `has_many_attached`); existing records are not re-validated. Both skip the blob callbacks, so attached records are not touched:
 
 ```sh
 bin/rails active_storage_validations:remove_metadata
@@ -750,7 +750,7 @@ en:
       connectors:
         words_connector: ", "
         two_words_connector: " and "
-        last_word_connector: " and "
+        last_word_connector: ", and "
 ```
 
 ---
@@ -906,7 +906,7 @@ libvips marks some loaders as untrusted (unfuzzed: SVG, BMP, JPEG 2000, Netpbm, 
 
 An empty but well-formed container (`ffprobe` exits 0 with no audio or video stream) is not processable. That is the same fail-closed miss as a corrupt file or a missing CLI.
 
-An HLS / DASH playlist or an ffmpeg concat list (a text file naming other media files) is not processable, and has no dimension, duration or audio track, even when the files it names are valid: `ffprobe` would report the streams of those files, read from the server, instead of the upload's.
+An HLS / DASH playlist or an ffmpeg concat list (a text file naming other media files) is not processable, and has no dimension, duration or audio track, even when the files it names are valid: such files are recognized from their first bytes and never handed to `ffprobe`, which would open the files they name, on the server, and report their streams instead of the upload's.
 
 libvips reads the image header only, while ImageMagick decodes the image. A truncated image whose header is intact is therefore processable with libvips, which also renders its variants (filling the missing rows), and not with ImageMagick.
 

@@ -46,7 +46,9 @@ module ActiveStorageValidations
     # State for a single attachable check. Active Model builds one validator per
     # class and reuses it for every record and every thread, so this must travel
     # through arguments rather than instance variables.
-    Context = Struct.new(:authorized_content_types, :content_type, :filename)
+    # +written_content_types+: the MIME rules as written, also accepted as is
+    # (see #authorized_content_type?).
+    Context = Struct.new(:authorized_content_types, :content_type, :filename, :written_content_types)
     # "image/*", as in the HTML accept attribute: any type of that media type.
     WILDCARD_CONTENT_TYPE = %r{\A[a-z][a-z-]*/\*\z}
 
@@ -63,9 +65,9 @@ module ActiveStorageValidations
     def validate_each(record, attribute, _value)
       return if no_attachments?(record, attribute)
 
-      authorized_content_types = authorized_content_types_from_options(record)
+      authorized_content_types, written_content_types = authorized_content_types_from_options(record)
       attachables_and_blobs(record, attribute).each do |attachable, blob|
-        context = Context.new(authorized_content_types, blob.content_type, blob.filename.to_s)
+        context = Context.new(authorized_content_types, blob.content_type, blob.filename.to_s, written_content_types)
         is_valid?(record, attribute, attachable, blob, context)
       end
     end
@@ -84,12 +86,27 @@ module ActiveStorageValidations
 
       # `[:jpg, :jpeg]` is one type: the message listed it twice ("JPG, JPG"),
       # and counted two, so it read "types are".
-      content_types.filter_map do |type|
+      authorized = content_types.filter_map do |type|
         case type
         when WILDCARD_CONTENT_TYPE then type.to_s
         when String, Symbol then authorized_marcel_content_type(type.to_s)
         when Regexp then type
         end
+      end.uniq
+
+      [ authorized, written_mime_content_types(content_types) ]
+    end
+
+    # An alias rule ("audio/x-aac") resolves to its canonical type
+    # ("audio/aac"), which an upload declared with the alias and no extension
+    # (JS FormData, MediaRecorder) still does not resolve to: 4.1 compared the
+    # rule as written, so it is accepted as written too.
+    def written_mime_content_types(content_types)
+      content_types.filter_map do |type|
+        next unless type.is_a?(String) || type.is_a?(Symbol)
+
+        type = type.to_s
+        type if type.include?("/") && !type.match?(WILDCARD_CONTENT_TYPE)
       end.uniq
     end
 
@@ -122,6 +139,7 @@ module ActiveStorageValidations
         when Regexp then authorized_content_type.match?(marcel_attachable_content_type(context).to_s)
         end
       end
+      attachable_content_type_is_authorized ||= Array(context.written_content_types).include?(marcel_attachable_content_type(context))
 
       return true if attachable_content_type_is_authorized
 

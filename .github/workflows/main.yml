@@ -50,10 +50,19 @@ jobs:
           - ruby: '4.0'
             gemfile: rails_7_0_1
     steps:
+      # mfinelli/setup-imagemagick gets a 404 from ImageMagick's releases since
+      # 7.1.2-36, so install that release's AppImage directly: pinned version,
+      # checksum from the release asset's published digest.
       - name: Install imagemagick
-        uses: mfinelli/setup-imagemagick@v8
-        with:
-          cache: true
+        env:
+          IMAGEMAGICK_VERSION: 7.1.2-36
+          IMAGEMAGICK_SHA256: 68cca0053a8f82206e72400014f32f4b654e9807f45928a2325a1d14d695fb3a
+        run: |
+          sudo apt-get install -y libfuse2t64
+          curl -fsSL -o magick "https://github.com/ImageMagick/ImageMagick/releases/download/${IMAGEMAGICK_VERSION}/ImageMagick-${IMAGEMAGICK_VERSION}-x86_64.AppImage"
+          echo "${IMAGEMAGICK_SHA256}  magick" | sha256sum --check
+          chmod +x magick
+          sudo mv magick /usr/local/bin/magick
 
       - name: Verify imagemagick
         run: magick -version

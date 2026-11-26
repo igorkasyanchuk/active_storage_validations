@@ -811,11 +811,6 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
         subject(:record) { model.public_send(attribute).attach(image_500x500_file) and model }
 
         let(:attribute) { :width }
-        let(:error_options) do
-          {
-            filename: "image_500x500_file.png"
-          }
-        end
 
         around do |example|
           previous = ActiveStorage.variant_processor
@@ -825,13 +820,33 @@ RSpec.describe ActiveStorageValidations::DimensionValidator do
           ActiveStorage.variant_processor = previous
         end
 
+        # Rails 8.1 tells apps without the image_processing gem to set it: it
+        # only turns variants off, images are still analyzed.
+        it "analyzes images with the default image processor" do
+          expect(described_class.new(attributes: [ :file ], width: 500).send(:image_processor)).to eq(ActiveStorageValidations::ASVAnalyzable::DEFAULT_IMAGE_PROCESSOR)
+        end
+
+        it { is_expected_to_be_valid }
+      end
+
+      context "when ActiveStorage.variant_processor is an unknown processor" do
+        subject(:record) { model.public_send(attribute).attach(image_500x500_file) and model }
+
+        let(:attribute) { :width }
+
+        around do |example|
+          previous = ActiveStorage.variant_processor
+          ActiveStorage.variant_processor = :unknown_processor
+          example.run
+        ensure
+          ActiveStorage.variant_processor = previous
+        end
+
         it "fails closed with media_metadata_missing instead of raising" do
           expect { record.valid? }.not_to raise_error
         end
 
-        it { is_expected_not_to_be_valid }
-        it { is_expected_to_include_error_message("media_metadata_missing", error_options: error_options) }
-        it { is_expected_to_have_error_options(error_options) }
+        it { is_expected_to_include_error_message("media_metadata_missing", error_options: { filename: "image_500x500_file.png" }) }
       end
 
       # Rails 8.2+: config.active_storage.variant_processor = MyTransformer
