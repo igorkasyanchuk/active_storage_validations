@@ -12,13 +12,15 @@ The previous snapshot (2026-08-02) ran on another machine with Ruby 3.4.9, so co
 
 **Database:** the SQLite sections run the dummy app's default database, in process. The PostgreSQL sections run the same suite against a local PostgreSQL 17 over TCP (`DATABASE_URL`): apps mostly run PostgreSQL, where each query is a round trip, larger still across a network.
 
-Since the previous snapshot, warm validations (cached `asv_*` metadata) no longer query `active_storage_attachments`. Before → after that change, on this machine (vips; same for mini_magick):
+Since the previous snapshot, warm validations (cached `asv_*` metadata) no longer query `active_storage_attachments`, and the first analysis of an upload with a file on disk no longer creates an unused tempfile. Before → after each change, on this machine (vips; the warm rows are the same for mini_magick, the cold ones are dominated by the `magick` command there):
 
-| Report | SQLite | PostgreSQL (localhost) |
-|---|---|---|
-| `dimension/image warm` | 211 µs → 26 µs | 337 µs → 27 µs |
-| `multi same keys warm` | 685 µs → 6.9 µs | 1.11 ms → 6.7 µs |
-| `dimension/image cold` | 577 µs → 452 µs | 700 µs → 513 µs |
+| Report | Change | SQLite | PostgreSQL (localhost) |
+|---|---|---|---|
+| `dimension/image warm` | no attachment queries | 211 µs → 26 µs | 337 µs → 27 µs |
+| `multi same keys warm` | no attachment queries | 685 µs → 6.9 µs | 1.11 ms → 6.7 µs |
+| `dimension/image cold` | no attachment queries | 577 µs → 452 µs | 700 µs → 513 µs |
+| `dimension/image cold` | no unused tempfile | 456 µs → 405 µs | 518 µs → 384 µs |
+| `processable_file/image cold` | no unused tempfile | 446 µs → 377 µs | 482 µs → 382 µs |
 
 ---
 
@@ -27,7 +29,7 @@ Since the previous snapshot, warm validations (cached `asv_*` metadata) no longe
 ```
 ruby: ruby 4.0.10 (2026-11-19 revision a704b7cd95) +PRISM [arm64-darwin25]
 rails: 8.1.4.1 (preloaded; not included in timing)
-took 10.932ms to load active_storage_validations
+took 12.279ms to load active_storage_validations
 ```
 
 ---
@@ -40,6 +42,7 @@ active_storage_validations benchmarks
 ruby:            ruby 4.0.10 (2026-11-19 revision a704b7cd95) +PRISM [arm64-darwin25]
 rails:           8.1.4.1
 IMAGE_PROCESSOR: vips
+database:        SQLite 3.54.1
 BUNDLE_GEMFILE:  (default Gemfile)
 host:            Darwin arm64
 vips:            vips-8.18.7
@@ -47,41 +50,41 @@ ffmpeg:          ffmpeg version 9.0.2
 pdfinfo:         pdfinfo version 26.10.0
 file:            file-5.41
 identify:        ImageMagick 7.1.2-34
-time:            2026-11-26T08:47:42Z
+time:            2026-11-26T11:12:27Z
 ========================================================================
 
 ruby 4.0.10 (2026-11-19 revision a704b7cd95) +PRISM [arm64-darwin25]
 Calculating -------------------------------------
-                              dimension/image cold      2.211k (± 3.0%) i/s  (452.20 μs/i) -      6.851k in   3.098038s
-                              dimension/image warm     38.205k (± 2.4%) i/s   (26.17 μs/i) -    116.746k in   3.055766s
-                               duration/audio cold     42.089 (± 7.1%) i/s   (23.76 ms/i) -    128.000 in   3.041180s
-                               duration/audio warm     42.621k (± 2.5%) i/s   (23.46 μs/i) -    128.400k in   3.012567s
-                                    pages/pdf cold     62.149 (± 6.4%) i/s   (16.09 ms/i) -    192.000 in   3.089358s
-                                    pages/pdf warm     27.168k (± 4.3%) i/s   (36.81 μs/i) -     82.890k in   3.050975s
-                           content_type spoof cold    227.540 (±17.1%) i/s    (4.39 ms/i) -    696.000 in   3.058799s
-                           content_type spoof warm     38.016k (± 5.0%) i/s   (26.30 μs/i) -    117.060k in   3.079224s
-                       processable_file/image cold      2.130k (± 6.5%) i/s  (469.39 μs/i) -      6.583k in   3.089971s
-                       processable_file/image warm     47.226k (± 6.3%) i/s   (21.17 μs/i) -    142.883k in   3.025486s
-     multi same keys cold (aspect_ratio+dimension)      1.901k (± 8.9%) i/s  (526.11 μs/i) -      5.921k in   3.115112s
-                              multi same keys warm    145.071k (± 6.1%) i/s    (6.89 μs/i) -    447.963k in   3.087889s
-multi different keys cold (dimension+content_type)     36.017 (± 5.6%) i/s   (27.76 ms/i) -    111.000 in   3.081910s
-                         multi different keys warm    149.593k (± 3.3%) i/s    (6.68 μs/i) -    463.200k in   3.096402s
+                              dimension/image cold      2.467k (±11.7%) i/s  (405.43 μs/i) -      7.448k in   3.019614s
+                              dimension/image warm     36.606k (± 2.8%) i/s   (27.32 μs/i) -    110.664k in   3.023149s
+                               duration/audio cold     41.239 (±12.1%) i/s   (24.25 ms/i) -    124.000 in   3.006874s
+                               duration/audio warm     39.030k (± 8.0%) i/s   (25.62 μs/i) -    118.636k in   3.039628s
+                                    pages/pdf cold     56.704 (±15.9%) i/s   (17.64 ms/i) -    174.000 in   3.068590s
+                                    pages/pdf warm     26.960k (± 3.4%) i/s   (37.09 μs/i) -     80.910k in   3.001125s
+                           content_type spoof cold    292.247 (± 6.5%) i/s    (3.42 ms/i) -    884.000 in   3.024840s
+                           content_type spoof warm     37.659k (± 6.7%) i/s   (26.55 μs/i) -    113.790k in   3.021601s
+                       processable_file/image cold      2.654k (± 4.7%) i/s  (376.74 μs/i) -      8.064k in   3.038059s
+                       processable_file/image warm     46.298k (±10.0%) i/s   (21.60 μs/i) -    140.160k in   3.027362s
+     multi same keys cold (aspect_ratio+dimension)      2.310k (± 8.9%) i/s  (432.84 μs/i) -      7.018k in   3.037669s
+                              multi same keys warm    141.395k (± 8.4%) i/s    (7.07 μs/i) -    441.780k in   3.124431s
+multi different keys cold (dimension+content_type)     34.855 (± 2.9%) i/s   (28.69 ms/i) -    105.000 in   3.012498s
+                         multi different keys warm    143.040k (± 3.6%) i/s    (6.99 μs/i) -    441.570k in   3.087048s
 
 Comparison:
-                         multi different keys warm:   149593.0 i/s
-                              multi same keys warm:   145071.0 i/s - same-ish: difference falls within error
-                       processable_file/image warm:    47226.5 i/s - 3.17x  slower
-                               duration/audio warm:    42621.5 i/s - 3.51x  slower
-                              dimension/image warm:    38205.2 i/s - 3.92x  slower
-                           content_type spoof warm:    38016.1 i/s - 3.93x  slower
-                                    pages/pdf warm:    27168.4 i/s - 5.51x  slower
-                              dimension/image cold:     2211.4 i/s - 67.65x  slower
-                       processable_file/image cold:     2130.4 i/s - 70.22x  slower
-     multi same keys cold (aspect_ratio+dimension):     1900.7 i/s - 78.70x  slower
-                           content_type spoof cold:      227.5 i/s - 657.44x  slower
-                                    pages/pdf cold:       62.1 i/s - 2407.01x  slower
-                               duration/audio cold:       42.1 i/s - 3554.21x  slower
-multi different keys cold (dimension+content_type):       36.0 i/s - 4153.44x  slower
+                         multi different keys warm:   143039.6 i/s
+                              multi same keys warm:   141395.3 i/s - same-ish: difference falls within error
+                       processable_file/image warm:    46297.7 i/s - 3.09x  slower
+                               duration/audio warm:    39029.8 i/s - 3.66x  slower
+                           content_type spoof warm:    37658.8 i/s - 3.80x  slower
+                              dimension/image warm:    36605.5 i/s - 3.91x  slower
+                                    pages/pdf warm:    26959.9 i/s - 5.31x  slower
+                       processable_file/image cold:     2654.3 i/s - 53.89x  slower
+                              dimension/image cold:     2466.5 i/s - 57.99x  slower
+     multi same keys cold (aspect_ratio+dimension):     2310.3 i/s - 61.91x  slower
+                           content_type spoof cold:      292.2 i/s - 489.45x  slower
+                                    pages/pdf cold:       56.7 i/s - 2522.58x  slower
+                               duration/audio cold:       41.2 i/s - 3468.56x  slower
+multi different keys cold (dimension+content_type):       34.9 i/s - 4103.87x  slower
 ```
 
 ---
@@ -94,6 +97,7 @@ active_storage_validations benchmarks
 ruby:            ruby 4.0.10 (2026-11-19 revision a704b7cd95) +PRISM [arm64-darwin25]
 rails:           8.1.4.1
 IMAGE_PROCESSOR: mini_magick
+database:        SQLite 3.54.1
 BUNDLE_GEMFILE:  (default Gemfile)
 host:            Darwin arm64
 vips:            vips-8.18.7
@@ -101,41 +105,41 @@ ffmpeg:          ffmpeg version 9.0.2
 pdfinfo:         pdfinfo version 26.10.0
 file:            file-5.41
 identify:        ImageMagick 7.1.2-34
-time:            2026-11-26T08:48:40Z
+time:            2026-11-26T11:16:19Z
 ========================================================================
 
 ruby 4.0.10 (2026-11-19 revision a704b7cd95) +PRISM [arm64-darwin25]
 Calculating -------------------------------------
-                              dimension/image cold    118.708 (±13.5%) i/s    (8.42 ms/i) -    360.000 in   3.032663s
-                              dimension/image warm     37.512k (± 4.2%) i/s   (26.66 μs/i) -    112.710k in   3.004602s
-                               duration/audio cold     44.795 (± 4.5%) i/s   (22.32 ms/i) -    136.000 in   3.036039s
-                               duration/audio warm     42.963k (± 1.6%) i/s   (23.28 μs/i) -    131.104k in   3.051534s
-                                    pages/pdf cold     73.642 (± 4.1%) i/s   (13.58 ms/i) -    225.000 in   3.055303s
-                                    pages/pdf warm     28.663k (± 1.1%) i/s   (34.89 μs/i) -     86.149k in   3.005615s
-                           content_type spoof cold    296.136 (± 9.1%) i/s    (3.38 ms/i) -    893.000 in   3.015502s
-                           content_type spoof warm     39.438k (± 1.8%) i/s   (25.36 μs/i) -    120.785k in   3.062636s
-                       processable_file/image cold    132.868 (± 6.0%) i/s    (7.53 ms/i) -    407.000 in   3.063181s
-                       processable_file/image warm     49.246k (± 3.0%) i/s   (20.31 μs/i) -    148.050k in   3.006360s
-     multi same keys cold (aspect_ratio+dimension)    137.325 (± 2.9%) i/s    (7.28 ms/i) -    420.000 in   3.058429s
-                              multi same keys warm    156.292k (± 2.0%) i/s    (6.40 μs/i) -    478.857k in   3.063864s
-multi different keys cold (dimension+content_type)     38.997 (± 2.6%) i/s   (25.64 ms/i) -    120.000 in   3.077154s
-                         multi different keys warm    152.614k (± 3.0%) i/s    (6.55 μs/i) -    462.086k in   3.027814s
+                              dimension/image cold    132.867 (± 5.3%) i/s    (7.53 ms/i) -    408.000 in   3.070751s
+                              dimension/image warm     35.523k (± 2.2%) i/s   (28.15 μs/i) -    109.650k in   3.086769s
+                               duration/audio cold     42.648 (± 7.0%) i/s   (23.45 ms/i) -    128.000 in   3.001294s
+                               duration/audio warm     38.560k (± 2.9%) i/s   (25.93 μs/i) -    118.500k in   3.073130s
+                                    pages/pdf cold     70.267 (± 5.7%) i/s   (14.23 ms/i) -    217.000 in   3.088233s
+                                    pages/pdf warm     26.261k (± 2.9%) i/s   (38.08 μs/i) -     81.084k in   3.087631s
+                           content_type spoof cold    308.017 (± 6.2%) i/s    (3.25 ms/i) -    930.000 in   3.019313s
+                           content_type spoof warm     35.234k (± 2.9%) i/s   (28.38 μs/i) -    107.097k in   3.039560s
+                       processable_file/image cold    133.794 (± 6.0%) i/s    (7.47 ms/i) -    403.000 in   3.012089s
+                       processable_file/image warm     45.232k (± 2.9%) i/s   (22.11 μs/i) -    137.970k in   3.050258s
+     multi same keys cold (aspect_ratio+dimension)    133.655 (± 6.0%) i/s    (7.48 ms/i) -    403.000 in   3.015232s
+                              multi same keys warm    138.737k (± 2.2%) i/s    (7.21 μs/i) -    417.540k in   3.009576s
+multi different keys cold (dimension+content_type)     36.854 (± 2.7%) i/s   (27.13 ms/i) -    111.000 in   3.011883s
+                         multi different keys warm    138.732k (± 2.5%) i/s    (7.21 μs/i) -    422.871k in   3.048105s
 
 Comparison:
-                              multi same keys warm:   156291.9 i/s
-                         multi different keys warm:   152613.7 i/s - same-ish: difference falls within error
-                       processable_file/image warm:    49245.6 i/s - 3.17x  slower
-                               duration/audio warm:    42963.3 i/s - 3.64x  slower
-                           content_type spoof warm:    39438.2 i/s - 3.96x  slower
-                              dimension/image warm:    37512.5 i/s - 4.17x  slower
-                                    pages/pdf warm:    28662.7 i/s - 5.45x  slower
-                           content_type spoof cold:      296.1 i/s - 527.77x  slower
-     multi same keys cold (aspect_ratio+dimension):      137.3 i/s - 1138.11x  slower
-                       processable_file/image cold:      132.9 i/s - 1176.29x  slower
-                              dimension/image cold:      118.7 i/s - 1316.61x  slower
-                                    pages/pdf cold:       73.6 i/s - 2122.31x  slower
-                               duration/audio cold:       44.8 i/s - 3489.03x  slower
-multi different keys cold (dimension+content_type):       39.0 i/s - 4007.78x  slower
+                              multi same keys warm:   138737.2 i/s
+                         multi different keys warm:   138732.4 i/s - same-ish: difference falls within error
+                       processable_file/image warm:    45232.2 i/s - 3.07x  slower
+                               duration/audio warm:    38560.0 i/s - 3.60x  slower
+                              dimension/image warm:    35522.6 i/s - 3.91x  slower
+                           content_type spoof warm:    35234.4 i/s - 3.94x  slower
+                                    pages/pdf warm:    26260.9 i/s - 5.28x  slower
+                           content_type spoof cold:      308.0 i/s - 450.42x  slower
+                       processable_file/image cold:      133.8 i/s - 1036.94x  slower
+     multi same keys cold (aspect_ratio+dimension):      133.7 i/s - 1038.03x  slower
+                              dimension/image cold:      132.9 i/s - 1044.18x  slower
+                                    pages/pdf cold:       70.3 i/s - 1974.44x  slower
+                               duration/audio cold:       42.6 i/s - 3253.05x  slower
+multi different keys cold (dimension+content_type):       36.9 i/s - 3764.51x  slower
 ```
 
 ---
@@ -156,41 +160,41 @@ ffmpeg:          ffmpeg version 9.0.2
 pdfinfo:         pdfinfo version 26.10.0
 file:            file-5.41
 identify:        ImageMagick 7.1.2-34
-time:            2026-11-26T09:02:47Z
+time:            2026-11-26T11:14:22Z
 ========================================================================
 
 ruby 4.0.10 (2026-11-19 revision a704b7cd95) +PRISM [arm64-darwin25]
 Calculating -------------------------------------
-                              dimension/image cold      1.951k (±11.6%) i/s  (512.57 μs/i) -      5.940k in   3.044650s
-                              dimension/image warm     37.411k (± 4.1%) i/s   (26.73 μs/i) -    112.233k in   3.000037s
-                               duration/audio cold     43.277 (± 4.6%) i/s   (23.11 ms/i) -    132.000 in   3.050093s
-                               duration/audio warm     40.532k (± 5.4%) i/s   (24.67 μs/i) -    125.136k in   3.087326s
-                                    pages/pdf cold     66.517 (±10.5%) i/s   (15.03 ms/i) -    200.000 in   3.006770s
-                                    pages/pdf warm     28.942k (± 1.4%) i/s   (34.55 μs/i) -     89.320k in   3.086130s
-                           content_type spoof cold    297.090 (± 8.4%) i/s    (3.37 ms/i) -    903.000 in   3.039478s
-                           content_type spoof warm     39.400k (± 1.2%) i/s   (25.38 μs/i) -    120.156k in   3.049622s
-                       processable_file/image cold      2.277k (± 4.5%) i/s  (439.20 μs/i) -      6.864k in   3.014670s
-                       processable_file/image warm     49.434k (± 2.5%) i/s   (20.23 μs/i) -    149.952k in   3.033357s
-     multi same keys cold (aspect_ratio+dimension)      1.908k (±17.8%) i/s  (524.21 μs/i) -      5.772k in   3.025716s
-                              multi same keys warm    148.358k (± 7.7%) i/s    (6.74 μs/i) -    454.057k in   3.060554s
-multi different keys cold (dimension+content_type)     33.836 (± 5.9%) i/s   (29.55 ms/i) -    102.000 in   3.014543s
-                         multi different keys warm    148.505k (± 3.4%) i/s    (6.73 μs/i) -    452.970k in   3.050197s
+                              dimension/image cold      2.601k (± 3.7%) i/s  (384.48 μs/i) -      7.980k in   3.068162s
+                              dimension/image warm     37.808k (± 1.0%) i/s   (26.45 μs/i) -    115.360k in   3.051202s
+                               duration/audio cold     42.739 (± 4.7%) i/s   (23.40 ms/i) -    132.000 in   3.088513s
+                               duration/audio warm     42.045k (± 1.6%) i/s   (23.78 μs/i) -    126.630k in   3.011794s
+                                    pages/pdf cold     64.755 (±12.4%) i/s   (15.44 ms/i) -    198.000 in   3.057686s
+                                    pages/pdf warm     26.195k (± 5.6%) i/s   (38.17 μs/i) -     79.750k in   3.044451s
+                           content_type spoof cold    271.052 (± 4.8%) i/s    (3.69 ms/i) -    841.000 in   3.102727s
+                           content_type spoof warm     36.771k (± 2.0%) i/s   (27.20 μs/i) -    111.012k in   3.019006s
+                       processable_file/image cold      2.619k (± 5.0%) i/s  (381.77 μs/i) -      7.859k in   3.000334s
+                       processable_file/image warm     48.494k (± 0.9%) i/s   (20.62 μs/i) -    149.203k in   3.076706s
+     multi same keys cold (aspect_ratio+dimension)      2.354k (± 5.2%) i/s  (424.84 μs/i) -      7.174k in   3.047800s
+                              multi same keys warm    128.377k (±10.8%) i/s    (7.79 μs/i) -    396.603k in   3.089367s
+multi different keys cold (dimension+content_type)     34.043 (± 5.9%) i/s   (29.37 ms/i) -    105.000 in   3.084342s
+                         multi different keys warm    135.324k (± 9.6%) i/s    (7.39 μs/i) -    418.292k in   3.091041s
 
 Comparison:
-                         multi different keys warm:   148505.2 i/s
-                              multi same keys warm:   148357.8 i/s - same-ish: difference falls within error
-                       processable_file/image warm:    49434.3 i/s - 3.00x  slower
-                               duration/audio warm:    40532.2 i/s - 3.66x  slower
-                           content_type spoof warm:    39400.3 i/s - 3.77x  slower
-                              dimension/image warm:    37410.5 i/s - 3.97x  slower
-                                    pages/pdf warm:    28942.4 i/s - 5.13x  slower
-                       processable_file/image cold:     2276.9 i/s - 65.22x  slower
-                              dimension/image cold:     1951.0 i/s - 76.12x  slower
-     multi same keys cold (aspect_ratio+dimension):     1907.6 i/s - 77.85x  slower
-                           content_type spoof cold:      297.1 i/s - 499.87x  slower
-                                    pages/pdf cold:       66.5 i/s - 2232.60x  slower
-                               duration/audio cold:       43.3 i/s - 3431.47x  slower
-multi different keys cold (dimension+content_type):       33.8 i/s - 4388.97x  slower
+                         multi different keys warm:   135324.0 i/s
+                              multi same keys warm:   128376.8 i/s - same-ish: difference falls within error
+                       processable_file/image warm:    48494.4 i/s - 2.79x  slower
+                               duration/audio warm:    42044.7 i/s - 3.22x  slower
+                              dimension/image warm:    37808.1 i/s - 3.58x  slower
+                           content_type spoof warm:    36771.0 i/s - 3.68x  slower
+                                    pages/pdf warm:    26195.2 i/s - 5.17x  slower
+                       processable_file/image cold:     2619.4 i/s - 51.66x  slower
+                              dimension/image cold:     2600.9 i/s - 52.03x  slower
+     multi same keys cold (aspect_ratio+dimension):     2353.8 i/s - 57.49x  slower
+                           content_type spoof cold:      271.1 i/s - 499.25x  slower
+                                    pages/pdf cold:       64.8 i/s - 2089.79x  slower
+                               duration/audio cold:       42.7 i/s - 3166.29x  slower
+multi different keys cold (dimension+content_type):       34.0 i/s - 3975.10x  slower
 ```
 
 ---
@@ -211,41 +215,41 @@ ffmpeg:          ffmpeg version 9.0.2
 pdfinfo:         pdfinfo version 26.10.0
 file:            file-5.41
 identify:        ImageMagick 7.1.2-34
-time:            2026-11-26T09:04:43Z
+time:            2026-11-26T11:17:17Z
 ========================================================================
 
 ruby 4.0.10 (2026-11-19 revision a704b7cd95) +PRISM [arm64-darwin25]
 Calculating -------------------------------------
-                              dimension/image cold    126.672 (±10.3%) i/s    (7.89 ms/i) -    387.000 in   3.055131s
-                              dimension/image warm     38.435k (± 1.8%) i/s   (26.02 μs/i) -    118.944k in   3.094690s
-                               duration/audio cold     44.978 (± 4.4%) i/s   (22.23 ms/i) -    136.000 in   3.023703s
-                               duration/audio warm     42.153k (± 2.0%) i/s   (23.72 μs/i) -    126.930k in   3.011181s
-                                    pages/pdf cold     72.463 (± 5.5%) i/s   (13.80 ms/i) -    222.000 in   3.063632s
-                                    pages/pdf warm     28.161k (± 3.2%) i/s   (35.51 μs/i) -     86.100k in   3.057373s
-                           content_type spoof cold    323.989 (± 4.9%) i/s    (3.09 ms/i) -    990.000 in   3.055662s
-                           content_type spoof warm     39.404k (± 0.8%) i/s   (25.38 μs/i) -    121.551k in   3.084743s
-                       processable_file/image cold    136.277 (± 5.1%) i/s    (7.34 ms/i) -    416.000 in   3.052612s
-                       processable_file/image warm     49.403k (± 2.5%) i/s   (20.24 μs/i) -    152.954k in   3.096064s
-     multi same keys cold (aspect_ratio+dimension)    139.039 (± 2.9%) i/s    (7.19 ms/i) -    429.000 in   3.085460s
-                              multi same keys warm    152.369k (± 1.6%) i/s    (6.56 μs/i) -    458.790k in   3.011045s
-multi different keys cold (dimension+content_type)     38.944 (± 5.1%) i/s   (25.68 ms/i) -    120.000 in   3.081373s
-                         multi different keys warm    150.953k (± 2.3%) i/s    (6.62 μs/i) -    456.360k in   3.023183s
+                              dimension/image cold    136.302 (± 6.6%) i/s    (7.34 ms/i) -    410.000 in   3.008028s
+                              dimension/image warm     35.912k (± 3.3%) i/s   (27.85 μs/i) -    107.877k in   3.003926s
+                               duration/audio cold     44.763 (± 4.5%) i/s   (22.34 ms/i) -    136.000 in   3.038222s
+                               duration/audio warm     39.270k (± 3.3%) i/s   (25.46 μs/i) -    117.955k in   3.003664s
+                                    pages/pdf cold     72.289 (± 6.9%) i/s   (13.83 ms/i) -    222.000 in   3.071002s
+                                    pages/pdf warm     26.126k (± 3.4%) i/s   (38.28 μs/i) -     79.205k in   3.031622s
+                           content_type spoof cold    321.752 (± 8.1%) i/s    (3.11 ms/i) -    984.000 in   3.058256s
+                           content_type spoof warm     36.236k (± 2.9%) i/s   (27.60 μs/i) -    109.306k in   3.016504s
+                       processable_file/image cold    137.081 (± 6.6%) i/s    (7.29 ms/i) -    420.000 in   3.063889s
+                       processable_file/image warm     45.412k (± 2.6%) i/s   (22.02 μs/i) -    137.310k in   3.023661s
+     multi same keys cold (aspect_ratio+dimension)    119.948 (± 8.3%) i/s    (8.34 ms/i) -    364.000 in   3.034647s
+                              multi same keys warm    138.395k (± 2.1%) i/s    (7.23 μs/i) -    426.060k in   3.078590s
+multi different keys cold (dimension+content_type)     38.629 (± 5.2%) i/s   (25.89 ms/i) -    116.000 in   3.002890s
+                         multi different keys warm    138.143k (± 2.9%) i/s    (7.24 μs/i) -    415.657k in   3.008891s
 
 Comparison:
-                              multi same keys warm:   152369.0 i/s
-                         multi different keys warm:   150953.5 i/s - same-ish: difference falls within error
-                       processable_file/image warm:    49402.7 i/s - 3.08x  slower
-                               duration/audio warm:    42152.9 i/s - 3.61x  slower
-                           content_type spoof warm:    39403.9 i/s - 3.87x  slower
-                              dimension/image warm:    38434.9 i/s - 3.96x  slower
-                                    pages/pdf warm:    28161.4 i/s - 5.41x  slower
-                           content_type spoof cold:      324.0 i/s - 470.29x  slower
-     multi same keys cold (aspect_ratio+dimension):      139.0 i/s - 1095.87x  slower
-                       processable_file/image cold:      136.3 i/s - 1118.09x  slower
-                              dimension/image cold:      126.7 i/s - 1202.86x  slower
-                                    pages/pdf cold:       72.5 i/s - 2102.71x  slower
-                               duration/audio cold:       45.0 i/s - 3387.64x  slower
-multi different keys cold (dimension+content_type):       38.9 i/s - 3912.55x  slower
+                              multi same keys warm:   138394.5 i/s
+                         multi different keys warm:   138142.9 i/s - same-ish: difference falls within error
+                       processable_file/image warm:    45411.8 i/s - 3.05x  slower
+                               duration/audio warm:    39270.4 i/s - 3.52x  slower
+                           content_type spoof warm:    36236.0 i/s - 3.82x  slower
+                              dimension/image warm:    35912.0 i/s - 3.85x  slower
+                                    pages/pdf warm:    26126.3 i/s - 5.30x  slower
+                           content_type spoof cold:      321.8 i/s - 430.13x  slower
+                       processable_file/image cold:      137.1 i/s - 1009.58x  slower
+                              dimension/image cold:      136.3 i/s - 1015.35x  slower
+     multi same keys cold (aspect_ratio+dimension):      119.9 i/s - 1153.79x  slower
+                                    pages/pdf cold:       72.3 i/s - 1914.46x  slower
+                               duration/audio cold:       44.8 i/s - 3091.72x  slower
+multi different keys cold (dimension+content_type):       38.6 i/s - 3582.62x  slower
 ```
 
 ---
@@ -254,7 +258,7 @@ multi different keys cold (dimension+content_type):       38.9 i/s - 3912.55x  s
 
 Same-process head-to-head (`benchmark/image_processors.rb`). Cold image metadata validation only; processor switched via `ActiveStorage.variant_processor` per report.
 
-**Summary (this machine):** libvips is about **17× faster** than MiniMagick for cold `dimension` / `processable_file` / `aspect_ratio` analysis (≈16.7×–17.3× depending on the report). The previous machine measured about 8×: the ratio depends on the machine and the ImageMagick build, libvips is faster on both.
+**Summary (this machine):** libvips is about **20× faster** than MiniMagick for cold `dimension` / `processable_file` / `aspect_ratio` analysis (≈20.4×–24.4× depending on the report). The previous machine measured about 8×: the ratio depends on the machine and the ImageMagick build, libvips is faster on both.
 
 ```
 ========================================================================
@@ -262,6 +266,7 @@ active_storage_validations benchmarks
 ruby:            ruby 4.0.10 (2026-11-19 revision a704b7cd95) +PRISM [arm64-darwin25]
 rails:           8.1.4.1
 IMAGE_PROCESSOR: vips
+database:        SQLite 3.54.1
 BUNDLE_GEMFILE:  (default Gemfile)
 host:            Darwin arm64
 vips:            vips-8.18.7
@@ -269,29 +274,29 @@ ffmpeg:          ffmpeg version 9.0.2
 pdfinfo:         pdfinfo version 26.10.0
 file:            file-5.41
 identify:        ImageMagick 7.1.2-34
-time:            2026-11-26T08:49:38Z
+time:            2026-11-26T11:18:14Z
 ========================================================================
 
 Note: IMAGE_PROCESSOR env is ignored here; each report sets the processor explicitly.
 
 ruby 4.0.10 (2026-11-19 revision a704b7cd95) +PRISM [arm64-darwin25]
 Calculating -------------------------------------
-              dimension/image cold (vips)      2.337k (± 3.5%) i/s  (427.90 μs/i) -      7.130k in   3.050956s
-       dimension/image cold (mini_magick)    143.494 (± 2.1%) i/s    (6.97 ms/i) -    442.000 in   3.080265s
-       processable_file/image cold (vips)      2.331k (± 6.1%) i/s  (429.05 μs/i) -      7.140k in   3.063424s
-processable_file/image cold (mini_magick)    139.341 (± 4.3%) i/s    (7.18 ms/i) -    420.000 in   3.014183s
-           aspect_ratio/image cold (vips)      2.412k (± 1.2%) i/s  (414.67 μs/i) -      7.409k in   3.072276s
-    aspect_ratio/image cold (mini_magick)    144.650 (± 2.1%) i/s    (6.91 ms/i) -    434.000 in   3.000354s
-              multi same keys cold (vips)      2.206k (± 3.2%) i/s  (453.24 μs/i) -      6.820k in   3.091094s
-       multi same keys cold (mini_magick)    141.512 (± 2.1%) i/s    (7.07 ms/i) -    430.000 in   3.038611s
+              dimension/image cold (vips)      2.739k (± 5.9%) i/s  (365.04 μs/i) -      8.236k in   3.006448s
+       dimension/image cold (mini_magick)    137.526 (± 7.3%) i/s    (7.27 ms/i) -    420.000 in   3.053976s
+       processable_file/image cold (vips)      2.657k (± 9.1%) i/s  (376.32 μs/i) -      8.204k in   3.087358s
+processable_file/image cold (mini_magick)    114.942 (± 9.6%) i/s    (8.70 ms/i) -    350.000 in   3.045022s
+           aspect_ratio/image cold (vips)      2.807k (± 4.7%) i/s  (356.31 μs/i) -      8.642k in   3.079190s
+    aspect_ratio/image cold (mini_magick)    136.747 (± 6.6%) i/s    (7.31 ms/i) -    420.000 in   3.071371s
+              multi same keys cold (vips)      2.492k (± 5.9%) i/s  (401.34 μs/i) -      7.504k in   3.011651s
+       multi same keys cold (mini_magick)    122.577 (±11.4%) i/s    (8.16 ms/i) -    378.000 in   3.083779s
 
 Comparison:
-           aspect_ratio/image cold (vips):     2411.6 i/s
-              dimension/image cold (vips):     2337.0 i/s - same-ish: difference falls within error
-       processable_file/image cold (vips):     2330.7 i/s - same-ish: difference falls within error
-              multi same keys cold (vips):     2206.3 i/s - 1.09x  slower
-    aspect_ratio/image cold (mini_magick):      144.6 i/s - 16.67x  slower
-       dimension/image cold (mini_magick):      143.5 i/s - 16.81x  slower
-       multi same keys cold (mini_magick):      141.5 i/s - 17.04x  slower
-processable_file/image cold (mini_magick):      139.3 i/s - 17.31x  slower
+           aspect_ratio/image cold (vips):     2806.6 i/s
+              dimension/image cold (vips):     2739.4 i/s - same-ish: difference falls within error
+       processable_file/image cold (vips):     2657.3 i/s - same-ish: difference falls within error
+              multi same keys cold (vips):     2491.7 i/s - 1.13x  slower
+       dimension/image cold (mini_magick):      137.5 i/s - 20.41x  slower
+    aspect_ratio/image cold (mini_magick):      136.7 i/s - 20.52x  slower
+       multi same keys cold (mini_magick):      122.6 i/s - 22.90x  slower
+processable_file/image cold (mini_magick):      114.9 i/s - 24.42x  slower
 ```

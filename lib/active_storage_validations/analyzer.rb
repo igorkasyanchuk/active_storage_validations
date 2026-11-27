@@ -54,8 +54,14 @@ module ActiveStorageValidations
     # StringIO, …). Named after the attachable's extension, like
     # ActiveStorage::Blob#open: ImageMagick needs it to decode formats without
     # a magic number (ICO, TGA), which then pass as an upload but not as a blob.
-    def create_media_tempfile(&block)
-      Tempfile.create([ "ActiveStorageValidations-", media_tempfile_extension ], binmode: true, &block)
+    #
+    # The file is only created when the attachable is copied (MediaTempfile),
+    # and deleted when the block returns or raises.
+    def create_media_tempfile
+      tempfile = MediaTempfile.new([ "ActiveStorageValidations-", media_tempfile_extension ])
+      yield tempfile
+    ensure
+      tempfile&.delete
     end
 
     def media_tempfile_extension
@@ -116,3 +122,5 @@ module ActiveStorageValidations
     end
   end
 end
+
+require_relative "analyzer/media_tempfile"

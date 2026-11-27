@@ -91,7 +91,12 @@ module ActiveStorageValidations
         max_byte_size ? io.read(max_byte_size) : io.read
       end
 
+      # +tempfile+ is an Analyzer::MediaTempfile: #to_io creates the file, so
+      # only an attachable that is copied gets one. On the File itself,
+      # IO.copy_stream keeps its kernel copy (it only calls #write on an IO-like).
       def copy_to_tempfile(tempfile, source)
+        tempfile = tempfile.to_io
+
         if source.is_a?(ActiveStorage::Blob)
           source.download { |chunk| tempfile.write(chunk) }
         else

@@ -12,6 +12,31 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
       expect(metadata).to eq({})
     end
 
+    # The Analyzer::MediaTempfile of the analysis: it holds a file only when
+    # the attachable was copied to it.
+    def media_tempfiles_of_the_analysis
+      tempfiles = []
+      allow(ActiveStorageValidations::Analyzer::MediaTempfile).to receive(:new).and_wrap_original do |original, *args|
+        original.call(*args).tap { |tempfile| tempfiles << tempfile }
+      end
+      metadata
+      tempfiles
+    end
+
+    def is_expected_to_read_the_file_in_place
+      tempfiles = media_tempfiles_of_the_analysis
+
+      expect(tempfiles).not_to be_empty
+      expect(tempfiles).to all(satisfy("create no file") { |tempfile| !tempfile.created? })
+    end
+
+    def is_expected_to_copy_it_to_one_deleted_tempfile
+      created = media_tempfiles_of_the_analysis.select(&:created?)
+
+      expect(created.size).to eq(1)
+      expect(File).not_to exist(created.first.to_io.path)
+    end
+
     subject(:metadata) { analyzer.metadata }
 
     describe "returns the right metadata for any attachable" do
@@ -35,6 +60,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
         end
 
         it { is_expected_to_return_the_right_metadata }
+        it { is_expected_to_copy_it_to_one_deleted_tempfile }
 
         # ImageMagick picks the decoder of formats without a magic number
         # (ICO, TGA) from the extension, like an uploaded file keeps it.
@@ -66,12 +92,14 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
         end
 
         it { is_expected_to_return_the_right_metadata }
+        it { is_expected_to_read_the_file_in_place }
       end
 
       describe "Rack::Test::UploadedFile object" do
         let(:attachable) { register_uploaded_file(Rack::Test::UploadedFile.new(media_path, media_content_type)) }
 
         it { is_expected_to_return_the_right_metadata }
+        it { is_expected_to_read_the_file_in_place }
 
         context "when built on a StringIO" do
           let(:attachable) do
@@ -79,6 +107,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
           end
 
           it { is_expected_to_return_the_right_metadata }
+          it { is_expected_to_copy_it_to_one_deleted_tempfile }
         end
       end
 
@@ -92,6 +121,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
         end
 
         it { is_expected_to_return_the_right_metadata }
+        it { is_expected_to_read_the_file_in_place }
 
         context "when not passed with a content_type" do
           let(:attachable) do
@@ -102,6 +132,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
           end
 
           it { is_expected_to_return_the_right_metadata }
+          it { is_expected_to_read_the_file_in_place }
         end
 
         context "when the io is an IO-like object without a filesystem path" do
@@ -116,6 +147,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
           end
 
           it { is_expected_to_return_the_right_metadata }
+          it { is_expected_to_copy_it_to_one_deleted_tempfile }
         end
 
         # `File.open(path) { |f| record.avatar.attach(io: f, …) }`: validated
@@ -129,6 +161,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
           end
 
           it { is_expected_to_return_the_right_metadata }
+          it { is_expected_to_read_the_file_in_place }
         end
 
         context "when the io is a Tempfile unlinked from the filesystem" do
@@ -142,6 +175,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
           end
 
           it { is_expected_to_return_the_right_metadata }
+          it { is_expected_to_copy_it_to_one_deleted_tempfile }
         end
 
         # Ruby 3.4+: an anonymous Tempfile's #to_path is the tmp directory.
@@ -156,6 +190,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
             end
 
             it { is_expected_to_return_the_right_metadata }
+            it { is_expected_to_copy_it_to_one_deleted_tempfile }
           end
         end
 
@@ -181,6 +216,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
             let(:fetched_file) { media_filename }
 
             it { is_expected_to_return_the_right_metadata }
+            it { is_expected_to_copy_it_to_one_deleted_tempfile }
           end
 
           describe "using URI.open constructor as io" do
@@ -190,6 +226,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
               let(:fetched_file) { media_filename }
 
               it { is_expected_to_return_the_right_metadata }
+              it { is_expected_to_copy_it_to_one_deleted_tempfile }
             end
 
             describe "Opening large media (>= 10ko) resulting in OpenUri returning a Tempfile" do
@@ -197,6 +234,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
               let(:expected_metadata) { expected_metadata_over_10ko }
 
               it { is_expected_to_return_the_right_metadata }
+              it { is_expected_to_read_the_file_in_place }
             end
           end
         end
@@ -214,6 +252,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
         end
 
         it { is_expected_to_return_the_right_metadata }
+        it { is_expected_to_copy_it_to_one_deleted_tempfile }
       end
 
       describe "File object" do
@@ -221,6 +260,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
 
         if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
           it { is_expected_to_return_the_right_metadata }
+          it { is_expected_to_read_the_file_in_place }
         else
           it { is_expected_to_raise_error(ArgumentError, "Could not find or build blob: expected attachable, got #{attachable.inspect}") }
         end
@@ -231,6 +271,7 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
 
         if Rails.gem_version >= Gem::Version.new("7.1.0.rc1")
           it { is_expected_to_return_the_right_metadata }
+          it { is_expected_to_read_the_file_in_place }
         else
           it { is_expected_to_raise_error(ArgumentError, "Could not find or build blob: expected attachable, got #{attachable.inspect}") }
         end
@@ -256,12 +297,14 @@ RSpec.shared_examples "returns the right metadata for any attachable" do
                 let(:attachable) { open_fixture(relative_filename) }
 
                 it { is_expected_to_return_the_right_metadata }
+                it { is_expected_to_read_the_file_in_place }
               end
 
               describe "Pathname object" do
                 let(:attachable) { Pathname.new(relative_filename) }
 
                 it { is_expected_to_return_the_right_metadata }
+                it { is_expected_to_read_the_file_in_place }
               end
             end
           end
