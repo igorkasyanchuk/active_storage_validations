@@ -40,8 +40,14 @@ module ActiveStorageValidations
       raise NotImplementedError
     end
 
+    # Memoized even when the command produced nothing (nil): `@media ||=` ran
+    # it again on the next call, so a file ffprobe could not read was probed
+    # twice (ASVFFProbable#read_media), a blob downloaded twice, and a command
+    # that hangs held the validation for twice its timeout.
     def media(tempfile)
-      @media ||= media_attachable.with_media_path(tempfile) do |path|
+      return @media if defined?(@media)
+
+      @media = media_attachable.with_media_path(tempfile) do |path|
         media_from_path(path)
       end
     end

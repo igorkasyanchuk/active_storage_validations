@@ -140,6 +140,13 @@ RSpec.describe ActiveStorageValidations::Analyzer::VideoAnalyzer do
         subject(:metadata) { analyzer.metadata }
 
         it { is_expected.to eq({}) }
+
+        # A nil result was not memoized, so #read_media ran the command again.
+        it "runs ffprobe once" do
+          metadata
+
+          expect(analyzer).to have_received(:run_command).once
+        end
       end
     end
   end

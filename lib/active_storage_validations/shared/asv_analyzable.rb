@@ -15,8 +15,54 @@ module ActiveStorageValidations
     CONTENT_TYPE_METADATA_KEYS = %i[content_type content_type_backend].freeze
     # What browsers and clients send when they do not know the type.
     GENERIC_CONTENT_TYPE = "application/octet-stream"
+    # Set on the validation error reported for a file whose media analysis
+    # produced nothing, see #share_failed_analysis.
+    FailedAnalysis = Struct.new(:blob, :timeout_options)
+    FAILED_ANALYSIS = :@active_storage_validations_failed_analysis
 
     private
+
+    # #metadata_for, unless another validator of this validation already ran
+    # the same analysis for nothing (#share_failed_analysis): the blob's cached
+    # metadata is then returned as it is, which is what #metadata_for returns
+    # on a cache hit and after a failed analysis.
+    def metadata_for_validation(record, blob, attachable, metadata_keys)
+      return media_metadata(blob) if failed_analysis_shared?(record, blob)
+
+      metadata_for(blob, attachable, metadata_keys)
+    end
+
+    # An analysis that produced nothing (missing CLI, timed out command,
+    # unreadable file) is not cached on the blob, so that a later validation
+    # retries it. Every metadata validator of the attribute therefore ran it
+    # again within the same validation: dimension + duration + with_audio +
+    # processable_file on a file that hangs ffprobe held the request for four
+    # timeouts, and downloaded a blob four times.
+    #
+    # The failure is remembered on the error this validator just added for the
+    # file (+errors_count+ is the number of errors before it ran), so it lasts
+    # exactly as long as that error: `valid?` clears the errors, and the next
+    # validation analyzes the file again. A validator that adds no error for
+    # an unanalyzable file shares nothing, and the next one analyzes it.
+    def share_failed_analysis(record, blob, metadata_keys, errors_count)
+      # The error first: a valid file, the usual case, costs nothing more.
+      error = record.errors.objects[errors_count]
+      return if error.nil? || blob_has_asv_metadata?(blob, metadata_keys)
+
+      error.instance_variable_set(FAILED_ANALYSIS, FailedAnalysis.new(blob, analyzer_timeout_options))
+    end
+
+    # Only shared between validators that analyze with the same timeout: a
+    # validator with a longer `timeout:` may succeed where another one gave up.
+    def failed_analysis_shared?(record, blob)
+      return false if record.errors.empty?
+
+      timeout_options = analyzer_timeout_options
+      record.errors.objects.any? do |error|
+        failed_analysis = error.instance_variable_get(FAILED_ANALYSIS)
+        failed_analysis && failed_analysis.blob.equal?(blob) && failed_analysis.timeout_options == timeout_options
+      end
+    end
 
     # Retrieve the ASV metadata from the blob.
     # If the blob has not been analyzed by our gem yet, the gem will analyze the

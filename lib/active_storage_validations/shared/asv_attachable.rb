@@ -30,16 +30,21 @@ module ActiveStorageValidations
     # +validation_options+ (flattened options, authorized ratios, …) are
     # computed once by the caller and passed to every +is_valid?+: Proc
     # options used to be evaluated again for each file (N+1 queries).
+    #
+    # A file that could not be analyzed is analyzed once per validation, not
+    # once per validator (ASVAnalyzable#share_failed_analysis).
     def validate_changed_files_from_metadata(record, attribute, metadata_keys, *validation_options)
       attachables_and_blobs(record, attribute).each do |attachable, blob|
+        errors_count = record.errors.size
         metadata = begin
-          metadata_for(blob, attachable, metadata_keys)
+          metadata_for_validation(record, blob, attachable, metadata_keys)
         rescue ActiveStorage::FileNotFoundError
           add_attachment_missing_error(record, attribute, attachable)
           next
         end
 
         is_valid?(record, attribute, attachable, metadata, *validation_options)
+        share_failed_analysis(record, blob, metadata_keys, errors_count)
       end
     end
 

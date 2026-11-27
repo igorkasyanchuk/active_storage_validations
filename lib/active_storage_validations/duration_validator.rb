@@ -46,26 +46,31 @@ module ActiveStorageValidations
       flat_options = set_flat_options(record)
 
       attachables_and_blobs(record, attribute).each do |attachable, blob|
+        errors_count = record.errors.size
         duration = begin
-          metadata_for(blob, attachable, METADATA_KEYS)&.fetch(:duration, nil)
+          metadata_for_validation(record, blob, attachable, METADATA_KEYS)&.fetch(:duration, nil)
         rescue ActiveStorage::FileNotFoundError
           add_attachment_missing_error(record, attribute, attachable, bound_error_options(attachable, flat_options))
           next
         end
 
-        # to_f, not to_i: durations are floats, and truncating would treat any
-        # file shorter than a second as unanalyzable.
-        if duration.to_f <= 0
-          add_media_metadata_missing_error(record, attribute, attachable, bound_error_options(attachable, flat_options))
-          next
-        end
-
-        duration = duration.to_f.round(precision)
-        is_valid?(duration, flat_options) || populate_error_options_and_add_error(record, attribute, attachable, flat_options, duration)
+        validate_duration(record, attribute, attachable, flat_options, duration)
+        share_failed_analysis(record, blob, METADATA_KEYS, errors_count)
       end
     end
 
     private
+
+    def validate_duration(record, attribute, attachable, flat_options, duration)
+      # to_f, not to_i: durations are floats, and truncating would treat any
+      # file shorter than a second as unanalyzable.
+      if duration.to_f <= 0
+        return add_media_metadata_missing_error(record, attribute, attachable, bound_error_options(attachable, flat_options))
+      end
+
+      duration = duration.to_f.round(precision)
+      is_valid?(duration, flat_options) || populate_error_options_and_add_error(record, attribute, attachable, flat_options, duration)
+    end
 
     def populate_error_options_and_add_error(record, attribute, attachable, flat_options, duration)
       errors_options = bound_error_options(attachable, flat_options, duration)
